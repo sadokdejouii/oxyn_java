@@ -41,6 +41,31 @@ public class MainLayoutController {
     }
 
     @FXML
+    private void handleEvenement(ActionEvent event) {
+        System.out.println("Événement clicked");
+    }
+
+    @FXML
+    private void handleSalle(ActionEvent event) {
+        System.out.println("Salle clicked");
+    }
+
+    @FXML
+    private void handlePlanning(ActionEvent event) {
+        System.out.println("Planning clicked");
+    }
+
+    @FXML
+    private void handleBoutique(ActionEvent event) {
+        System.out.println("Boutique clicked");
+    }
+
+    @FXML
+    private void handleForum(ActionEvent event) {
+        System.out.println("Forum clicked");
+    }
+
+    @FXML
     private void handleCulture(ActionEvent event) {
         System.out.println("Culture clicked");
     }

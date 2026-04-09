@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.controllers.MainLayoutController"
-            prefHeight="800.0" prefWidth="1400.0"
-            stylesheets="@../css/sidebar.css,@../css/home.css,@../css/cards.css">
+<BorderPane prefHeight="800.0" prefWidth="1400.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/home.css,@../css/cards.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="org.example.controllers.MainLayoutController">
 
     <left>
-        <VBox fx:id="sidebar" styleClass="sidebar" spacing="0"
-              prefWidth="280" maxWidth="280" maxHeight="Infinity">
+        <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="288" spacing="0" styleClass="sidebar">
 
-            <HBox fx:id="brandSection" styleClass="brand" alignment="CENTER_LEFT" spacing="12">
+            <Region maxWidth="Infinity" prefHeight="2" styleClass="sidebar-sheen" />
+
+            <HBox fx:id="brandSection" alignment="CENTER_LEFT" spacing="12" styleClass="brand">
                 <padding>
-                    <Insets top="24" right="20  " bottom="24" left="20" />
+                    <Insets bottom="24" left="20" right="20" top="24" />
                 </padding>
 
                 <!-- <ImageView fitWidth="40" fitHeight="40" preserveRatio="true">
@@ -27,140 +29,163 @@
                 </ImageView>
                 -->
 
-                <VBox fx:id="brandText" HBox.hgrow="ALWAYS">
-                    <Label text="AgriSense 360" styleClass="brand-name" />
-                    <Label text="Smart AI Companion for Farms" styleClass="brand-tagline" />
+                <VBox fx:id="brandText" spacing="0" HBox.hgrow="ALWAYS">
+                    <Label styleClass="brand-name" text="AgriSense 360" />
+                    <Region maxWidth="44" prefHeight="3" prefWidth="44" styleClass="brand-accent" />
+                    <Label styleClass="brand-tagline" text="Smart AI Companion for Farms" />
                 </VBox>
 
-                <StackPane>
-                    <Button fx:id="floatingButton" text="🌾" onAction="#handleFloatingButton"
-                            style="-fx-min-width:40px;-fx-min-height:40px;
-                                   -fx-max-width:40px;-fx-max-height:40px;
-                                   -fx-background-radius:50;-fx-border-radius:50;
-                                   -fx-background-color:rgba(255,255,255,0.18);
-                                   -fx-text-fill:white;-fx-font-size:18px;
-                                   -fx-alignment:CENTER;
-                                   -fx-cursor:hand;-fx-border-width:0;
-                                   -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.25),6,0,0,2);"/>
-                    <Label fx:id="notificationDot" text="1"
-                           visible="false" managed="false"
-                           StackPane.alignment="TOP_RIGHT"
-                           translateX="4" translateY="-4"
-                           style="-fx-background-color:#e53935;-fx-text-fill:white;
-                                  -fx-font-size:9px;-fx-font-weight:bold;
-                                  -fx-min-width:16;-fx-min-height:16;
-                                  -fx-max-width:20;-fx-max-height:16;
-                                  -fx-background-radius:8;-fx-alignment:CENTER;
-                                  -fx-padding:0 3 0 3;"/>
+                <StackPane styleClass="brand-fab-wrap">
+                    <Button fx:id="floatingButton" onAction="#handleFloatingButton" styleClass="brand-fab" text="🌾" />
+                    <Label fx:id="notificationDot" managed="false" styleClass="notification-badge" text="1" translateX="4" translateY="-4" visible="false" StackPane.alignment="TOP_RIGHT" />
                 </StackPane>
             </HBox>
 
-            <Button fx:id="toggleButton" styleClass="sidebar-toggle" onAction="#handleToggleMenu">
+            <Button fx:id="toggleButton" onAction="#handleToggleMenu" styleClass="sidebar-toggle">
                 <graphic>
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label fx:id="toggleIcon" text="☰" style="-fx-font-size: 18px; -fx-text-fill: #a0d6a0;"/>
-                        <Label fx:id="toggleText" text="Toggle menu" styleClass="toggle-text" />
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label fx:id="toggleIcon" styleClass="toggle-glyph" text="☰" />
+                        <Label fx:id="toggleText" styleClass="toggle-text" text="Toggle menu" />
                     </HBox>
                 </graphic>
             </Button>
 
-            <ScrollPane fitToWidth="true" fitToHeight="false"
-                        hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                        styleClass="sidebar-scroll"
-                        VBox.vgrow="ALWAYS">
+            <ScrollPane fitToHeight="false" fitToWidth="true" hbarPolicy="NEVER" styleClass="sidebar-scroll" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
 
-                <VBox styleClass="managements" spacing="5">
+                <VBox spacing="6" styleClass="managements">
                     <padding>
-                        <Insets top="20" right="15" bottom="10" left="15" />
+                        <Insets bottom="12" left="16" right="16" top="22" />
                     </padding>
 
-                    <Label fx:id="navTitle" text="MANAGEMENTS" styleClass="nav-title" />
+                    <Label fx:id="navTitle" styleClass="nav-title" text="MANAGEMENTS" />
 
-                    <VBox spacing="5">
-                        <Button fx:id="homeBtn" styleClass="nav-link" onAction="#handleHome">
+                    <VBox spacing="6">
+                        <Button fx:id="homeBtn" onAction="#handleHome" styleClass="nav-link">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="🏠" />
-                                    <Label fx:id="homeLabel" text="Home" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="🏠" />
+                                    <Label fx:id="homeLabel" styleClass="nav-label" text="Home" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="animalsBtn" styleClass="nav-link" onAction="#handleAnimals"
-                                visible="false" managed="false">
+                        <Button fx:id="animalsBtn" managed="false" onAction="#handleAnimals" styleClass="nav-link" visible="false">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="🐄" />
-                                    <Label fx:id="animalsLabel" text="Animals Management" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="🐄" />
+                                    <Label fx:id="animalsLabel" styleClass="nav-label" text="Animals Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="equipmentBtn" styleClass="nav-link" onAction="#handleEquipment"
-                                visible="false" managed="false">
+                        <Button fx:id="equipmentBtn" managed="false" onAction="#handleEquipment" styleClass="nav-link" visible="false">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="🚜" />
-                                    <Label fx:id="equipmentLabel" text="Equipments Management" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="🚜" />
+                                    <Label fx:id="equipmentLabel" styleClass="nav-label" text="Equipments Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="stockBtn" styleClass="nav-link" onAction="#handleStock"
-                                visible="false" managed="false">
+                        <Button fx:id="stockBtn" managed="false" onAction="#handleStock" styleClass="nav-link" visible="false">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="📦" />
-                                    <Label fx:id="stockLabel" text="Stock Management" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="📦" />
+                                    <Label fx:id="stockLabel" styleClass="nav-label" text="Stock Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="btnBOS" styleClass="nav-link" onAction="#handleBackofficeStock">
+                        <Button fx:id="btnBOS" onAction="#handleBackofficeStock" styleClass="nav-link">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="🏢" />
-                                    <Label fx:id="BOStockLabel" text="Backoffice Stock" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="🏢" />
+                                    <Label fx:id="BOStockLabel" styleClass="nav-label" text="Backoffice Stock" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="cultureBtn" styleClass="nav-link" onAction="#handleCulture"
-                                visible="false" managed="false">
+                        <Label styleClass="nav-title" text="ESPACES &amp; OUTILS" />
+
+                        <VBox spacing="6">
+                            <Button fx:id="evenementBtn" onAction="#handleEvenement" styleClass="nav-link">
+                                <graphic>
+                                    <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <Label styleClass="nav-emoji" text="📅" />
+                                        <Label fx:id="evenementLabel" styleClass="nav-label" text="Événement" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+
+                            <Button fx:id="salleBtn" onAction="#handleSalle" styleClass="nav-link">
+                                <graphic>
+                                    <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <Label styleClass="nav-emoji" text="🏛️" />
+                                        <Label fx:id="salleLabel" styleClass="nav-label" text="Salle" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+
+                            <Button fx:id="planningBtn" onAction="#handlePlanning" styleClass="nav-link">
+                                <graphic>
+                                    <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <Label styleClass="nav-emoji" text="🗓️" />
+                                        <Label fx:id="planningLabel" styleClass="nav-label" text="Planning" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+
+                            <Button fx:id="boutiqueBtn" onAction="#handleBoutique" styleClass="nav-link">
+                                <graphic>
+                                    <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <Label styleClass="nav-emoji" text="🛍️" />
+                                        <Label fx:id="boutiqueLabel" styleClass="nav-label" text="Boutique" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+
+                            <Button fx:id="forumBtn" onAction="#handleForum" styleClass="nav-link">
+                                <graphic>
+                                    <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <Label styleClass="nav-emoji" text="💬" />
+                                        <Label fx:id="forumLabel" styleClass="nav-label" text="Forum" />
+                                    </HBox>
+                                </graphic>
+                            </Button>
+                        </VBox>
+
+                        <Button fx:id="cultureBtn" managed="false" onAction="#handleCulture" styleClass="nav-link" visible="false">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="🌱" />
-                                    <Label fx:id="cultureLabel" text="Culture Management" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="🌱" />
+                                    <Label fx:id="cultureLabel" styleClass="nav-label" text="Culture Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="usersBtn" styleClass="nav-link" onAction="#handleUsers"
-                                visible="false" managed="false">
+                        <Button fx:id="usersBtn" managed="false" onAction="#handleUsers" styleClass="nav-link" visible="false">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="👤" />
-                                    <Label fx:id="usersLabel" text="User Management" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="👤" />
+                                    <Label fx:id="usersLabel" styleClass="nav-label" text="User Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="workersBtn" styleClass="nav-link" onAction="#handleWorkers"
-                                visible="false" managed="false">
+                        <Button fx:id="workersBtn" managed="false" onAction="#handleWorkers" styleClass="nav-link" visible="false">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="👷" />
-                                    <Label fx:id="workersLabel" text="Workers Management" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="👷" />
+                                    <Label fx:id="workersLabel" styleClass="nav-label" text="Workers Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="ouvrierBtn" styleClass="nav-link" onAction="#handleOuvrier"
-                                visible="false" managed="false">
+                        <Button fx:id="ouvrierBtn" managed="false" onAction="#handleOuvrier" styleClass="nav-link" visible="false">
                             <graphic>
-                                <HBox spacing="12" alignment="CENTER_LEFT">
-                                    <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="👨‍🔧" />
-                                    <Label fx:id="ouvrierLabel" text="Ouvrier Management" styleClass="nav-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label styleClass="nav-emoji" text="👨‍🔧" />
+                                    <Label fx:id="ouvrierLabel" styleClass="nav-label" text="Ouvrier Management" />
                                 </HBox>
                             </graphic>
                         </Button>
@@ -168,40 +193,38 @@
                 </VBox>
             </ScrollPane>
 
-            <VBox spacing="5" style="-fx-padding: 10 15 10 15;">
-                <Button fx:id="profileBtn" styleClass="nav-link" onAction="#handleProfile">
+            <VBox spacing="6" styleClass="sidebar-actions">
+                <Button fx:id="profileBtn" onAction="#handleProfile" styleClass="nav-link">
                     <graphic>
-                        <HBox spacing="12" alignment="CENTER_LEFT">
-                            <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="👨‍💼" />
-                            <Label fx:id="profileLabel" text="Profile" styleClass="nav-label" />
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label styleClass="nav-emoji" text="👨‍💼" />
+                            <Label fx:id="profileLabel" styleClass="nav-label" text="Profile" />
                         </HBox>
                     </graphic>
                 </Button>
 
-                <Button fx:id="logoutBtn" styleClass="nav-link logout-btn" onAction="#handleLogout">
+                <Button fx:id="logoutBtn" onAction="#handleLogout" styleClass="nav-link logout-btn">
                     <graphic>
-                        <HBox spacing="12" alignment="CENTER_LEFT">
-                            <Label style="-fx-font-size: 22px; -fx-min-width: 28px;" text="🚪" />
-                            <Label fx:id="logoutLabel" text="Logout" styleClass="nav-label" />
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Label styleClass="nav-emoji" text="🚪" />
+                            <Label fx:id="logoutLabel" styleClass="nav-label" text="Logout" />
                         </HBox>
                     </graphic>
                 </Button>
             </VBox>
 
-            <HBox fx:id="sidebarFooter" styleClass="sidebar-foot" spacing="8" alignment="CENTER_LEFT">
+            <HBox fx:id="sidebarFooter" alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-foot sidebar-status">
                 <padding>
-                    <Insets bottom="16" left="20" right="20" top="16" />
+                    <Insets bottom="18" left="20" right="20" top="18" />
                 </padding>
-                <Region styleClass="pulse-dot" prefWidth="8" prefHeight="8"
-                        style="-fx-background-color: #4caf50; -fx-background-radius: 50%;"/>
-                <Label fx:id="footerText" text="Connected" style="-fx-text-fill: #a0d6a0; -fx-font-size: 11px;"/>
+                <Region prefHeight="8" prefWidth="8" styleClass="pulse-dot" />
+                <Label fx:id="footerText" styleClass="sidebar-status-label" text="Connected" />
             </HBox>
 
         </VBox>
     </left>
-
     <center>
-        <StackPane fx:id="contentArea" style="-fx-background-color: #f4f6f0;"/>
+        <StackPane fx:id="contentArea" styleClass="content-area" />
     </center>
 
 </BorderPane>
