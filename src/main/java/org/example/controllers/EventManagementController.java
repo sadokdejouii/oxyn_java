@@ -222,6 +222,37 @@ public class EventManagementController implements Initializable {
         }
     }
 
+    private void openModifyEventForm(int eventId, String eventTitle) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/ModifierEvenements.fxml"));
+            if (loader.getLocation() == null) {
+                throw new RuntimeException("FXML file not found: /FXML/ModifierEvenements.fxml");
+            }
+            Stage modifyEventStage = new Stage();
+            modifyEventStage.setTitle("Modifier l'Événement: " + eventTitle);
+            Scene scene = new Scene(loader.load(), 700, 850);
+            modifyEventStage.setScene(scene);
+            modifyEventStage.initModality(Modality.APPLICATION_MODAL);
+            
+            // Set event data in the controller
+            ModifierEvenementController controller = loader.getController();
+            controller.setEventData(eventId);
+            
+            modifyEventStage.showAndWait();
+
+            // Refresh data after modifying event
+            loadData();
+            showView(View.EVENTS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Erreur lors de l'ouverture du formulaire");
+            alert.setContentText("Détail: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
     // ==================== VIEW MANAGEMENT ====================
 
     private void showView(View view) {
@@ -340,6 +371,11 @@ public class EventManagementController implements Initializable {
         actionBox.setStyle("-fx-alignment: CENTER_LEFT;");
         actionBox.setPadding(new Insets(8, 0, 0, 0));
 
+        Button modifierBtn = new Button("✏️ Modifier");
+        modifierBtn.getStyleClass().add("action-btn-primary");
+        modifierBtn.setStyle("-fx-font-size: 11px;");
+        modifierBtn.setOnAction(e -> openModifyEventForm(item.getId(), item.getTitre()));
+
         Button inscriptionsBtn = new Button("\ud83d\udccb Voir les Inscriptions");
         inscriptionsBtn.getStyleClass().add("action-btn-primary");
         inscriptionsBtn.setStyle("-fx-font-size: 11px;");
@@ -355,7 +391,7 @@ public class EventManagementController implements Initializable {
         deleteBtn.setStyle("-fx-font-size: 11px;");
         deleteBtn.setOnAction(e -> deleteEventWithConfirmation(item.getId(), item.getTitre()));
 
-        actionBox.getChildren().addAll(inscriptionsBtn, reviewsBtn, deleteBtn);
+        actionBox.getChildren().addAll(modifierBtn, inscriptionsBtn, reviewsBtn, deleteBtn);
 
         card.getChildren().addAll(titleLabel, descLabel, details1Box, details2Box, details3Box, statusBox, actionBox);
         return card;
