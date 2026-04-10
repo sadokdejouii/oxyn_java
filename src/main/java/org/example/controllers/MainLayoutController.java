@@ -10,18 +10,28 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.stage.Stage;
 import org.example.services.SessionContext;
 import org.example.utils.PageLoader;
 
 import java.net.URL;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 public class MainLayoutController implements Initializable {
 
@@ -35,6 +45,9 @@ public class MainLayoutController implements Initializable {
     private static final String PAGE_CLIENT_EVENTS = "/FXML/pages/ClientEvents.fxml";
     private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
     private static final String PAGE_PROFILE = "/FXML/pages/ProfilePage.fxml";
+
+    @FXML
+    private BorderPane shellRoot;
 
     @FXML
     private VBox sidebar;
@@ -119,6 +132,11 @@ public class MainLayoutController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        Runnable installIcons = () -> installIkonliFontIcons(shellRoot);
+        installIcons.run();
+        // After skins attach button graphics / scroll content, placeholders may only appear on this pass.
+        Platform.runLater(installIcons);
+
         SessionContext ctx = SessionContext.getInstance();
         topbarUserName.setText(ctx.getDisplayName());
         topbarUserRole.setText(ctx.getRole().displayLabel());
@@ -345,5 +363,76 @@ public class MainLayoutController implements Initializable {
         a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    /**
+     * FXML uses {@code Region} placeholders so Scene Builder can open the file without Ikonli on its classpath.
+     * This replaces them with real {@link FontIcon} nodes at runtime.
+     * <p>
+     * Traversal must follow {@link Labeled#getGraphic()} and {@link ScrollPane#getContent()}, not only
+     * {@link Parent#getChildrenUnmodifiable()}, or icons inside buttons / scroll areas are never reached.
+     */
+    private static void installIkonliFontIcons(Parent root) {
+        if (root == null) {
+            return;
+        }
+        Deque<Node> queue = new ArrayDeque<>();
+        Set<Node> seen = new HashSet<>();
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            Node n = queue.removeFirst();
+            if (!seen.add(n)) {
+                continue;
+            }
+            if (n instanceof Region r && r.getStyleClass().contains("ikonli-slot")) {
+                FontIcon icon = ikonliPlaceholderToFontIcon(r);
+                if (icon != null && r.getParent() instanceof Pane pane) {
+                    int i = pane.getChildren().indexOf(r);
+                    if (i >= 0) {
+                        pane.getChildren().set(i, icon);
+                    }
+                }
+                continue;
+            }
+            if (n instanceof Labeled labeled && labeled.getGraphic() != null) {
+                queue.addLast(labeled.getGraphic());
+            }
+            if (n instanceof ScrollPane scrollPane && scrollPane.getContent() != null) {
+                queue.addLast(scrollPane.getContent());
+            }
+            if (n instanceof Parent p) {
+                queue.addAll(p.getChildrenUnmodifiable());
+            }
+        }
+    }
+
+    private static FontIcon ikonliPlaceholderToFontIcon(Region r) {
+        String literal = null;
+        int size = 18;
+        List<String> styles = new ArrayList<>();
+        for (String c : r.getStyleClass()) {
+            if ("ikonli-slot".equals(c)) {
+                continue;
+            }
+            if (c.startsWith("fas-") || c.startsWith("far-") || c.startsWith("fab-")) {
+                literal = c;
+                continue;
+            }
+            if (c.startsWith("sz-")) {
+                try {
+                    size = Integer.parseInt(c.substring(3));
+                } catch (NumberFormatException ignored) {
+                }
+                continue;
+            }
+            styles.add(c);
+        }
+        if (literal == null) {
+            return null;
+        }
+        FontIcon icon = new FontIcon(literal);
+        icon.setIconSize(size);
+        icon.getStyleClass().addAll(styles);
+        return icon;
     }
 }

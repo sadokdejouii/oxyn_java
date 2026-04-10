@@ -12,9 +12,9 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
+<!-- Ikonli FontIcon is swapped in at runtime (see MainLayoutController): Scene Builder has no Ikonli on its classpath. Placeholders use Region + classes ikonli-slot, fas-*, sz-*. -->
+<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
 
     <left>
         <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="272" spacing="0" styleClass="sidebar">
@@ -49,7 +49,7 @@
             <Button fx:id="toggleButton" onAction="#handleToggleMenu" styleClass="sidebar-toggle">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                        <FontIcon iconLiteral="fas-bars" iconSize="16" styleClass="sidebar-toggle-icon" />
+                        <Region styleClass="ikonli-slot,fas-bars,sz-16,sidebar-toggle-icon" minHeight="16.0" minWidth="16.0" prefHeight="16.0" prefWidth="16.0" />
                         <Label fx:id="toggleText" styleClass="toggle-text" text="Collapse sidebar" />
                     </HBox>
                 </graphic>
@@ -69,7 +69,7 @@
                         <Button fx:id="adminDashboardBtn" onAction="#handleAdminDashboard" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <FontIcon iconLiteral="fas-chart-pie" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Region styleClass="ikonli-slot,fas-chart-pie,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="Dashboard" />
                                 </HBox>
                             </graphic>
@@ -78,7 +78,7 @@
                         <Button fx:id="stockMgmtBtn" onAction="#handleStockManagement" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <FontIcon iconLiteral="fas-warehouse" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Region styleClass="ikonli-slot,fas-warehouse,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="Stock Management" />
                                 </HBox>
                             </graphic>
@@ -87,7 +87,7 @@
                         <Button fx:id="eventMgmtBtn" onAction="#handleEventManagement" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <FontIcon iconLiteral="fas-calendar-check" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Region styleClass="ikonli-slot,fas-calendar-check,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="Event Management" />
                                 </HBox>
                             </graphic>
@@ -96,7 +96,7 @@
                         <Button fx:id="userMgmtBtn" onAction="#handleUserManagement" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <FontIcon iconLiteral="fas-users" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Region styleClass="ikonli-slot,fas-users,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="User Management" />
                                 </HBox>
                             </graphic>
@@ -105,7 +105,7 @@
                         <Button fx:id="reportsBtn" onAction="#handleReports" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <FontIcon iconLiteral="fas-chart-line" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Region styleClass="ikonli-slot,fas-chart-line,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="Reports / Statistics" />
                                 </HBox>
                             </graphic>
@@ -118,7 +118,7 @@
                         <Button fx:id="clientHomeBtn" onAction="#handleClientHome" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <FontIcon iconLiteral="fas-home" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Region styleClass="ikonli-slot,fas-home,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="Home" />
                                 </HBox>
                             </graphic>
@@ -127,7 +127,7 @@
                         <Button fx:id="clientEventsBtn" onAction="#handleClientEvents" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <FontIcon iconLiteral="fas-calendar-alt" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Region styleClass="ikonli-slot,fas-calendar-alt,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="Events" />
                                 </HBox>
                             </graphic>
@@ -136,7 +136,7 @@
                         <Button fx:id="clientPlanningBtn" onAction="#handlePlanning" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <FontIcon iconLiteral="fas-calendar" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Region styleClass="ikonli-slot,fas-calendar,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="Planning" />
                                 </HBox>
                             </graphic>
@@ -149,7 +149,7 @@
                 <Button fx:id="profileBtn" onAction="#handleProfile" styleClass="nav-link">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="12">
-                            <FontIcon iconLiteral="fas-user" iconSize="18" styleClass="nav-icon-fa" />
+                            <Region styleClass="ikonli-slot,fas-user,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                             <Label styleClass="nav-label" text="Profile" />
                         </HBox>
                     </graphic>
@@ -158,7 +158,7 @@
                 <Button fx:id="logoutBtn" onAction="#handleLogout" styleClass="nav-link logout-btn">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="12">
-                            <FontIcon iconLiteral="fas-sign-out-alt" iconSize="18" styleClass="nav-icon-fa" />
+                            <Region styleClass="ikonli-slot,fas-sign-out-alt,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                             <Label styleClass="nav-label" text="Logout" />
                         </HBox>
                     </graphic>
@@ -189,7 +189,7 @@
                     <Region HBox.hgrow="ALWAYS" />
 
                     <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-wrap">
-                        <FontIcon iconLiteral="fas-search" iconSize="14" styleClass="topbar-search-icon" />
+                        <Region styleClass="ikonli-slot,fas-search,sz-14,topbar-search-icon" minHeight="14.0" minWidth="14.0" prefHeight="14.0" prefWidth="14.0" />
                         <TextField fx:id="topbarSearchField" promptText="Search modules, events, stock…" styleClass="topbar-search" HBox.hgrow="ALWAYS" />
                     </HBox>
 
@@ -197,7 +197,7 @@
 
                     <Button fx:id="notificationBtn" onAction="#handleNotifications" styleClass="topbar-icon-btn" text="">
                         <graphic>
-                            <FontIcon iconLiteral="fas-bell" iconSize="18" />
+                            <Region styleClass="ikonli-slot,fas-bell,sz-18" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                         </graphic>
                     </Button>
 
