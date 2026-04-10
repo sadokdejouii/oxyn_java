@@ -270,7 +270,8 @@ public class AfficherEvenementsController implements Initializable {
             dialogPane.getButtonTypes().forEach(button -> {
                 var buttonNode = dialogPane.lookupButton(button);
                 buttonNode.setStyle("-fx-font-size: 12px; -fx-padding: 8 20;");
-                if (button.getTypeCode() == javafx.scene.control.ButtonBar.ButtonData.OK_DONE.getTypeCode()) {
+                // Style OK buttons with red background for delete confirmation
+                if (button == javafx.scene.control.ButtonType.OK) {
                     buttonNode.setStyle("-fx-font-size: 12px; -fx-padding: 8 20; -fx-base: rgba(244, 67, 54, 0.8);");
                 }
             });
@@ -302,4 +303,5 @@ public class AfficherEvenementsController implements Initializable {
         stylizeAlert(alert, "error");
         alert.showAndWait();
     }
+}
 

@@ -365,16 +365,11 @@ public class EventManagementController implements Initializable {
         HBox statusBox = new HBox();
         statusBox.getChildren().add(statusLabel);
 
-        // Action buttons
-        HBox actionBox = new HBox();
-        actionBox.setSpacing(10);
-        actionBox.setStyle("-fx-alignment: CENTER_LEFT;");
-        actionBox.setPadding(new Insets(8, 0, 0, 0));
-
-        Button modifierBtn = new Button("✏️ Modifier");
-        modifierBtn.getStyleClass().add("action-btn-primary");
-        modifierBtn.setStyle("-fx-font-size: 11px;");
-        modifierBtn.setOnAction(e -> openModifyEventForm(item.getId(), item.getTitre()));
+        // Action buttons - Row 1: Info buttons
+        HBox actionBox1 = new HBox();
+        actionBox1.setSpacing(10);
+        actionBox1.setStyle("-fx-alignment: CENTER_LEFT;");
+        actionBox1.setPadding(new Insets(8, 0, 0, 0));
 
         Button inscriptionsBtn = new Button("\ud83d\udccb Voir les Inscriptions");
         inscriptionsBtn.getStyleClass().add("action-btn-primary");
@@ -386,14 +381,27 @@ public class EventManagementController implements Initializable {
         reviewsBtn.setStyle("-fx-font-size: 11px;");
         reviewsBtn.setOnAction(e -> showReviewsForEvent(item.getId()));
 
+        actionBox1.getChildren().addAll(inscriptionsBtn, reviewsBtn);
+
+        // Action buttons - Row 2: Modify and Delete buttons
+        HBox actionBox2 = new HBox();
+        actionBox2.setSpacing(10);
+        actionBox2.setStyle("-fx-alignment: CENTER_LEFT;");
+        actionBox2.setPadding(new Insets(8, 0, 0, 0));
+
+        Button modifierBtn = new Button("✏️ Modifier");
+        modifierBtn.getStyleClass().add("action-btn-primary");
+        modifierBtn.setStyle("-fx-font-size: 11px;");
+        modifierBtn.setOnAction(e -> openModifyEventForm(item.getId(), item.getTitre()));
+
         Button deleteBtn = new Button("🗑️ Supprimer");
         deleteBtn.getStyleClass().add("action-btn-delete");
         deleteBtn.setStyle("-fx-font-size: 11px;");
         deleteBtn.setOnAction(e -> deleteEventWithConfirmation(item.getId(), item.getTitre()));
 
-        actionBox.getChildren().addAll(modifierBtn, inscriptionsBtn, reviewsBtn, deleteBtn);
+        actionBox2.getChildren().addAll(modifierBtn, deleteBtn);
 
-        card.getChildren().addAll(titleLabel, descLabel, details1Box, details2Box, details3Box, statusBox, actionBox);
+        card.getChildren().addAll(titleLabel, descLabel, details1Box, details2Box, details3Box, statusBox, actionBox1, actionBox2);
         return card;
     }
 
