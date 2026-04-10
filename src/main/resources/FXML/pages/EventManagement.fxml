@@ -3,37 +3,48 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
 <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.EventManagementController">
-    <VBox spacing="18" styleClass="page-root">
+    <VBox spacing="20" styleClass="page-root">
+        <!-- Header Section -->
         <VBox spacing="6">
-            <Label styleClass="page-hero-title" text="Event management" />
-            <Label styleClass="page-hero-sub" text="Create, update, and retire events. Data is loaded from your database when available." wrapText="true" />
+            <Label styleClass="page-hero-title" text="Gestion des Événements" />
+            <Label styleClass="page-hero-sub" text="Consultez les événements avec les informations détaillées, les inscriptions et les avis." wrapText="true" />
         </VBox>
 
-        <HBox spacing="10" styleClass="toolbar-card">
-            <Button onAction="#handleAddEvent" styleClass="primary-toolbar-btn" text="New event" />
-            <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Refresh" />
-            <HBox HBox.hgrow="ALWAYS" />
-            <Button onAction="#handleDelete" styleClass="ghost-toolbar-btn" text="Delete selected" />
-        </HBox>
+        <!-- Main Content Container -->
+        <VBox spacing="8" styleClass="saas-chart-card" VBox.vgrow="ALWAYS">
+            <!-- Events Grid Section (2-column layout with pagination) -->
+            <VBox fx:id="eventsMainSection" spacing="12" VBox.vgrow="ALWAYS" managed="true" visible="true">
+                <Label styleClass="saas-card-title" text="Événements" />
+                <TilePane fx:id="eventsGridPane" prefColumns="2" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
+                <HBox fx:id="eventsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
+            </VBox>
 
-        <VBox spacing="8" styleClass="saas-chart-card">
-            <Label styleClass="saas-card-title" text="Events" />
-            <TableView fx:id="eventsTable" prefHeight="460" styleClass="data-table">
-                <columns>
-                    <TableColumn fx:id="titleColumn" prefWidth="200" text="Title" />
-                    <TableColumn fx:id="villeColumn" prefWidth="120" text="City" />
-                    <TableColumn fx:id="debutColumn" prefWidth="160" text="Start" />
-                    <TableColumn fx:id="finColumn" prefWidth="160" text="End" />
-                    <TableColumn fx:id="statutColumn" prefWidth="120" text="Status" />
-                </columns>
-            </TableView>
+            <!-- Inscriptions for Selected Event (Hidden by default) -->
+            <VBox fx:id="inscriptionsDetailSection" spacing="12" VBox.vgrow="ALWAYS" managed="false" visible="false">
+                <HBox spacing="12" style="-fx-alignment: CENTER_LEFT;">
+                    <Label styleClass="saas-card-title" text="Inscriptions pour l'Événement" />
+                    <Button fx:id="backFromInscriptionsBtn" onAction="#handleBackToEvents" styleClass="ghost-toolbar-btn" text="← Retour aux Événements" />
+                </HBox>
+                <TilePane fx:id="inscriptionsGridPane" prefColumns="2" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
+                <HBox fx:id="inscriptionsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
+            </VBox>
+
+            <!-- Reviews for Selected Event (Hidden by default) -->
+            <VBox fx:id="reviewsDetailSection" spacing="12" VBox.vgrow="ALWAYS" managed="false" visible="false">
+                <HBox spacing="12" style="-fx-alignment: CENTER_LEFT;">
+                    <Label styleClass="saas-card-title" text="Avis pour l'Événement" />
+                    <Button fx:id="backFromReviewsBtn" onAction="#handleBackToEvents" styleClass="ghost-toolbar-btn" text="← Retour aux Événements" />
+                </HBox>
+                <TilePane fx:id="reviewsGridPane" prefColumns="2" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
+                <HBox fx:id="reviewsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
+            </VBox>
         </VBox>
     </VBox>
 </ScrollPane>
