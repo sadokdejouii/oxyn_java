@@ -350,7 +350,12 @@ public class EventManagementController implements Initializable {
         reviewsBtn.setStyle("-fx-font-size: 11px;");
         reviewsBtn.setOnAction(e -> showReviewsForEvent(item.getId()));
 
-        actionBox.getChildren().addAll(inscriptionsBtn, reviewsBtn);
+        Button deleteBtn = new Button("🗑️ Supprimer");
+        deleteBtn.getStyleClass().add("action-btn-delete");
+        deleteBtn.setStyle("-fx-font-size: 11px;");
+        deleteBtn.setOnAction(e -> deleteEventWithConfirmation(item.getId(), item.getTitre()));
+
+        actionBox.getChildren().addAll(inscriptionsBtn, reviewsBtn, deleteBtn);
 
         card.getChildren().addAll(titleLabel, descLabel, details1Box, details2Box, details3Box, statusBox, actionBox);
         return card;
@@ -385,7 +390,20 @@ public class EventManagementController implements Initializable {
         HBox statusBox = new HBox();
         statusBox.getChildren().add(statusLabel);
 
-        card.getChildren().addAll(titleLabel, detailsBox, statusBox);
+        // Delete button
+        HBox actionBox = new HBox();
+        actionBox.setSpacing(10);
+        actionBox.setStyle("-fx-alignment: CENTER_LEFT;");
+        actionBox.setPadding(new Insets(8, 0, 0, 0));
+
+        Button deleteBtn = new Button("🗑️ Supprimer");
+        deleteBtn.getStyleClass().add("action-btn-delete");
+        deleteBtn.setStyle("-fx-font-size: 11px;");
+        deleteBtn.setOnAction(e -> deleteInscriptionWithConfirmation(item.getId(), item.getUserName()));
+
+        actionBox.getChildren().add(deleteBtn);
+
+        card.getChildren().addAll(titleLabel, detailsBox, statusBox, actionBox);
         return card;
     }
 
@@ -424,7 +442,20 @@ public class EventManagementController implements Initializable {
 
         detailsBox.getChildren().add(dateLabel);
 
-        card.getChildren().addAll(titleBox, commentLabel, detailsBox);
+        // Delete button
+        HBox actionBox = new HBox();
+        actionBox.setSpacing(10);
+        actionBox.setStyle("-fx-alignment: CENTER_LEFT;");
+        actionBox.setPadding(new Insets(8, 0, 0, 0));
+
+        Button deleteBtn = new Button("🗑️ Supprimer");
+        deleteBtn.getStyleClass().add("action-btn-delete");
+        deleteBtn.setStyle("-fx-font-size: 11px;");
+        deleteBtn.setOnAction(e -> deleteAvisWithConfirmation(item.getId(), item.getUserName()));
+
+        actionBox.getChildren().add(deleteBtn);
+
+        card.getChildren().addAll(titleBox, commentLabel, detailsBox, actionBox);
         return card;
     }
 
@@ -712,6 +743,194 @@ public class EventManagementController implements Initializable {
             reviewsPage++;
             displayReviewsPaginated();
         }
+    }
+
+    // ==================== DELETE METHODS ====================
+
+    private void deleteEventWithConfirmation(int eventId, String eventTitle) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirmation de suppression");
+        confirmAlert.setHeaderText("⚠️  Supprimer cet événement ?");
+        confirmAlert.setContentText("Êtes-vous sûr de vouloir supprimer \"" + eventTitle + "\" ?\n\nCette action est irréversible et supprimera aussi toutes les inscriptions et avis associés.");
+        confirmAlert.getDialogPane().setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 12;");
+        
+        stylizeAlert(confirmAlert);
+
+        if (confirmAlert.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+            try {
+                evenementServices.supprimer(eventId);
+                showStyledSuccess("Événement supprimé ✓", "L'événement \"" + eventTitle + "\" a été supprimé avec succès.");
+                
+                // Refresh data
+                loadData();
+                showView(View.EVENTS);
+            } catch (SQLException ex) {
+                showStyledError("Erreur lors de la suppression", "Détail: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void deleteInscriptionWithConfirmation(int inscriptionId, String userName) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirmation de suppression");
+        confirmAlert.setHeaderText("⚠️  Supprimer cette inscription ?");
+        confirmAlert.setContentText("Êtes-vous sûr de vouloir supprimer l'inscription de \"" + userName + "\" ?\n\nCette action est irréversible.");
+        confirmAlert.getDialogPane().setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 12;");
+        
+        stylizeAlert(confirmAlert);
+
+        if (confirmAlert.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+            try {
+                inscriptionServices.supprimer(inscriptionId);
+                showStyledSuccess("Inscription supprimée ✓", "L'inscription de \"" + userName + "\" a été supprimée avec succès.");
+                
+                // Refresh data
+                filterInscriptionsByEvent(currentSelectedEventId);
+            } catch (SQLException ex) {
+                showStyledError("Erreur lors de la suppression", "Détail: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void deleteAvisWithConfirmation(int avisId, String userName) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirmation de suppression");
+        confirmAlert.setHeaderText("⚠️  Supprimer cet avis ?");
+        confirmAlert.setContentText("Êtes-vous sûr de vouloir supprimer l'avis de \"" + userName + "\" ?\n\nCette action est irréversible.");
+        confirmAlert.getDialogPane().setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 12;");
+        
+        stylizeAlert(confirmAlert);
+
+        if (confirmAlert.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+            try {
+                avisServices.supprimer(avisId);
+                showStyledSuccess("Avis supprimé ✓", "L'avis de \"" + userName + "\" a été supprimé avec succès.");
+                
+                // Refresh data
+                filterReviewsByEvent(currentSelectedEventId);
+            } catch (SQLException ex) {
+                showStyledError("Erreur lors de la suppression", "Détail: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void stylizeAlert(Alert alert) {
+        // Style the dialog pane
+        javafx.scene.control.DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #F5F8FF 0%, #FFFFFF 100%);" +
+            "-fx-border-color: rgba(0, 153, 204, 0.40);" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 8;" +
+            "-fx-padding: 20;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 12, 0, 0, 4);"
+        );
+        
+        // Style all buttons
+        dialogPane.getButtonTypes().forEach(buttonType -> {
+            javafx.scene.control.Button button = (javafx.scene.control.Button) dialogPane.lookupButton(buttonType);
+            if (button != null) {
+                if (buttonType == javafx.scene.control.ButtonType.OK) {
+                    button.setStyle(
+                        "-fx-background-color: linear-gradient(to bottom, rgba(244, 67, 54, 0.35) 0%, rgba(229, 57, 53, 0.45) 100%);" +
+                        "-fx-border-color: rgba(244, 67, 54, 0.55);" +
+                        "-fx-border-radius: 6;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-text-fill: #FFFFFF;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-padding: 10 24;" +
+                        "-fx-font-size: 12;" +
+                        "-fx-cursor: hand;"
+                    );
+                } else {
+                    button.setStyle(
+                        "-fx-background-color: rgba(200, 200, 200, 0.25);" +
+                        "-fx-border-color: rgba(150, 150, 150, 0.40);" +
+                        "-fx-border-radius: 6;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-text-fill: #333333;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-padding: 10 24;" +
+                        "-fx-font-size: 12;" +
+                        "-fx-cursor: hand;"
+                    );
+                }
+            }
+        });
+    }
+
+    private void showStyledSuccess(String title, String message) {
+        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+        successAlert.setTitle(title);
+        successAlert.setHeaderText(null);
+        successAlert.setContentText(message);
+        
+        javafx.scene.control.DialogPane dialogPane = successAlert.getDialogPane();
+        dialogPane.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #F0F8F0 0%, #FFFFFF 100%);" +
+            "-fx-border-color: rgba(76, 175, 80, 0.40);" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 8;" +
+            "-fx-padding: 20;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 10, 0, 0, 3);"
+        );
+        
+        // Style all buttons
+        dialogPane.getButtonTypes().forEach(buttonType -> {
+            javafx.scene.control.Button button = (javafx.scene.control.Button) dialogPane.lookupButton(buttonType);
+            if (button != null) {
+                button.setStyle(
+                    "-fx-background-color: linear-gradient(to bottom, rgba(76, 175, 80, 0.35) 0%, rgba(56, 142, 60, 0.45) 100%);" +
+                    "-fx-border-color: rgba(76, 175, 80, 0.55);" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-text-fill: #FFFFFF;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-padding: 10 24;" +
+                    "-fx-font-size: 12;" +
+                    "-fx-cursor: hand;"
+                );
+            }
+        });
+        
+        successAlert.showAndWait();
+    }
+
+    private void showStyledError(String title, String message) {
+        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+        errorAlert.setTitle(title);
+        errorAlert.setHeaderText(null);
+        errorAlert.setContentText(message);
+        
+        javafx.scene.control.DialogPane dialogPane = errorAlert.getDialogPane();
+        dialogPane.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #FFEBEE 0%, #FFFFFF 100%);" +
+            "-fx-border-color: rgba(244, 67, 54, 0.40);" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 8;" +
+            "-fx-padding: 20;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 10, 0, 0, 3);"
+        );
+        
+        // Style all buttons
+        dialogPane.getButtonTypes().forEach(buttonType -> {
+            javafx.scene.control.Button button = (javafx.scene.control.Button) dialogPane.lookupButton(buttonType);
+            if (button != null) {
+                button.setStyle(
+                    "-fx-background-color: linear-gradient(to bottom, rgba(244, 67, 54, 0.30) 0%, rgba(229, 57, 53, 0.40) 100%);" +
+                    "-fx-border-color: rgba(244, 67, 54, 0.50);" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-text-fill: #FFFFFF;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-padding: 10 24;" +
+                    "-fx-font-size: 12;" +
+                    "-fx-cursor: hand;"
+                );
+            }
+        });
+        
+        errorAlert.showAndWait();
     }
 
     private static String safe(String s) {
