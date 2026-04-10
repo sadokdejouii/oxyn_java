@@ -1,24 +1,33 @@
 package org.example.controllers;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import org.example.entities.Evenement;
 import org.example.services.EvenementServices;
 
+import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ResourceBundle;
 
-public class AjouterEvenementsController {
+public class AjouterEvenementsController implements Initializable {
 
     @FXML
-    private DatePicker created_at_evenement;
+    private TextField titre_evenement;
 
     @FXML
-    private TextField created_by_evenement;
+    private TextArea description_evenement;
 
     @FXML
     private DatePicker date_debut_evenement;
@@ -27,104 +36,171 @@ public class AjouterEvenementsController {
     private DatePicker date_fin_evenement;
 
     @FXML
-    private TextField description_evenement;
+    private TextField lieu_evenement;
 
     @FXML
-    private TextField lieu_evenement;
+    private TextField ville_evenement;
 
     @FXML
     private TextField places_max_evenement;
 
     @FXML
-    private TextField statut_evenement;
+    private ComboBox<String> statut_evenement;
 
     @FXML
-    private TextField titre_evenement;
+    private Button annulerBtn;
 
-    @FXML
-    private TextField ville_evenement;
+    private final EvenementServices es = new EvenementServices();
 
-    private EvenementServices es = new EvenementServices();
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        statut_evenement.setItems(FXCollections.observableArrayList(
+                "Sélectionner",
+                "À venir",
+                "En cours",
+                "Terminée"
+        ));
+        statut_evenement.setValue("Sélectionner");
+    }
 
     @FXML
     void ajouterEvenement(ActionEvent event) {
-        try {
-            // Vérification simple
-            if (titre_evenement.getText().isEmpty() ||
-                    description_evenement.getText().isEmpty() ||
-                    lieu_evenement.getText().isEmpty() ||
-                    ville_evenement.getText().isEmpty() ||
-                    places_max_evenement.getText().isEmpty() ||
-                    statut_evenement.getText().isEmpty() ||
-                    created_by_evenement.getText().isEmpty() ||
-                    date_debut_evenement.getValue() == null ||
-                    date_fin_evenement.getValue() == null ||
-                    created_at_evenement.getValue() == null) {
+        if (titre_evenement.getText().trim().isEmpty()) {
+            showError("Le titre est obligatoire.", "Champ manquant");
+            return;
+        }
+        if (titre_evenement.getText().length() > 30) {
+            showError("Le titre ne doit pas dépasser 30 caractères.", "Titre trop long");
+            return;
+        }
 
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Champs manquants");
-                alert.setHeaderText(null);
-                alert.setContentText("Veuillez remplir tous les champs.");
-                alert.show();
+        if (description_evenement.getText().trim().isEmpty()) {
+            showError("La description est obligatoire.", "Champ manquant");
+            return;
+        }
+        if (description_evenement.getText().length() > 100) {
+            showError("La description ne doit pas dépasser 100 caractères.", "Description trop longue");
+            return;
+        }
+
+        if (date_debut_evenement.getValue() == null) {
+            showError("La date de début est obligatoire.", "Champ manquant");
+            return;
+        }
+
+        LocalDate today = LocalDate.now();
+        if (date_debut_evenement.getValue().isBefore(today)) {
+            showError("La date de début ne peut pas être dans le passé.", "Date invalide");
+            return;
+        }
+
+        if (date_fin_evenement.getValue() == null) {
+            showError("La date de fin est obligatoire.", "Champ manquant");
+            return;
+        }
+        if (date_fin_evenement.getValue().isBefore(date_debut_evenement.getValue())) {
+            showError("La date de fin ne peut pas être avant la date de début.", "Date invalide");
+            return;
+        }
+
+        if (lieu_evenement.getText().trim().isEmpty()) {
+            showError("Le lieu est obligatoire.", "Champ manquant");
+            return;
+        }
+
+        if (ville_evenement.getText().trim().isEmpty()) {
+            showError("La ville est obligatoire.", "Champ manquant");
+            return;
+        }
+
+        if (places_max_evenement.getText().trim().isEmpty()) {
+            showError("Le nombre de places est obligatoire.", "Champ manquant");
+            return;
+        }
+
+        try {
+            int places = Integer.parseInt(places_max_evenement.getText().trim());
+            if (places <= 0) {
+                showError("Le nombre de places doit être supérieur à 0.", "Nombre invalide");
                 return;
             }
+        } catch (NumberFormatException e) {
+            showError("Le nombre de places doit être un nombre entier valide.", "Format invalide");
+            return;
+        }
 
-            // Conversion LocalDate -> Timestamp
+        if (statut_evenement.getValue() == null || statut_evenement.getValue().isEmpty()) {
+            showError("Veuillez sélectionner un statut.", "Champ manquant");
+            return;
+        }
+        if (statut_evenement.getValue().equals("Sélectionner")) {
+            showError("Veuillez sélectionner un statut valide.", "Statut invalide");
+            return;
+        }
+
+        try {
+            Timestamp createdAt = Timestamp.valueOf(LocalDateTime.now());
             Timestamp dateDebut = Timestamp.valueOf(date_debut_evenement.getValue().atStartOfDay());
             Timestamp dateFin = Timestamp.valueOf(date_fin_evenement.getValue().atStartOfDay());
-            Timestamp createdAt = Timestamp.valueOf(created_at_evenement.getValue().atStartOfDay());
 
-            // Création de l'objet Evenement
-            Evenement e = new Evenement(
-                    titre_evenement.getText(),
-                    description_evenement.getText(),
+            Evenement evenement = new Evenement(
+                    titre_evenement.getText().trim(),
+                    description_evenement.getText().trim(),
                     dateDebut,
                     dateFin,
-                    lieu_evenement.getText(),
-                    ville_evenement.getText(),
-                    Integer.parseInt(places_max_evenement.getText()),
-                    statut_evenement.getText(),
+                    lieu_evenement.getText().trim(),
+                    ville_evenement.getText().trim(),
+                    Integer.parseInt(places_max_evenement.getText().trim()),
+                    statut_evenement.getValue(),
                     createdAt,
-                    Integer.parseInt(created_by_evenement.getText())
+                    1
             );
 
-            // Ajout en base
-            es.ajouter(e);
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Succès");
-            alert.setHeaderText(null);
-            alert.setContentText("Événement ajouté avec succès !");
-            alert.show();
-
+            es.ajouter(evenement);
+            showSuccess("Événement ajouté avec succès !");
             clearFields();
+            // Close the window after successful addition
+            Stage stage = (Stage) titre_evenement.getScene().getWindow();
+            stage.close();
 
-        } catch (NumberFormatException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erreur de saisie");
-            alert.setHeaderText(null);
-            alert.setContentText("created_by et places_max doivent être des nombres.");
-            alert.show();
-        } catch (SQLException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erreur SQL");
-            alert.setHeaderText(null);
-            alert.setContentText("Erreur lors de l'ajout : " + e.getMessage());
-            alert.show();
+        } catch (SQLException ex) {
+            showError("Erreur lors de l'ajout de l'événement : " + ex.getMessage(), "Erreur base de données");
+        } catch (Exception ex) {
+            showError("Une erreur inattendue s'est produite : " + ex.getMessage(), "Erreur");
         }
+    }
+
+    @FXML
+    void annulerAjout(ActionEvent event) {
+        // Close the current window/stage
+        Stage stage = (Stage) annulerBtn.getScene().getWindow();
+        stage.close();
     }
 
     private void clearFields() {
         titre_evenement.clear();
         description_evenement.clear();
+        date_debut_evenement.setValue(null);
+        date_fin_evenement.setValue(null);
         lieu_evenement.clear();
         ville_evenement.clear();
         places_max_evenement.clear();
-        statut_evenement.clear();
-        created_by_evenement.clear();
+        statut_evenement.setValue("Sélectionner");
+    }
 
-        date_debut_evenement.setValue(null);
-        date_fin_evenement.setValue(null);
-        created_at_evenement.setValue(null);
+    private void showError(String message, String title) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Succès");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

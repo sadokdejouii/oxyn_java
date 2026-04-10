@@ -2,9 +2,13 @@ package org.example.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -13,6 +17,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.example.entities.AvisEvenement;
 import org.example.entities.Evenement;
 import org.example.entities.InscriptionEvenement;
@@ -154,6 +160,7 @@ public class EventManagementController implements Initializable {
 
     @FXML private Button backFromInscriptionsBtn;
     @FXML private Button backFromReviewsBtn;
+    @FXML private Button ajouterEvenementBtn;
 
     // ==================== DATA & SERVICES ====================
     private static final int ITEMS_PER_PAGE = 6;
@@ -186,6 +193,33 @@ public class EventManagementController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         loadData();
         showView(View.EVENTS);
+    }
+
+    @FXML
+    void openAddEventForm(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/AjouterEvenements.fxml"));
+            if (loader.getLocation() == null) {
+                throw new RuntimeException("FXML file not found: /FXML/AjouterEvenements.fxml");
+            }
+            Stage addEventStage = new Stage();
+            addEventStage.setTitle("Ajouter un Nouvel Événement");
+            Scene scene = new Scene(loader.load(), 700, 850);
+            addEventStage.setScene(scene);
+            addEventStage.initModality(Modality.APPLICATION_MODAL);
+            addEventStage.showAndWait();
+
+            // Refresh data after adding event
+            loadData();
+            showView(View.EVENTS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Erreur lors de l'ouverture du formulaire");
+            alert.setContentText("Détail: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     // ==================== VIEW MANAGEMENT ====================

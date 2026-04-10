@@ -486,3 +486,248 @@
     -fx-font-weight: bold;
     -fx-font-size: 12px;
 }
+
+/* ========== FORM DIALOG STYLING ========== */
+.form-dialog {
+    -fx-background-color: linear-gradient(to bottom, rgba(18, 32, 62, 0.98) 0%, rgba(13, 27, 62, 0.95) 100%);
+    -fx-border-color: rgba(79, 195, 247, 0.35);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 35, 0.15, 0, 14);
+}
+
+.form-container {
+    -fx-spacing: 18;
+    -fx-padding: 32;
+    -fx-background-color: transparent;
+}
+
+.form-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 0 0 16 0;
+    -fx-border-color: rgba(79, 195, 247, 0.30);
+    -fx-border-width: 0 0 2 0;
+}
+
+.form-section-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(0, 191, 255, 0.95);
+    -fx-padding: 14 0 10 0;
+    -fx-letter-spacing: 0.02em;
+}
+
+.form-group {
+    -fx-spacing: 7;
+}
+
+.form-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(232, 238, 247, 0.90);
+    -fx-text-fill: #E8EEF7;
+    -fx-padding: 0 0 2 0;
+}
+
+.form-input {
+    -fx-control-inner-background: #FFFFFF;
+    -fx-border-color: rgba(0, 153, 204, 0.50);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #1a1a1a;
+    -fx-padding: 12 14;
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI";
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 4, 0, 0, 1);
+}
+
+.form-input:focused {
+    -fx-control-inner-background: #FFFFFF;
+    -fx-border-color: rgba(0, 191, 255, 0.85);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.35), 12, 0, 0, 4);
+}
+
+.form-input::prompt-text {
+    -fx-text-fill: #999999;
+    -fx-font-size: 12px;
+}
+
+.form-combo-box {
+    -fx-control-inner-background: #FFFFFF;
+    -fx-border-color: rgba(0, 153, 204, 0.50);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #1a1a1a;
+    -fx-padding: 12 14;
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI";
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 4, 0, 0, 1);
+}
+
+.form-combo-box:focused {
+    -fx-control-inner-background: #FFFFFF;
+    -fx-border-color: rgba(0, 191, 255, 0.85);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.35), 12, 0, 0, 4);
+}
+
+.form-combo-box .list-cell {
+    -fx-text-fill: #1a1a1a;
+    -fx-control-inner-background: #FFFFFF;
+    -fx-padding: 10 12;
+    -fx-font-size: 12px;
+}
+
+.form-combo-box .list-cell:filled:selected {
+    -fx-background-color: rgba(0, 191, 255, 0.20);
+    -fx-text-fill: #0099CC;
+    -fx-font-weight: bold;
+}
+
+.form-date-picker {
+    -fx-control-inner-background: #FFFFFF;
+    -fx-border-color: rgba(0, 153, 204, 0.50);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #1a1a1a;
+    -fx-padding: 12 14;
+    -fx-font-size: 13px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 4, 0, 0, 1);
+}
+
+.form-date-picker:focused {
+    -fx-control-inner-background: #FFFFFF;
+    -fx-border-color: rgba(0, 191, 255, 0.85);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.35), 12, 0, 0, 4);
+}
+
+.form-button-group {
+    -fx-spacing: 14;
+    -fx-padding: 24 0 0 0;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-border-color: rgba(79, 195, 247, 0.20);
+    -fx-border-width: 1 0 0 0;
+}
+
+.form-btn-submit {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 191, 255, 0.40) 0%, rgba(0, 153, 204, 0.55) 100%);
+    -fx-border-color: rgba(0, 191, 255, 0.55);
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 12 28;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+    -fx-border-width: 1.5px;
+}
+
+.form-btn-submit:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 191, 255, 0.55) 0%, rgba(0, 153, 204, 0.70) 100%);
+    -fx-border-color: rgba(0, 191, 255, 0.75);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.35), 14, 0, 0, 4);
+}
+
+.form-btn-submit:pressed {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 153, 204, 0.60) 0%, rgba(0, 102, 153, 0.75) 100%);
+}
+
+.form-btn-cancel {
+    -fx-background-color: linear-gradient(to bottom, rgba(244, 67, 54, 0.30) 0%, rgba(229, 57, 53, 0.40) 100%);
+    -fx-border-color: rgba(244, 67, 54, 0.50);
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 12 28;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+    -fx-border-width: 1.5px;
+}
+
+.form-btn-cancel:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(244, 67, 54, 0.45) 0%, rgba(229, 57, 53, 0.55) 100%);
+    -fx-border-color: rgba(244, 67, 54, 0.70);
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.30), 14, 0, 0, 4);
+}
+
+.form-btn-cancel:pressed {
+    -fx-background-color: linear-gradient(to bottom, rgba(229, 57, 53, 0.55) 0%, rgba(198, 40, 40, 0.65) 100%);
+}
+
+/* ========== DATE PICKER CALENDAR STYLING ========== */
+.date-picker-popup {
+    -fx-background-color: linear-gradient(to bottom, #F5F8FF 0%, #FFFFFF 100%);
+    -fx-border-color: rgba(0, 153, 204, 0.40);
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 12, 0, 0, 4);
+    -fx-padding: 12;
+}
+
+.calendar-header {
+    -fx-background-color: linear-gradient(to right, rgba(0, 191, 255, 0.15) 0%, rgba(0, 153, 204, 0.10) 100%);
+    -fx-border-color: rgba(0, 153, 204, 0.20);
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10;
+    -fx-text-fill: #0099CC;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.calendar-day-header {
+    -fx-text-fill: #0099CC;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 6;
+    -fx-background-color: rgba(0, 191, 255, 0.08);
+}
+
+.calendar-day-cell {
+    -fx-padding: 6;
+    -fx-border-color: transparent;
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #333333;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER;
+}
+
+.calendar-day-cell:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.15);
+    -fx-text-fill: #0099CC;
+    -fx-font-weight: bold;
+}
+
+.calendar-day-cell:selected {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 191, 255, 0.40) 0%, rgba(0, 153, 204, 0.50) 100%);
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-border-color: rgba(0, 153, 204, 0.60);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.calendar-day-cell:today {
+    -fx-background-color: rgba(76, 175, 80, 0.15);
+    -fx-border-color: rgba(76, 175, 80, 0.40);
+    -fx-border-width: 1px;
+    -fx-text-fill: #2E7D32;
+    -fx-font-weight: bold;
+}
+
+.calendar-day-cell.previous-month,
+.calendar-day-cell.next-month {
+    -fx-text-fill: #CCCCCC;
+    -fx-opacity: 0.5;
+}
+
+.date-picker {
+    -fx-font-family: "Segoe UI";
+}

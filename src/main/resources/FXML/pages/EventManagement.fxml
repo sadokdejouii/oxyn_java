@@ -17,6 +17,12 @@
             <Label styleClass="page-hero-sub" text="Consultez les événements avec les informations détaillées, les inscriptions et les avis." wrapText="true" />
         </VBox>
 
+        <!-- Add Button Section -->
+        <HBox spacing="12" style="-fx-alignment: CENTER_LEFT;">
+            <Button fx:id="ajouterEvenementBtn" mnemonicParsing="false" onAction="#openAddEventForm" styleClass="action-btn-primary" text="➕ Ajouter un Événement" />
+            <HBox HBox.hgrow="ALWAYS" />
+        </HBox>
+
         <!-- Main Content Container -->
         <VBox spacing="8" styleClass="saas-chart-card" VBox.vgrow="ALWAYS">
             <!-- Events Grid Section (2-column layout with pagination) -->
