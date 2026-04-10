@@ -101,25 +101,37 @@ public class MainLayoutController implements Initializable {
     private Button adminDashboardBtn;
 
     @FXML
-    private Button stockMgmtBtn;
+    private Button adminEvenementsBtn;
 
     @FXML
-    private Button eventMgmtBtn;
+    private Button adminSalleBtn;
 
     @FXML
-    private Button userMgmtBtn;
+    private Button adminPlanningBtn;
 
     @FXML
-    private Button reportsBtn;
+    private Button adminBoutiqueBtn;
 
     @FXML
-    private Button clientHomeBtn;
+    private Button adminForumBtn;
 
     @FXML
-    private Button clientEventsBtn;
+    private Button homeBtn;
 
     @FXML
-    private Button clientPlanningBtn;
+    private Button evenementsBtn;
+
+    @FXML
+    private Button salleBtn;
+
+    @FXML
+    private Button planningBtn;
+
+    @FXML
+    private Button boutiqueBtn;
+
+    @FXML
+    private Button forumBtn;
 
     @FXML
     private Button profileBtn;
@@ -144,13 +156,17 @@ public class MainLayoutController implements Initializable {
 
         mainNavButtons.clear();
         mainNavButtons.add(adminDashboardBtn);
-        mainNavButtons.add(stockMgmtBtn);
-        mainNavButtons.add(eventMgmtBtn);
-        mainNavButtons.add(userMgmtBtn);
-        mainNavButtons.add(reportsBtn);
-        mainNavButtons.add(clientHomeBtn);
-        mainNavButtons.add(clientEventsBtn);
-        mainNavButtons.add(clientPlanningBtn);
+        mainNavButtons.add(adminEvenementsBtn);
+        mainNavButtons.add(adminSalleBtn);
+        mainNavButtons.add(adminPlanningBtn);
+        mainNavButtons.add(adminBoutiqueBtn);
+        mainNavButtons.add(adminForumBtn);
+        mainNavButtons.add(homeBtn);
+        mainNavButtons.add(evenementsBtn);
+        mainNavButtons.add(salleBtn);
+        mainNavButtons.add(planningBtn);
+        mainNavButtons.add(boutiqueBtn);
+        mainNavButtons.add(forumBtn);
         mainNavButtons.add(profileBtn);
 
         applyRoleShell(ctx);
@@ -158,7 +174,7 @@ public class MainLayoutController implements Initializable {
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else {
-            navigate(PAGE_CLIENT_HOME, "Home", clientHomeBtn);
+            navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
         }
     }
 
@@ -238,7 +254,7 @@ public class MainLayoutController implements Initializable {
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else {
-            navigate(PAGE_CLIENT_HOME, "Home", clientHomeBtn);
+            navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
         }
     }
 
@@ -291,38 +307,58 @@ public class MainLayoutController implements Initializable {
     }
 
     @FXML
-    private void handleStockManagement() {
-        navigate(PAGE_STOCK, "Stock management", stockMgmtBtn);
+    private void handleAdminEvenements() {
+        navigate(PAGE_EVENTS_ADMIN, "Evenements", adminEvenementsBtn);
     }
 
     @FXML
-    private void handleEventManagement() {
-        navigate(PAGE_EVENTS_ADMIN, "Event management", eventMgmtBtn);
+    private void handleAdminSalle() {
+        navigate(PAGE_STOCK, "Salle", adminSalleBtn);
     }
 
     @FXML
-    private void handleUserManagement() {
-        navigate(PAGE_USERS, "User management", userMgmtBtn);
+    private void handleAdminPlanning() {
+        navigate(PAGE_PLANNING, "Planning", adminPlanningBtn);
     }
 
     @FXML
-    private void handleReports() {
-        navigate(PAGE_REPORTS, "Reports / statistics", reportsBtn);
+    private void handleAdminBoutique() {
+        navigate(PAGE_USERS, "Boutique", adminBoutiqueBtn);
     }
 
     @FXML
-    private void handleClientHome() {
-        navigate(PAGE_CLIENT_HOME, "Home", clientHomeBtn);
+    private void handleAdminForum() {
+        navigate(PAGE_REPORTS, "Forum", adminForumBtn);
     }
 
     @FXML
-    private void handleClientEvents() {
-        navigate(PAGE_CLIENT_EVENTS, "Events", clientEventsBtn);
+    private void handleHome() {
+        navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
+    }
+
+    @FXML
+    private void handleEvenements() {
+        navigate(PAGE_CLIENT_EVENTS, "Evenements", evenementsBtn);
+    }
+
+    @FXML
+    private void handleSalle() {
+        navigate(PAGE_PLANNING, "Salle", salleBtn);
     }
 
     @FXML
     private void handlePlanning() {
-        navigate(PAGE_PLANNING, "Planning", clientPlanningBtn);
+        navigate(PAGE_PLANNING, "Planning", planningBtn);
+    }
+
+    @FXML
+    private void handleBoutique() {
+        navigate(PAGE_PLANNING, "Boutique", boutiqueBtn);
+    }
+
+    @FXML
+    private void handleForum() {
+        navigate(PAGE_PLANNING, "Forum", forumBtn);
     }
 
     @FXML
