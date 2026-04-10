@@ -167,6 +167,37 @@ public class AjouterEvenementsController implements Initializable {
     @FXML
     void annulerAjout(ActionEvent event) {
         // Close the current window/stage
+        Stage stage = (Stage) titre_evenement.getScene().getWindow();
+        stage.close();
+    }
+
+    private void clearFields() {
+        titre_evenement.clear();
+        description_evenement.clear();
+        date_debut_evenement.setValue(null);
+        date_fin_evenement.setValue(null);
+        lieu_evenement.clear();
+        ville_evenement.clear();
+        places_max_evenement.clear();
+        statut_evenement.setValue(null);
+    }
+
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Succès");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showError(String message, String title) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+}
         Stage stage = (Stage) annulerBtn.getScene().getWindow();
         stage.close();
     }
