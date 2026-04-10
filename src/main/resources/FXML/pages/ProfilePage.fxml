@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ProfilePageController">
+    <VBox spacing="18" styleClass="page-root">
+        <VBox spacing="6">
+            <Label styleClass="page-hero-title" text="Profile" />
+            <Label styleClass="page-hero-sub" text="Your account details from the active session." wrapText="true" />
+        </VBox>
+
+        <VBox spacing="12" styleClass="saas-chart-card">
+            <Label styleClass="saas-card-title" text="Account" />
+            <HBox spacing="10">
+                <Label styleClass="activity-sub" text="Name" />
+                <Label fx:id="nameValue" styleClass="activity-title" text="—" />
+            </HBox>
+            <HBox spacing="10">
+                <Label styleClass="activity-sub" text="Role" />
+                <Label fx:id="roleValue" styleClass="activity-title" text="—" />
+            </HBox>
+            <HBox spacing="10">
+                <Label styleClass="activity-sub" text="Workspace" />
+                <Label styleClass="activity-title" text="OXYN" />
+            </HBox>
+        </VBox>
+
+        <HBox spacing="10" styleClass="toolbar-card">
+            <Button onAction="#handleSave" styleClass="primary-toolbar-btn" text="Save changes" />
+            <Button onAction="#handleSecurity" styleClass="ghost-toolbar-btn" text="Security" />
+        </HBox>
+    </VBox>
+</ScrollPane>

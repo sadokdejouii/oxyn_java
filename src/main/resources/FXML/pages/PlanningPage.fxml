@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.PlanningPageController">
+    <VBox spacing="18" styleClass="page-root">
+        <VBox spacing="6">
+            <Label styleClass="page-hero-title" text="Planning" />
+            <Label styleClass="page-hero-sub" text="Your week at a glance. Replace this scaffold with a full calendar or Gantt component when ready." wrapText="true" />
+        </VBox>
+
+        <VBox spacing="10" styleClass="saas-chart-card">
+            <Label styleClass="saas-card-title" text="This week" />
+            <VBox fx:id="agendaList" spacing="0" />
+        </VBox>
+
+        <HBox spacing="12" styleClass="saas-stat-row">
+            <VBox spacing="6" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="FOCUS HOURS" />
+                <Label styleClass="saas-stat-value" text="18" />
+                <Label styleClass="saas-stat-hint" text="Planned deep work" />
+            </VBox>
+            <VBox spacing="6" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="FIELD VISITS" />
+                <Label styleClass="saas-stat-value" text="3" />
+                <Label styleClass="saas-stat-hint" text="On-site checkpoints" />
+            </VBox>
+            <VBox spacing="6" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="DEADLINES" />
+                <Label styleClass="saas-stat-value" text="2" />
+                <Label styleClass="saas-stat-hint" text="Due in 7 days" />
+            </VBox>
+        </HBox>
+
+        <Region prefHeight="8" />
+    </VBox>
+</ScrollPane>

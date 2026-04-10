@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   AgriSense 360 — shell + sidebar
+   OXYN — shell + sidebar
    Palette: #0D1B3E · #1A2F5E · #243B7F · #00BFFF · #4FC3F7 · #FFFFFF · #A0B4CC
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -68,6 +68,53 @@
     -fx-font-size: 11px;
     -fx-text-fill: rgba(160, 180, 204, 0.9);
     -fx-padding: 8 0 0 0;
+}
+
+/* ── Clickable brand (logo + OXYN) ─────────────────────────────── */
+.brand-home-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 14px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 6 8 6 6;
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+    -fx-content-display: GRAPHIC_ONLY;
+    -fx-background-insets: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.brand-home-btn:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.08);
+    -fx-border-color: rgba(79, 195, 247, 0.22);
+}
+
+.brand-home-btn:pressed {
+    -fx-background-color: rgba(0, 191, 255, 0.12);
+    -fx-translate-y: 1px;
+}
+
+.brand-logo-glow-wrap {
+    -fx-padding: 4;
+}
+
+.brand-logo-glow-wrap .brand-logo-image {
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.55), 16, 0.45, 0, 0),
+                dropshadow(gaussian, rgba(79, 195, 247, 0.35), 24, 0.35, 0, 0);
+}
+
+.brand-home-btn:hover .brand-logo-glow-wrap .brand-logo-image {
+    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.75), 22, 0.55, 0, 0),
+                dropshadow(gaussian, rgba(0, 191, 255, 0.6), 36, 0.5, 0, 0);
+    -fx-scale-x: 1.07;
+    -fx-scale-y: 1.07;
+}
+
+.brand-home-btn:armed .brand-logo-glow-wrap .brand-logo-image {
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
 /* ── Brand FAB ─────────────────────────────────────────────────── */
@@ -152,8 +199,12 @@
     -fx-alignment: center-left;
 }
 
-.sidebar-toggle:hover .toggle-glyph {
-    -fx-text-fill: #00BFFF;
+.sidebar-toggle-icon {
+    -fx-icon-color: #4FC3F7;
+}
+
+.sidebar-toggle:hover .sidebar-toggle-icon {
+    -fx-icon-color: #00BFFF;
 }
 
 .toggle-text {
@@ -236,6 +287,19 @@
     -fx-background-color: rgba(0, 191, 255, 0.2);
     -fx-border-color: rgba(0, 191, 255, 0.45);
     -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.2), 10, 0.35, 0, 0);
+}
+
+/* Font Awesome (Ikonli) icons in sidebar */
+.nav-icon-fa {
+    -fx-icon-color: rgba(79, 195, 247, 0.92);
+}
+
+.nav-link:hover .nav-icon-fa {
+    -fx-icon-color: #00BFFF;
+}
+
+.nav-link.active .nav-icon-fa {
+    -fx-icon-color: #00BFFF;
 }
 
 /* ── Nav labels ─────────────────────────────────────────────────── */

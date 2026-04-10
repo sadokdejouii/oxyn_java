@@ -1,0 +1,229 @@
+/* Dashboard pages — card UI on dark shell */
+
+.page-scroll {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.page-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.page-root {
+    -fx-spacing: 20;
+    -fx-padding: 28 32 40 32;
+}
+
+.page-hero-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
+.page-hero-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: rgba(160, 180, 204, 0.88);
+}
+
+.saas-stat-row {
+    -fx-spacing: 16;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.saas-stat-card {
+    -fx-spacing: 6;
+    -fx-padding: 18 20;
+    -fx-min-width: 200;
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 0% 55%, rgba(255, 255, 255, 0.07) 0%, transparent 100%),
+            rgba(26, 47, 94, 0.55);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(79, 195, 247, 0.22);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 22, 0, 0, 6);
+}
+
+.saas-stat-card:hover {
+    -fx-border-color: rgba(0, 191, 255, 0.38);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.18), 20, 0.25, 0, 4);
+}
+
+.saas-stat-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(160, 180, 204, 0.85);
+    -fx-letter-spacing: 0.06em;
+}
+
+.saas-stat-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00BFFF;
+}
+
+.saas-stat-hint {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(160, 180, 204, 0.55);
+}
+
+.saas-chart-card {
+    -fx-spacing: 12;
+    -fx-padding: 18 18 14 18;
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 0% 40%, rgba(255, 255, 255, 0.06) 0%, transparent 100%),
+            rgba(13, 27, 62, 0.65);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(79, 195, 247, 0.22);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 24, 0, 0, 8);
+}
+
+.saas-card-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
+.saas-activity-card {
+    -fx-spacing: 0;
+    -fx-padding: 0;
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 0% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 100%),
+            rgba(13, 27, 62, 0.55);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.38), 22, 0, 0, 8);
+}
+
+.activity-row {
+    -fx-padding: 14 18;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-width: 0 0 1 0;
+}
+
+.activity-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
+.activity-sub {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(160, 180, 204, 0.8);
+}
+
+.activity-time {
+    -fx-font-size: 11px;
+    -fx-text-fill: #4FC3F7;
+}
+
+.toolbar-card {
+    -fx-spacing: 12;
+    -fx-padding: 16 18;
+    -fx-alignment: CENTER_LEFT;
+    -fx-background-color: rgba(26, 47, 94, 0.45);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+}
+
+.primary-toolbar-btn {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 191, 255, 0.28) 0%, rgba(0, 153, 204, 0.45) 100%);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(79, 195, 247, 0.45);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16;
+    -fx-cursor: hand;
+}
+
+.primary-toolbar-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(79, 195, 247, 0.35) 0%, rgba(0, 191, 255, 0.45) 100%);
+}
+
+.ghost-toolbar-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(79, 195, 247, 0.22);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #E8EEF7;
+    -fx-padding: 10 16;
+    -fx-cursor: hand;
+}
+
+.data-table {
+    -fx-background-color: transparent;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: rgba(232, 238, 247, 0.95);
+}
+
+.chart-pie-label {
+    -fx-fill: rgba(232, 238, 247, 0.92);
+}
+
+.chart-legend-item {
+    -fx-text-fill: rgba(232, 238, 247, 0.88);
+}
+
+.data-table .column-header-background {
+    -fx-background-color: rgba(0, 191, 255, 0.12);
+}
+
+.table-row-cell {
+    -fx-background-color: rgba(13, 27, 62, 0.35);
+    -fx-border-color: transparent;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: rgba(0, 191, 255, 0.22);
+}
+
+/* Charts on dark background */
+.saas-chart {
+    -fx-padding: 4 0 0 0;
+}
+
+.saas-chart .chart-title {
+    -fx-text-fill: #FFFFFF;
+}
+
+.saas-chart .axis-label {
+    -fx-text-fill: rgba(160, 180, 204, 0.85);
+}
+
+.saas-chart .axis {
+    -fx-tick-label-fill: rgba(160, 180, 204, 0.75);
+}
+
+.saas-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.saas-chart .chart-vertical-grid-lines,
+.saas-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(79, 195, 247, 0.12);
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: #00BFFF;
+    -fx-stroke-width: 2.5px;
+}
+
+.default-color0.chart-line-symbol {
+    -fx-background-color: #00BFFF, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
+}

@@ -10,12 +10,12 @@ public class MainFX extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/MainLayout.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Login.fxml"));
         Parent root = loader.load();
 
-        Scene scene = new Scene(root, 1530, 800);
+        Scene scene = new Scene(root, 1080, 720);
 
-        primaryStage.setTitle("AgriSense 360");
+        primaryStage.setTitle("OXYN — Sign in");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

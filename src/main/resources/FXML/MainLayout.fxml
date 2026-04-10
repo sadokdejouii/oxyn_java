@@ -4,188 +4,140 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane prefHeight="800.0" prefWidth="1400.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/home.css,@../css/cards.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="org.example.controllers.MainLayoutController">
+<BorderPane prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
 
     <left>
-        <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="288" spacing="0" styleClass="sidebar">
+        <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="272" spacing="0" styleClass="sidebar">
 
             <Region maxWidth="Infinity" prefHeight="2" styleClass="sidebar-sheen" />
 
-            <HBox fx:id="brandSection" alignment="CENTER_LEFT" spacing="12" styleClass="brand">
+            <HBox alignment="CENTER_LEFT" spacing="0" styleClass="brand">
                 <padding>
-                    <Insets bottom="24" left="20" right="20" top="24" />
+                    <Insets bottom="18" left="14" right="16" top="18" />
                 </padding>
 
-                <!-- <ImageView fitWidth="40" fitHeight="40" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/logo.png" />
-                    </image>
-                </ImageView>
-                -->
-
-                <VBox fx:id="brandText" spacing="0" HBox.hgrow="ALWAYS">
-                    <Label styleClass="brand-name" text="AgriSense 360" />
-                    <Region maxWidth="44" prefHeight="3" prefWidth="44" styleClass="brand-accent" />
-                    <Label styleClass="brand-tagline" text="Smart AI Companion for Farms" />
-                </VBox>
-
-                <StackPane styleClass="brand-fab-wrap">
-                    <Button fx:id="floatingButton" onAction="#handleFloatingButton" styleClass="brand-fab" text="🌾" />
-                    <Label fx:id="notificationDot" managed="false" styleClass="notification-badge" text="1" translateX="4" translateY="-4" visible="false" StackPane.alignment="TOP_RIGHT" />
-                </StackPane>
+                <Button fx:id="brandHomeButton" maxWidth="Infinity" onAction="#handleBrandHome" styleClass="brand-home-btn" text="" HBox.hgrow="ALWAYS">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane styleClass="brand-logo-glow-wrap">
+                                <ImageView fitHeight="52.0" fitWidth="52.0" pickOnBounds="true" preserveRatio="true" styleClass="brand-logo-image">
+                                    <image>
+                                        <Image url="@../images/oxynLogo.png" />
+                                    </image>
+                                </ImageView>
+                            </StackPane>
+                            <VBox fx:id="brandTextColumn" spacing="2" HBox.hgrow="ALWAYS">
+                                <Label styleClass="brand-name" text="OXYN" />
+                                <Region maxWidth="44" prefHeight="3" prefWidth="44" styleClass="brand-accent" />
+                                <Label styleClass="brand-tagline" text="Operations &amp; events platform" />
+                            </VBox>
+                        </HBox>
+                    </graphic>
+                </Button>
             </HBox>
 
             <Button fx:id="toggleButton" onAction="#handleToggleMenu" styleClass="sidebar-toggle">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label fx:id="toggleIcon" styleClass="toggle-glyph" text="☰" />
-                        <Label fx:id="toggleText" styleClass="toggle-text" text="Toggle menu" />
+                        <FontIcon iconLiteral="fas-bars" iconSize="16" styleClass="sidebar-toggle-icon" />
+                        <Label fx:id="toggleText" styleClass="toggle-text" text="Collapse sidebar" />
                     </HBox>
                 </graphic>
             </Button>
 
             <ScrollPane fitToHeight="false" fitToWidth="true" hbarPolicy="NEVER" styleClass="sidebar-scroll" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
-
-                <VBox spacing="6" styleClass="managements">
+                <VBox spacing="14" styleClass="managements">
                     <padding>
-                        <Insets bottom="12" left="16" right="16" top="22" />
+                        <Insets bottom="12" left="14" right="14" top="12" />
                     </padding>
 
-                    <Label fx:id="navTitle" styleClass="nav-title" text="MANAGEMENTS" />
+                    <Label fx:id="shellModeLabel" styleClass="nav-title" text="MODE" />
 
-                    <VBox spacing="6">
-                        <Button fx:id="homeBtn" onAction="#handleHome" styleClass="nav-link">
+                    <VBox fx:id="adminNavGroup" spacing="6">
+                        <Label styleClass="nav-title" text="BACK OFFICE" />
+
+                        <Button fx:id="adminDashboardBtn" onAction="#handleAdminDashboard" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="🏠" />
-                                    <Label fx:id="homeLabel" styleClass="nav-label" text="Home" />
+                                    <FontIcon iconLiteral="fas-chart-pie" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Label styleClass="nav-label" text="Dashboard" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="animalsBtn" managed="false" onAction="#handleAnimals" styleClass="nav-link" visible="false">
+                        <Button fx:id="stockMgmtBtn" onAction="#handleStockManagement" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="🐄" />
-                                    <Label fx:id="animalsLabel" styleClass="nav-label" text="Animals Management" />
+                                    <FontIcon iconLiteral="fas-warehouse" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Label styleClass="nav-label" text="Stock Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="equipmentBtn" managed="false" onAction="#handleEquipment" styleClass="nav-link" visible="false">
+                        <Button fx:id="eventMgmtBtn" onAction="#handleEventManagement" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="🚜" />
-                                    <Label fx:id="equipmentLabel" styleClass="nav-label" text="Equipments Management" />
+                                    <FontIcon iconLiteral="fas-calendar-check" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Label styleClass="nav-label" text="Event Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="stockBtn" managed="false" onAction="#handleStock" styleClass="nav-link" visible="false">
+                        <Button fx:id="userMgmtBtn" onAction="#handleUserManagement" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="📦" />
-                                    <Label fx:id="stockLabel" styleClass="nav-label" text="Stock Management" />
+                                    <FontIcon iconLiteral="fas-users" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Label styleClass="nav-label" text="User Management" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="btnBOS" onAction="#handleBackofficeStock" styleClass="nav-link">
+                        <Button fx:id="reportsBtn" onAction="#handleReports" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="🏢" />
-                                    <Label fx:id="BOStockLabel" styleClass="nav-label" text="Backoffice Stock" />
+                                    <FontIcon iconLiteral="fas-chart-line" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Label styleClass="nav-label" text="Reports / Statistics" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+                    </VBox>
+
+                    <VBox fx:id="clientNavGroup" spacing="6">
+                        <Label styleClass="nav-title" text="FRONT OFFICE" />
+
+                        <Button fx:id="clientHomeBtn" onAction="#handleClientHome" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <FontIcon iconLiteral="fas-home" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Label styleClass="nav-label" text="Home" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Label styleClass="nav-title" text="ESPACES &amp; OUTILS" />
-
-                        <VBox spacing="6">
-                            <Button fx:id="evenementBtn" onAction="#handleEvenement" styleClass="nav-link">
-                                <graphic>
-                                    <HBox alignment="CENTER_LEFT" spacing="12">
-                                        <Label styleClass="nav-emoji" text="📅" />
-                                        <Label fx:id="evenementLabel" styleClass="nav-label" text="Événement" />
-                                    </HBox>
-                                </graphic>
-                            </Button>
-
-                            <Button fx:id="salleBtn" onAction="#handleSalle" styleClass="nav-link">
-                                <graphic>
-                                    <HBox alignment="CENTER_LEFT" spacing="12">
-                                        <Label styleClass="nav-emoji" text="🏛️" />
-                                        <Label fx:id="salleLabel" styleClass="nav-label" text="Salle" />
-                                    </HBox>
-                                </graphic>
-                            </Button>
-
-                            <Button fx:id="planningBtn" onAction="#handlePlanning" styleClass="nav-link">
-                                <graphic>
-                                    <HBox alignment="CENTER_LEFT" spacing="12">
-                                        <Label styleClass="nav-emoji" text="🗓️" />
-                                        <Label fx:id="planningLabel" styleClass="nav-label" text="Planning" />
-                                    </HBox>
-                                </graphic>
-                            </Button>
-
-                            <Button fx:id="boutiqueBtn" onAction="#handleBoutique" styleClass="nav-link">
-                                <graphic>
-                                    <HBox alignment="CENTER_LEFT" spacing="12">
-                                        <Label styleClass="nav-emoji" text="🛍️" />
-                                        <Label fx:id="boutiqueLabel" styleClass="nav-label" text="Boutique" />
-                                    </HBox>
-                                </graphic>
-                            </Button>
-
-                            <Button fx:id="forumBtn" onAction="#handleForum" styleClass="nav-link">
-                                <graphic>
-                                    <HBox alignment="CENTER_LEFT" spacing="12">
-                                        <Label styleClass="nav-emoji" text="💬" />
-                                        <Label fx:id="forumLabel" styleClass="nav-label" text="Forum" />
-                                    </HBox>
-                                </graphic>
-                            </Button>
-                        </VBox>
-
-                        <Button fx:id="cultureBtn" managed="false" onAction="#handleCulture" styleClass="nav-link" visible="false">
+                        <Button fx:id="clientEventsBtn" onAction="#handleClientEvents" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="🌱" />
-                                    <Label fx:id="cultureLabel" styleClass="nav-label" text="Culture Management" />
+                                    <FontIcon iconLiteral="fas-calendar-alt" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Label styleClass="nav-label" text="Events" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="usersBtn" managed="false" onAction="#handleUsers" styleClass="nav-link" visible="false">
+                        <Button fx:id="clientPlanningBtn" onAction="#handlePlanning" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="👤" />
-                                    <Label fx:id="usersLabel" styleClass="nav-label" text="User Management" />
-                                </HBox>
-                            </graphic>
-                        </Button>
-
-                        <Button fx:id="workersBtn" managed="false" onAction="#handleWorkers" styleClass="nav-link" visible="false">
-                            <graphic>
-                                <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="👷" />
-                                    <Label fx:id="workersLabel" styleClass="nav-label" text="Workers Management" />
-                                </HBox>
-                            </graphic>
-                        </Button>
-
-                        <Button fx:id="ouvrierBtn" managed="false" onAction="#handleOuvrier" styleClass="nav-link" visible="false">
-                            <graphic>
-                                <HBox alignment="CENTER_LEFT" spacing="12">
-                                    <Label styleClass="nav-emoji" text="👨‍🔧" />
-                                    <Label fx:id="ouvrierLabel" styleClass="nav-label" text="Ouvrier Management" />
+                                    <FontIcon iconLiteral="fas-calendar" iconSize="18" styleClass="nav-icon-fa" />
+                                    <Label styleClass="nav-label" text="Planning" />
                                 </HBox>
                             </graphic>
                         </Button>
@@ -193,12 +145,12 @@
                 </VBox>
             </ScrollPane>
 
-            <VBox spacing="6" styleClass="sidebar-actions">
+            <VBox fx:id="sidebarActionsBox" spacing="6" styleClass="sidebar-actions">
                 <Button fx:id="profileBtn" onAction="#handleProfile" styleClass="nav-link">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="12">
-                            <Label styleClass="nav-emoji" text="👨‍💼" />
-                            <Label fx:id="profileLabel" styleClass="nav-label" text="Profile" />
+                            <FontIcon iconLiteral="fas-user" iconSize="18" styleClass="nav-icon-fa" />
+                            <Label styleClass="nav-label" text="Profile" />
                         </HBox>
                     </graphic>
                 </Button>
@@ -206,8 +158,8 @@
                 <Button fx:id="logoutBtn" onAction="#handleLogout" styleClass="nav-link logout-btn">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="12">
-                            <Label styleClass="nav-emoji" text="🚪" />
-                            <Label fx:id="logoutLabel" styleClass="nav-label" text="Logout" />
+                            <FontIcon iconLiteral="fas-sign-out-alt" iconSize="18" styleClass="nav-icon-fa" />
+                            <Label styleClass="nav-label" text="Logout" />
                         </HBox>
                     </graphic>
                 </Button>
@@ -215,7 +167,7 @@
 
             <HBox fx:id="sidebarFooter" alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-foot sidebar-status">
                 <padding>
-                    <Insets bottom="18" left="20" right="20" top="18" />
+                    <Insets bottom="16" left="20" right="20" top="14" />
                 </padding>
                 <Region prefHeight="8" prefWidth="8" styleClass="pulse-dot" />
                 <Label fx:id="footerText" styleClass="sidebar-status-label" text="Connected" />
@@ -223,8 +175,47 @@
 
         </VBox>
     </left>
+
     <center>
-        <StackPane fx:id="contentArea" styleClass="content-area" />
+        <BorderPane styleClass="main-shell-center">
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="16" styleClass="topbar">
+                    <padding>
+                        <Insets bottom="0" left="0" right="24" top="0" />
+                    </padding>
+
+                    <Label fx:id="topbarPageTitle" styleClass="topbar-page-title" text="Dashboard" />
+
+                    <Region HBox.hgrow="ALWAYS" />
+
+                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-wrap">
+                        <FontIcon iconLiteral="fas-search" iconSize="14" styleClass="topbar-search-icon" />
+                        <TextField fx:id="topbarSearchField" promptText="Search modules, events, stock…" styleClass="topbar-search" HBox.hgrow="ALWAYS" />
+                    </HBox>
+
+                    <Region prefWidth="8" />
+
+                    <Button fx:id="notificationBtn" onAction="#handleNotifications" styleClass="topbar-icon-btn" text="">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-bell" iconSize="18" />
+                        </graphic>
+                    </Button>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="topbar-user-chip">
+                        <StackPane styleClass="topbar-avatar">
+                            <Label fx:id="userAvatarLabel" text="A" />
+                        </StackPane>
+                        <VBox spacing="2">
+                            <Label fx:id="topbarUserName" styleClass="topbar-user-name" text="User" />
+                            <Label fx:id="topbarUserRole" styleClass="topbar-user-role" text="Admin" />
+                        </VBox>
+                    </HBox>
+                </HBox>
+            </top>
+            <center>
+                <StackPane fx:id="contentArea" styleClass="content-area" />
+            </center>
+        </BorderPane>
     </center>
 
 </BorderPane>
