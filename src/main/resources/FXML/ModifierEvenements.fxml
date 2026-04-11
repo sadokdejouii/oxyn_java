@@ -12,7 +12,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.controllers.AjouterEvenementsController"
+      fx:controller="org.example.controllers.ModifierEvenementController"
       styleClass="form-dialog"
     alignment="TOP_CENTER"
       stylesheets="@../css/dashboard-saas.css">
@@ -29,7 +29,7 @@
             <VBox styleClass="form-container" spacing="16">
 
                 <!-- Form Title -->
-                <Label styleClass="form-title" text="Ajouter un Nouvel Événement" />
+                <Label styleClass="form-title" text="Modifier l'Événement" />
 
                 <Label fx:id="formFeedbackLabel"
                        managed="false"
@@ -122,11 +122,11 @@
 
                 <!-- Button Group -->
                 <VBox styleClass="form-button-group" spacing="12">
-                    <Button fx:id="ajouterBtn"
+                    <Button fx:id="modifierBtn"
                         mnemonicParsing="false"
-                        onAction="#ajouterEvenement"
+                        onAction="#modifierEvenement"
                         styleClass="form-btn-submit"
-                        text="Ajouter Événement" />
+                        text="Enregistrer les Modifications" />
                 </VBox>
 
             </VBox>
