@@ -1,0 +1,315 @@
+/* ═══════════════════════════════════════════════════════════════════
+   User Management — SaaS dashboard (dark shell, cyan accent)
+   Loaded with MainLayout; complements dashboard-saas.css
+   ═══════════════════════════════════════════════════════════════════ */
+
+.um-page {
+    -fx-background: transparent;
+}
+
+.um-root.page-root {
+    -fx-spacing: 22;
+    -fx-padding: 8 8 48 8;
+}
+
+/* ── Hero ───────────────────────────────────────────────────────── */
+.um-hero {
+    -fx-spacing: 10;
+}
+
+.um-hero-top {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 12;
+}
+
+.um-kicker {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(79, 195, 247, 0.95);
+    -fx-letter-spacing: 0.14em;
+    -fx-padding: 4 10;
+    -fx-background-color: rgba(0, 191, 255, 0.12);
+    -fx-background-radius: 20px;
+    -fx-border-color: rgba(79, 195, 247, 0.28);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.um-title.page-hero-title {
+    -fx-font-size: 28px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 8, 0, 0, 1);
+}
+
+.um-hero-sub.page-hero-sub {
+    -fx-font-size: 13.5px;
+    -fx-max-width: 720px;
+    -fx-line-spacing: 2px;
+}
+
+/* ── Stat row ───────────────────────────────────────────────────── */
+.um-stat-row {
+    -fx-spacing: 14;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.um-stat-tile.saas-stat-card {
+    -fx-min-width: 0;
+    -fx-padding: 16 18 14 18;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+}
+
+.um-stat-tile .saas-stat-value {
+    -fx-font-size: 26px;
+}
+
+.um-stat-tile .saas-stat-hint {
+    -fx-wrap-text: true;
+}
+
+.um-stat-accent {
+    -fx-text-fill: #7AE7FF;
+}
+
+.um-stat-success {
+    -fx-text-fill: #69F0AE;
+}
+
+.um-stat-warn {
+    -fx-text-fill: #FFB74D;
+}
+
+.um-stat-muted {
+    -fx-text-fill: rgba(160, 180, 204, 0.75);
+}
+
+/* ── Unified control panel ──────────────────────────────────────── */
+.um-panel {
+    -fx-spacing: 14;
+    -fx-padding: 18 20 18 20;
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 100% 0%, rgba(79, 195, 247, 0.08) 0%, transparent 42%),
+            rgba(13, 27, 62, 0.72);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(79, 195, 247, 0.24);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 20, 0, 0, 6);
+}
+
+.um-panel-row {
+    -fx-spacing: 12;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.um-form-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(160, 180, 204, 0.9);
+    -fx-letter-spacing: 0.05em;
+}
+
+.um-search-wrap {
+    -fx-spacing: 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 14 0 4;
+    -fx-background-color: rgba(0, 0, 0, 0.22);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-max-width: Infinity;
+}
+
+.um-search-wrap:focus-within {
+    -fx-border-color: rgba(0, 191, 255, 0.45);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.15), 12, 0, 0, 0);
+}
+
+.um-search-icon {
+    -fx-min-width: 36;
+    -fx-pref-width: 36;
+    -fx-alignment: CENTER;
+    -fx-font-size: 14px;
+    -fx-text-fill: rgba(160, 180, 204, 0.75);
+}
+
+.um-search-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-padding: 12 12 12 4;
+    -fx-font-size: 13px;
+    -fx-text-fill: #E8EEF7;
+    -fx-prompt-text-fill: rgba(160, 180, 204, 0.45);
+}
+
+.um-search-field:focused {
+    -fx-faint-focus-color: transparent;
+    -fx-focus-color: transparent;
+}
+
+.um-search-clear {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(160, 180, 204, 0.85);
+    -fx-font-size: 12px;
+    -fx-padding: 8 14 8 10;
+    -fx-cursor: hand;
+    -fx-underline: false;
+}
+
+.um-search-clear:hover {
+    -fx-text-fill: #00BFFF;
+}
+
+.um-toolbar-actions {
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 2 0 0 0;
+}
+
+.um-vdiv {
+    -fx-pref-width: 1;
+    -fx-max-height: 22;
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+}
+
+.um-spacer {
+    -fx-min-width: 8;
+}
+
+.primary-toolbar-btn.um-btn-compact {
+    -fx-padding: 9 14;
+}
+
+.ghost-toolbar-btn.um-btn-compact {
+    -fx-padding: 9 14;
+}
+
+/* ── Table card header ──────────────────────────────────────────── */
+.um-table-header {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 12;
+    -fx-padding: 0 0 4 0;
+}
+
+.um-table-hint {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(160, 180, 204, 0.65);
+}
+
+.um-table-panel {
+    -fx-min-height: 320;
+}
+
+.um-data-table {
+    -fx-table-cell-border-color: rgba(255, 255, 255, 0.04);
+}
+
+.um-data-table .column-header,
+.um-data-table .column-header .label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(160, 180, 204, 0.95);
+    -fx-letter-spacing: 0.04em;
+}
+
+.um-data-table .column-header-background {
+    -fx-background-color: rgba(0, 191, 255, 0.14);
+    -fx-border-color: rgba(79, 195, 247, 0.15);
+    -fx-border-width: 0 0 1 0;
+}
+
+.um-data-table .table-row-cell {
+    -fx-background-color: rgba(13, 27, 62, 0.28);
+    -fx-border-color: rgba(255, 255, 255, 0.03);
+    -fx-border-width: 0 0 1 0;
+}
+
+.um-data-table .table-row-cell:hover {
+    -fx-background-color: rgba(26, 47, 94, 0.55);
+}
+
+.um-data-table .table-row-cell:selected {
+    -fx-background-color: rgba(0, 191, 255, 0.2);
+}
+
+.um-data-table .table-row-cell:selected:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.26);
+}
+
+.um-data-table .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(0, 191, 255, 0.35);
+    -fx-background-radius: 4px;
+}
+
+.um-data-table .scroll-bar:vertical .track {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Badges in table cells */
+.um-table-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10;
+    -fx-background-radius: 20px;
+    -fx-text-fill: #E8EEF7;
+}
+
+.um-role-admin {
+    -fx-background-color: rgba(156, 39, 176, 0.35);
+    -fx-border-color: rgba(206, 147, 216, 0.45);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.um-role-coach {
+    -fx-background-color: rgba(33, 150, 243, 0.28);
+    -fx-border-color: rgba(100, 181, 246, 0.4);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.um-role-client {
+    -fx-background-color: rgba(0, 191, 255, 0.18);
+    -fx-border-color: rgba(79, 195, 247, 0.35);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.um-status-on {
+    -fx-background-color: rgba(105, 240, 174, 0.2);
+    -fx-text-fill: #B9F6CA;
+    -fx-border-color: rgba(105, 240, 174, 0.35);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.um-status-off {
+    -fx-background-color: rgba(255, 112, 67, 0.15);
+    -fx-text-fill: #FFAB91;
+    -fx-border-color: rgba(255, 112, 67, 0.3);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+/* Empty state */
+.um-empty-box {
+    -fx-alignment: CENTER;
+    -fx-spacing: 8;
+    -fx-padding: 48 24;
+}
+
+.um-empty-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(232, 238, 247, 0.9);
+}
+
+.um-empty-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(160, 180, 204, 0.65);
+    -fx-wrap-text: true;
+    -fx-text-alignment: CENTER;
+    -fx-max-width: 320px;
+}
