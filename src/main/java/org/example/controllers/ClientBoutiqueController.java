@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import org.example.entities.PanierSession;
 import org.example.entities.produits;
 import org.example.services.ProduitsService;
+import org.example.utils.ProductImageStorage;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -55,11 +56,11 @@ public class ClientBoutiqueController {
         VBox card = new VBox(10);
         card.getStyleClass().add("product-card");
         
-        // Image placeholder
         ImageView imageView = new ImageView();
         imageView.setFitWidth(250);
         imageView.setFitHeight(150);
         imageView.getStyleClass().add("product-image");
+        ProductImageStorage.applyToImageView(imageView, produit.getImage_produit());
         
         // Marque et nom
         Label brandLabel = new Label("OXYN");

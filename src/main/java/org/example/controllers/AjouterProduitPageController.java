@@ -2,11 +2,19 @@ package org.example.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import org.example.entities.produits;
 import org.example.services.ProduitsService;
+import org.example.utils.ProductImageStorage;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
@@ -25,8 +33,11 @@ public class AjouterProduitPageController {
     private TextField quantiteField;
     
     @FXML
-    private TextField imageField;
-    
+    private ImageView imagePreview;
+
+    @FXML
+    private Label imageFileLabel;
+
     @FXML
     private TextField statutField;
     
@@ -35,6 +46,9 @@ public class AjouterProduitPageController {
     
     private ProduitsService produitsService;
     private MainLayoutController mainLayoutController;
+
+    /** Fichier image choisi par l’utilisateur (avant copie vers product_images). */
+    private Path selectedImageSource;
 
     public AjouterProduitPageController() {
         this.produitsService = new ProduitsService();
@@ -60,13 +74,22 @@ public class AjouterProduitPageController {
         }
 
         try {
-            // Créer le produit avec les données du formulaire
+            String imageName = "default.jpg";
+            if (selectedImageSource != null) {
+                try {
+                    imageName = ProductImageStorage.copyUploadedFile(selectedImageSource);
+                } catch (IOException ex) {
+                    showAlert("Erreur", "Impossible d’enregistrer l’image : " + ex.getMessage());
+                    return;
+                }
+            }
+
             produits produit = new produits(
                 nomField.getText().trim(),
                 descriptionField.getText().trim(),
                 Double.parseDouble(prixField.getText().trim()),
                 Integer.parseInt(quantiteField.getText().trim()),
-                imageField.getText().trim().isEmpty() ? "default.jpg" : imageField.getText().trim(),
+                imageName,
                 dateField.getText(),
                 statutField.getText().trim()
             );
@@ -97,12 +120,41 @@ public class AjouterProduitPageController {
     }
 
     @FXML
+    private void handleChooseImage() {
+        Window owner = nomField != null && nomField.getScene() != null
+                ? nomField.getScene().getWindow()
+                : null;
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choisir une image produit");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.bmp"),
+                new FileChooser.ExtensionFilter("Tous les fichiers", "*.*"));
+        var file = chooser.showOpenDialog(owner);
+        if (file == null) {
+            return;
+        }
+        selectedImageSource = file.toPath();
+        if (imageFileLabel != null) {
+            imageFileLabel.setText(file.getName());
+        }
+        if (imagePreview != null) {
+            imagePreview.setImage(new Image(file.toURI().toString(), 200, 200, true, true));
+        }
+    }
+
+    @FXML
     private void handleClear() {
         nomField.clear();
         descriptionField.clear();
         prixField.clear();
         quantiteField.clear();
-        imageField.clear();
+        selectedImageSource = null;
+        if (imagePreview != null) {
+            imagePreview.setImage(null);
+        }
+        if (imageFileLabel != null) {
+            imageFileLabel.setText("Aucune image — le défaut « default.jpg » sera utilisé si présent dans /images.");
+        }
         statutField.setText("Disponible");
         dateField.setText(LocalDate.now().toString());
     }

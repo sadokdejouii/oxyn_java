@@ -6,7 +6,6 @@ import org.example.utils.MyDataBase;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date;
 
 public class ProduitsService implements ICrud<produits>{
     Connection con;
@@ -17,10 +16,18 @@ public class ProduitsService implements ICrud<produits>{
 
     @Override
     public void ajouter(produits p) throws SQLException {
-        String sql = "INSERT INTO `produits`(`nom_produit`, `description_produit`, `prix_produit`, `quantite_stock_produit`, `image_produit`, `date_creation_produit`, `statut_produit`) VALUES ('" + p.getNom_produit() + "','" + p.getDescription_produit() + "'," + p.getPrix_produit() + "," + p.getQuantite_stock_produit() + ",'" + p.getImage_produit() + "','" + p.getDate_creation_produit() + "','" + p.getStatut_produit() + "')";
-        Statement statement = con.createStatement();
-        statement.executeUpdate(sql);
-        System.out.println("Personne ajouté avec succes");
+        String sql = "INSERT INTO produits (nom_produit, description_produit, prix_produit, quantite_stock_produit, image_produit, date_creation_produit, statut_produit) VALUES (?,?,?,?,?,?,?)";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, p.getNom_produit());
+            ps.setString(2, p.getDescription_produit());
+            ps.setDouble(3, p.getPrix_produit());
+            ps.setInt(4, p.getQuantite_stock_produit());
+            ps.setString(5, p.getImage_produit());
+            ps.setString(6, p.getDate_creation_produit());
+            ps.setString(7, p.getStatut_produit());
+            ps.executeUpdate();
+        }
+        System.out.println("Produit ajouté avec succès");
     }
 
     @Override

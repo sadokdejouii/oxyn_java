@@ -6,6 +6,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -49,9 +50,15 @@
                     </VBox>
                 </HBox>
 
-                <VBox spacing="5">
-                    <Label styleClass="form-label" text="Image (URL ou nom de fichier)" />
-                    <TextField fx:id="imageField" promptText="product.jpg ou URL de l'image" styleClass="form-input" />
+                <VBox spacing="8">
+                    <Label styleClass="form-label" text="Photo du produit" />
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <ImageView fx:id="imagePreview" fitHeight="100" fitWidth="100" pickOnBounds="true" preserveRatio="true" styleClass="product-image" />
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Button onAction="#handleChooseImage" styleClass="ghost-toolbar-btn" text="Choisir une image…" />
+                            <Label fx:id="imageFileLabel" styleClass="saas-stat-hint" text="Aucune image — le défaut « default.jpg » sera utilisé si présent dans /images." wrapText="true" />
+                        </VBox>
+                    </HBox>
                 </VBox>
 
                 <VBox spacing="5">
