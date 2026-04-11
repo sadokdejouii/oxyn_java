@@ -1,0 +1,219 @@
+/*
+ * Thème SaaS clair — module Planning + Discussion (hors sidebar).
+ * Couleurs : primary #3A7AFE, secondary #00C9A7, accent #FF8A65,
+ * fond #F5F7FB, texte #1E293B.
+ */
+
+/* —— Carte dashboard réutilisable (FXML + PlanningDashboardCard.java) —— */
+.saas-dash-card {
+    -fx-spacing: 0;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 20, 0.3, 0, 4);
+    -fx-padding: 0;
+}
+
+.saas-dash-card:hover {
+    -fx-border-color: rgba(58, 122, 254, 0.18);
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.12), 24, 0.35, 0, 6);
+}
+
+.saas-dash-card-head {
+    -fx-padding: 18 20 14 20;
+    -fx-spacing: 10;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.saas-dash-card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.saas-dash-card-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.saas-dash-card-badge {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a7afe;
+    -fx-padding: 5px 12px;
+    -fx-background-color: rgba(58, 122, 254, 0.1);
+    -fx-background-radius: 999px;
+    -fx-border-color: rgba(58, 122, 254, 0.2);
+    -fx-border-radius: 999px;
+    -fx-border-width: 1px;
+}
+
+.saas-dash-card-badge--secondary {
+    -fx-text-fill: #0d9488;
+    -fx-background-color: rgba(0, 201, 167, 0.12);
+    -fx-border-color: rgba(0, 201, 167, 0.25);
+}
+
+.saas-dash-card-badge--accent {
+    -fx-text-fill: #ea580c;
+    -fx-background-color: rgba(255, 138, 101, 0.14);
+    -fx-border-color: rgba(255, 138, 101, 0.28);
+}
+
+.saas-dash-card-body {
+    -fx-padding: 0 20 20 20;
+    -fx-spacing: 12;
+}
+
+.saas-dash-card-body--flush {
+    -fx-padding: 0 0 16 0;
+}
+
+.saas-dash-card-icon {
+    -fx-icon-color: #3a7afe;
+    -fx-padding: 0 4 0 0;
+}
+
+/* —— Discussion (page dédiée) —— */
+.discussion-saas-root {
+    -fx-spacing: 20;
+    -fx-padding: 8 8 32 8;
+    -fx-background-color: #f5f7fb;
+}
+
+.discussion-saas-hero {
+    -fx-spacing: 6;
+    -fx-padding: 4 4 8 4;
+}
+
+.discussion-saas-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.discussion-saas-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+    -fx-max-width: 720px;
+}
+
+.discussion-saas-split > .split-pane-divider {
+    -fx-background-color: rgba(30, 41, 59, 0.08);
+    -fx-padding: 0 4;
+}
+
+.discussion-saas-panel {
+    -fx-spacing: 12;
+    -fx-padding: 18 18 16 18;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 20, 0.3, 0, 4);
+}
+
+.discussion-saas-panel:hover {
+    -fx-border-color: rgba(58, 122, 254, 0.14);
+}
+
+.discussion-saas-panel-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.discussion-saas-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.discussion-saas-scroll .viewport {
+    -fx-background-color: #f8fafc;
+}
+
+.discussion-saas-messages {
+    -fx-background-color: #f8fafc;
+}
+
+.discussion-saas-input-row {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+    -fx-border-width: 1px 0 0 0;
+}
+
+.discussion-saas-field {
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(30, 41, 59, 0.1);
+    -fx-border-width: 1px;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1e293b;
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+}
+
+.discussion-saas-field:focused {
+    -fx-border-color: rgba(58, 122, 254, 0.45);
+}
+
+.discussion-saas-btn-primary {
+    -fx-background-color: linear-gradient(to bottom, #4d87ff 0%, #3a7afe 100%);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 18px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.25), 12, 0.35, 0, 3);
+}
+
+.discussion-saas-btn-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #5c91ff 0%, #2f6ef0 100%);
+}
+
+.discussion-saas-btn-ghost {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #475569;
+    -fx-padding: 10px 16px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(30, 41, 59, 0.12);
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+}
+
+.discussion-saas-btn-ghost:hover {
+    -fx-border-color: rgba(58, 122, 254, 0.35);
+    -fx-text-fill: #3a7afe;
+}
+
+.discussion-saas-list {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-background-radius: 12px;
+}
+
+.discussion-saas-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1e293b;
+    -fx-padding: 10 12;
+}
+
+.discussion-saas-list .list-cell:selected {
+    -fx-background-color: rgba(58, 122, 254, 0.12);
+}
+
+.discussion-saas-list .list-cell:hover {
+    -fx-background-color: rgba(58, 122, 254, 0.06);
+}
+
+.discussion-saas-status {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}

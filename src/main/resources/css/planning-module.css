@@ -1,0 +1,466 @@
+/* Module Planning — shell clair premium SaaS (isolé du sidebar) */
+
+.page-scroll {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.page-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.planning-page-root {
+    -fx-spacing: 0;
+    -fx-padding: 30px 30px 40px 30px;
+    -fx-background-color: #f5f7fb;
+    -fx-alignment: TOP_CENTER;
+    -fx-max-width: Infinity;
+}
+
+/* Panneau blanc principal — pleine largeur */
+.planning-main-shell {
+    -fx-max-width: Infinity;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 20, 0.3, 0, 5);
+    -fx-padding: 24px 28px 32px 28px;
+}
+
+.planning-page-stack {
+    -fx-background-color: #f5f7fb;
+    -fx-min-height: 0;
+}
+
+.planning-page-stack > .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.planning-top-header {
+    -fx-padding: 0 0 16 0;
+    -fx-spacing: 20;
+    -fx-alignment: CENTER_LEFT;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.planning-top-header:hover {
+    -fx-border-color: transparent;
+}
+
+.planning-hero-title-row {
+    -fx-spacing: 12;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.planning-hero-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.planning-hero-sub {
+    -fx-font-size: 13.5px;
+    -fx-text-fill: #64748b;
+    -fx-line-spacing: 2px;
+    -fx-max-width: 920px;
+}
+
+.planning-hero-meta {
+    -fx-font-size: 11px;
+    -fx-text-fill: #94a3b8;
+    -fx-padding: 4 0 0 0;
+}
+
+.planning-role-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-width: 0;
+    -fx-letter-spacing: 0.04em;
+}
+
+.planning-role-badge--admin {
+    -fx-background-color: linear-gradient(to bottom right, #f87171, #dc2626);
+}
+
+.planning-role-badge--client {
+    -fx-background-color: linear-gradient(to bottom right, #34d399, #059669);
+}
+
+.planning-role-badge--encadrant {
+    -fx-background-color: linear-gradient(to bottom right, #60a5fa, #3a7afe);
+}
+
+.planning-user-avatar-wrap {
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
+}
+
+.planning-user-avatar-ring {
+    -fx-fill: linear-gradient(from 0% 0% to 100% 100%, #3a7afe 0%, #00c9a7 100%);
+    -fx-stroke: rgba(255, 255, 255, 0.95);
+    -fx-stroke-width: 2px;
+}
+
+.planning-user-avatar-fill {
+    -fx-fill: #ffffff;
+}
+
+.planning-user-avatar-text {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a7afe;
+}
+
+.planning-dynamic {
+    -fx-spacing: 20;
+}
+
+/* Cartes dynamiques (PlanningUi.card, erreurs, formulaire) */
+.planning-card {
+    -fx-spacing: 14;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 20, 0.3, 0, 4);
+    -fx-padding: 20px 22px 22px 22px;
+}
+
+.planning-card:hover {
+    -fx-border-color: rgba(58, 122, 254, 0.15);
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.1), 22, 0.35, 0, 5);
+}
+
+.planning-card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.planning-card-icon {
+    -fx-icon-color: #3a7afe;
+}
+
+.planning-card-body {
+    -fx-spacing: 10;
+}
+
+.planning-badge {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a7afe;
+    -fx-padding: 4px 10px;
+    -fx-background-radius: 999px;
+    -fx-background-color: rgba(58, 122, 254, 0.1);
+    -fx-border-color: rgba(58, 122, 254, 0.2);
+    -fx-border-radius: 999px;
+    -fx-border-width: 1px;
+}
+
+.planning-badge--live {
+    -fx-background-color: rgba(0, 201, 167, 0.12);
+    -fx-border-color: rgba(0, 201, 167, 0.28);
+    -fx-text-fill: #0f766e;
+}
+
+.planning-badge--data {
+    -fx-background-color: rgba(99, 102, 241, 0.1);
+    -fx-border-color: rgba(99, 102, 241, 0.22);
+    -fx-text-fill: #4f46e5;
+}
+
+.planning-hint {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+.planning-text-area {
+    -fx-control-inner-background: #f8fafc;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(30, 41, 59, 0.1);
+    -fx-border-width: 1px;
+    -fx-text-fill: #1e293b;
+    -fx-font-size: 13px;
+    -fx-padding: 12px;
+}
+
+.planning-text-area .content {
+    -fx-background-color: transparent;
+}
+
+.planning-check {
+    -fx-text-fill: #334155;
+    -fx-font-size: 13px;
+}
+
+.planning-check .box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(58, 122, 254, 0.35);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.planning-primary-btn {
+    -fx-background-color: linear-gradient(to bottom, #5c91ff 0%, #3a7afe 100%);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(58, 122, 254, 0.35);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 18px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.22), 14, 0.35, 0, 3);
+}
+
+.planning-primary-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #6b9aff 0%, #2f6ef0 100%);
+}
+
+.planning-table {
+    -fx-background-color: transparent;
+    -fx-background-radius: 14px;
+}
+
+.planning-table .column-header-background {
+    -fx-background-color: rgba(58, 122, 254, 0.08);
+    -fx-background-radius: 12px 12px 0 0;
+}
+
+.planning-table .table-cell {
+    -fx-text-fill: #1e293b;
+    -fx-padding: 10px 12px;
+}
+
+.planning-table .table-row-cell {
+    -fx-background-color: #ffffff;
+}
+
+.planning-table .table-row-cell:selected {
+    -fx-background-color: rgba(58, 122, 254, 0.1);
+}
+
+.planning-table .table-row-cell:hover {
+    -fx-background-color: rgba(241, 245, 249, 0.95);
+}
+
+/* Planning client (intro + titres sections code-only) */
+.planning-client-intro {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+.planning-client-section-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.planning-client-action {
+    -fx-max-width: 320px;
+}
+
+.planning-kv-key {
+    -fx-font-size: 10px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: bold;
+}
+
+.planning-kv-val {
+    -fx-font-size: 13px;
+    -fx-text-fill: #1e293b;
+}
+
+.planning-kcal-value {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a7afe;
+}
+
+.planning-kcal-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.planning-macro-bar {
+    -fx-accent: #00c9a7;
+}
+
+.planning-progress-week {
+    -fx-accent: #00c9a7;
+}
+
+.planning-inner-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.planning-inner-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.planning-day-card {
+    -fx-padding: 12px 14px;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(30, 41, 59, 0.08);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 14, 0.25, 0, 3);
+}
+
+.planning-day-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a7afe;
+}
+
+.planning-ex-line {
+    -fx-font-size: 12px;
+    -fx-text-fill: #334155;
+}
+
+.planning-meal-card {
+    -fx-padding: 12px 14px;
+    -fx-spacing: 6px;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(255, 138, 101, 0.2);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+}
+
+.planning-meal-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ea580c;
+}
+
+.planning-meal-nom {
+    -fx-font-size: 12px;
+    -fx-text-fill: #1e293b;
+}
+
+.planning-meal-ing {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+}
+
+.planning-form-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+    -fx-min-width: 140px;
+}
+
+/* Formulaire fiche santé */
+.planning-fiche-form-root {
+    -fx-max-width: 640px;
+}
+
+.planning-fiche-form-headline {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.planning-fiche-form-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.planning-fiche-form-grid {
+    -fx-padding: 8px 0 0 0;
+}
+
+.planning-fiche-form-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+}
+
+.planning-fiche-combo,
+.planning-fiche-spinner {
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: rgba(30, 41, 59, 0.12);
+    -fx-border-width: 1px;
+    -fx-background-color: #ffffff;
+}
+
+.planning-fiche-combo .list-cell {
+    -fx-text-fill: #1e293b;
+}
+
+.planning-fiche-spinner .text-field {
+    -fx-text-fill: #1e293b;
+}
+
+.planning-fiche-submit {
+    -fx-padding: 12px 20px;
+}
+
+.planning-fiche-cancel {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(30, 41, 59, 0.12);
+    -fx-border-radius: 10px;
+    -fx-padding: 10px 18px;
+    -fx-cursor: hand;
+}
+
+.planning-form-error-box {
+    -fx-padding: 14px 16px;
+    -fx-background-color: rgba(254, 226, 226, 0.65);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(248, 113, 113, 0.45);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+.planning-form-error-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #b91c1c;
+}
+
+.planning-form-error-line {
+    -fx-font-size: 12px;
+    -fx-text-fill: #991b1b;
+}
+
+/* FAB discussion */
+.planning-discussion-fab {
+    -fx-background-radius: 999px;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+    -fx-padding: 0;
+    -fx-background-color: linear-gradient(to bottom right, #5c91ff, #3a7afe);
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.35), 18, 0.4, 0, 5);
+    -fx-cursor: hand;
+}
+
+.planning-discussion-fab:hover {
+    -fx-background-color: linear-gradient(to bottom right, #3a7afe, #2563eb);
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.45), 22, 0.45, 0, 6);
+}
+
+.planning-discussion-fab .planning-fab-icon {
+    -fx-icon-color: #ffffff;
+}

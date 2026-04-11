@@ -1,13 +1,10 @@
 package org.example.services;
 
-import org.example.entities.Evenement;
-
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Aggregates KPIs and chart series for dashboard views. DB-backed where possible, with safe fallbacks.
+ * Données de démonstration pour le tableau de bord admin.
  */
 public class DashboardDataService {
 
@@ -29,23 +26,7 @@ public class DashboardDataService {
     }
 
     public KpiSnapshot loadKpis() {
-        int events = countEventsFromDb();
-        int stock = 1284;
-        int users = 42;
-        double revenue = 48_250.0;
-        if (events == 0) {
-            events = 24;
-        }
-        return new KpiSnapshot(stock, events, users, revenue);
-    }
-
-    private int countEventsFromDb() {
-        try {
-            List<Evenement> list = new EvenementServices().afficher();
-            return list != null ? list.size() : 0;
-        } catch (SQLException e) {
-            return 0;
-        }
+        return new KpiSnapshot(1284, 24, 42, 48_250.0);
     }
 
     public List<ActivityPoint> activitySeriesLastWeeks() {

@@ -227,3 +227,27 @@
     -fx-background-radius: 4px;
     -fx-padding: 4px;
 }
+
+/* Planning — bulle discussion (comme main git, pas d’entrée sidebar) */
+.planning-page-stack {
+    -fx-min-height: 0;
+}
+
+.planning-discussion-fab {
+    -fx-background-radius: 999;
+    -fx-min-width: 56;
+    -fx-min-height: 56;
+    -fx-max-width: 56;
+    -fx-max-height: 56;
+    -fx-padding: 0;
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #2563eb);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.28), 12, 0.25, 0, 4);
+}
+
+.planning-discussion-fab:hover {
+    -fx-background-color: linear-gradient(to bottom right, #2563eb, #1d4ed8);
+}
+
+.planning-discussion-fab .planning-fab-icon {
+    -fx-icon-color: #ffffff;
+}

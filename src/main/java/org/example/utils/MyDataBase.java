@@ -4,18 +4,22 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class MyDataBase {
-    final String USERNAME = "root";
-    final String URL = "jdbc:mysql://localhost:3306/oxyn";
-    final String PASSWORD ="";
+/**
+ * Connexion JDBC MySQL (base {@code oxyn}).
+ */
+public final class MyDataBase {
 
-    Connection connection;
-    static MyDataBase instance;
+    private static MyDataBase instance;
 
-    // constructeur
+    private final String username = "root";
+    private final String url = "jdbc:mysql://localhost:3306/oxyn";
+    private final String password = "";
+
+    private Connection connection;
+
     private MyDataBase() {
         try {
-            connection = DriverManager.getConnection(URL,USERNAME,PASSWORD);
+            connection = DriverManager.getConnection(url, username, password);
             System.out.println("Connection established");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -23,7 +27,7 @@ public class MyDataBase {
     }
 
     public static MyDataBase getInstance() {
-        if (instance == null){
+        if (instance == null) {
             instance = new MyDataBase();
         }
         return instance;

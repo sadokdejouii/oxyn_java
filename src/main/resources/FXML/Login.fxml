@@ -3,11 +3,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -26,28 +24,23 @@
         <StackPane styleClass="login-logo-wrap">
             <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true" styleClass="login-logo-image">
                 <image>
-                    <Image url="@../images/oxynLogo.png" />
+                    <Image url="@../../images/oxynLogo.png" />
                 </image>
             </ImageView>
         </StackPane>
         <Label styleClass="login-eyebrow" text="OXYN" />
-        <Label styleClass="login-title" text="Sign in" />
-        <Label styleClass="login-sub" text="Use admin / admin for Back Office, or any other username for Front Office (client)." wrapText="true" />
+        <Label styleClass="login-title" text="Connexion démo" />
+        <Label fx:id="demoHintLabel" styleClass="login-sub" text="" wrapText="true" />
 
         <Region prefHeight="8" />
 
         <VBox spacing="8">
-            <Label styleClass="field-label" text="Username" />
-            <TextField fx:id="usernameField" promptText="e.g. admin" styleClass="login-field" />
+            <Label styleClass="field-label" text="E-mail" />
+            <TextField fx:id="emailField" promptText="exemple@domaine.com (compte users)" styleClass="login-field" onAction="#handleLogin" />
         </VBox>
 
-        <VBox spacing="8">
-            <Label styleClass="field-label" text="Password" />
-            <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="login-field" onAction="#handleLogin" />
-        </VBox>
+        <Button defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="login-primary" text="Continuer" />
 
-        <Button defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="login-primary" text="Continue" />
-
-        <Label styleClass="login-hint" text="Role: username “admin” → Admin · any other name → Client" wrapText="true" />
+        <Label styleClass="login-hint" text="Démo : l’e-mail doit exister dans MySQL (table users) — sans mot de passe." wrapText="true" />
     </VBox>
 </VBox>

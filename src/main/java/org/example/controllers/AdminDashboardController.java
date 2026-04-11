@@ -3,7 +3,6 @@ package org.example.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
@@ -79,8 +78,5 @@ public class AdminDashboardController implements Initializable {
             rowBox.getChildren().addAll(top, sub);
             activityList.getChildren().add(rowBox);
         }
-
-        NumberAxis yAxis = (NumberAxis) activityLineChart.getYAxis();
-        yAxis.setForceZeroInRange(true);
     }
 }

@@ -16,13 +16,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.stage.Stage;
 import org.example.services.SessionContext;
 import org.example.utils.PageLoader;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
 import java.util.ArrayDeque;
@@ -36,15 +36,9 @@ import java.util.Set;
 public class MainLayoutController implements Initializable {
 
     private static final String PAGE_ADMIN_DASH = "/FXML/pages/AdminDashboard.fxml";
-    private static final String PAGE_STOCK = "/FXML/pages/StockManagement.fxml";
-    private static final String PAGE_EVENTS_ADMIN = "/FXML/pages/EventManagement.fxml";
-    private static final String PAGE_USERS = "/FXML/pages/UserManagement.fxml";
-    private static final String PAGE_REPORTS = "/FXML/pages/ReportsStatistics.fxml";
-
-    private static final String PAGE_CLIENT_HOME = "/FXML/pages/ClientHome.fxml";
-    private static final String PAGE_CLIENT_EVENTS = "/FXML/pages/ClientEvents.fxml";
+    private static final String PAGE_PLACEHOLDER = "/FXML/pages/PlaceholderPage.fxml";
     private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
-    private static final String PAGE_PROFILE = "/FXML/pages/ProfilePage.fxml";
+    private static final String PAGE_DISCUSSION = "/FXML/pages/DiscussionPage.fxml";
 
     @FXML
     private BorderPane shellRoot;
@@ -138,15 +132,12 @@ public class MainLayoutController implements Initializable {
 
     private final List<Button> mainNavButtons = new ArrayList<>();
 
-    private Button activeNavButton;
-
     private boolean sidebarCompact;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Runnable installIcons = () -> installIkonliFontIcons(shellRoot);
         installIcons.run();
-        // After skins attach button graphics / scroll content, placeholders may only appear on this pass.
         Platform.runLater(installIcons);
 
         SessionContext ctx = SessionContext.getInstance();
@@ -171,10 +162,14 @@ public class MainLayoutController implements Initializable {
 
         applyRoleShell(ctx);
         wireSearch();
+        registerDiscussionFromPlanningHook(ctx);
+
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
+        } else if (ctx.isEncadrant()) {
+            navigate(PAGE_PLANNING, "Planning", planningBtn);
         } else {
-            navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
+            navigate(PAGE_PLANNING, "Planning", planningBtn);
         }
     }
 
@@ -184,9 +179,32 @@ public class MainLayoutController implements Initializable {
         adminNavGroup.setManaged(admin);
         clientNavGroup.setVisible(!admin);
         clientNavGroup.setManaged(!admin);
-        shellModeLabel.setText(admin ? "ADMINISTRATOR" : "CLIENT");
+        shellModeLabel.setText(admin ? "ADMINISTRATOR" : ctx.isEncadrant() ? "ENCADRANT" : "CLIENT");
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        footerText.setText(admin ? "Back office session" : "Front office session");
+        if (admin) {
+            footerText.setText("Back office session");
+        } else if (ctx.isEncadrant()) {
+            footerText.setText("Encadrant — planning");
+        } else {
+            footerText.setText("Front office session");
+        }
+    }
+
+    private void registerDiscussionFromPlanningHook(SessionContext ctx) {
+        ctx.setOpenDiscussionFromPlanningAction(() -> {
+            try {
+                Button nav = ctx.isAdmin() ? adminPlanningBtn : planningBtn;
+                PageLoader.show(contentArea, PAGE_DISCUSSION);
+                topbarPageTitle.setText("Discussion");
+                setActiveNav(nav);
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (footerText != null) {
+                    footerText.setText("Page load failed");
+                }
+                info("Navigation error", e.getMessage() != null ? e.getMessage() : e.toString());
+            }
+        });
     }
 
     private void wireSearch() {
@@ -213,13 +231,27 @@ public class MainLayoutController implements Initializable {
         }
     }
 
+    private void navigatePlaceholder(String moduleTitle, Button navButton) {
+        try {
+            PlaceholderContext.setModuleLabel(moduleTitle);
+            PageLoader.show(contentArea, PAGE_PLACEHOLDER);
+            topbarPageTitle.setText(moduleTitle);
+            setActiveNav(navButton);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (footerText != null) {
+                footerText.setText("Page load failed");
+            }
+            info("Navigation error", e.getMessage() != null ? e.getMessage() : e.toString());
+        }
+    }
+
     private void setActiveNav(Button button) {
         for (Button b : mainNavButtons) {
             if (b != null) {
                 b.getStyleClass().remove("active");
             }
         }
-        activeNavButton = button;
         if (button != null && !button.getStyleClass().contains("active")) {
             button.getStyleClass().add("active");
         }
@@ -245,16 +277,15 @@ public class MainLayoutController implements Initializable {
         }
     }
 
-    /**
-     * Logo / brand row: return to the default dashboard for the current role.
-     */
     @FXML
     private void handleBrandHome() {
         SessionContext ctx = SessionContext.getInstance();
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
+        } else if (ctx.isEncadrant()) {
+            navigate(PAGE_PLANNING, "Planning", planningBtn);
         } else {
-            navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
+            navigate(PAGE_PLANNING, "Planning", planningBtn);
         }
     }
 
@@ -308,12 +339,12 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminEvenements() {
-        navigate(PAGE_EVENTS_ADMIN, "Evenements", adminEvenementsBtn);
+        navigatePlaceholder("Événements", adminEvenementsBtn);
     }
 
     @FXML
     private void handleAdminSalle() {
-        navigate(PAGE_STOCK, "Salle", adminSalleBtn);
+        navigatePlaceholder("Salle de sport", adminSalleBtn);
     }
 
     @FXML
@@ -323,27 +354,27 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminBoutique() {
-        navigate(PAGE_USERS, "Boutique", adminBoutiqueBtn);
+        navigatePlaceholder("Boutique", adminBoutiqueBtn);
     }
 
     @FXML
     private void handleAdminForum() {
-        navigate(PAGE_REPORTS, "Forum", adminForumBtn);
+        navigatePlaceholder("Forum", adminForumBtn);
     }
 
     @FXML
     private void handleHome() {
-        navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
+        navigate(PAGE_PLANNING, "Planning", homeBtn);
     }
 
     @FXML
     private void handleEvenements() {
-        navigate(PAGE_CLIENT_EVENTS, "Evenements", evenementsBtn);
+        navigatePlaceholder("Événements", evenementsBtn);
     }
 
     @FXML
     private void handleSalle() {
-        navigate(PAGE_PLANNING, "Salle", salleBtn);
+        navigatePlaceholder("Salle de sport", salleBtn);
     }
 
     @FXML
@@ -353,17 +384,17 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleBoutique() {
-        navigate(PAGE_PLANNING, "Boutique", boutiqueBtn);
+        navigatePlaceholder("Boutique", boutiqueBtn);
     }
 
     @FXML
     private void handleForum() {
-        navigate(PAGE_PLANNING, "Forum", forumBtn);
+        navigatePlaceholder("Forum", forumBtn);
     }
 
     @FXML
     private void handleProfile() {
-        navigate(PAGE_PROFILE, "Profile", profileBtn);
+        navigatePlaceholder("Profil", profileBtn);
     }
 
     @FXML
@@ -401,13 +432,7 @@ public class MainLayoutController implements Initializable {
         a.showAndWait();
     }
 
-    /**
-     * FXML uses {@code Region} placeholders so Scene Builder can open the file without Ikonli on its classpath.
-     * This replaces them with real {@link FontIcon} nodes at runtime.
-     * <p>
-     * Traversal must follow {@link Labeled#getGraphic()} and {@link ScrollPane#getContent()}, not only
-     * {@link Parent#getChildrenUnmodifiable()}, or icons inside buttons / scroll areas are never reached.
-     */
+    /** Remplace les {@code Region} Ikonli dans l’arbre (FXML / Scene Builder). */
     private static void installIkonliFontIcons(Parent root) {
         if (root == null) {
             return;

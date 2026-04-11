@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.PlaceholderPageController">
+    <VBox spacing="14" styleClass="page-root">
+        <Label fx:id="placeholderTitle" styleClass="page-hero-title" text="—" wrapText="true" />
+        <Label fx:id="placeholderMessage" styleClass="page-hero-sub" maxWidth="560" text="—" wrapText="true" />
+    </VBox>
+</ScrollPane>

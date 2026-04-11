@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- Ikonli FontIcon is swapped in at runtime (see MainLayoutController): Scene Builder has no Ikonli on its classpath. Placeholders use Region + classes ikonli-slot, fas-*, sz-*. -->
+<!-- Ikonli FontIcon is swapped in at runtime (see org.example.controllers.MainLayoutController). Placeholders: Region + ikonli-slot, fas-*, sz-*. -->
 <BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
 
     <left>
@@ -32,7 +32,7 @@
                             <StackPane styleClass="brand-logo-glow-wrap">
                                 <ImageView fitHeight="52.0" fitWidth="52.0" pickOnBounds="true" preserveRatio="true" styleClass="brand-logo-image">
                                     <image>
-                                        <Image url="@../images/oxynLogo.png" />
+                                        <Image url="@../../images/oxynLogo.png" />
                                     </image>
                                 </ImageView>
                             </StackPane>

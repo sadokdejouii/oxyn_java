@@ -1,41 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.PlanningPageController">
-    <VBox spacing="18" styleClass="page-root">
-        <VBox spacing="6">
-            <Label styleClass="page-hero-title" text="Planning" />
-            <Label styleClass="page-hero-sub" text="Your week at a glance. Replace this scaffold with a full calendar or Gantt component when ready." wrapText="true" />
+<StackPane styleClass="planning-page-stack" stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-module.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.PlanningPageController">
+    <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
+        <VBox fx:id="planningRoot" spacing="0" styleClass="planning-page-root">
+            <VBox styleClass="planning-main-shell" spacing="20" maxWidth="Infinity">
+                <HBox styleClass="planning-top-header" alignment="CENTER_LEFT" spacing="20">
+                    <VBox spacing="8" HBox.hgrow="ALWAYS">
+                        <HBox styleClass="planning-hero-title-row" alignment="CENTER_LEFT" spacing="12">
+                            <Label styleClass="planning-hero-title" text="Planning" />
+                            <Label fx:id="roleBadge" styleClass="planning-role-badge" text="" />
+                        </HBox>
+                        <Label fx:id="heroSub" styleClass="planning-hero-sub" text="Chargement…" wrapText="true" />
+                        <Label styleClass="planning-hero-meta" text="Fiche santé · Programme · Tâches · IA · Discussion" wrapText="true" />
+                    </VBox>
+                    <StackPane styleClass="planning-user-avatar-wrap">
+                        <Circle radius="23" styleClass="planning-user-avatar-ring" />
+                        <Circle radius="20" styleClass="planning-user-avatar-fill" />
+                        <Label fx:id="avatarInitials" styleClass="planning-user-avatar-text" text="?" />
+                    </StackPane>
+                </HBox>
+                <VBox fx:id="dynamicContainer" spacing="18" styleClass="planning-dynamic" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
+            </VBox>
         </VBox>
-
-        <VBox spacing="10" styleClass="saas-chart-card">
-            <Label styleClass="saas-card-title" text="This week" />
-            <VBox fx:id="agendaList" spacing="0" />
-        </VBox>
-
-        <HBox spacing="12" styleClass="saas-stat-row">
-            <VBox spacing="6" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="saas-stat-label" text="FOCUS HOURS" />
-                <Label styleClass="saas-stat-value" text="18" />
-                <Label styleClass="saas-stat-hint" text="Planned deep work" />
-            </VBox>
-            <VBox spacing="6" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="saas-stat-label" text="FIELD VISITS" />
-                <Label styleClass="saas-stat-value" text="3" />
-                <Label styleClass="saas-stat-hint" text="On-site checkpoints" />
-            </VBox>
-            <VBox spacing="6" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="saas-stat-label" text="DEADLINES" />
-                <Label styleClass="saas-stat-value" text="2" />
-                <Label styleClass="saas-stat-hint" text="Due in 7 days" />
-            </VBox>
-        </HBox>
-
-        <Region prefHeight="8" />
-    </VBox>
-</ScrollPane>
+    </ScrollPane>
+    <Button focusTraversable="false" onAction="#handleOpenDiscussion" styleClass="planning-discussion-fab" StackPane.alignment="BOTTOM_RIGHT" text="">
+        <StackPane.margin>
+            <Insets bottom="28" right="28" />
+        </StackPane.margin>
+        <graphic>
+            <FontIcon iconLiteral="fas-comments" iconSize="22" styleClass="planning-fab-icon" />
+        </graphic>
+    </Button>
+</StackPane>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.EncadrantPlanningHubController"
+           styleClass="eph-root" maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-widgets.css,@../../css/encadrant-planning-hub.css">
+    <VBox fx:id="listLayer" spacing="20" maxWidth="Infinity" maxHeight="Infinity">
+        <padding>
+            <Insets top="4" right="4" bottom="24" left="4" />
+        </padding>
+        <HBox alignment="CENTER_LEFT" spacing="16" styleClass="eph-toolbar">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label styleClass="eph-title" text="Clients suivis" />
+                <Label styleClass="eph-sub" text="Comptes actifs avec fiche santé — sélectionnez une carte pour le détail."
+                       wrapText="true" />
+            </VBox>
+            <Button fx:id="btnRefresh" mnemonicParsing="false" text="Actualiser" styleClass="eph-btn-secondary">
+                <graphic>
+                    <FontIcon iconLiteral="fas-sync-alt" iconSize="14" styleClass="eph-btn-icon" />
+                </graphic>
+            </Button>
+        </HBox>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="eph-scroll" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+            <FlowPane fx:id="clientsGrid" hgap="20" vgap="20" prefWrapLength="1180" maxWidth="Infinity" />
+        </ScrollPane>
+    </VBox>
+
+    <VBox fx:id="detailLayer" managed="false" visible="false" spacing="16" maxWidth="Infinity" maxHeight="Infinity"
+          styleClass="eph-detail-layer">
+        <padding>
+            <Insets top="8" right="8" bottom="16" left="8" />
+        </padding>
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="eph-detail-toolbar">
+            <Button fx:id="btnBack" mnemonicParsing="false" text="Retour à la liste" styleClass="eph-btn-back">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="14" styleClass="eph-btn-icon" />
+                </graphic>
+            </Button>
+            <Label fx:id="lblDetailTitle" styleClass="eph-detail-title" text="" />
+        </HBox>
+        <StackPane fx:id="detailMount" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS" styleClass="eph-detail-mount" />
+    </VBox>
+</StackPane>
