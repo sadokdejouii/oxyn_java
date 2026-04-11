@@ -37,14 +37,16 @@
 
         <Region prefHeight="8" />
 
-        <VBox spacing="8">
+        <VBox spacing="6">
             <Label styleClass="field-label" text="E-mail" />
             <TextField fx:id="emailField" promptText="vous@exemple.com" styleClass="login-field" onAction="#handleLogin" />
+            <Label fx:id="emailErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
         </VBox>
 
-        <VBox spacing="8">
+        <VBox spacing="6">
             <Label styleClass="field-label" text="Mot de passe" />
             <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="login-field" onAction="#handleLogin" />
+            <Label fx:id="passwordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
         </VBox>
 
         <Button defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="login-primary" text="Se connecter" />

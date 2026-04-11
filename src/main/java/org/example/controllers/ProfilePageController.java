@@ -4,8 +4,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.TextInputControl;
 import javafx.stage.Stage;
 import org.example.entities.Admin;
 import org.example.entities.Client;
@@ -16,6 +17,7 @@ import org.example.services.SessionContext;
 import org.example.services.UserRole;
 import org.example.services.UserService;
 import org.example.utils.FormFieldFeedback;
+import org.example.utils.PasswordUtils;
 import org.example.utils.UserDialogHelper;
 
 import java.net.URL;
@@ -23,7 +25,7 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 /**
- * Lecture du profil connecté ; mise à jour partielle (nom, prénom, téléphone) pour client et encadrant.
+ * Profil connecté : e-mail, nom, prénom, téléphone et changement de mot de passe (admin, client, encadrant).
  */
 public class ProfilePageController implements Initializable {
 
@@ -33,13 +35,16 @@ public class ProfilePageController implements Initializable {
     private Label subtitleLabel;
 
     @FXML
-    private Label emailValue;
-
-    @FXML
     private Label statusValue;
 
     @FXML
     private Label roleValue;
+
+    @FXML
+    private TextField emailField;
+
+    @FXML
+    private Label emailErrorLabel;
 
     @FXML
     private TextField nomField;
@@ -60,13 +65,28 @@ public class ProfilePageController implements Initializable {
     private Label telephoneErrorLabel;
 
     @FXML
+    private PasswordField currentPasswordField;
+
+    @FXML
+    private Label currentPasswordErrorLabel;
+
+    @FXML
+    private PasswordField newPasswordField;
+
+    @FXML
+    private Label newPasswordErrorLabel;
+
+    @FXML
+    private PasswordField confirmPasswordField;
+
+    @FXML
+    private Label confirmPasswordErrorLabel;
+
+    @FXML
     private Button saveButton;
 
     @FXML
     private Label avatarLabel;
-
-    @FXML
-    private VBox readOnlyBanner;
 
     @FXML
     private Label formHintLabel;
@@ -76,60 +96,21 @@ public class ProfilePageController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         SessionContext ctx = SessionContext.getInstance();
+        subtitleLabel.setText("Modifiez vos informations et votre mot de passe. Les changements s’appliquent immédiatement à votre session.");
 
-        nomField.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(nomField, nomErrorLabel, LOGIN_THEME));
-        prenomField.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(prenomField, prenomErrorLabel, LOGIN_THEME));
-        telephoneField.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(telephoneField, telephoneErrorLabel, LOGIN_THEME));
-
-        boolean admin = ctx.isAdmin();
-        if (readOnlyBanner != null) {
-            readOnlyBanner.setVisible(admin);
-            readOnlyBanner.setManaged(admin);
-        }
-        if (formHintLabel != null) {
-            formHintLabel.setVisible(!admin);
-            formHintLabel.setManaged(!admin);
-        }
-        if (admin) {
-            subtitleLabel.setText("Consultation de votre fiche (modification réservée à l’annuaire administrateur).");
-            nomField.setEditable(false);
-            nomField.setDisable(true);
-            prenomField.setEditable(false);
-            prenomField.setDisable(true);
-            telephoneField.setEditable(false);
-            telephoneField.setDisable(true);
-            saveButton.setVisible(false);
-            saveButton.setManaged(false);
-            setProfileFieldsDisabledStyle(true);
-        } else {
-            subtitleLabel.setText("Consultez vos informations et modifiez votre nom, prénom ou téléphone.");
-            nomField.setEditable(true);
-            nomField.setDisable(false);
-            prenomField.setEditable(true);
-            prenomField.setDisable(false);
-            telephoneField.setEditable(true);
-            telephoneField.setDisable(false);
-            saveButton.setVisible(true);
-            saveButton.setManaged(true);
-            setProfileFieldsDisabledStyle(false);
-        }
+        wireClear(emailField, emailErrorLabel);
+        wireClear(nomField, nomErrorLabel);
+        wireClear(prenomField, prenomErrorLabel);
+        wireClear(telephoneField, telephoneErrorLabel);
+        wireClear(currentPasswordField, currentPasswordErrorLabel);
+        wireClear(newPasswordField, newPasswordErrorLabel);
+        wireClear(confirmPasswordField, confirmPasswordErrorLabel);
 
         reloadFromDatabase();
     }
 
-    private void setProfileFieldsDisabledStyle(boolean disabled) {
-        for (TextField f : new TextField[]{nomField, prenomField, telephoneField}) {
-            if (f == null) {
-                continue;
-            }
-            if (disabled) {
-                if (!f.getStyleClass().contains("pp-field-disabled")) {
-                    f.getStyleClass().add("pp-field-disabled");
-                }
-            } else {
-                f.getStyleClass().remove("pp-field-disabled");
-            }
-        }
+    private void wireClear(TextInputControl input, Label err) {
+        input.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(input, err, LOGIN_THEME));
     }
 
     private void reloadFromDatabase() {
@@ -154,14 +135,29 @@ public class ProfilePageController implements Initializable {
     }
 
     private void fillReadOnlyAndFields(User u) {
-        emailValue.setText(u.getEmail() != null ? u.getEmail() : "—");
+        if (emailField != null) {
+            emailField.setText(u.getEmail() != null ? u.getEmail() : "");
+        }
         applyStatusBadge(u);
         applyRolePresentation(u);
         refreshAvatar(u);
         nomField.setText(u.getNom() != null ? u.getNom() : "");
         prenomField.setText(u.getPrenom() != null ? u.getPrenom() : "");
         telephoneField.setText(u.getTelephone() != null ? u.getTelephone() : "");
+        clearPasswordFields();
         clearFieldErrors();
+    }
+
+    private void clearPasswordFields() {
+        if (currentPasswordField != null) {
+            currentPasswordField.clear();
+        }
+        if (newPasswordField != null) {
+            newPasswordField.clear();
+        }
+        if (confirmPasswordField != null) {
+            confirmPasswordField.clear();
+        }
     }
 
     private void refreshAvatar(User u) {
@@ -228,17 +224,18 @@ public class ProfilePageController implements Initializable {
     }
 
     private void clearFieldErrors() {
+        FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME);
         FormFieldFeedback.clearInputError(nomField, nomErrorLabel, LOGIN_THEME);
         FormFieldFeedback.clearInputError(prenomField, prenomErrorLabel, LOGIN_THEME);
         FormFieldFeedback.clearInputError(telephoneField, telephoneErrorLabel, LOGIN_THEME);
+        FormFieldFeedback.clearInputError(currentPasswordField, currentPasswordErrorLabel, LOGIN_THEME);
+        FormFieldFeedback.clearInputError(newPasswordField, newPasswordErrorLabel, LOGIN_THEME);
+        FormFieldFeedback.clearInputError(confirmPasswordField, confirmPasswordErrorLabel, LOGIN_THEME);
     }
 
     @FXML
     private void handleSave() {
         SessionContext ctx = SessionContext.getInstance();
-        if (ctx.isAdmin()) {
-            return;
-        }
         User cur = ctx.getCurrentUser();
         if (cur == null) {
             return;
@@ -246,6 +243,13 @@ public class ProfilePageController implements Initializable {
 
         clearFieldErrors();
         boolean ok = true;
+
+        String email = text(emailField);
+        String emailErr = AuthValidation.validateEmailContent(email);
+        if (emailErr != null) {
+            FormFieldFeedback.setInputError(emailField, emailErrorLabel, emailErr, LOGIN_THEME);
+            ok = false;
+        }
 
         String nomErr = AuthValidation.validatePersonName(raw(nomField), false);
         if (nomErr != null) {
@@ -266,16 +270,69 @@ public class ProfilePageController implements Initializable {
             ok = false;
         }
 
-        if (!ok) {
-            return;
-        }
-
         String n = text(nomField);
         String p = text(prenomField);
         String telNorm = tel.isEmpty() ? null : tel;
 
+        String currentPwd = passwordText(currentPasswordField);
+        String newPwd = passwordText(newPasswordField);
+        String confirmPwd = passwordText(confirmPasswordField);
+
+        User dbUser;
         try {
-            userService.updateProfilePartial(cur.getId(), n, p, telNorm);
+            dbUser = userService.getUserById(cur.getId());
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Profil",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+            return;
+        }
+        if (dbUser == null) {
+            UserDialogHelper.showMessage(owner(), "Profil", "Utilisateur introuvable en base.", true);
+            return;
+        }
+
+        if (emailErr == null) {
+            try {
+                User taken = userService.findByEmail(email);
+                if (taken != null && taken.getId() != cur.getId()) {
+                    FormFieldFeedback.setInputError(emailField, emailErrorLabel,
+                            "Cette adresse e-mail est déjà utilisée par un autre compte.", LOGIN_THEME);
+                    ok = false;
+                }
+            } catch (SQLException e) {
+                UserDialogHelper.showMessage(owner(), "Profil",
+                        e.getMessage() != null ? e.getMessage() : e.toString(), true);
+                return;
+            }
+        }
+
+        String pwdBlockErr = validatePasswordBlock(dbUser, currentPwd, newPwd, confirmPwd, n, p);
+        if (pwdBlockErr != null) {
+            ok = false;
+            if (pwdBlockErr.startsWith("CURRENT:")) {
+                FormFieldFeedback.setInputError(currentPasswordField, currentPasswordErrorLabel,
+                        pwdBlockErr.substring("CURRENT:".length()), LOGIN_THEME);
+            } else if (pwdBlockErr.startsWith("NEW:")) {
+                FormFieldFeedback.setInputError(newPasswordField, newPasswordErrorLabel,
+                        pwdBlockErr.substring("NEW:".length()), LOGIN_THEME);
+            } else if (pwdBlockErr.startsWith("CONFIRM:")) {
+                FormFieldFeedback.setInputError(confirmPasswordField, confirmPasswordErrorLabel,
+                        pwdBlockErr.substring("CONFIRM:".length()), LOGIN_THEME);
+            }
+        }
+
+        if (!ok) {
+            return;
+        }
+
+        String passwordHash = dbUser.getPassword();
+        if (!newPwd.isEmpty()) {
+            passwordHash = PasswordUtils.hash(newPwd);
+        }
+
+        User toSave = rebuildUser(dbUser, email, passwordHash, n, p, telNorm, dbUser.isActive());
+        try {
+            userService.updateUser(toSave);
             User refreshed = userService.getUserById(cur.getId());
             if (refreshed != null) {
                 ctx.applyRefreshedUser(refreshed);
@@ -286,6 +343,49 @@ public class ProfilePageController implements Initializable {
             UserDialogHelper.showMessage(owner(), "Profil",
                     e.getMessage() != null ? e.getMessage() : e.toString(), true);
         }
+    }
+
+    /**
+     * @return null si OK ; sinon préfixe CURRENT:, NEW: ou CONFIRM: + message
+     */
+    private static String validatePasswordBlock(User dbUser, String currentPwd, String newPwd, String confirmPwd,
+                                                String nom, String prenom) {
+        boolean any = !currentPwd.isEmpty() || !newPwd.isEmpty() || !confirmPwd.isEmpty();
+        if (!any) {
+            return null;
+        }
+        if (currentPwd.isEmpty()) {
+            return "CURRENT:Saisissez votre mot de passe actuel pour le modifier.";
+        }
+        if (!PasswordUtils.matches(currentPwd, dbUser.getPassword())) {
+            return "CURRENT:Mot de passe actuel incorrect.";
+        }
+        if (newPwd.isEmpty()) {
+            return "NEW:Saisissez un nouveau mot de passe.";
+        }
+        String newErr = AuthValidation.validatePasswordCreate(newPwd, nom, prenom);
+        if (newErr != null) {
+            return "NEW:" + newErr;
+        }
+        String cErr = AuthValidation.validateConfirmPassword(newPwd, confirmPwd);
+        if (cErr != null) {
+            return "CONFIRM:" + cErr;
+        }
+        return null;
+    }
+
+    private static User rebuildUser(User db, String email, String passwordHash, String nom, String prenom,
+                                    String telephone, boolean active) {
+        if (db instanceof Admin) {
+            return new Admin(db.getId(), email, passwordHash, nom, prenom, telephone, active);
+        }
+        if (db instanceof Coach) {
+            return new Coach(db.getId(), email, passwordHash, nom, prenom, telephone, active);
+        }
+        if (db instanceof Client) {
+            return new Client(db.getId(), email, passwordHash, nom, prenom, telephone, active);
+        }
+        throw new IllegalStateException("Type utilisateur non géré");
     }
 
     private static boolean containsWhitespace(String s) {
@@ -305,10 +405,17 @@ public class ProfilePageController implements Initializable {
         return f.getText() != null ? f.getText().trim() : "";
     }
 
+    private static String passwordText(PasswordField f) {
+        return f.getText() != null ? f.getText() : "";
+    }
+
     private Stage owner() {
-        if (nomField == null || nomField.getScene() == null) {
-            return null;
+        if (emailField != null && emailField.getScene() != null) {
+            return (Stage) emailField.getScene().getWindow();
         }
-        return (Stage) nomField.getScene().getWindow();
+        if (nomField != null && nomField.getScene() != null) {
+            return (Stage) nomField.getScene().getWindow();
+        }
+        return null;
     }
 }

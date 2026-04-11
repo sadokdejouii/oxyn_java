@@ -138,6 +138,20 @@
     -fx-wrap-text: true;
 }
 
+.pp-section-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(160, 180, 204, 0.9);
+    -fx-letter-spacing: 0.06em;
+    -fx-padding: 8 0 0 0;
+}
+
+.pp-section-hint {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(160, 180, 204, 0.55);
+    -fx-wrap-text: true;
+}
+
 .pp-form-block {
     -fx-spacing: 18;
     -fx-padding: 4 0 0 0;
