@@ -645,6 +645,104 @@
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-cursor: hand;
+}
+
+/* ========================================
+   UNIFIED RECHERCHE & TRIE DESIGN
+   Same styling for search and sort controls
+   ======================================== */
+
+/* Sort Label - Cyan */
+.sort-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-text-fill: rgba(0, 191, 255, 1);
+    -fx-letter-spacing: 1.5;
+}
+
+/* Sort Combo Box - UNIFIED with Recherche */
+.sort-combo,
+.sort-order-combo {
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-weight: 500;
+    -fx-padding: 10 16;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(79, 195, 247, 0.35);
+    -fx-border-width: 2;
+    -fx-background-color: #243B7F;
+    -fx-text-fill: #FFFFFF;
+    -fx-prompt-text-fill: #A0B4CC;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.1), 6, 0, 0, 1);
+}
+
+.sort-combo {
+    -fx-pref-width: 130;
+}
+
+.sort-order-combo {
+    -fx-pref-width: 120;
+}
+
+/* HOVER STATE */
+.sort-combo:hover,
+.sort-order-combo:hover {
+    -fx-border-color: rgba(0, 191, 255, 0.55);
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.25), 12, 0, 0, 2);
+}
+
+/* FOCUSED STATE */
+.sort-combo:focused,
+.sort-order-combo:focused {
+    -fx-border-color: #00BFFF;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.4), 16, 0, 0, 3);
+}
+
+/* ComboBox Popup - Dark blue with cyan accent */
+.combo-box-popup .list-view {
+    -fx-background-color: #243B7F;
+    -fx-border-color: rgba(0, 191, 255, 0.4);
+    -fx-border-width: 2;
+    -fx-border-radius: 4;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 14, 0, 0, 4);
+}
+
+/* List Cell - Base */
+.combo-box-popup .list-view .list-cell {
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-weight: 500;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-color: #243B7F;
+}
+
+/* List Cell Separator - Cyan line */
+.combo-box-popup .list-view .list-cell:not(:last-visible-cell) {
+    -fx-border-color: rgba(0, 191, 255, 0.15);
+    -fx-border-width: 0 0 1 0;
+}
+
+/* List Cell HOVER - Cyan highlight */
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.15);
+    -fx-text-fill: #00BFFF;
+    -fx-font-weight: 600;
+}
+
+/* List Cell SELECTED - Bright cyan */
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: rgba(0, 191, 255, 0.25);
+    -fx-text-fill: #00BFFF;
+    -fx-font-weight: bold;
+    -fx-border-color: rgba(0, 191, 255, 0.5);
+    -fx-border-width: 0 2 0 0;
+}
     -fx-border-width: 1.5px;
 }
 

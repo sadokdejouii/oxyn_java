@@ -10,9 +10,11 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
@@ -162,6 +164,19 @@ public class EventManagementController implements Initializable {
     @FXML private Button backFromReviewsBtn;
     @FXML private Button ajouterEvenementBtn;
 
+    // Search Fields
+    @FXML private TextField eventsSearchField;
+    @FXML private TextField inscriptionsSearchField;
+    @FXML private TextField avisSearchField;
+
+    // Sort ComboBoxes
+    @FXML private ComboBox<String> eventsSortByCombo;
+    @FXML private ComboBox<String> eventsSortOrderCombo;
+    @FXML private ComboBox<String> inscriptionsSortByCombo;
+    @FXML private ComboBox<String> inscriptionsSortOrderCombo;
+    @FXML private ComboBox<String> avisSortByCombo;
+    @FXML private ComboBox<String> avisSortOrderCombo;
+
     // ==================== DATA & SERVICES ====================
     private static final int ITEMS_PER_PAGE = 6;
     
@@ -191,8 +206,57 @@ public class EventManagementController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        setupSearchAndSort();
         loadData();
         showView(View.EVENTS);
+    }
+
+    private void setupSearchAndSort() {
+        // Events sort options
+        eventsSortByCombo.setItems(FXCollections.observableArrayList(
+            "Titre", "Lieu", "Ville", "Statut", "Date Début"
+        ));
+        eventsSortByCombo.setValue("Titre");
+        
+        eventsSortOrderCombo.setItems(FXCollections.observableArrayList(
+            "Croissant ↑", "Décroissant ↓"
+        ));
+        eventsSortOrderCombo.setValue("Croissant ↑");
+
+        // Inscriptions sort options
+        inscriptionsSortByCombo.setItems(FXCollections.observableArrayList(
+            "Statut", "Date Inscription"
+        ));
+        inscriptionsSortByCombo.setValue("Statut");
+        
+        inscriptionsSortOrderCombo.setItems(FXCollections.observableArrayList(
+            "Croissant ↑", "Décroissant ↓"
+        ));
+        inscriptionsSortOrderCombo.setValue("Croissant ↑");
+
+        // Avis sort options
+        avisSortByCombo.setItems(FXCollections.observableArrayList(
+            "Note"
+        ));
+        avisSortByCombo.setValue("Note");
+        
+        avisSortOrderCombo.setItems(FXCollections.observableArrayList(
+            "Croissant ↑", "Décroissant ↓"
+        ));
+        avisSortOrderCombo.setValue("Croissant ↑");
+
+        // Add listeners for real-time search and sort
+        eventsSearchField.textProperty().addListener((obs, oldVal, newVal) -> filterAndSortEvents());
+        eventsSortByCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterAndSortEvents());
+        eventsSortOrderCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterAndSortEvents());
+
+        inscriptionsSearchField.textProperty().addListener((obs, oldVal, newVal) -> filterAndSortInscriptions());
+        inscriptionsSortByCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterAndSortInscriptions());
+        inscriptionsSortOrderCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterAndSortInscriptions());
+
+        avisSearchField.textProperty().addListener((obs, oldVal, newVal) -> filterAndSortAvis());
+        avisSortByCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterAndSortAvis());
+        avisSortOrderCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterAndSortAvis());
     }
 
     @FXML
@@ -979,5 +1043,96 @@ public class EventManagementController implements Initializable {
 
     private static String safe(String s) {
         return s == null ? "" : s;
+    }
+
+    // ==================== SEARCH & SORT METHODS ====================
+
+    private void filterAndSortEvents() {
+        String searchText = eventsSearchField.getText().toLowerCase();
+        String sortBy = eventsSortByCombo.getValue();
+        boolean ascending = !eventsSortOrderCombo.getValue().contains("Décroissant");
+
+        List<EventItem> filtered = eventsList.stream()
+            .filter(item -> searchText.isEmpty() || 
+                item.getTitre().toLowerCase().contains(searchText) ||
+                item.getLieu().toLowerCase().contains(searchText) ||
+                item.getVille().toLowerCase().contains(searchText) ||
+                item.getStatut().toLowerCase().contains(searchText))
+            .sorted((a, b) -> {
+                int result = 0;
+                switch(sortBy) {
+                    case "Titre": result = a.getTitre().compareTo(b.getTitre()); break;
+                    case "Lieu": result = a.getLieu().compareTo(b.getLieu()); break;
+                    case "Ville": result = a.getVille().compareTo(b.getVille()); break;
+                    case "Statut": result = a.getStatut().compareTo(b.getStatut()); break;
+                    case "Date Début": result = a.getDebut().compareTo(b.getDebut()); break;
+                }
+                return ascending ? result : -result;
+            })
+            .collect(Collectors.toList());
+
+        displayEventCards(filtered);
+    }
+
+    private void filterAndSortInscriptions() {
+        String searchText = inscriptionsSearchField.getText().toLowerCase();
+        String sortBy = inscriptionsSortByCombo.getValue();
+        boolean ascending = !inscriptionsSortOrderCombo.getValue().contains("Décroissant");
+
+        List<InscriptionItem> filtered = inscriptionsList.stream()
+            .filter(item -> searchText.isEmpty() || 
+                item.getStatut().toLowerCase().contains(searchText))
+            .sorted((a, b) -> {
+                int result = 0;
+                switch(sortBy) {
+                    case "Statut": result = a.getStatut().compareTo(b.getStatut()); break;
+                    case "Date Inscription": result = a.getDateInscription().compareTo(b.getDateInscription()); break;
+                }
+                return ascending ? result : -result;
+            })
+            .collect(Collectors.toList());
+
+        displayInscriptionCards(filtered);
+    }
+
+    private void filterAndSortAvis() {
+        String searchText = avisSearchField.getText().toLowerCase();
+        String sortBy = avisSortByCombo.getValue();
+        boolean ascending = !avisSortOrderCombo.getValue().contains("Décroissant");
+
+        List<AvisItem> filtered = reviewsList.stream()
+            .filter(item -> searchText.isEmpty() || 
+                String.valueOf(item.getNote()).contains(searchText))
+            .sorted((a, b) -> {
+                int result = 0;
+                if ("Note".equals(sortBy)) {
+                    result = Integer.compare(a.getNote(), b.getNote());
+                }
+                return ascending ? result : -result;
+            })
+            .collect(Collectors.toList());
+
+        displayAvisCards(filtered);
+    }
+
+    private void displayEventCards(List<EventItem> items) {
+        eventsGridPane.getChildren().clear();
+        for (EventItem item : items) {
+            eventsGridPane.getChildren().add(buildEventCard(item));
+        }
+    }
+
+    private void displayInscriptionCards(List<InscriptionItem> items) {
+        inscriptionsGridPane.getChildren().clear();
+        for (InscriptionItem item : items) {
+            inscriptionsGridPane.getChildren().add(buildInscriptionCard(item));
+        }
+    }
+
+    private void displayAvisCards(List<AvisItem> items) {
+        reviewsGridPane.getChildren().clear();
+        for (AvisItem item : items) {
+            reviewsGridPane.getChildren().add(buildReviewCard(item));
+        }
     }
 }

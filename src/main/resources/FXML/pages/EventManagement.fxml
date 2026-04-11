@@ -2,10 +2,13 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -28,6 +31,18 @@
             <!-- Events Grid Section (2-column layout with pagination) -->
             <VBox fx:id="eventsMainSection" spacing="12" VBox.vgrow="ALWAYS" managed="true" visible="true">
                 <Label styleClass="saas-card-title" text="Événements" />
+                
+                <!-- Search and Sort Bar for Events -->
+                <HBox spacing="16" styleClass="search-sort-bar" style="-fx-alignment: CENTER_LEFT; -fx-padding: 16;">
+                    <TextField fx:id="eventsSearchField" promptText="🔍 Rechercher par titre, lieu, ville, statut..." styleClass="search-field" />
+                    <HBox spacing="8" style="-fx-alignment: CENTER_LEFT;">
+                        <Label text="Trier par:" styleClass="sort-label" />
+                        <ComboBox fx:id="eventsSortByCombo" styleClass="sort-combo" />
+                        <ComboBox fx:id="eventsSortOrderCombo" styleClass="sort-order-combo" promptText="Ordre" />
+                    </HBox>
+                    <HBox HBox.hgrow="ALWAYS" />
+                </HBox>
+                
                 <TilePane fx:id="eventsGridPane" prefColumns="2" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
                 <HBox fx:id="eventsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
             </VBox>
@@ -38,6 +53,18 @@
                     <Label styleClass="saas-card-title" text="Inscriptions pour l'Événement" />
                     <Button fx:id="backFromInscriptionsBtn" onAction="#handleBackToEvents" styleClass="ghost-toolbar-btn" text="← Retour aux Événements" />
                 </HBox>
+                
+                <!-- Search and Sort Bar for Inscriptions -->
+                <HBox spacing="16" styleClass="search-sort-bar" style="-fx-alignment: CENTER_LEFT; -fx-padding: 16;">
+                    <TextField fx:id="inscriptionsSearchField" promptText="🔍 Rechercher par statut inscription..." styleClass="search-field" />
+                    <HBox spacing="8" style="-fx-alignment: CENTER_LEFT;">
+                        <Label text="Trier par:" styleClass="sort-label" />
+                        <ComboBox fx:id="inscriptionsSortByCombo" styleClass="sort-combo" />
+                        <ComboBox fx:id="inscriptionsSortOrderCombo" styleClass="sort-order-combo" promptText="Ordre" />
+                    </HBox>
+                    <HBox HBox.hgrow="ALWAYS" />
+                </HBox>
+                
                 <TilePane fx:id="inscriptionsGridPane" prefColumns="2" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
                 <HBox fx:id="inscriptionsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
             </VBox>
@@ -48,6 +75,18 @@
                     <Label styleClass="saas-card-title" text="Avis pour l'Événement" />
                     <Button fx:id="backFromReviewsBtn" onAction="#handleBackToEvents" styleClass="ghost-toolbar-btn" text="← Retour aux Événements" />
                 </HBox>
+                
+                <!-- Search and Sort Bar for Reviews/Avis -->
+                <HBox spacing="16" styleClass="search-sort-bar" style="-fx-alignment: CENTER_LEFT; -fx-padding: 16;">
+                    <TextField fx:id="avisSearchField" promptText="🔍 Rechercher par note..." styleClass="search-field" />
+                    <HBox spacing="8" style="-fx-alignment: CENTER_LEFT;">
+                        <Label text="Trier par:" styleClass="sort-label" />
+                        <ComboBox fx:id="avisSortByCombo" styleClass="sort-combo" />
+                        <ComboBox fx:id="avisSortOrderCombo" styleClass="sort-order-combo" promptText="Ordre" />
+                    </HBox>
+                    <HBox HBox.hgrow="ALWAYS" />
+                </HBox>
+                
                 <TilePane fx:id="reviewsGridPane" prefColumns="2" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
                 <HBox fx:id="reviewsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
             </VBox>
