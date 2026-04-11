@@ -19,7 +19,8 @@
         <HBox spacing="10" styleClass="toolbar-card">
             <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser" />
             <HBox HBox.hgrow="ALWAYS" />
-            <Button onAction="#handlePanier" styleClass="primary-toolbar-btn" text="Mon Panier" />
+            <Button onAction="#handleMesCommandes" styleClass="ghost-toolbar-btn" text="Mes commandes" />
+            <Button onAction="#handlePanier" styleClass="primary-toolbar-btn" text="Mon panier" />
         </HBox>
 
         <VBox spacing="8" styleClass="saas-chart-card">

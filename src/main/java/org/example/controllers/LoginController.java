@@ -28,7 +28,8 @@ public class LoginController {
         }
         UserRole role = user.equalsIgnoreCase("admin") ? UserRole.ADMIN : UserRole.CLIENT;
         String display = user.equalsIgnoreCase("admin") ? "Administrator" : capitalize(user);
-        SessionContext.getInstance().login(display, role);
+        int clientId = role == UserRole.ADMIN ? 1 : resolveClientId(user);
+        SessionContext.getInstance().login(display, role, clientId);
 
         try {
             Node source = usernameField != null ? usernameField : passwordField;
@@ -42,6 +43,26 @@ public class LoginController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Ex. {@code client}, {@code client1} → 1 ; {@code client12} → 12. Sinon 1.
+     */
+    private static int resolveClientId(String username) {
+        String u = username.toLowerCase();
+        if (u.startsWith("client")) {
+            String suffix = u.substring("client".length());
+            if (suffix.isEmpty()) {
+                return 1;
+            }
+            try {
+                int id = Integer.parseInt(suffix);
+                return id > 0 ? id : 1;
+            } catch (NumberFormatException ignored) {
+                return 1;
+            }
+        }
+        return 1;
     }
 
     private static String capitalize(String s) {

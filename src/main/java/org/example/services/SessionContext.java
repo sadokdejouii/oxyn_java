@@ -11,6 +11,8 @@ public final class SessionContext {
 
     private String displayName = "Guest";
     private UserRole role = UserRole.CLIENT;
+    /** Identifiant client en base (table commandes.id_client_commande). */
+    private int clientDatabaseId = 1;
 
     private SessionContext() {
     }
@@ -20,16 +22,22 @@ public final class SessionContext {
     }
 
     public void login(String displayName, UserRole role) {
+        login(displayName, role, 1);
+    }
+
+    public void login(String displayName, UserRole role, int clientDatabaseId) {
         this.displayName = Objects.requireNonNullElse(displayName, "User").trim();
         if (this.displayName.isEmpty()) {
             this.displayName = "User";
         }
         this.role = Objects.requireNonNullElse(role, UserRole.CLIENT);
+        this.clientDatabaseId = clientDatabaseId > 0 ? clientDatabaseId : 1;
     }
 
     public void logout() {
         this.displayName = "Guest";
         this.role = UserRole.CLIENT;
+        this.clientDatabaseId = 1;
     }
 
     public String getDisplayName() {
@@ -42,5 +50,9 @@ public final class SessionContext {
 
     public boolean isAdmin() {
         return role == UserRole.ADMIN;
+    }
+
+    public int getClientDatabaseId() {
+        return clientDatabaseId;
     }
 }

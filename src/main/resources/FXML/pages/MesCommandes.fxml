@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MesCommandesController">
+    <VBox spacing="18" styleClass="page-root">
+        <padding>
+            <Insets bottom="20" left="8" right="8" top="8" />
+        </padding>
+
+        <VBox spacing="6">
+            <Label styleClass="page-hero-title" text="Mes commandes" />
+            <Label styleClass="page-hero-sub" text="Historique de vos achats. Vous pouvez annuler une commande validée dans les 24 heures suivant la validation." wrapText="true" />
+        </VBox>
+
+        <HBox spacing="10" styleClass="toolbar-card">
+            <Button onAction="#handleRetourBoutique" styleClass="ghost-toolbar-btn" text="← Retour à la boutique" />
+            <HBox HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleRefresh" styleClass="primary-toolbar-btn" text="Actualiser" />
+        </HBox>
+
+        <VBox fx:id="ordersContainer" spacing="14" />
+    </VBox>
+</ScrollPane>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.PanierController">
+    <VBox spacing="18" styleClass="page-root">
+        <padding>
+            <Insets bottom="20" left="8" right="8" top="8" />
+        </padding>
+
+        <VBox spacing="6">
+            <Label styleClass="page-hero-title" text="Mon panier" />
+            <Label styleClass="page-hero-sub" text="Vérifiez vos articles, indiquez l’adresse de livraison et le mode de paiement, puis validez votre commande." wrapText="true" />
+        </VBox>
+
+        <HBox spacing="10" styleClass="toolbar-card">
+            <Button onAction="#handleRetourBoutique" styleClass="ghost-toolbar-btn" text="← Retour à la boutique" />
+            <HBox HBox.hgrow="ALWAYS" />
+        </HBox>
+
+        <VBox spacing="12" styleClass="saas-chart-card">
+            <Label styleClass="saas-card-title" text="Articles" />
+            <TableView fx:id="tablePanier" prefHeight="280" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colNom" prefWidth="260" text="Produit" />
+                    <TableColumn fx:id="colPrix" prefWidth="120" text="Prix unitaire" />
+                    <TableColumn fx:id="colQte" prefWidth="90" text="Qté" />
+                    <TableColumn fx:id="colSousTotal" prefWidth="130" text="Sous-total" />
+                </columns>
+            </TableView>
+            <HBox alignment="CENTER_RIGHT" spacing="8">
+                <Label styleClass="saas-stat-label" text="Total TTC" />
+                <Label fx:id="totalLabel" styleClass="saas-stat-value" text="0,00 TND" />
+            </HBox>
+        </VBox>
+
+        <VBox spacing="12" styleClass="saas-chart-card">
+            <Label styleClass="saas-card-title" text="Livraison &amp; paiement" />
+            <Label styleClass="saas-stat-hint" text="Adresse de livraison" />
+            <TextArea fx:id="adresseField" prefRowCount="3" promptText="Rue, ville, code postal…" wrapText="true" />
+            <Label styleClass="saas-stat-hint" text="Mode de paiement" />
+            <ComboBox fx:id="paiementCombo" prefWidth="280" />
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button fx:id="validerBtn" onAction="#handleValiderCommande" styleClass="primary-toolbar-btn" text="Valider la commande" />
+            </HBox>
+        </VBox>
+    </VBox>
+</ScrollPane>

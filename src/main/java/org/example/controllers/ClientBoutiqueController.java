@@ -9,6 +9,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import org.example.entities.PanierSession;
 import org.example.entities.produits;
 import org.example.services.ProduitsService;
 
@@ -21,9 +22,15 @@ public class ClientBoutiqueController {
     private TilePane produitsContainer;
 
     private ProduitsService produitsService;
+    private MainLayoutController mainLayoutController;
+    private final PanierSession panier = PanierSession.getInstance();
 
     public ClientBoutiqueController() {
         this.produitsService = new ProduitsService();
+    }
+
+    public void setMainLayoutController(MainLayoutController mainLayoutController) {
+        this.mainLayoutController = mainLayoutController;
     }
 
     @FXML
@@ -142,8 +149,18 @@ public class ClientBoutiqueController {
 
     @FXML
     private void handlePanier() {
-        showAlert("Panier", "Fonctionnalité du panier à implémenter");
-        // TODO: Implémenter la page du panier
+        if (mainLayoutController == null) {
+            return;
+        }
+        mainLayoutController.navigate("/FXML/pages/Panier.fxml", "Mon panier", null);
+    }
+
+    @FXML
+    private void handleMesCommandes() {
+        if (mainLayoutController == null) {
+            return;
+        }
+        mainLayoutController.navigate("/FXML/pages/MesCommandes.fxml", "Mes commandes", null);
     }
     
     private void handleVoirProduit(produits produit) {
@@ -152,8 +169,8 @@ public class ClientBoutiqueController {
     }
     
     private void handleAjouterPanier(produits produit) {
-        showAlert("Ajout au panier", "Produit ajouté au panier: " + produit.getNom_produit());
-        // TODO: Implémenter la gestion du panier
+        panier.ajouterProduit(produit);
+        showAlert("Panier", "« " + produit.getNom_produit() + " » a été ajouté à votre panier.");
     }
     
     private void handleRupture(produits produit) {

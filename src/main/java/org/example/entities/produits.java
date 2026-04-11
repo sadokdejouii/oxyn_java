@@ -1,11 +1,7 @@
 package org.example.entities;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
 public class produits {
 
-    public Object getQuantite_stock_produit;
     protected int id_produit;
     protected String nom_produit;
     protected String description_produit;
@@ -121,8 +117,7 @@ public class produits {
     @Override
     public String toString() {
         return "produits{" +
-                "getQuantite_stock_produit=" + getQuantite_stock_produit +
-                ", id_produit=" + id_produit +
+                "id_produit=" + id_produit +
                 ", nom_produit='" + nom_produit + '\'' +
                 ", description_produit='" + description_produit + '\'' +
                 ", prix_produit=" + prix_produit +
