@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane prefHeight="420.0" prefWidth="620.0" styleClass="front-modal-overlay" stylesheets="@../../css/front-events.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.FrontEventPopupController">
+    <VBox maxWidth="560.0" prefWidth="560.0" spacing="16" styleClass="front-modal-card">
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label fx:id="popupTitleLabel" styleClass="front-modal-title" text="Titre" />
+                <Label fx:id="popupSubtitleLabel" styleClass="front-modal-subtitle" text="Sous-titre" wrapText="true" />
+            </VBox>
+            <Button mnemonicParsing="false" onAction="#handleClose" styleClass="front-modal-close" text="✕" />
+        </HBox>
+
+        <ScrollPane fitToWidth="true" prefHeight="280.0" styleClass="front-popup-scroll">
+            <content>
+                <VBox fx:id="popupItemsBox" spacing="10" styleClass="front-popup-content" />
+            </content>
+        </ScrollPane>
+
+        <HBox fx:id="popupActionsBox" alignment="CENTER" spacing="10" styleClass="front-modal-actions">
+            <Button fx:id="secondaryActionButton" mnemonicParsing="false" onAction="#handleSecondaryAction" styleClass="front-modal-action-secondary" text="Annuler" visible="false" managed="false" />
+            <Button fx:id="primaryActionButton" mnemonicParsing="false" onAction="#handlePrimaryAction" styleClass="front-modal-action-primary" text="Confirmer" visible="false" managed="false" />
+        </HBox>
+    </VBox>
+</StackPane>

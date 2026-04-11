@@ -71,6 +71,10 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
 
     @Override
     public void modifier(int id) throws SQLException {
+        // overload kept for interface compatibility
+    }
+
+    public void modifier(AvisEvenement a) throws SQLException {
         String sql = "UPDATE avis_evenement SET " +
                 "note_avis_evenement = ?, " +
                 "commentaire_avis_evenement = ?, " +
@@ -80,15 +84,14 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
                 "WHERE id_note_avis_evenement = ?";
 
         PreparedStatement ps = con.prepareStatement(sql);
-
-        ps.setInt(1, 5);
-        ps.setString(2, "Avis modifié");
-        ps.setTimestamp(3, Timestamp.valueOf("2026-04-04 15:00:00"));
-        ps.setInt(4, 1);
-        ps.setInt(5, 1);
-        ps.setInt(6, id);
-
+        ps.setInt(1, a.getNote());
+        ps.setString(2, a.getCommentaire());
+        ps.setTimestamp(3, new Timestamp(a.getCreatedAt().getTime()));
+        ps.setInt(4, a.getIdEvenement());
+        ps.setInt(5, a.getIdUser());
+        ps.setInt(6, a.getId());
         ps.executeUpdate();
+
         System.out.println("Avis modifié avec succès !");
     }
 }
