@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="dialogRoot" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.dialog.UserFormDialogController" styleClass="app-dialog-root" stylesheets="@../../css/dialogs.css" prefWidth="500">
+    <top>
+        <HBox styleClass="app-dialog-header" alignment="CENTER_LEFT" spacing="12">
+            <Label fx:id="titleLabel" styleClass="app-dialog-title" text="Utilisateur" HBox.hgrow="ALWAYS" />
+            <Button focusTraversable="false" onAction="#handleCancel" styleClass="app-dialog-close" text="✕" />
+        </HBox>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <VBox styleClass="app-dialog-body" spacing="0">
+                <GridPane fx:id="formGrid" hgap="12" vgap="14">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="118" prefWidth="128" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="220" />
+                    </columnConstraints>
+
+                    <Label styleClass="dialog-field-label" text="E-mail *" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <TextField fx:id="emailField" styleClass="dialog-input" />
+                        <Label fx:id="emailErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+
+                    <Label fx:id="passwordLabel" styleClass="dialog-field-label" text="Mot de passe *" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <PasswordField fx:id="passwordField" styleClass="dialog-input" />
+                        <Label fx:id="passwordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+
+                    <Label styleClass="dialog-field-label" text="Nom *" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <TextField fx:id="nomField" styleClass="dialog-input" />
+                        <Label fx:id="nomErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+
+                    <Label styleClass="dialog-field-label" text="Prénom *" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                        <TextField fx:id="prenomField" styleClass="dialog-input" />
+                        <Label fx:id="prenomErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+
+                    <Label styleClass="dialog-field-label" text="Téléphone" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                        <TextField fx:id="telephoneField" styleClass="dialog-input" />
+                        <Label fx:id="telephoneErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+
+                    <Label styleClass="dialog-field-label" text="Rôle *" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                        <ComboBox fx:id="roleCombo" styleClass="dialog-input" maxWidth="Infinity" />
+                        <Label fx:id="roleErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+
+                    <Label styleClass="dialog-field-label" text="Statut" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                    <CheckBox fx:id="activeCheck" mnemonicParsing="false" text="Compte actif" styleClass="dialog-field-label" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                </GridPane>
+            </VBox>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <HBox styleClass="app-dialog-footer" alignment="CENTER_RIGHT" spacing="10">
+            <Button onAction="#handleCancel" styleClass="dialog-btn-ghost" text="Annuler" />
+            <Button defaultButton="true" onAction="#handleSave" styleClass="dialog-btn-primary" text="Enregistrer" />
+        </HBox>
+    </bottom>
+</BorderPane>
