@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="dialogRoot" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.dialog.MessageDialogController" styleClass="app-dialog-root" stylesheets="@../../css/dialogs.css">
+    <top>
+        <HBox styleClass="app-dialog-header" alignment="CENTER_LEFT" spacing="12">
+            <Label fx:id="titleLabel" styleClass="app-dialog-title" text="Message" HBox.hgrow="ALWAYS" />
+            <Button focusTraversable="false" onAction="#handleClose" styleClass="app-dialog-close" text="✕" />
+        </HBox>
+    </top>
+    <center>
+        <VBox styleClass="app-dialog-body" spacing="8">
+            <Label fx:id="messageLabel" styleClass="app-dialog-message" wrapText="true" text="" />
+        </VBox>
+    </center>
+    <bottom>
+        <HBox styleClass="app-dialog-footer" alignment="CENTER_RIGHT">
+            <Button defaultButton="true" onAction="#handleClose" styleClass="dialog-btn-primary" text="OK" />
+        </HBox>
+    </bottom>
+</BorderPane>

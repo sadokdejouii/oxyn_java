@@ -15,7 +15,7 @@ public class MainFX extends Application {
 
         Scene scene = new Scene(root, 1080, 720);
 
-        primaryStage.setTitle("OXYN — Sign in");
+        primaryStage.setTitle("OXYN — Connexion");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
