@@ -40,10 +40,14 @@ public class MainLayoutController implements Initializable {
     private static final String PAGE_EVENTS_ADMIN = "/FXML/pages/EventManagement.fxml";
     private static final String PAGE_USERS = "/FXML/pages/UserManagement.fxml";
     private static final String PAGE_REPORTS = "/FXML/pages/ReportsStatistics.fxml";
+    private static final String PAGE_BOUTIQUE = "/FXML/pages/BoutiquePage.fxml";
+    private static final String PAGE_AJOUTER_PRODUIT = "/FXML/pages/AjouterProduitPage.fxml";
+    private static final String PAGE_MODIFIER_PRODUIT = "/FXML/pages/ModifierProduitPage.fxml";
 
     private static final String PAGE_CLIENT_HOME = "/FXML/pages/ClientHome.fxml";
     private static final String PAGE_CLIENT_EVENTS = "/FXML/pages/ClientEvents.fxml";
     private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
+    private static final String PAGE_CLIENT_BOUTIQUE = "/FXML/pages/ClientBoutique.fxml";
     private static final String PAGE_PROFILE = "/FXML/pages/ProfilePage.fxml";
 
     @FXML
@@ -199,9 +203,9 @@ public class MainLayoutController implements Initializable {
         });
     }
 
-    private void navigate(String classpath, String title, Button navButton) {
+    public void navigate(String classpath, String title, Button navButton) {
         try {
-            PageLoader.show(contentArea, classpath);
+            PageLoader.show(contentArea, classpath, this);
             topbarPageTitle.setText(title);
             setActiveNav(navButton);
         } catch (Exception e) {
@@ -323,7 +327,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminBoutique() {
-        navigate(PAGE_USERS, "Boutique", adminBoutiqueBtn);
+        navigate(PAGE_BOUTIQUE, "Boutique", adminBoutiqueBtn);
     }
 
     @FXML
@@ -353,7 +357,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleBoutique() {
-        navigate(PAGE_PLANNING, "Boutique", boutiqueBtn);
+        navigate(PAGE_CLIENT_BOUTIQUE, "Boutique", boutiqueBtn);
     }
 
     @FXML
