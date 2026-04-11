@@ -1,6 +1,7 @@
 package org.example.controllers;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -150,9 +151,11 @@ public class MainLayoutController implements Initializable {
         Platform.runLater(installIcons);
 
         SessionContext ctx = SessionContext.getInstance();
-        topbarUserName.setText(ctx.getDisplayName());
+        topbarUserName.textProperty().bind(ctx.displayNameProperty());
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        userAvatarLabel.setText(initials(ctx.getDisplayName()));
+        userAvatarLabel.textProperty().bind(Bindings.createStringBinding(
+                () -> initials(ctx.getDisplayName()),
+                ctx.displayNameProperty()));
 
         mainNavButtons.clear();
         mainNavButtons.add(adminDashboardBtn);
@@ -173,6 +176,8 @@ public class MainLayoutController implements Initializable {
         wireSearch();
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
+        } else if (ctx.isEncadrant()) {
+            navigate(PAGE_CLIENT_HOME, "Accueil encadrant", homeBtn);
         } else {
             navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
         }
@@ -180,13 +185,26 @@ public class MainLayoutController implements Initializable {
 
     private void applyRoleShell(SessionContext ctx) {
         boolean admin = ctx.isAdmin();
+        boolean encadrant = ctx.isEncadrant();
         adminNavGroup.setVisible(admin);
         adminNavGroup.setManaged(admin);
         clientNavGroup.setVisible(!admin);
         clientNavGroup.setManaged(!admin);
-        shellModeLabel.setText(admin ? "ADMINISTRATOR" : "CLIENT");
+        if (admin) {
+            shellModeLabel.setText("ADMINISTRATOR");
+        } else if (encadrant) {
+            shellModeLabel.setText("ENCADRANT");
+        } else {
+            shellModeLabel.setText("CLIENT");
+        }
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        footerText.setText(admin ? "Back office session" : "Front office session");
+        if (admin) {
+            footerText.setText("Back office session");
+        } else if (encadrant) {
+            footerText.setText("Session encadrant");
+        } else {
+            footerText.setText("Front office session");
+        }
     }
 
     private void wireSearch() {
@@ -253,6 +271,8 @@ public class MainLayoutController implements Initializable {
         SessionContext ctx = SessionContext.getInstance();
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
+        } else if (ctx.isEncadrant()) {
+            navigate(PAGE_CLIENT_HOME, "Accueil encadrant", homeBtn);
         } else {
             navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
         }
@@ -323,7 +343,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminBoutique() {
-        navigate(PAGE_USERS, "Boutique", adminBoutiqueBtn);
+        navigate(PAGE_USERS, "Utilisateurs", adminBoutiqueBtn);
     }
 
     @FXML
@@ -374,7 +394,7 @@ public class MainLayoutController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Login.fxml"));
             Parent root = loader.load();
             stage.setScene(new Scene(root, 1080, 720));
-            stage.setTitle("OXYN — Sign in");
+            stage.setTitle("OXYN — Connexion");
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
