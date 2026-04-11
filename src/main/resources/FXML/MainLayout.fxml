@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- Ikonli FontIcon is swapped in at runtime (see MainLayoutController): Scene Builder has no Ikonli on its classpath. Placeholders use Region + classes ikonli-slot, fas-*, sz-*. -->
-<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
+<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css,@../css/forum.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
 
     <left>
         <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="272" spacing="0" styleClass="sidebar">

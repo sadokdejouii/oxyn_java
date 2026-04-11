@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.collections.FXCollections?>
+
+<BorderPane styleClass="forum-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ForumController">
+
+    <!-- LEFT SIDEBAR -->
+    <left>
+        <VBox spacing="20" styleClass="forum-sidebar" prefWidth="280">
+            <padding>
+                <Insets bottom="20" left="16" right="16" top="20" />
+            </padding>
+
+            <!-- Search Section -->
+            <VBox spacing="8">
+                <Label text="Rechercher" styleClass="sidebar-label" />
+                <HBox spacing="8">
+                    <TextField fx:id="searchField" promptText="Rechercher dans..." prefHeight="36" HBox.hgrow="ALWAYS" styleClass="search-field" />
+                    <Button text="🔍" styleClass="search-button" prefWidth="36" prefHeight="36" />
+                </HBox>
+            </VBox>
+
+            <!-- Categories Section -->
+            <VBox spacing="8">
+                <Label text="Catégories" styleClass="sidebar-label" />
+                <VBox fx:id="categoriesContainer" spacing="6" />
+            </VBox>
+
+            <!-- Recent Posts Section -->
+            <VBox spacing="8">
+                <Label text="Posts récents" styleClass="sidebar-label" />
+                <VBox fx:id="recentPostsContainer" spacing="8" styleClass="recent-posts-box" />
+            </VBox>
+
+            <Separator />
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <VBox spacing="16" styleClass="forum-main-content" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="16" />
+            </padding>
+
+            <!-- CREATE POST SECTION -->
+            <VBox styleClass="create-post-section" spacing="12">
+                <padding>
+                    <Insets bottom="16" left="16" right="16" top="16" />
+                </padding>
+
+                <!-- User Header -->
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Label text="👤" styleClass="create-post-avatar" />
+                    <Label text="Créer un nouveau post" styleClass="create-post-label" />
+                </HBox>
+
+                <!-- Content Area -->
+                <TextArea fx:id="postContentArea" promptText="Qu'y a-t-il sur votre esprit ? Partagez votre expérience avec la communauté..." prefRowCount="5" wrapText="true" styleClass="create-post-textarea" />
+                <Label fx:id="postContentError" text="" styleClass="error-label" visible="false" />
+
+                <!-- Attachment & Media Preview -->
+                <HBox fx:id="attachmentPreviewBox" spacing="8" alignment="CENTER_LEFT" />
+                <Label fx:id="attachmentLabel" text="Aucun fichier sélectionné" styleClass="attachment-status-label" />
+
+                <!-- Controls Row -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button fx:id="attachmentButton" text="📎 Joindre" styleClass="post-control-button" />
+                    <Button fx:id="emojiButton" text="😊 Emoji" styleClass="post-control-button" />
+
+                    <!-- Category Selector -->
+                    <ComboBox fx:id="categoryComboBox" promptText="Sélectionner une catégorie" styleClass="post-category-combo" prefWidth="180" />
+
+                    <Region HBox.hgrow="ALWAYS" />
+
+                    <!-- Post Button -->
+                    <Button fx:id="postButton" text="✓ Publier" styleClass="post-button-primary" />
+                </HBox>
+            </VBox>
+
+            <!-- Filter & Controls Section -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label text="Trier par:" styleClass="filter-label" />
+                <ComboBox fx:id="sortComboBox" prefWidth="180" styleClass="sort-combo" />
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <!-- Grid/List Toggle -->
+                <HBox spacing="4" styleClass="view-toggle-box">
+                    <Button fx:id="gridViewBtn" text="⊞" styleClass="view-button,grid-view-btn" prefWidth="40" prefHeight="40" />
+                    <Button fx:id="listViewBtn" text="☰" styleClass="view-button,list-view-btn" prefWidth="40" prefHeight="40" />
+                </HBox>
+            </HBox>
+
+            <!-- Posts Container -->
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="posts-scroll" VBox.vgrow="ALWAYS">
+                <VBox fx:id="postsContainer" spacing="16" styleClass="posts-container" />
+            </ScrollPane>
+        </VBox>
+    </center>
+</BorderPane>
