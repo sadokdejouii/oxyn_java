@@ -4,10 +4,10 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -17,7 +17,6 @@ import org.example.services.EvenementServices;
 import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
@@ -48,9 +47,16 @@ public class AjouterEvenementsController implements Initializable {
     private ComboBox<String> statut_evenement;
 
     @FXML
-    private Button annulerBtn;
+    private Label formFeedbackLabel;
 
     private final EvenementServices es = new EvenementServices();
+    private boolean embeddedMode = false;
+    private Runnable onDone;
+
+    public void setEmbeddedMode(Runnable onDone) {
+        this.embeddedMode = true;
+        this.onDone = onDone;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -61,10 +67,13 @@ public class AjouterEvenementsController implements Initializable {
                 "Terminée"
         ));
         statut_evenement.setValue("Sélectionner");
+        clearFeedback();
     }
 
     @FXML
     void ajouterEvenement(ActionEvent event) {
+        clearFeedback();
+
         if (titre_evenement.getText().trim().isEmpty()) {
             showError("Le titre est obligatoire.", "Champ manquant");
             return;
@@ -153,9 +162,7 @@ public class AjouterEvenementsController implements Initializable {
             es.ajouter(evenement);
             showSuccess("Événement ajouté avec succès !");
             clearFields();
-            // Close the window after successful addition
-            Stage stage = (Stage) titre_evenement.getScene().getWindow();
-            stage.close();
+            closeOrReturn();
 
         } catch (SQLException ex) {
             showError("Erreur lors de l'ajout de l'événement : " + ex.getMessage(), "Erreur base de données");
@@ -164,9 +171,13 @@ public class AjouterEvenementsController implements Initializable {
         }
     }
 
-    @FXML
-    void annulerAjout(ActionEvent event) {
-        // Close the current window/stage
+    private void closeOrReturn() {
+        if (embeddedMode) {
+            if (onDone != null) {
+                onDone.run();
+            }
+            return;
+        }
         Stage stage = (Stage) titre_evenement.getScene().getWindow();
         stage.close();
     }
@@ -183,18 +194,33 @@ public class AjouterEvenementsController implements Initializable {
     }
 
     private void showSuccess(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Succès");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        showFeedback(message, true);
     }
 
     private void showError(String message, String title) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        showFeedback(message, false);
+    }
+
+    private void showFeedback(String message, boolean success) {
+        if (formFeedbackLabel == null) {
+            return;
+        }
+
+        formFeedbackLabel.setText(message);
+        formFeedbackLabel.getStyleClass().removeAll("form-feedback-error", "form-feedback-success");
+        formFeedbackLabel.getStyleClass().add(success ? "form-feedback-success" : "form-feedback-error");
+        formFeedbackLabel.setVisible(true);
+        formFeedbackLabel.setManaged(true);
+    }
+
+    private void clearFeedback() {
+        if (formFeedbackLabel == null) {
+            return;
+        }
+
+        formFeedbackLabel.setText("");
+        formFeedbackLabel.getStyleClass().removeAll("form-feedback-error", "form-feedback-success");
+        formFeedbackLabel.setVisible(false);
+        formFeedbackLabel.setManaged(false);
     }
 }

@@ -4,10 +4,10 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -54,11 +54,18 @@ public class ModifierEvenementController implements Initializable {
     private Button modifierBtn;
 
     @FXML
-    private Button annulerBtn;
+    private Label formFeedbackLabel;
 
     private final EvenementServices es = new EvenementServices();
     private Evenement currentEvenement;
     private int eventId = -1;
+    private boolean embeddedMode = false;
+    private Runnable onDone;
+
+    public void setEmbeddedMode(Runnable onDone) {
+        this.embeddedMode = true;
+        this.onDone = onDone;
+    }
 
     public void setEventData(int eventId) {
         this.eventId = eventId;
@@ -74,6 +81,7 @@ public class ModifierEvenementController implements Initializable {
                 "Terminée"
         ));
         statut_evenement.setValue("Sélectionner");
+        clearFeedback();
     }
 
     private void loadEventData() {
@@ -111,6 +119,8 @@ public class ModifierEvenementController implements Initializable {
 
     @FXML
     void modifierEvenement(ActionEvent event) {
+        clearFeedback();
+
         if (titre_evenement.getText().trim().isEmpty()) {
             showError("Le titre est obligatoire.", "Champ manquant");
             return;
@@ -200,10 +210,7 @@ public class ModifierEvenementController implements Initializable {
 
             es.modifier(evenementModifie);
             showSuccess("Événement modifié avec succès !");
-            
-            // Close the window after successful modification
-            Stage stage = (Stage) titre_evenement.getScene().getWindow();
-            stage.close();
+            closeOrReturn();
 
         } catch (SQLException ex) {
             showError("Erreur lors de la modification de l'événement : " + ex.getMessage(), "Erreur base de données");
@@ -212,26 +219,45 @@ public class ModifierEvenementController implements Initializable {
         }
     }
 
-    @FXML
-    void annulerModification(ActionEvent event) {
-        // Close the current window/stage
-        Stage stage = (Stage) annulerBtn.getScene().getWindow();
+    private void closeOrReturn() {
+        if (embeddedMode) {
+            if (onDone != null) {
+                onDone.run();
+            }
+            return;
+        }
+        Stage stage = (Stage) titre_evenement.getScene().getWindow();
         stage.close();
     }
 
     private void showError(String message, String title) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        showFeedback(message, false);
     }
 
     private void showSuccess(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Succès");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        showFeedback(message, true);
+    }
+
+    private void showFeedback(String message, boolean success) {
+        if (formFeedbackLabel == null) {
+            return;
+        }
+
+        formFeedbackLabel.setText(message);
+        formFeedbackLabel.getStyleClass().removeAll("form-feedback-error", "form-feedback-success");
+        formFeedbackLabel.getStyleClass().add(success ? "form-feedback-success" : "form-feedback-error");
+        formFeedbackLabel.setVisible(true);
+        formFeedbackLabel.setManaged(true);
+    }
+
+    private void clearFeedback() {
+        if (formFeedbackLabel == null) {
+            return;
+        }
+
+        formFeedbackLabel.setText("");
+        formFeedbackLabel.getStyleClass().removeAll("form-feedback-error", "form-feedback-success");
+        formFeedbackLabel.setVisible(false);
+        formFeedbackLabel.setManaged(false);
     }
 }

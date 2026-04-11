@@ -7,8 +7,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -17,10 +17,13 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.example.entities.AvisEvenement;
 import org.example.entities.Evenement;
 import org.example.entities.InscriptionEvenement;
@@ -146,6 +149,8 @@ public class EventManagementController implements Initializable {
     // ==================== FXML COMPONENTS ====================
     
     @FXML private VBox eventsMainSection;
+    @FXML private VBox eventFormSection;
+    @FXML private VBox eventFormContainer;
     @FXML private VBox inscriptionsDetailSection;
     @FXML private VBox reviewsDetailSection;
 
@@ -162,7 +167,14 @@ public class EventManagementController implements Initializable {
 
     @FXML private Button backFromInscriptionsBtn;
     @FXML private Button backFromReviewsBtn;
+    @FXML private Button backFromFormBtn;
     @FXML private Button ajouterEvenementBtn;
+
+    @FXML private Label totalEventsStatValue;
+    @FXML private Label totalInscriptionsStatValue;
+    @FXML private Label totalAvisStatValue;
+    @FXML private Label activeEventsStatValue;
+    @FXML private Label citiesEventsStatValue;
 
     // Search Fields
     @FXML private TextField eventsSearchField;
@@ -197,7 +209,7 @@ public class EventManagementController implements Initializable {
     private int reviewsPage = 0;
 
     private enum View {
-        EVENTS, INSCRIPTIONS, REVIEWS
+        EVENTS, FORM, INSCRIPTIONS, REVIEWS
     }
 
     private View currentView = View.EVENTS;
@@ -266,23 +278,18 @@ public class EventManagementController implements Initializable {
             if (loader.getLocation() == null) {
                 throw new RuntimeException("FXML file not found: /FXML/AjouterEvenements.fxml");
             }
-            Stage addEventStage = new Stage();
-            addEventStage.setTitle("Ajouter un Nouvel Événement");
-            Scene scene = new Scene(loader.load(), 700, 850);
-            addEventStage.setScene(scene);
-            addEventStage.initModality(Modality.APPLICATION_MODAL);
-            addEventStage.showAndWait();
+            VBox formRoot = loader.load();
+            AjouterEvenementsController controller = loader.getController();
+            controller.setEmbeddedMode(() -> {
+                loadData();
+                showView(View.EVENTS);
+            });
 
-            // Refresh data after adding event
-            loadData();
-            showView(View.EVENTS);
+            eventFormContainer.getChildren().setAll(formRoot);
+            showView(View.FORM);
         } catch (Exception e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erreur");
-            alert.setHeaderText("Erreur lors de l'ouverture du formulaire");
-            alert.setContentText("Détail: " + e.getMessage());
-            alert.showAndWait();
+            showStyledError("Erreur lors de l'ouverture du formulaire", "Détail: " + e.getMessage());
         }
     }
 
@@ -292,28 +299,21 @@ public class EventManagementController implements Initializable {
             if (loader.getLocation() == null) {
                 throw new RuntimeException("FXML file not found: /FXML/ModifierEvenements.fxml");
             }
-            Stage modifyEventStage = new Stage();
-            modifyEventStage.setTitle("Modifier l'Événement: " + eventTitle);
-            Scene scene = new Scene(loader.load(), 700, 850);
-            modifyEventStage.setScene(scene);
-            modifyEventStage.initModality(Modality.APPLICATION_MODAL);
+            VBox formRoot = loader.load();
             
             // Set event data in the controller
             ModifierEvenementController controller = loader.getController();
             controller.setEventData(eventId);
-            
-            modifyEventStage.showAndWait();
+            controller.setEmbeddedMode(() -> {
+                loadData();
+                showView(View.EVENTS);
+            });
 
-            // Refresh data after modifying event
-            loadData();
-            showView(View.EVENTS);
+            eventFormContainer.getChildren().setAll(formRoot);
+            showView(View.FORM);
         } catch (Exception e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erreur");
-            alert.setHeaderText("Erreur lors de l'ouverture du formulaire");
-            alert.setContentText("Détail: " + e.getMessage());
-            alert.showAndWait();
+            showStyledError("Erreur lors de l'ouverture du formulaire", "Détail: " + e.getMessage());
         }
     }
 
@@ -324,6 +324,8 @@ public class EventManagementController implements Initializable {
 
         eventsMainSection.setVisible(false);
         eventsMainSection.setManaged(false);
+        eventFormSection.setVisible(false);
+        eventFormSection.setManaged(false);
         inscriptionsDetailSection.setVisible(false);
         inscriptionsDetailSection.setManaged(false);
         reviewsDetailSection.setVisible(false);
@@ -333,6 +335,10 @@ public class EventManagementController implements Initializable {
             case EVENTS:
                 eventsMainSection.setVisible(true);
                 eventsMainSection.setManaged(true);
+                break;
+            case FORM:
+                eventFormSection.setVisible(true);
+                eventFormSection.setManaged(true);
                 break;
             case INSCRIPTIONS:
                 inscriptionsDetailSection.setVisible(true);
@@ -368,206 +374,194 @@ public class EventManagementController implements Initializable {
     // ==================== CARD BUILDERS ====================
 
     private VBox buildEventCard(EventItem item) {
-        VBox card = new VBox();
+        VBox card = new VBox(12);
         card.getStyleClass().add("list-card");
-        card.setSpacing(10);
         card.setPadding(new Insets(18));
+        card.setAlignment(Pos.TOP_CENTER);
 
-        // Title
+        String visualKey = resolveVisualKey(item.getTitre() + " " + item.getDescription());
+        StackPane coverPane = buildCoverPane(visualKey, resolveVisualText(visualKey));
+
         Label titleLabel = new Label(item.getTitre());
         titleLabel.getStyleClass().add("list-card-title");
-        titleLabel.setStyle("-fx-font-size: 16px;");
+        titleLabel.setWrapText(true);
+        titleLabel.setMaxWidth(Double.MAX_VALUE);
 
-        // Description
-        Label descLabel = new Label(item.getDescription());
+        Label descLabel = new Label(item.getDescription().isBlank() ? "Description non disponible." : item.getDescription());
         descLabel.getStyleClass().add("list-card-comment");
         descLabel.setWrapText(true);
-        descLabel.setStyle("-fx-font-size: 13px;");
+        descLabel.setMaxWidth(Double.MAX_VALUE);
 
-        // Details row 1: Location and Places
-        HBox details1Box = new HBox();
-        details1Box.setSpacing(12);
-        details1Box.setStyle("-fx-alignment: CENTER_LEFT;");
+        VBox detailsBox = new VBox(6,
+                createDetailLabel("📍 " + (item.getLieu().isBlank() ? "Lieu à confirmer" : item.getLieu()) + " • " + (item.getVille().isBlank() ? "Ville non précisée" : item.getVille())),
+                createDetailLabel("👥 Capacité : " + item.getPlacesMax() + " places"),
+                createDetailLabel("🗓️ Début : " + item.getDebut()),
+                createDetailLabel("⏳ Fin : " + item.getFin()),
+                createDetailLabel("🕒 Créé : " + item.getCreatedAt())
+        );
+        detailsBox.setAlignment(Pos.CENTER);
 
-        Label lieuLabel = new Label("📍 " + (item.getLieu().isEmpty() ? "N/A" : item.getLieu()));
-        lieuLabel.getStyleClass().add("list-card-detail");
-
-        Label placesLabel = new Label("Capacité: " + item.getPlacesMax());
-        placesLabel.getStyleClass().add("list-card-detail");
-
-        details1Box.getChildren().addAll(lieuLabel, placesLabel);
-
-        // Details row 2: Dates
-        HBox details2Box = new HBox();
-        details2Box.setSpacing(12);
-        details2Box.setStyle("-fx-alignment: CENTER_LEFT;");
-
-        Label startLabel = new Label("Début: " + item.getDebut());
-        startLabel.getStyleClass().add("list-card-detail");
-
-        Label endLabel = new Label("Fin: " + item.getFin());
-        endLabel.getStyleClass().add("list-card-detail");
-
-        details2Box.getChildren().addAll(startLabel, endLabel);
-
-        // Details row 3: Created at and Status
-        HBox details3Box = new HBox();
-        details3Box.setSpacing(12);
-        details3Box.setStyle("-fx-alignment: CENTER_LEFT;");
-
-        Label createdLabel = new Label("Créé: " + item.getCreatedAt());
-        createdLabel.getStyleClass().add("list-card-detail");
-
-        details3Box.getChildren().add(createdLabel);
-
-        // Status badge
-        Label statusLabel = new Label(item.getStatut());
-        statusLabel.getStyleClass().add("list-card-status");
-        statusLabel.getStyleClass().add("event-status");
+        Label statusLabel = new Label(item.getStatut().isBlank() ? "Statut non défini" : item.getStatut());
+        statusLabel.getStyleClass().addAll("list-card-status", "event-status");
         applyEventStatusStyle(statusLabel, item.getStatut());
 
-        HBox statusBox = new HBox();
-        statusBox.getChildren().add(statusLabel);
+        HBox statusBox = new HBox(statusLabel);
+        statusBox.setAlignment(Pos.CENTER);
 
-        // Action buttons - Row 1: Info buttons
-        HBox actionBox1 = new HBox();
-        actionBox1.setSpacing(10);
-        actionBox1.setStyle("-fx-alignment: CENTER_LEFT;");
-        actionBox1.setPadding(new Insets(8, 0, 0, 0));
-
-        Button inscriptionsBtn = new Button("\ud83d\udccb Voir les Inscriptions");
-        inscriptionsBtn.getStyleClass().add("action-btn-primary");
-        inscriptionsBtn.setStyle("-fx-font-size: 11px;");
+        Button inscriptionsBtn = new Button("� Inscriptions");
+        inscriptionsBtn.getStyleClass().addAll("event-action-btn", "event-btn-inscriptions");
         inscriptionsBtn.setOnAction(e -> showInscriptionsForEvent(item.getId()));
 
-        Button reviewsBtn = new Button("\u2b50 Voir les Avis");
-        reviewsBtn.getStyleClass().add("action-btn-secondary");
-        reviewsBtn.setStyle("-fx-font-size: 11px;");
+        Button reviewsBtn = new Button("💬 Avis");
+        reviewsBtn.getStyleClass().addAll("event-action-btn", "event-btn-avis");
         reviewsBtn.setOnAction(e -> showReviewsForEvent(item.getId()));
 
-        actionBox1.getChildren().addAll(inscriptionsBtn, reviewsBtn);
+        HBox actionBox1 = new HBox(10, inscriptionsBtn, reviewsBtn);
+        actionBox1.setAlignment(Pos.CENTER);
 
-        // Action buttons - Row 2: Modify and Delete buttons
-        HBox actionBox2 = new HBox();
-        actionBox2.setSpacing(10);
-        actionBox2.setStyle("-fx-alignment: CENTER_LEFT;");
-        actionBox2.setPadding(new Insets(8, 0, 0, 0));
-
-        Button modifierBtn = new Button("✏️ Modifier");
-        modifierBtn.getStyleClass().add("action-btn-primary");
-        modifierBtn.setStyle("-fx-font-size: 11px;");
+        Button modifierBtn = new Button("🛠 Modifier");
+        modifierBtn.getStyleClass().addAll("event-action-btn", "event-btn-edit");
         modifierBtn.setOnAction(e -> openModifyEventForm(item.getId(), item.getTitre()));
 
-        Button deleteBtn = new Button("🗑️ Supprimer");
-        deleteBtn.getStyleClass().add("action-btn-delete");
-        deleteBtn.setStyle("-fx-font-size: 11px;");
+        Button deleteBtn = new Button("🗑 Supprimer");
+        deleteBtn.getStyleClass().addAll("event-action-btn", "event-btn-delete");
         deleteBtn.setOnAction(e -> deleteEventWithConfirmation(item.getId(), item.getTitre()));
 
-        actionBox2.getChildren().addAll(modifierBtn, deleteBtn);
+        HBox actionBox2 = new HBox(10, modifierBtn, deleteBtn);
+        actionBox2.setAlignment(Pos.CENTER);
 
-        card.getChildren().addAll(titleLabel, descLabel, details1Box, details2Box, details3Box, statusBox, actionBox1, actionBox2);
+        card.getChildren().addAll(coverPane, titleLabel, descLabel, detailsBox, statusBox, actionBox1, actionBox2);
         return card;
     }
 
     private VBox buildInscriptionCard(InscriptionItem item) {
-        VBox card = new VBox();
+        VBox card = new VBox(12);
         card.getStyleClass().add("list-card");
-        card.setSpacing(8);
-        card.setPadding(new Insets(16));
+        card.setPadding(new Insets(18));
+        card.setAlignment(Pos.TOP_CENTER);
 
-        // Title with user name
-        Label titleLabel = new Label("👤 " + item.getUserName());
+        StackPane coverPane = buildCoverPane("inscription", "👥 Inscriptions");
+
+        Label titleLabel = new Label(item.getUserName().isBlank() ? "Participant" : item.getUserName());
         titleLabel.getStyleClass().add("list-card-title");
+        titleLabel.setWrapText(true);
 
-        // Details
-        HBox detailsBox = new HBox();
-        detailsBox.setSpacing(12);
-        detailsBox.setStyle("-fx-alignment: CENTER_LEFT;");
+        VBox detailsBox = new VBox(6,
+                createDetailLabel("🎫 Événement #" + item.getIdEvenement()),
+                createDetailLabel("🆔 Utilisateur #" + item.getIdUser()),
+                createDetailLabel("📅 Inscrit le : " + item.getDateInscription())
+        );
+        detailsBox.setAlignment(Pos.CENTER);
 
-        Label dateLabel = new Label("📅 " + item.getDateInscription());
-        dateLabel.getStyleClass().add("list-card-detail");
-
-        detailsBox.getChildren().add(dateLabel);
-
-        // Status badge
-        Label statusLabel = new Label(item.getStatut());
-        statusLabel.getStyleClass().add("list-card-status");
-        statusLabel.getStyleClass().add("inscription-status");
+        Label statusLabel = new Label(item.getStatut().isBlank() ? "Statut non défini" : item.getStatut());
+        statusLabel.getStyleClass().addAll("list-card-status", "inscription-status");
         applyInscriptionStatusStyle(statusLabel, item.getStatut());
 
-        HBox statusBox = new HBox();
-        statusBox.getChildren().add(statusLabel);
+        HBox statusBox = new HBox(statusLabel);
+        statusBox.setAlignment(Pos.CENTER);
 
-        // Delete button
-        HBox actionBox = new HBox();
-        actionBox.setSpacing(10);
-        actionBox.setStyle("-fx-alignment: CENTER_LEFT;");
-        actionBox.setPadding(new Insets(8, 0, 0, 0));
-
-        Button deleteBtn = new Button("🗑️ Supprimer");
-        deleteBtn.getStyleClass().add("action-btn-delete");
-        deleteBtn.setStyle("-fx-font-size: 11px;");
+        Button deleteBtn = new Button("🗑 Supprimer");
+        deleteBtn.getStyleClass().addAll("event-action-btn", "event-btn-delete");
         deleteBtn.setOnAction(e -> deleteInscriptionWithConfirmation(item.getId(), item.getUserName()));
 
-        actionBox.getChildren().add(deleteBtn);
+        HBox actionBox = new HBox(deleteBtn);
+        actionBox.setAlignment(Pos.CENTER);
 
-        card.getChildren().addAll(titleLabel, detailsBox, statusBox, actionBox);
+        card.getChildren().addAll(coverPane, titleLabel, detailsBox, statusBox, actionBox);
         return card;
     }
 
     private VBox buildReviewCard(AvisItem item) {
-        VBox card = new VBox();
+        VBox card = new VBox(12);
         card.getStyleClass().add("list-card");
-        card.setSpacing(8);
-        card.setPadding(new Insets(16));
+        card.setPadding(new Insets(18));
+        card.setAlignment(Pos.TOP_CENTER);
 
-        // Title with user name and rating
-        HBox titleBox = new HBox();
-        titleBox.setSpacing(12);
-        titleBox.setStyle("-fx-alignment: CENTER_LEFT;");
+        StackPane coverPane = buildCoverPane("review", "⭐ Avis & Notes");
 
-        Label titleLabel = new Label("👤 " + item.getUserName());
+        Label titleLabel = new Label(item.getUserName().isBlank() ? "Utilisateur" : item.getUserName());
         titleLabel.getStyleClass().add("list-card-title");
+        titleLabel.setWrapText(true);
 
         Label ratingLabel = new Label(buildStarRating(item.getNote()));
-        ratingLabel.getStyleClass().add("list-card-rating");
-        ratingLabel.getStyleClass().add("avis-rating");
+        ratingLabel.getStyleClass().addAll("list-card-rating", "avis-rating");
 
-        titleBox.getChildren().addAll(titleLabel, ratingLabel);
-
-        // Comment
-        Label commentLabel = new Label(item.getCommentaire());
+        Label commentLabel = new Label(item.getCommentaire().isBlank() ? "Aucun commentaire ajouté." : item.getCommentaire());
         commentLabel.getStyleClass().add("list-card-comment");
         commentLabel.setWrapText(true);
+        commentLabel.setMaxWidth(Double.MAX_VALUE);
 
-        // Details
-        HBox detailsBox = new HBox();
-        detailsBox.setSpacing(12);
-        detailsBox.setStyle("-fx-alignment: CENTER_LEFT;");
+        VBox detailsBox = new VBox(6,
+                createDetailLabel("🎫 Événement #" + item.getIdEvenement()),
+                createDetailLabel("🆔 Utilisateur #" + item.getIdUser()),
+                createDetailLabel("📅 Publié le : " + item.getCreatedAt())
+        );
+        detailsBox.setAlignment(Pos.CENTER);
 
-        Label dateLabel = new Label("📅 " + item.getCreatedAt());
-        dateLabel.getStyleClass().add("list-card-detail");
-
-        detailsBox.getChildren().add(dateLabel);
-
-        // Delete button
-        HBox actionBox = new HBox();
-        actionBox.setSpacing(10);
-        actionBox.setStyle("-fx-alignment: CENTER_LEFT;");
-        actionBox.setPadding(new Insets(8, 0, 0, 0));
-
-        Button deleteBtn = new Button("🗑️ Supprimer");
-        deleteBtn.getStyleClass().add("action-btn-delete");
-        deleteBtn.setStyle("-fx-font-size: 11px;");
+        Button deleteBtn = new Button("🗑 Supprimer");
+        deleteBtn.getStyleClass().addAll("event-action-btn", "event-btn-delete");
         deleteBtn.setOnAction(e -> deleteAvisWithConfirmation(item.getId(), item.getUserName()));
 
-        actionBox.getChildren().add(deleteBtn);
+        HBox actionBox = new HBox(deleteBtn);
+        actionBox.setAlignment(Pos.CENTER);
 
-        card.getChildren().addAll(titleBox, commentLabel, detailsBox, actionBox);
+        card.getChildren().addAll(coverPane, titleLabel, ratingLabel, commentLabel, detailsBox, actionBox);
         return card;
     }
 
     // ==================== STYLING HELPERS ====================
+
+    private Label createDetailLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add("list-card-detail");
+        label.setWrapText(true);
+        label.setMaxWidth(Double.MAX_VALUE);
+        return label;
+    }
+
+    private StackPane buildCoverPane(String visualKey, String text) {
+        StackPane coverPane = new StackPane();
+        coverPane.getStyleClass().addAll("back-card-cover", "back-cover-" + visualKey);
+        coverPane.setPrefHeight(86);
+        coverPane.setMinHeight(86);
+        coverPane.setMaxWidth(Double.MAX_VALUE);
+
+        Label coverText = new Label(text);
+        coverText.getStyleClass().add("back-card-cover-text");
+        coverPane.getChildren().add(coverText);
+        return coverPane;
+    }
+
+    private String resolveVisualKey(String value) {
+        String text = safe(value).toLowerCase();
+        if (text.contains("yoga") || text.contains("zen") || text.contains("pilates")) {
+            return "yoga";
+        }
+        if (text.contains("foot") || text.contains("football")) {
+            return "football";
+        }
+        if (text.contains("basket")) {
+            return "basket";
+        }
+        if (text.contains("run") || text.contains("course") || text.contains("marathon")) {
+            return "running";
+        }
+        if (text.contains("music") || text.contains("concert") || text.contains("festival")) {
+            return "music";
+        }
+        return "event";
+    }
+
+    private String resolveVisualText(String visualKey) {
+        return switch (visualKey) {
+            case "yoga" -> "☯ Yoga & Bien-être";
+            case "football" -> "⚽ Football";
+            case "basket" -> "🏀 Basketball";
+            case "running" -> "🏃 Course & Fitness";
+            case "music" -> "🎵 Événement spécial";
+            default -> "✨ Event Spotlight";
+        };
+    }
 
     private String buildStarRating(int note) {
         StringBuilder stars = new StringBuilder();
@@ -579,25 +573,27 @@ public class EventManagementController implements Initializable {
     }
 
     private void applyEventStatusStyle(Label statusLabel, String status) {
-        status = status.toLowerCase();
-        if (status.contains("active") || status.contains("ongoing")) {
-            statusLabel.getStyleClass().add("status-active");
-        } else if (status.contains("cancelled") || status.contains("closed")) {
+        status = safe(status).toLowerCase();
+        if (status.contains("termin")) {
+            statusLabel.getStyleClass().add("status-finished");
+        } else if (status.contains("annul") || status.contains("cancelled") || status.contains("closed")) {
             statusLabel.getStyleClass().add("status-error");
-        } else if (status.contains("draft") || status.contains("pending")) {
-            statusLabel.getStyleClass().add("status-warning");
+        } else if (status.contains("en cours") || status.contains("active") || status.contains("ongoing")) {
+            statusLabel.getStyleClass().add("status-active");
+        } else if (status.contains("à venir") || status.contains("a venir") || status.contains("draft") || status.contains("pending")) {
+            statusLabel.getStyleClass().add("status-upcoming");
         } else {
             statusLabel.getStyleClass().add("status-default");
         }
     }
 
     private void applyInscriptionStatusStyle(Label statusLabel, String status) {
-        status = status.toLowerCase();
-        if (status.contains("confirmed") || status.contains("accepted")) {
+        status = safe(status).toLowerCase();
+        if (status.contains("confirm") || status.contains("accepted")) {
             statusLabel.getStyleClass().add("status-active");
-        } else if (status.contains("rejected") || status.contains("cancelled")) {
+        } else if (status.contains("rejet") || status.contains("refus") || status.contains("cancelled") || status.contains("annul")) {
             statusLabel.getStyleClass().add("status-error");
-        } else if (status.contains("pending") || status.contains("waiting")) {
+        } else if (status.contains("pending") || status.contains("waiting") || status.contains("attente")) {
             statusLabel.getStyleClass().add("status-warning");
         } else {
             statusLabel.getStyleClass().add("status-default");
@@ -610,6 +606,54 @@ public class EventManagementController implements Initializable {
         loadEventsData();
         loadInscriptionsData();
         loadReviewsData();
+        updateDashboardStats();
+    }
+
+    private void updateDashboardStats() {
+        int totalEvents = eventsList.size();
+        int totalInscriptions = 0;
+        int totalAvis = 0;
+
+        try {
+            totalInscriptions = inscriptionServices.afficher().size();
+        } catch (SQLException ignored) {
+        }
+
+        try {
+            totalAvis = avisServices.afficher().size();
+        } catch (SQLException ignored) {
+        }
+
+        long activeEvents = eventsList.stream()
+                .filter(item -> {
+                    String status = safe(item.getStatut()).toLowerCase();
+                    return status.contains("à venir") || status.contains("a venir") || status.contains("en cours")
+                            || status.contains("active") || status.contains("ongoing");
+                })
+                .count();
+
+        long coveredCities = eventsList.stream()
+                .map(EventItem::getVille)
+                .map(EventManagementController::safe)
+                .filter(city -> !city.isBlank() && !city.equals("—"))
+                .distinct()
+                .count();
+
+        if (totalEventsStatValue != null) {
+            totalEventsStatValue.setText(String.valueOf(totalEvents));
+        }
+        if (totalInscriptionsStatValue != null) {
+            totalInscriptionsStatValue.setText(String.valueOf(totalInscriptions));
+        }
+        if (totalAvisStatValue != null) {
+            totalAvisStatValue.setText(String.valueOf(totalAvis));
+        }
+        if (activeEventsStatValue != null) {
+            activeEventsStatValue.setText(String.valueOf(activeEvents));
+        }
+        if (citiesEventsStatValue != null) {
+            citiesEventsStatValue.setText(String.valueOf(coveredCities));
+        }
     }
 
     private void loadEventsData() {
@@ -856,20 +900,17 @@ public class EventManagementController implements Initializable {
     // ==================== DELETE METHODS ====================
 
     private void deleteEventWithConfirmation(int eventId, String eventTitle) {
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Confirmation de suppression");
-        confirmAlert.setHeaderText("⚠️  Supprimer cet événement ?");
-        confirmAlert.setContentText("Êtes-vous sûr de vouloir supprimer \"" + eventTitle + "\" ?\n\nCette action est irréversible et supprimera aussi toutes les inscriptions et avis associés.");
-        confirmAlert.getDialogPane().setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 12;");
-        
-        stylizeAlert(confirmAlert);
+        boolean confirmed = showCustomConfirmation(
+                "Supprimer cet événement ?",
+                "Êtes-vous sûr de vouloir supprimer \"" + eventTitle + "\" ?\n\nCette action est irréversible et supprimera aussi toutes les inscriptions et avis associés.",
+                "Supprimer"
+        );
 
-        if (confirmAlert.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+        if (confirmed) {
             try {
                 evenementServices.supprimer(eventId);
                 showStyledSuccess("Événement supprimé ✓", "L'événement \"" + eventTitle + "\" a été supprimé avec succès.");
-                
-                // Refresh data
+
                 loadData();
                 showView(View.EVENTS);
             } catch (SQLException ex) {
@@ -879,21 +920,19 @@ public class EventManagementController implements Initializable {
     }
 
     private void deleteInscriptionWithConfirmation(int inscriptionId, String userName) {
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Confirmation de suppression");
-        confirmAlert.setHeaderText("⚠️  Supprimer cette inscription ?");
-        confirmAlert.setContentText("Êtes-vous sûr de vouloir supprimer l'inscription de \"" + userName + "\" ?\n\nCette action est irréversible.");
-        confirmAlert.getDialogPane().setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 12;");
-        
-        stylizeAlert(confirmAlert);
+        boolean confirmed = showCustomConfirmation(
+                "Supprimer cette inscription ?",
+                "Êtes-vous sûr de vouloir supprimer l'inscription de \"" + userName + "\" ?\n\nCette action est irréversible.",
+                "Supprimer"
+        );
 
-        if (confirmAlert.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+        if (confirmed) {
             try {
                 inscriptionServices.supprimer(inscriptionId);
                 showStyledSuccess("Inscription supprimée ✓", "L'inscription de \"" + userName + "\" a été supprimée avec succès.");
-                
-                // Refresh data
+
                 filterInscriptionsByEvent(currentSelectedEventId);
+                updateDashboardStats();
             } catch (SQLException ex) {
                 showStyledError("Erreur lors de la suppression", "Détail: " + ex.getMessage());
             }
@@ -901,144 +940,198 @@ public class EventManagementController implements Initializable {
     }
 
     private void deleteAvisWithConfirmation(int avisId, String userName) {
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Confirmation de suppression");
-        confirmAlert.setHeaderText("⚠️  Supprimer cet avis ?");
-        confirmAlert.setContentText("Êtes-vous sûr de vouloir supprimer l'avis de \"" + userName + "\" ?\n\nCette action est irréversible.");
-        confirmAlert.getDialogPane().setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 12;");
-        
-        stylizeAlert(confirmAlert);
+        boolean confirmed = showCustomConfirmation(
+                "Supprimer cet avis ?",
+                "Êtes-vous sûr de vouloir supprimer l'avis de \"" + userName + "\" ?\n\nCette action est irréversible.",
+                "Supprimer"
+        );
 
-        if (confirmAlert.showAndWait().get() == javafx.scene.control.ButtonType.OK) {
+        if (confirmed) {
             try {
                 avisServices.supprimer(avisId);
                 showStyledSuccess("Avis supprimé ✓", "L'avis de \"" + userName + "\" a été supprimé avec succès.");
-                
-                // Refresh data
+
                 filterReviewsByEvent(currentSelectedEventId);
+                updateDashboardStats();
             } catch (SQLException ex) {
                 showStyledError("Erreur lors de la suppression", "Détail: " + ex.getMessage());
             }
         }
     }
 
-    private void stylizeAlert(Alert alert) {
-        // Style the dialog pane
-        javafx.scene.control.DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.setStyle(
-            "-fx-background-color: linear-gradient(to bottom, #F5F8FF 0%, #FFFFFF 100%);" +
-            "-fx-border-color: rgba(0, 153, 204, 0.40);" +
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 8;" +
-            "-fx-padding: 20;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 12, 0, 0, 4);"
+    private boolean showCustomConfirmation(String title, String message, String confirmText) {
+        final boolean[] confirmed = {false};
+
+        Stage dialogStage = new Stage();
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        if (ajouterEvenementBtn != null && ajouterEvenementBtn.getScene() != null) {
+            dialogStage.initOwner(ajouterEvenementBtn.getScene().getWindow());
+        }
+        dialogStage.initStyle(StageStyle.TRANSPARENT);
+        dialogStage.setTitle(title);
+
+        Label badgeLabel = new Label("Confirmation");
+        badgeLabel.setStyle(
+                "-fx-background-color: rgba(220, 53, 69, 0.18);" +
+                "-fx-text-fill: #FFB7BE;" +
+                "-fx-font-size: 11px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 6 12;" +
+                "-fx-background-radius: 999px;"
         );
-        
-        // Style all buttons
-        dialogPane.getButtonTypes().forEach(buttonType -> {
-            javafx.scene.control.Button button = (javafx.scene.control.Button) dialogPane.lookupButton(buttonType);
-            if (button != null) {
-                if (buttonType == javafx.scene.control.ButtonType.OK) {
-                    button.setStyle(
-                        "-fx-background-color: linear-gradient(to bottom, rgba(244, 67, 54, 0.35) 0%, rgba(229, 57, 53, 0.45) 100%);" +
-                        "-fx-border-color: rgba(244, 67, 54, 0.55);" +
-                        "-fx-border-radius: 6;" +
-                        "-fx-background-radius: 6;" +
-                        "-fx-text-fill: #FFFFFF;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-padding: 10 24;" +
-                        "-fx-font-size: 12;" +
-                        "-fx-cursor: hand;"
-                    );
-                } else {
-                    button.setStyle(
-                        "-fx-background-color: rgba(200, 200, 200, 0.25);" +
-                        "-fx-border-color: rgba(150, 150, 150, 0.40);" +
-                        "-fx-border-radius: 6;" +
-                        "-fx-background-radius: 6;" +
-                        "-fx-text-fill: #333333;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-padding: 10 24;" +
-                        "-fx-font-size: 12;" +
-                        "-fx-cursor: hand;"
-                    );
-                }
-            }
+
+        Label titleLabel = new Label(title);
+        titleLabel.setWrapText(true);
+        titleLabel.setStyle(
+                "-fx-text-fill: #FFFFFF;" +
+                "-fx-font-size: 19px;" +
+                "-fx-font-weight: bold;"
+        );
+
+        Label messageLabel = new Label(message);
+        messageLabel.setWrapText(true);
+        messageLabel.setStyle(
+                "-fx-text-fill: rgba(226, 236, 248, 0.92);" +
+                "-fx-font-size: 13px;" +
+                "-fx-line-spacing: 4px;"
+        );
+
+        Button cancelButton = new Button("Annuler");
+        cancelButton.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.08);" +
+                "-fx-border-color: rgba(123,216,255,0.22);" +
+                "-fx-border-width: 1px;" +
+                "-fx-border-radius: 10px;" +
+                "-fx-background-radius: 10px;" +
+                "-fx-text-fill: #EAF4FF;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 10 18;" +
+                "-fx-cursor: hand;"
+        );
+        cancelButton.setOnAction(e -> dialogStage.close());
+
+        Button confirmButton = new Button(confirmText);
+        confirmButton.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, rgba(220, 53, 69, 0.94) 0%, rgba(164, 28, 44, 0.98) 100%);" +
+                "-fx-border-color: rgba(255, 180, 186, 0.55);" +
+                "-fx-border-width: 1px;" +
+                "-fx-border-radius: 10px;" +
+                "-fx-background-radius: 10px;" +
+                "-fx-text-fill: #FFFFFF;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 10 18;" +
+                "-fx-cursor: hand;"
+        );
+        confirmButton.setOnAction(e -> {
+            confirmed[0] = true;
+            dialogStage.close();
         });
+
+        HBox actions = new HBox(10, cancelButton, confirmButton);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+
+        VBox root = new VBox(16, badgeLabel, titleLabel, messageLabel, actions);
+        root.setPadding(new Insets(22));
+        root.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, rgba(18, 32, 62, 0.98) 0%, rgba(10, 19, 40, 0.98) 100%);" +
+                "-fx-border-color: rgba(123, 216, 255, 0.25);" +
+                "-fx-border-width: 1.2px;" +
+                "-fx-border-radius: 18px;" +
+                "-fx-background-radius: 18px;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 30, 0.15, 0, 10);"
+        );
+        root.setPrefWidth(480);
+
+        Scene scene = new Scene(root);
+        scene.setFill(Color.TRANSPARENT);
+        dialogStage.setScene(scene);
+        dialogStage.showAndWait();
+
+        return confirmed[0];
+    }
+
+    private void showCustomMessageDialog(String badgeText, String title, String message, boolean isError) {
+        Stage dialogStage = new Stage();
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        if (ajouterEvenementBtn != null && ajouterEvenementBtn.getScene() != null) {
+            dialogStage.initOwner(ajouterEvenementBtn.getScene().getWindow());
+        }
+        dialogStage.initStyle(StageStyle.TRANSPARENT);
+        dialogStage.setTitle(title);
+
+        String badgeColor = isError ? "rgba(220, 53, 69, 0.18)" : "rgba(46, 204, 113, 0.18)";
+        String badgeTextColor = isError ? "#FFB7BE" : "#A9F5C8";
+        String buttonBackground = isError
+                ? "linear-gradient(to bottom, rgba(220, 53, 69, 0.94) 0%, rgba(164, 28, 44, 0.98) 100%)"
+                : "linear-gradient(to bottom, rgba(46, 204, 113, 0.94) 0%, rgba(29, 139, 78, 0.98) 100%)";
+
+        Label badgeLabel = new Label(badgeText);
+        badgeLabel.setStyle(
+                "-fx-background-color: " + badgeColor + ";" +
+                "-fx-text-fill: " + badgeTextColor + ";" +
+                "-fx-font-size: 11px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 6 12;" +
+                "-fx-background-radius: 999px;"
+        );
+
+        Label titleLabel = new Label(title);
+        titleLabel.setWrapText(true);
+        titleLabel.setStyle(
+                "-fx-text-fill: #FFFFFF;" +
+                "-fx-font-size: 19px;" +
+                "-fx-font-weight: bold;"
+        );
+
+        Label messageLabel = new Label(message);
+        messageLabel.setWrapText(true);
+        messageLabel.setStyle(
+                "-fx-text-fill: rgba(226, 236, 248, 0.92);" +
+                "-fx-font-size: 13px;" +
+                "-fx-line-spacing: 4px;"
+        );
+
+        Button closeButton = new Button("Fermer");
+        closeButton.setStyle(
+                "-fx-background-color: " + buttonBackground + ";" +
+                "-fx-border-color: rgba(255, 255, 255, 0.24);" +
+                "-fx-border-width: 1px;" +
+                "-fx-border-radius: 10px;" +
+                "-fx-background-radius: 10px;" +
+                "-fx-text-fill: #FFFFFF;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 10 18;" +
+                "-fx-cursor: hand;"
+        );
+        closeButton.setOnAction(e -> dialogStage.close());
+
+        HBox actions = new HBox(closeButton);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+
+        VBox root = new VBox(16, badgeLabel, titleLabel, messageLabel, actions);
+        root.setPadding(new Insets(22));
+        root.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, rgba(18, 32, 62, 0.98) 0%, rgba(10, 19, 40, 0.98) 100%);" +
+                "-fx-border-color: rgba(123, 216, 255, 0.25);" +
+                "-fx-border-width: 1.2px;" +
+                "-fx-border-radius: 18px;" +
+                "-fx-background-radius: 18px;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 30, 0.15, 0, 10);"
+        );
+        root.setPrefWidth(480);
+
+        Scene scene = new Scene(root);
+        scene.setFill(Color.TRANSPARENT);
+        dialogStage.setScene(scene);
+        dialogStage.showAndWait();
     }
 
     private void showStyledSuccess(String title, String message) {
-        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-        successAlert.setTitle(title);
-        successAlert.setHeaderText(null);
-        successAlert.setContentText(message);
-        
-        javafx.scene.control.DialogPane dialogPane = successAlert.getDialogPane();
-        dialogPane.setStyle(
-            "-fx-background-color: linear-gradient(to bottom, #F0F8F0 0%, #FFFFFF 100%);" +
-            "-fx-border-color: rgba(76, 175, 80, 0.40);" +
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 8;" +
-            "-fx-padding: 20;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 10, 0, 0, 3);"
-        );
-        
-        // Style all buttons
-        dialogPane.getButtonTypes().forEach(buttonType -> {
-            javafx.scene.control.Button button = (javafx.scene.control.Button) dialogPane.lookupButton(buttonType);
-            if (button != null) {
-                button.setStyle(
-                    "-fx-background-color: linear-gradient(to bottom, rgba(76, 175, 80, 0.35) 0%, rgba(56, 142, 60, 0.45) 100%);" +
-                    "-fx-border-color: rgba(76, 175, 80, 0.55);" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-background-radius: 6;" +
-                    "-fx-text-fill: #FFFFFF;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-padding: 10 24;" +
-                    "-fx-font-size: 12;" +
-                    "-fx-cursor: hand;"
-                );
-            }
-        });
-        
-        successAlert.showAndWait();
+        showCustomMessageDialog("Succès", title, message, false);
     }
 
     private void showStyledError(String title, String message) {
-        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-        errorAlert.setTitle(title);
-        errorAlert.setHeaderText(null);
-        errorAlert.setContentText(message);
-        
-        javafx.scene.control.DialogPane dialogPane = errorAlert.getDialogPane();
-        dialogPane.setStyle(
-            "-fx-background-color: linear-gradient(to bottom, #FFEBEE 0%, #FFFFFF 100%);" +
-            "-fx-border-color: rgba(244, 67, 54, 0.40);" +
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 8;" +
-            "-fx-padding: 20;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 10, 0, 0, 3);"
-        );
-        
-        // Style all buttons
-        dialogPane.getButtonTypes().forEach(buttonType -> {
-            javafx.scene.control.Button button = (javafx.scene.control.Button) dialogPane.lookupButton(buttonType);
-            if (button != null) {
-                button.setStyle(
-                    "-fx-background-color: linear-gradient(to bottom, rgba(244, 67, 54, 0.30) 0%, rgba(229, 57, 53, 0.40) 100%);" +
-                    "-fx-border-color: rgba(244, 67, 54, 0.50);" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-background-radius: 6;" +
-                    "-fx-text-fill: #FFFFFF;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-padding: 10 24;" +
-                    "-fx-font-size: 12;" +
-                    "-fx-cursor: hand;"
-                );
-            }
-        });
-        
-        errorAlert.showAndWait();
+        showCustomMessageDialog("Erreur", title, message, true);
     }
 
     private static String safe(String s) {
