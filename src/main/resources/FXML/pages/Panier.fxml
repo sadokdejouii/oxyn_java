@@ -45,8 +45,8 @@
 
         <VBox spacing="12" styleClass="saas-chart-card">
             <Label styleClass="saas-card-title" text="Livraison &amp; paiement" />
-            <Label styleClass="saas-stat-hint" text="Adresse de livraison" />
-            <TextArea fx:id="adresseField" prefRowCount="3" promptText="Rue, ville, code postal…" wrapText="true" />
+            <Label styleClass="saas-stat-hint" text="Adresse au format : quartier, ville, pays (trois parties séparées par des virgules, max. 255 caractères)" wrapText="true" />
+            <TextArea fx:id="adresseField" prefRowCount="3" promptText="Ex. cité Ibn Khaldoun, Tunis, Tunisie" wrapText="true" />
             <Label styleClass="saas-stat-hint" text="Mode de paiement" />
             <ComboBox fx:id="paiementCombo" prefWidth="280" />
             <HBox alignment="CENTER_RIGHT" spacing="10">

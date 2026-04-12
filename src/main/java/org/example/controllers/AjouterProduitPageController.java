@@ -153,7 +153,7 @@ public class AjouterProduitPageController {
             imagePreview.setImage(null);
         }
         if (imageFileLabel != null) {
-            imageFileLabel.setText("Aucune image — le défaut « default.jpg » sera utilisé si présent dans /images.");
+            imageFileLabel.setText("Aucun fichier sélectionné — « default.jpg » sera utilisé si présent dans /images.");
         }
         statutField.setText("Disponible");
         dateField.setText(LocalDate.now().toString());

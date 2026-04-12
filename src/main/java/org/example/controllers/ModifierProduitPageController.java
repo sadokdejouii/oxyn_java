@@ -4,9 +4,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import org.example.entities.produits;
 import org.example.services.ProduitsService;
+import org.example.utils.ProductImageStorage;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.sql.SQLException;
 
 public class ModifierProduitPageController {
@@ -15,29 +22,35 @@ public class ModifierProduitPageController {
 
     @FXML
     private TextField nomField;
-    
+
     @FXML
     private TextArea descriptionField;
-    
+
     @FXML
     private TextField prixField;
-    
+
     @FXML
     private TextField quantiteField;
-    
+
     @FXML
     private TextField imageField;
-    
+
+    @FXML
+    private ImageView imagePreview;
+
     @FXML
     private TextField statutField;
-    
+
     @FXML
     private TextField dateField;
-    
+
     private ProduitsService produitsService;
     private MainLayoutController mainLayoutController;
     private produits produitActuel;
     private String[] valeursInitiales;
+
+    /** Nouvelle image choisie (copie en base au moment de l’enregistrement). */
+    private Path selectedImageSource;
 
     public ModifierProduitPageController() {
         this.produitsService = new ProduitsService();
@@ -54,6 +67,7 @@ public class ModifierProduitPageController {
     public void setProduit(produits produit) {
         this.produitActuel = produit;
         if (produit != null) {
+            selectedImageSource = null;
             populateFields();
             saveInitialValues();
         }
@@ -61,12 +75,19 @@ public class ModifierProduitPageController {
 
     @FXML
     public void initialize() {
-        // Utiliser le produit temporaire s'il existe
+        if (imageField != null) {
+            imageField.textProperty().addListener((obs, oldV, newV) -> {
+                if (selectedImageSource == null) {
+                    refreshImagePreview();
+                }
+            });
+        }
         if (produitTemporaire != null) {
             this.produitActuel = produitTemporaire;
+            selectedImageSource = null;
             populateFields();
             saveInitialValues();
-            produitTemporaire = null; // Nettoyer après utilisation
+            produitTemporaire = null;
         }
     }
 
@@ -79,18 +100,54 @@ public class ModifierProduitPageController {
             imageField.setText(produitActuel.getImage_produit());
             statutField.setText(produitActuel.getStatut_produit());
             dateField.setText(produitActuel.getDate_creation_produit());
+            selectedImageSource = null;
+            refreshImagePreview();
+        }
+    }
+
+    private void refreshImagePreview() {
+        if (imagePreview == null) {
+            return;
+        }
+        imagePreview.setImage(null);
+        if (imageField == null) {
+            return;
+        }
+        String t = imageField.getText();
+        if (t != null && !t.isBlank()) {
+            ProductImageStorage.applyToImageView(imagePreview, t.trim());
+        }
+    }
+
+    @FXML
+    private void handleChooseImage() {
+        Window owner = nomField != null && nomField.getScene() != null
+                ? nomField.getScene().getWindow()
+                : null;
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choisir une image produit");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.bmp"),
+                new FileChooser.ExtensionFilter("Tous les fichiers", "*.*"));
+        var file = chooser.showOpenDialog(owner);
+        if (file == null) {
+            return;
+        }
+        selectedImageSource = file.toPath();
+        if (imagePreview != null) {
+            imagePreview.setImage(new Image(file.toURI().toString(), 220, 220, true, true));
         }
     }
 
     private void saveInitialValues() {
         if (produitActuel != null) {
             valeursInitiales = new String[]{
-                nomField.getText(),
-                descriptionField.getText(),
-                prixField.getText(),
-                quantiteField.getText(),
-                imageField.getText(),
-                statutField.getText()
+                    nomField.getText(),
+                    descriptionField.getText(),
+                    prixField.getText(),
+                    quantiteField.getText(),
+                    imageField.getText(),
+                    statutField.getText()
             };
         }
     }
@@ -102,24 +159,35 @@ public class ModifierProduitPageController {
         }
 
         try {
-            // Mettre à jour le produit avec les nouvelles valeurs
+            String imageName;
+            if (selectedImageSource != null) {
+                try {
+                    imageName = ProductImageStorage.copyUploadedFile(selectedImageSource);
+                } catch (IOException ex) {
+                    showAlert("Erreur", "Impossible d’enregistrer l’image : " + ex.getMessage());
+                    return;
+                }
+                selectedImageSource = null;
+                imageField.setText(imageName);
+            } else {
+                imageName = imageField.getText().trim().isEmpty() ? "default.jpg" : imageField.getText().trim();
+            }
+
             produitActuel.setNom_produit(nomField.getText().trim());
             produitActuel.setDescription_produit(descriptionField.getText().trim());
             produitActuel.setPrix_produit(Double.parseDouble(prixField.getText().trim()));
             produitActuel.setQuantite_stock_produit(Integer.parseInt(quantiteField.getText().trim()));
-            produitActuel.setImage_produit(imageField.getText().trim().isEmpty() ? "default.jpg" : imageField.getText().trim());
+            produitActuel.setImage_produit(imageName);
             produitActuel.setStatut_produit(statutField.getText().trim());
 
-            // Mettre à jour dans la base de données
             produitsService.modifier(produitActuel);
-            
+
             showAlert("Succès", "Produit modifié avec succès !");
-            
-            // Retourner à la page boutique
+
             if (mainLayoutController != null) {
                 mainLayoutController.navigate("/FXML/pages/BoutiquePage.fxml", "Boutique", null);
             }
-            
+
         } catch (NumberFormatException e) {
             showAlert("Erreur", "Veuillez vérifier les champs numériques (prix et quantité)");
         } catch (SQLException e) {
@@ -129,7 +197,6 @@ public class ModifierProduitPageController {
 
     @FXML
     private void handleCancel() {
-        // Retourner à la page boutique
         if (mainLayoutController != null) {
             mainLayoutController.navigate("/FXML/pages/BoutiquePage.fxml", "Boutique", null);
         }
@@ -137,7 +204,6 @@ public class ModifierProduitPageController {
 
     @FXML
     private void handleReset() {
-        // Restaurer les valeurs initiales
         if (valeursInitiales != null) {
             nomField.setText(valeursInitiales[0]);
             descriptionField.setText(valeursInitiales[1]);
@@ -146,6 +212,8 @@ public class ModifierProduitPageController {
             imageField.setText(valeursInitiales[4]);
             statutField.setText(valeursInitiales[5]);
         }
+        selectedImageSource = null;
+        refreshImagePreview();
     }
 
     private boolean validateForm() {

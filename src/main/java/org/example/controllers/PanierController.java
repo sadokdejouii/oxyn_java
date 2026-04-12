@@ -10,12 +10,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.entities.LignePanier;
 import org.example.entities.PanierSession;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
 import org.example.services.SessionContext;
+import org.example.utils.AdresseCommandeValidator;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -60,6 +62,16 @@ public class PanierController {
         colSousTotal.setCellValueFactory(new PropertyValueFactory<>("sousTotal"));
         paiementCombo.setItems(FXCollections.observableArrayList("En ligne", "En espèces"));
         paiementCombo.getSelectionModel().selectFirst();
+        if (adresseField != null) {
+            int max = AdresseCommandeValidator.LONGUEUR_MAX;
+            adresseField.setTextFormatter(new TextFormatter<>(change -> {
+                String next = change.getControlNewText();
+                if (next.length() > max) {
+                    return null;
+                }
+                return change;
+            }));
+        }
         rafraichirPanier();
     }
 
@@ -84,12 +96,19 @@ public class PanierController {
     }
 
     private void validerCommande() {
-        String adresse = adresseField.getText() != null ? adresseField.getText().trim() : "";
+        String rawAdresse = adresseField.getText();
+        String erreurAdresse = AdresseCommandeValidator.valider(rawAdresse);
         String modePaiement = paiementCombo.getValue();
-        if (adresse.isEmpty() || modePaiement == null) {
-            showAlert(Alert.AlertType.WARNING, "Champs requis", "Veuillez renseigner l’adresse et choisir un mode de paiement.");
+        if (modePaiement == null) {
+            showAlert(Alert.AlertType.WARNING, "Champs requis", "Veuillez choisir un mode de paiement.");
             return;
         }
+        if (erreurAdresse != null) {
+            showAlert(Alert.AlertType.WARNING, "Adresse de livraison", erreurAdresse);
+            adresseField.requestFocus();
+            return;
+        }
+        String adresse = AdresseCommandeValidator.formaterPourEnregistrement(rawAdresse);
         if (panier.estVide()) {
             showAlert(Alert.AlertType.INFORMATION, "Panier vide", "Ajoutez des produits depuis la boutique avant de valider.");
             return;

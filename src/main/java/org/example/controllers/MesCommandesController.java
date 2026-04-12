@@ -74,7 +74,7 @@ public class MesCommandesController {
         } catch (SQLException e) {
             Label err = new Label("Impossible de charger les commandes : " + e.getMessage());
             err.setWrapText(true);
-            err.setStyle("-fx-text-fill: #ef9a9a;");
+            err.setStyle("-fx-text-fill: #c62828;");
             ordersContainer.getChildren().add(err);
         }
     }
