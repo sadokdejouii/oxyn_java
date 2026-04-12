@@ -26,8 +26,18 @@ public class LoginController {
         if (user.isEmpty()) {
             user = "client";
         }
-        UserRole role = user.equalsIgnoreCase("admin") ? UserRole.ADMIN : UserRole.CLIENT;
-        String display = user.equalsIgnoreCase("admin") ? "Administrator" : capitalize(user);
+        UserRole role;
+        String display;
+        if (user.equalsIgnoreCase("admin")) {
+            role = UserRole.ADMIN;
+            display = "Administrator";
+        } else if (user.equalsIgnoreCase("encadrant")) {
+            role = UserRole.ENCADRANT;
+            display = "Encadrant";
+        } else {
+            role = UserRole.CLIENT;
+            display = capitalize(user);
+        }
         SessionContext.getInstance().login(display, role);
 
         try {

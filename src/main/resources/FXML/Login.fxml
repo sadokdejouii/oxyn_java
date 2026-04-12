@@ -32,7 +32,7 @@
         </StackPane>
         <Label styleClass="login-eyebrow" text="OXYN" />
         <Label styleClass="login-title" text="Sign in" />
-        <Label styleClass="login-sub" text="Use admin / admin for Back Office, or any other username for Front Office (client)." wrapText="true" />
+        <Label styleClass="login-sub" text="Use admin / admin for Back Office, encadrant for Encadrant, or any other username for Front Office (client)." wrapText="true" />
 
         <Region prefHeight="8" />
 
@@ -43,11 +43,12 @@
 
         <VBox spacing="8">
             <Label styleClass="field-label" text="Password" />
-            <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="login-field" onAction="#handleLogin" />
+            <PasswordField fx:id="passwordField" promptText="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" styleClass="login-field" onAction="#handleLogin" />
         </VBox>
 
         <Button defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="login-primary" text="Continue" />
 
-        <Label styleClass="login-hint" text="Role: username “admin” → Admin · any other name → Client" wrapText="true" />
+        <Label styleClass="login-hint" text="Role: username â€œadminâ€ â†’ Admin Â· any other name â†’ Client" wrapText="true" />
     </VBox>
 </VBox>
+

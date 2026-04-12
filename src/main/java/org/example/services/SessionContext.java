@@ -43,4 +43,8 @@ public final class SessionContext {
     public boolean isAdmin() {
         return role == UserRole.ADMIN;
     }
+
+    public boolean isEncadrant() {
+        return role == UserRole.ENCADRANT;
+    }
 }

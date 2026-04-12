@@ -2,9 +2,14 @@ package org.example.services;
 
 public enum UserRole {
     ADMIN,
-    CLIENT;
+    CLIENT,
+    ENCADRANT;
 
     public String displayLabel() {
-        return this == ADMIN ? "Admin" : "Client";
+        switch (this) {
+            case ADMIN: return "Admin";
+            case ENCADRANT: return "Encadrant";
+            default: return "Client";
+        }
     }
 }
