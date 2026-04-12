@@ -14,6 +14,9 @@ import org.example.utils.UserDialogHelper;
 
 import java.sql.SQLException;
 
+/**
+ * Inscription client (même flux que {@code main}).
+ */
 public class RegisterController {
 
     @FXML

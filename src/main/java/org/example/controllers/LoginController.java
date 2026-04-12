@@ -23,6 +23,9 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+/**
+ * Connexion standard (e-mail + mot de passe), alignée sur le flux {@code main} / DAO.
+ */
 public class LoginController implements Initializable {
 
     private static final boolean LOGIN_THEME = true;
@@ -83,15 +86,7 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
-
-            Node source = emailField != null ? emailField : passwordField;
-            Stage stage = (Stage) source.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/MainLayout.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root, 1530, 880);
-            stage.setScene(scene);
-            stage.setTitle("OXYN — " + SessionContext.getInstance().getRole().displayLabel());
-            stage.show();
+            openMain(event);
         } catch (SQLException e) {
             showError("Erreur base de données",
                     e.getMessage() != null ? e.getMessage() : e.toString());
@@ -114,6 +109,27 @@ public class LoginController implements Initializable {
             AuthNavigation.showRegister(stage);
         } catch (Exception e) {
             showError("Navigation", e.getMessage() != null ? e.getMessage() : e.toString());
+        }
+    }
+
+    private void openMain(ActionEvent event) {
+        try {
+            Node source = emailField != null ? emailField : passwordField;
+            if (source == null || source.getScene() == null) {
+                source = (Node) event.getSource();
+            }
+            Stage stage = (Stage) source.getScene().getWindow();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/MainLayout.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root, 1530, 880);
+            SessionContext ctx = SessionContext.getInstance();
+            stage.setScene(scene);
+            stage.setTitle("OXYN — " + ctx.getRole().displayLabel());
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur",
+                    "Impossible d’ouvrir l’application : " + e.getMessage());
         }
     }
 

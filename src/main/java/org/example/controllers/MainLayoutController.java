@@ -37,6 +37,8 @@ import java.util.Set;
 public class MainLayoutController implements Initializable {
 
     private static final String PAGE_ADMIN_DASH = "/FXML/pages/AdminDashboard.fxml";
+    private static final String PAGE_PLACEHOLDER = "/FXML/pages/PlaceholderPage.fxml";
+    private static final String PAGE_DISCUSSION = "/FXML/pages/DiscussionPage.fxml";
     private static final String PAGE_STOCK = "/FXML/pages/AdminSalleHub.fxml";
     private static final String PAGE_EVENTS_ADMIN = "/FXML/pages/EventManagement.fxml";
     private static final String PAGE_USERS = "/FXML/pages/UserManagement.fxml";
@@ -211,19 +213,19 @@ public class MainLayoutController implements Initializable {
         mainNavButtons.add(encEvenementsBtn);
         mainNavButtons.add(encGroupeBtn);
         mainNavButtons.add(encSalleBtn);
-        mainNavButtons.add(encSalleBtn);
         mainNavButtons.add(encBoutiqueBtn);
         mainNavButtons.add(encForumBtn);
 
         applyRoleShell(ctx);
         wireSearch();
+        registerDiscussionFromPlanningHook(ctx);
+
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
             navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
-            navigate(PAGE_CLIENT_HOME, "Accueil encadrant", homeBtn);
         } else {
-            navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
+            navigate(PAGE_PLANNING, "Planning", planningBtn);
         }
     }
 
@@ -242,7 +244,40 @@ public class MainLayoutController implements Initializable {
         String modeLabel = admin ? "ADMINISTRATOR" : encadrant ? "ENCADRANT" : "CLIENT";
         shellModeLabel.setText(modeLabel);
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        footerText.setText(admin ? "Back office session" : encadrant ? "Encadrant session" : "Front office session");
+        footerText.setText(admin ? "Back office session" : encadrant ? "Encadrant — planning" : "Front office session");
+    }
+
+    private void registerDiscussionFromPlanningHook(SessionContext ctx) {
+        ctx.setOpenDiscussionFromPlanningAction(() -> {
+            try {
+                Button nav = ctx.isAdmin() ? adminPlanningBtn
+                        : ctx.isEncadrant() ? encSalleBtn : planningBtn;
+                PageLoader.show(contentArea, PAGE_DISCUSSION, this);
+                topbarPageTitle.setText("Discussion");
+                setActiveNav(nav);
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (footerText != null) {
+                    footerText.setText("Page load failed");
+                }
+                info("Navigation error", e.getMessage() != null ? e.getMessage() : e.toString());
+            }
+        });
+    }
+
+    private void navigatePlaceholder(String moduleTitle, Button navButton) {
+        try {
+            PlaceholderContext.setModuleLabel(moduleTitle);
+            PageLoader.show(contentArea, PAGE_PLACEHOLDER, this);
+            topbarPageTitle.setText(moduleTitle);
+            setActiveNav(navButton);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (footerText != null) {
+                footerText.setText("Page load failed");
+            }
+            info("Navigation error", e.getMessage() != null ? e.getMessage() : e.toString());
+        }
     }
 
     private void wireSearch() {
@@ -312,9 +347,8 @@ public class MainLayoutController implements Initializable {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
             navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
-            navigate(PAGE_CLIENT_HOME, "Accueil encadrant", homeBtn);
         } else {
-            navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
+            navigate(PAGE_PLANNING, "Planning", planningBtn);
         }
     }
 
@@ -461,12 +495,12 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleEncBoutique() {
-        navigate(PAGE_PLANNING, "Boutique", encBoutiqueBtn);
+        navigate(PAGE_CLIENT_BOUTIQUE, "Boutique", encBoutiqueBtn);
     }
 
     @FXML
     private void handleEncForum() {
-        navigate(PAGE_PLANNING, "Forum", encForumBtn);
+        navigate(PAGE_FORUM, "Forum", encForumBtn);
     }
 
     @FXML
