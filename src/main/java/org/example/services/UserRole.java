@@ -1,12 +1,11 @@
 package org.example.services;
 
 import org.example.entities.Admin;
-import org.example.entities.Client;
 import org.example.entities.Coach;
 import org.example.entities.User;
 
 /**
- * Rôle applicatif (aligné sur {@code oxyn_java} / branche {@code main}) + parsing Symfony {@code roles_user}.
+ * Rôle applicatif (aligné sur {@code main}) + parsing Symfony {@code roles_user}.
  */
 public enum UserRole {
     ADMIN,

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll,pp-page" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ProfilePageController">
+    <VBox spacing="24" styleClass="page-root,pp-root">
+        <padding>
+            <Insets bottom="12" left="8" right="8" top="8" />
+        </padding>
+
+        <!-- Hero -->
+        <HBox styleClass="pp-hero">
+            <StackPane styleClass="pp-avatar-wrap">
+                <Label fx:id="avatarLabel" styleClass="pp-avatar-text" text="?" />
+            </StackPane>
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label styleClass="pp-kicker" text="MON COMPTE" />
+                <Label styleClass="page-hero-title,pp-title" text="Mon profil" />
+                <Label fx:id="subtitleLabel" styleClass="page-hero-sub,pp-hero-sub" text="Chargement…" wrapText="true" />
+            </VBox>
+        </HBox>
+
+        <HBox styleClass="pp-columns">
+            <!-- Account summary -->
+            <VBox maxWidth="Infinity" styleClass="saas-chart-card,pp-card" HBox.hgrow="ALWAYS" minWidth="220">
+                <Label styleClass="pp-card-head" text="STATUT DU COMPTE" />
+                <VBox styleClass="pp-kv-list">
+                    <VBox spacing="8" styleClass="pp-kv-row">
+                        <Label styleClass="pp-kv-key" text="Statut" />
+                        <HBox spacing="10">
+                            <Label fx:id="statusValue" styleClass="pp-inline-badge" text="—" />
+                        </HBox>
+                    </VBox>
+                    <VBox spacing="8" styleClass="pp-kv-row,pp-kv-row-last">
+                        <Label styleClass="pp-kv-key" text="Rôle" />
+                        <HBox spacing="10">
+                            <Label fx:id="roleValue" styleClass="pp-inline-badge" text="—" />
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <!-- Editable profile + security -->
+            <VBox maxWidth="Infinity" styleClass="saas-chart-card,pp-card" HBox.hgrow="ALWAYS" minWidth="320">
+                <Label styleClass="pp-card-head" text="INFORMATIONS &amp; SÉCURITÉ" />
+                <Label styleClass="pp-card-sub" text="Modifiez votre e-mail, vos coordonnées et, si besoin, votre mot de passe. Laissez les champs de nouveau mot de passe vides pour le conserver." wrapText="true" />
+                <VBox spacing="18" styleClass="pp-form-block">
+                    <VBox spacing="6" styleClass="pp-field-stack">
+                        <Label styleClass="field-label" text="Adresse e-mail *" />
+                        <TextField fx:id="emailField" styleClass="login-field" />
+                        <Label fx:id="emailErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+                    <HBox spacing="16" styleClass="pp-form-row">
+                        <VBox spacing="6" styleClass="pp-field-stack" HBox.hgrow="ALWAYS">
+                            <Label styleClass="field-label" text="Nom *" />
+                            <TextField fx:id="nomField" styleClass="login-field" />
+                            <Label fx:id="nomErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                        </VBox>
+                        <VBox spacing="6" styleClass="pp-field-stack" HBox.hgrow="ALWAYS">
+                            <Label styleClass="field-label" text="Prénom *" />
+                            <TextField fx:id="prenomField" styleClass="login-field" />
+                            <Label fx:id="prenomErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                        </VBox>
+                    </HBox>
+                    <VBox spacing="6" styleClass="pp-field-stack">
+                        <Label styleClass="field-label" text="Téléphone" />
+                        <TextField fx:id="telephoneField" promptText="Optionnel" styleClass="login-field" />
+                        <Label fx:id="telephoneErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+
+                    <Label styleClass="pp-section-title" text="MOT DE PASSE" />
+                    <Label styleClass="pp-section-hint" text="Renseignez le mot de passe actuel uniquement si vous souhaitez en définir un nouveau." wrapText="true" />
+                    <VBox spacing="6" styleClass="pp-field-stack">
+                        <Label styleClass="field-label" text="Mot de passe actuel" />
+                        <PasswordField fx:id="currentPasswordField" styleClass="login-field" />
+                        <Label fx:id="currentPasswordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                    </VBox>
+                    <HBox spacing="16" styleClass="pp-form-row">
+                        <VBox spacing="6" styleClass="pp-field-stack" HBox.hgrow="ALWAYS">
+                            <Label styleClass="field-label" text="Nouveau mot de passe" />
+                            <PasswordField fx:id="newPasswordField" styleClass="login-field" />
+                            <Label fx:id="newPasswordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                        </VBox>
+                        <VBox spacing="6" styleClass="pp-field-stack" HBox.hgrow="ALWAYS">
+                            <Label styleClass="field-label" text="Confirmation" />
+                            <PasswordField fx:id="confirmPasswordField" styleClass="login-field" />
+                            <Label fx:id="confirmPasswordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </HBox>
+
+        <HBox alignment="CENTER_RIGHT" styleClass="pp-footer">
+            <Label styleClass="pp-hint-muted" text="E-mail, nom et prénom obligatoires. Mot de passe : laisser vide pour ne pas changer." />
+            <Button fx:id="saveButton" onAction="#handleSave" styleClass="primary-toolbar-btn,pp-save-btn" text="Enregistrer les modifications" />
+        </HBox>
+    </VBox>
+</ScrollPane>

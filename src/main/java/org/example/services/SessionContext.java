@@ -7,8 +7,8 @@ import org.example.entities.User;
 import java.util.Objects;
 
 /**
- * Session après connexion : modèle {@link User} (comme {@code main}), propriété JavaFX pour la barre du haut,
- * et hook navigation discussion depuis le planning.
+ * Session après connexion : modèle {@link User}, propriété JavaFX pour la barre du haut,
+ * hook navigation discussion depuis le planning, et identifiant client pour les modules boutique/commandes.
  */
 public final class SessionContext {
 
@@ -130,6 +130,14 @@ public final class SessionContext {
             return currentUser.getEmail();
         }
         return legacyEmail;
+    }
+
+    /**
+     * Identifiant client pour boutique / commandes (API attendue par la branche {@code main}).
+     */
+    public int getClientDatabaseId() {
+        int id = getUserId();
+        return id > 0 ? id : 1;
     }
 
     public boolean isAdmin() {

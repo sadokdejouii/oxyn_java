@@ -12,6 +12,7 @@ public final class MyDataBase {
     private static final String HOST = "localhost";
     private static final String PORT = "3306";
     private static final String DB_NAME = "oxyn";
+
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";
 
@@ -23,6 +24,10 @@ public final class MyDataBase {
     private Connection connection;
 
     private MyDataBase() {
+        connect();
+    }
+
+    private void connect() {
         try {
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             System.out.println("Connexion à la base « " + DB_NAME + " » établie.");
@@ -40,6 +45,36 @@ public final class MyDataBase {
     }
 
     public Connection getConnection() {
+        try {
+            if (connection == null || connection.isClosed() || !connection.isValid(1)) {
+                connect();
+            }
+        } catch (SQLException e) {
+            connect();
+        }
         return connection;
+    }
+
+    /** Reset after writes so next read gets fresh data */
+    public void resetConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException ignored) {
+        }
+        connect();
+    }
+
+    public static String getURL() {
+        return URL;
+    }
+
+    public static String getUSERNAME() {
+        return USERNAME;
+    }
+
+    public static String getPASSWORD() {
+        return PASSWORD;
     }
 }

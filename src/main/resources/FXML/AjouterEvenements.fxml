@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controllers.AjouterEvenementsController"
+      styleClass="form-dialog"
+    alignment="TOP_CENTER"
+      stylesheets="@../css/dashboard-saas.css">
+
+    <ScrollPane fitToWidth="true"
+                hbarPolicy="NEVER"
+                styleClass="page-scroll">
+
+        <VBox styleClass="form-shell" spacing="0">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <VBox styleClass="form-container" spacing="16">
+
+                <!-- Form Title -->
+                <Label styleClass="form-title" text="Ajouter un Nouvel Événement" />
+
+                <Label fx:id="formFeedbackLabel"
+                       managed="false"
+                       styleClass="form-feedback"
+                       text=""
+                       visible="false"
+                       wrapText="true" />
+
+                <!-- Event Details Section -->
+                <VBox styleClass="form-group" spacing="12">
+                    <Label styleClass="form-section-title" text="Détails de l'Événement" />
+
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-label" text="Titre *" />
+                        <TextField fx:id="titre_evenement"
+                                   maxWidth="Infinity"
+                                   promptText="Entrez le titre (max 30 caractères)"
+                                   styleClass="form-input" />
+                    </VBox>
+
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-label" text="Description *" />
+                        <TextArea fx:id="description_evenement"
+                                  maxWidth="Infinity"
+                                  prefRowCount="3"
+                                  promptText="Entrez la description (max 100 caractères)"
+                                  styleClass="form-input"
+                                  wrapText="true" />
+                    </VBox>
+
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-label" text="Statut *" />
+                        <ComboBox fx:id="statut_evenement"
+                                  maxWidth="Infinity"
+                                  promptText="Sélectionnez le statut"
+                                  styleClass="form-combo-box" />
+                    </VBox>
+                </VBox>
+
+                <!-- Dates Section -->
+                <VBox styleClass="form-group" spacing="12">
+                    <Label styleClass="form-section-title" text="Dates" />
+
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-label" text="Date de Début *" />
+                        <DatePicker fx:id="date_debut_evenement"
+                                    maxWidth="Infinity"
+                                    promptText="Sélectionnez la date de début"
+                                    styleClass="form-date-picker" />
+                    </VBox>
+
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-label" text="Date de Fin *" />
+                        <DatePicker fx:id="date_fin_evenement"
+                                    maxWidth="Infinity"
+                                    promptText="Sélectionnez la date de fin"
+                                    styleClass="form-date-picker" />
+                    </VBox>
+                </VBox>
+
+                <!-- Location Section -->
+                <VBox styleClass="form-group" spacing="12">
+                    <Label styleClass="form-section-title" text="Localisation" />
+
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-label" text="Lieu *" />
+                        <TextField fx:id="lieu_evenement"
+                                   maxWidth="Infinity"
+                                   promptText="Entrez le lieu"
+                                   styleClass="form-input" />
+                    </VBox>
+
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-label" text="Ville *" />
+                        <TextField fx:id="ville_evenement"
+                                   maxWidth="Infinity"
+                                   promptText="Entrez la ville"
+                                   styleClass="form-input" />
+                    </VBox>
+                </VBox>
+
+                <!-- Capacity Section -->
+                <VBox styleClass="form-group">
+                    <Label styleClass="form-label" text="Nombre de Places *" />
+                    <TextField fx:id="places_max_evenement"
+                               maxWidth="Infinity"
+                               promptText="Entrez le nombre de places"
+                               styleClass="form-input" />
+                </VBox>
+
+                <!-- Button Group -->
+                <VBox styleClass="form-button-group" spacing="12">
+                    <Button fx:id="ajouterBtn"
+                        mnemonicParsing="false"
+                        onAction="#ajouterEvenement"
+                        styleClass="form-btn-submit"
+                        text="Ajouter Événement" />
+                </VBox>
+
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

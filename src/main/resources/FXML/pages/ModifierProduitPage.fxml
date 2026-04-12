@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ModifierProduitPageController">
+    <VBox alignment="TOP_CENTER" styleClass="page-root product-form-page product-form-outer">
+        <VBox spacing="20" styleClass="product-form-shell">
+
+            <VBox spacing="8" styleClass="product-form-hero">
+                <Label styleClass="page-hero-title" text="Modifier un produit" />
+                <Label styleClass="page-hero-sub" text="Mettez à jour les informations affichées en boutique. Les modifications sont enregistrées après validation du formulaire." wrapText="true" />
+                <Label styleClass="product-form-required-legend" text="* Champs obligatoires" />
+            </VBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="toolbar-card product-form-toolbar">
+                <Button onAction="#handleSave" styleClass="primary-toolbar-btn" text="Enregistrer les modifications" />
+                <Button onAction="#handleCancel" styleClass="ghost-toolbar-btn" text="Annuler" />
+                <HBox HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleReset" styleClass="ghost-toolbar-btn" text="Réinitialiser" />
+            </HBox>
+
+            <VBox styleClass="product-form-section">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="PRÉSENTATION" />
+                    <Label styleClass="product-form-section-title" text="Nom et description" />
+                    <Label styleClass="product-form-hint" text="Texte visible par les clients." wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body">
+                    <VBox spacing="6">
+                        <Label styleClass="product-form-field-label" text="Nom du produit *" />
+                        <TextField fx:id="nomField" promptText="Nom du produit" styleClass="form-input" />
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label styleClass="product-form-field-label" text="Description *" />
+                        <TextArea fx:id="descriptionField" prefHeight="110" promptText="Description" styleClass="form-input" wrapText="true" />
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <VBox styleClass="product-form-section">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="COMMERCE" />
+                    <Label styleClass="product-form-section-title" text="Prix et inventaire" />
+                    <Label styleClass="product-form-hint" text="Prix en TND et quantité disponible." wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body">
+                    <GridPane hgap="20" styleClass="product-form-grid" vgap="4">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="140" prefWidth="200" />
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="140" prefWidth="200" />
+                        </columnConstraints>
+                        <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Prix (TND) *" />
+                            <TextField fx:id="prixField" promptText="0.00" styleClass="form-input" />
+                        </VBox>
+                        <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Quantité en stock *" />
+                            <TextField fx:id="quantiteField" promptText="0" styleClass="form-input" />
+                        </VBox>
+                    </GridPane>
+                </VBox>
+            </VBox>
+
+            <VBox styleClass="product-form-section">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="MÉDIA" />
+                    <Label styleClass="product-form-section-title" text="Image du produit" />
+                    <Label styleClass="product-form-hint" text="Aperçu selon le nom de fichier en base. Vous pouvez remplacer l’image par un nouveau fichier ou corriger le nom manuellement." wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body">
+                    <HBox alignment="TOP_LEFT" spacing="20" styleClass="product-form-image-actions">
+                        <VBox alignment="CENTER" styleClass="product-form-image-frame">
+                            <ImageView fx:id="imagePreview" fitHeight="112" fitWidth="112" pickOnBounds="true" preserveRatio="true" />
+                        </VBox>
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Button onAction="#handleChooseImage" styleClass="ghost-toolbar-btn" text="Remplacer par une nouvelle image…" />
+                            <VBox spacing="6">
+                                <Label styleClass="product-form-field-label" text="Nom du fichier enregistré (base de données)" />
+                                <TextField fx:id="imageField" promptText="ex. 1739…_photo.jpg" styleClass="form-input" />
+                                <Label styleClass="product-form-hint" text="Mis à jour automatiquement si vous choisissez un fichier ; sinon modifiable à la main." wrapText="true" />
+                            </VBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <VBox styleClass="product-form-section">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="STATUT" />
+                    <Label styleClass="product-form-section-title" text="Publication et traçabilité" />
+                    <Label styleClass="product-form-hint" text="La date de création d’origine est conservée (lecture seule)." wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body">
+                    <GridPane hgap="20" styleClass="product-form-grid" vgap="4">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="140" prefWidth="200" />
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="140" prefWidth="200" />
+                        </columnConstraints>
+                        <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Statut *" />
+                            <TextField fx:id="statutField" promptText="Disponible" styleClass="form-input" />
+                        </VBox>
+                        <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Date de création" />
+                            <TextField fx:id="dateField" disable="true" styleClass="form-input" />
+                        </VBox>
+                    </GridPane>
+                </VBox>
+            </VBox>
+
+        </VBox>
+    </VBox>
+</ScrollPane>

@@ -96,6 +96,11 @@ public class LoginController implements Initializable {
         }
     }
 
+    private void clearFieldErrors() {
+        FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME);
+        FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME);
+    }
+
     @FXML
     private void handleGoRegister(ActionEvent event) {
         try {
@@ -105,11 +110,6 @@ public class LoginController implements Initializable {
         } catch (Exception e) {
             showError("Navigation", e.getMessage() != null ? e.getMessage() : e.toString());
         }
-    }
-
-    private void clearFieldErrors() {
-        FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME);
-        FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME);
     }
 
     private void openMain(ActionEvent event) {

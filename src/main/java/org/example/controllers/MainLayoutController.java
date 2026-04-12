@@ -17,13 +17,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.stage.Stage;
 import org.example.services.SessionContext;
 import org.example.utils.PageLoader;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
 import java.util.ArrayDeque;
@@ -38,9 +38,28 @@ public class MainLayoutController implements Initializable {
 
     private static final String PAGE_ADMIN_DASH = "/FXML/pages/AdminDashboard.fxml";
     private static final String PAGE_PLACEHOLDER = "/FXML/pages/PlaceholderPage.fxml";
-    private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
     private static final String PAGE_DISCUSSION = "/FXML/pages/DiscussionPage.fxml";
+    private static final String PAGE_STOCK = "/FXML/pages/AdminSalleHub.fxml";
+    private static final String PAGE_EVENTS_ADMIN = "/FXML/pages/EventManagement.fxml";
+    private static final String PAGE_USERS = "/FXML/pages/UserManagement.fxml";
+    private static final String PAGE_REPORTS = "/FXML/pages/ReportsStatistics.fxml";
+    private static final String PAGE_ADMIN_COMMANDES = "/FXML/pages/AdminCommandes.fxml";
+    private static final String PAGE_BOUTIQUE = "/FXML/pages/BoutiquePage.fxml";
+    private static final String PAGE_AJOUTER_PRODUIT = "/FXML/pages/AjouterProduitPage.fxml";
+    private static final String PAGE_MODIFIER_PRODUIT = "/FXML/pages/ModifierProduitPage.fxml";
 
+    private static final String PAGE_CLIENT_HOME   = "/FXML/pages/ClientHome.fxml";
+    private static final String PAGE_CLIENT_SALLE  = "/FXML/pages/ClientSalleList.fxml";
+    private static final String PAGE_CLIENT_EVENTS = "/FXML/pages/ClientEvents.fxml";
+    private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
+    private static final String PAGE_CLIENT_BOUTIQUE = "/FXML/pages/ClientBoutique.fxml";
+    private static final String PAGE_PROFILE = "/FXML/pages/ProfilePage.fxml";
+    private static final String PAGE_FORUM = "/FXML/pages/Forum.fxml";
+    private static final String PAGE_FORUM_BACKOFFICE = "/FXML/pages/ForumBackoffice.fxml";
+
+    private static final String PAGE_ENC_HOME = "/FXML/pages/EncadrantHome.fxml";
+    private static final String PAGE_ENC_GROUPE = "/FXML/pages/EncadrantGroupe.fxml";
+    private static final String PAGE_ENC_PLANNING = "/FXML/pages/EncadrantPlanning.fxml";
     @FXML
     private BorderPane shellRoot;
 
@@ -64,6 +83,9 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private VBox adminNavGroup;
+
+    @FXML
+    private VBox encadrantNavGroup;
 
     @FXML
     private VBox clientNavGroup;
@@ -91,7 +113,10 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private Label userAvatarLabel;
-
+    
+    @FXML
+    private Button adminUsersBtn;
+  
     @FXML
     private Button adminDashboardBtn;
 
@@ -131,6 +156,24 @@ public class MainLayoutController implements Initializable {
     @FXML
     private Button profileBtn;
 
+    @FXML
+    private Button encDashboardBtn;
+
+    @FXML
+    private Button encEvenementsBtn;
+
+    @FXML
+    private Button encGroupeBtn;
+
+    @FXML
+    private Button encSalleBtn;
+
+    @FXML
+    private Button encBoutiqueBtn;
+
+    @FXML
+    private Button encForumBtn;
+
     private final List<Button> mainNavButtons = new ArrayList<>();
 
     private Button activeNavButton;
@@ -141,6 +184,7 @@ public class MainLayoutController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         Runnable installIcons = () -> installIkonliFontIcons(shellRoot);
         installIcons.run();
+        // After skins attach button graphics / scroll content, placeholders may only appear on this pass.
         Platform.runLater(installIcons);
 
         SessionContext ctx = SessionContext.getInstance();
@@ -151,6 +195,7 @@ public class MainLayoutController implements Initializable {
                 ctx.displayNameProperty()));
 
         mainNavButtons.clear();
+        mainNavButtons.add(adminUsersBtn);
         mainNavButtons.add(adminDashboardBtn);
         mainNavButtons.add(adminEvenementsBtn);
         mainNavButtons.add(adminSalleBtn);
@@ -164,6 +209,12 @@ public class MainLayoutController implements Initializable {
         mainNavButtons.add(boutiqueBtn);
         mainNavButtons.add(forumBtn);
         mainNavButtons.add(profileBtn);
+        mainNavButtons.add(encDashboardBtn);
+        mainNavButtons.add(encEvenementsBtn);
+        mainNavButtons.add(encGroupeBtn);
+        mainNavButtons.add(encSalleBtn);
+        mainNavButtons.add(encBoutiqueBtn);
+        mainNavButtons.add(encForumBtn);
 
         applyRoleShell(ctx);
         wireSearch();
@@ -172,7 +223,7 @@ public class MainLayoutController implements Initializable {
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
-            navigate(PAGE_PLANNING, "Planning", planningBtn);
+            navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
         } else {
             navigate(PAGE_PLANNING, "Planning", planningBtn);
         }
@@ -180,26 +231,28 @@ public class MainLayoutController implements Initializable {
 
     private void applyRoleShell(SessionContext ctx) {
         boolean admin = ctx.isAdmin();
+        boolean encadrant = ctx.isEncadrant();
+        boolean client = !admin && !encadrant;
+
         adminNavGroup.setVisible(admin);
         adminNavGroup.setManaged(admin);
-        clientNavGroup.setVisible(!admin);
-        clientNavGroup.setManaged(!admin);
-        shellModeLabel.setText(admin ? "ADMINISTRATOR" : ctx.isEncadrant() ? "ENCADRANT" : "CLIENT");
+        encadrantNavGroup.setVisible(encadrant);
+        encadrantNavGroup.setManaged(encadrant);
+        clientNavGroup.setVisible(client);
+        clientNavGroup.setManaged(client);
+
+        String modeLabel = admin ? "ADMINISTRATOR" : encadrant ? "ENCADRANT" : "CLIENT";
+        shellModeLabel.setText(modeLabel);
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        if (admin) {
-            footerText.setText("Back office session");
-        } else if (ctx.isEncadrant()) {
-            footerText.setText("Encadrant — planning");
-        } else {
-            footerText.setText("Front office session");
-        }
+        footerText.setText(admin ? "Back office session" : encadrant ? "Encadrant — planning" : "Front office session");
     }
 
     private void registerDiscussionFromPlanningHook(SessionContext ctx) {
         ctx.setOpenDiscussionFromPlanningAction(() -> {
             try {
-                Button nav = ctx.isAdmin() ? adminPlanningBtn : planningBtn;
-                PageLoader.show(contentArea, PAGE_DISCUSSION);
+                Button nav = ctx.isAdmin() ? adminPlanningBtn
+                        : ctx.isEncadrant() ? encSalleBtn : planningBtn;
+                PageLoader.show(contentArea, PAGE_DISCUSSION, this);
                 topbarPageTitle.setText("Discussion");
                 setActiveNav(nav);
             } catch (Exception e) {
@@ -212,20 +265,11 @@ public class MainLayoutController implements Initializable {
         });
     }
 
-    private void wireSearch() {
-        if (topbarSearchField == null) {
-            return;
-        }
-        topbarSearchField.setOnAction(e -> {
-            String q = topbarSearchField.getText() == null ? "" : topbarSearchField.getText().trim();
-            info("Search", q.isEmpty() ? "Type a query to search (UI hook)." : "Searching for: " + q);
-        });
-    }
-
-    private void navigate(String classpath, String title, Button navButton) {
+    private void navigatePlaceholder(String moduleTitle, Button navButton) {
         try {
-            PageLoader.show(contentArea, classpath);
-            topbarPageTitle.setText(title);
+            PlaceholderContext.setModuleLabel(moduleTitle);
+            PageLoader.show(contentArea, PAGE_PLACEHOLDER, this);
+            topbarPageTitle.setText(moduleTitle);
             setActiveNav(navButton);
         } catch (Exception e) {
             e.printStackTrace();
@@ -236,11 +280,20 @@ public class MainLayoutController implements Initializable {
         }
     }
 
-    private void navigatePlaceholder(String moduleTitle, Button navButton) {
+    private void wireSearch() {
+        if (topbarSearchField == null) {
+            return;
+        }
+        topbarSearchField.setOnAction(e -> {
+            String q = topbarSearchField.getText() == null ? "" : topbarSearchField.getText().trim();
+            info("Search", q.isEmpty() ? "Type a query to search (UI hook)." : "Searching for: " + q);
+        });
+    }
+
+    public void navigate(String classpath, String title, Button navButton) {
         try {
-            PlaceholderContext.setModuleLabel(moduleTitle);
-            PageLoader.show(contentArea, PAGE_PLACEHOLDER);
-            topbarPageTitle.setText(moduleTitle);
+            PageLoader.show(contentArea, classpath, this);
+            topbarPageTitle.setText(title);
             setActiveNav(navButton);
         } catch (Exception e) {
             e.printStackTrace();
@@ -274,6 +327,7 @@ public class MainLayoutController implements Initializable {
             toggleText.setText(sidebarCompact ? "Expand" : "Collapse sidebar");
         }
         applyNavTextVisible(adminNavGroup, !sidebarCompact);
+        applyNavTextVisible(encadrantNavGroup, !sidebarCompact);
         applyNavTextVisible(clientNavGroup, !sidebarCompact);
         applyNavTextVisible(sidebarActionsBox, !sidebarCompact);
         applySectionTitlesVisible(!sidebarCompact);
@@ -283,13 +337,16 @@ public class MainLayoutController implements Initializable {
         }
     }
 
+    /**
+     * Logo / brand row: return to the default dashboard for the current role.
+     */
     @FXML
     private void handleBrandHome() {
         SessionContext ctx = SessionContext.getInstance();
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
-            navigate(PAGE_PLANNING, "Planning", planningBtn);
+            navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
         } else {
             navigate(PAGE_PLANNING, "Planning", planningBtn);
         }
@@ -313,18 +370,17 @@ public class MainLayoutController implements Initializable {
     private void applySectionTitlesVisible(boolean show) {
         if (adminNavGroup != null) {
             for (Node n : adminNavGroup.getChildren()) {
-                if (n instanceof Label) {
-                    n.setVisible(show);
-                    n.setManaged(show);
-                }
+                if (n instanceof Label) { n.setVisible(show); n.setManaged(show); }
+            }
+        }
+        if (encadrantNavGroup != null) {
+            for (Node n : encadrantNavGroup.getChildren()) {
+                if (n instanceof Label) { n.setVisible(show); n.setManaged(show); }
             }
         }
         if (clientNavGroup != null) {
             for (Node n : clientNavGroup.getChildren()) {
-                if (n instanceof Label) {
-                    n.setVisible(show);
-                    n.setManaged(show);
-                }
+                if (n instanceof Label) { n.setVisible(show); n.setManaged(show); }
             }
         }
         if (shellModeLabel != null) {
@@ -332,7 +388,9 @@ public class MainLayoutController implements Initializable {
             shellModeLabel.setManaged(show);
         }
     }
-
+    
+  
+   
     @FXML
     private void handleNotifications() {
         info("Notifications", "You have no unread notifications (demo).");
@@ -345,12 +403,12 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminEvenements() {
-        navigatePlaceholder("Événements", adminEvenementsBtn);
+        navigate(PAGE_EVENTS_ADMIN, "Evenements", adminEvenementsBtn);
     }
 
     @FXML
     private void handleAdminSalle() {
-        navigatePlaceholder("Salle de sport", adminSalleBtn);
+        navigate(PAGE_STOCK, "Salle", adminSalleBtn);
     }
 
     @FXML
@@ -360,27 +418,39 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminBoutique() {
-        navigatePlaceholder("Boutique", adminBoutiqueBtn);
+        navigate(PAGE_BOUTIQUE, "Boutique", adminBoutiqueBtn);
+    }
+
+    /**
+     * Ouvert depuis la page Boutique : garde l’entrée « Boutique » active dans la barre latérale.
+     */
+    public void navigateToAdminCommandes() {
+        navigate(PAGE_ADMIN_COMMANDES, "Commandes", adminBoutiqueBtn);
+    }
+
+    @FXML
+    private void handleAdminUsers() {
+        navigate(PAGE_USERS, "Utilisateurs", adminUsersBtn);
     }
 
     @FXML
     private void handleAdminForum() {
-        navigatePlaceholder("Forum", adminForumBtn);
+        navigate(PAGE_FORUM_BACKOFFICE, "Forum Management", adminForumBtn);
     }
 
     @FXML
     private void handleHome() {
-        navigate(PAGE_PLANNING, "Planning", homeBtn);
+        navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
     }
 
     @FXML
     private void handleEvenements() {
-        navigatePlaceholder("Événements", evenementsBtn);
+        navigate(PAGE_CLIENT_EVENTS, "Evenements", evenementsBtn);
     }
 
     @FXML
     private void handleSalle() {
-        navigatePlaceholder("Salle de sport", salleBtn);
+        navigate(PAGE_CLIENT_SALLE, "Salles", salleBtn);
     }
 
     @FXML
@@ -390,17 +460,52 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleBoutique() {
-        navigatePlaceholder("Boutique", boutiqueBtn);
+        navigate(PAGE_CLIENT_BOUTIQUE, "Boutique", boutiqueBtn);
     }
 
     @FXML
     private void handleForum() {
-        navigatePlaceholder("Forum", forumBtn);
+        navigate(PAGE_FORUM, "Forum", forumBtn);
     }
 
     @FXML
     private void handleProfile() {
-        navigatePlaceholder("Profil", profileBtn);
+        navigate(PAGE_PROFILE, "Profile", profileBtn);
+    }
+
+    @FXML
+    private void handleEncDashboard() {
+        navigate(PAGE_ENC_HOME, "Dashboard", encDashboardBtn);
+    }
+
+    @FXML
+    private void handleEncEvenements() {
+        navigate(PAGE_CLIENT_EVENTS, "Evenements", encEvenementsBtn);
+    }
+
+    @FXML
+    private void handleEncSalle() {
+        navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+    }
+
+    @FXML
+    private void handleEncPlanning() {
+        navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+    }
+
+    @FXML
+    private void handleEncBoutique() {
+        navigate(PAGE_CLIENT_BOUTIQUE, "Boutique", encBoutiqueBtn);
+    }
+
+    @FXML
+    private void handleEncForum() {
+        navigate(PAGE_FORUM, "Forum", encForumBtn);
+    }
+
+    @FXML
+    private void handleEncGroupe() {
+        navigate(PAGE_ENC_GROUPE, "Mes Groupes", encGroupeBtn);
     }
 
     @FXML
@@ -411,7 +516,7 @@ public class MainLayoutController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Login.fxml"));
             Parent root = loader.load();
             stage.setScene(new Scene(root, 1080, 720));
-            stage.setTitle("OXYN — Sign in");
+            stage.setTitle("OXYN — Connexion");
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
@@ -438,7 +543,13 @@ public class MainLayoutController implements Initializable {
         a.showAndWait();
     }
 
-    /** Remplace les {@code Region} Ikonli dans l’arbre (FXML / Scene Builder). */
+    /**
+     * FXML uses {@code Region} placeholders so Scene Builder can open the file without Ikonli on its classpath.
+     * This replaces them with real {@link FontIcon} nodes at runtime.
+     * <p>
+     * Traversal must follow {@link Labeled#getGraphic()} and {@link ScrollPane#getContent()}, not only
+     * {@link Parent#getChildrenUnmodifiable()}, or icons inside buttons / scroll areas are never reached.
+     */
     private static void installIkonliFontIcons(Parent root) {
         if (root == null) {
             return;
