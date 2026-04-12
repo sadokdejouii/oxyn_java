@@ -1,14 +1,11 @@
 package org.example.controllers;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
@@ -16,8 +13,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Window;
 import org.example.entities.LigneCommandeAffichage;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
@@ -33,9 +28,18 @@ public class MesCommandesController {
     @FXML
     private VBox ordersContainer;
 
+    @FXML
+    private VBox editAdressePanel;
+
+    @FXML
+    private TextArea editAdresseArea;
+
     private MainLayoutController mainLayoutController;
 
     private final CommandesService commandesService = new CommandesService();
+
+    /** Commande en cours d’édition d’adresse (null si panneau fermé). */
+    private commandes commandeEditionAdresse;
 
     public void setMainLayoutController(MainLayoutController mainLayoutController) {
         this.mainLayoutController = mainLayoutController;
@@ -43,6 +47,9 @@ public class MesCommandesController {
 
     @FXML
     public void initialize() {
+        if (editAdresseArea != null) {
+            AdresseCommandeValidator.appliquerLimiteLongueur(editAdresseArea);
+        }
         refresh();
     }
 
@@ -55,7 +62,66 @@ public class MesCommandesController {
 
     @FXML
     private void handleRefresh() {
+        fermerPanneauEdition();
         refresh();
+    }
+
+    @FXML
+    private void handleSaveAdresse() {
+        if (commandeEditionAdresse == null || editAdresseArea == null) {
+            return;
+        }
+        final int idCommande = commandeEditionAdresse.getId_commande();
+        final int clientId = SessionContext.getInstance().getClientDatabaseId();
+
+        String err = AdresseCommandeValidator.valider(editAdresseArea.getText());
+        if (err != null) {
+            warn(err);
+            editAdresseArea.requestFocus();
+            return;
+        }
+        String formatted = AdresseCommandeValidator.formaterPourEnregistrement(editAdresseArea.getText());
+        try {
+            if (commandesService.modifierAdresseCommande(idCommande, clientId, formatted)) {
+                info("Adresse de livraison mise à jour.");
+                fermerPanneauEdition();
+                refresh();
+            } else {
+                warn("Modification impossible (délai de 24 h dépassé, ou statut de la commande modifié).");
+            }
+        } catch (SQLException ex) {
+            error("Erreur : " + ex.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleCancelEditAdresse() {
+        fermerPanneauEdition();
+    }
+
+    private void fermerPanneauEdition() {
+        commandeEditionAdresse = null;
+        if (editAdressePanel != null) {
+            editAdressePanel.setVisible(false);
+            editAdressePanel.setManaged(false);
+        }
+        if (editAdresseArea != null) {
+            editAdresseArea.clear();
+        }
+    }
+
+    private void ouvrirEditionAdresse(commandes c) {
+        commandeEditionAdresse = c;
+        if (editAdresseArea != null) {
+            editAdresseArea.setText(c.getAdresse_commande() != null ? c.getAdresse_commande() : "");
+        }
+        if (editAdressePanel != null) {
+            editAdressePanel.setVisible(true);
+            editAdressePanel.setManaged(true);
+        }
+        if (editAdresseArea != null) {
+            editAdresseArea.requestFocus();
+        }
     }
 
     private void refresh() {
@@ -150,7 +216,7 @@ public class MesCommandesController {
         if (commandesService.peutModifierAdresse(c)) {
             Button modifierAdresse = new Button("Modifier l’adresse");
             modifierAdresse.getStyleClass().add("ghost-toolbar-btn");
-            modifierAdresse.setOnAction(e -> ouvrirModifierAdresse(c));
+            modifierAdresse.setOnAction(e -> ouvrirEditionAdresse(c));
 
             Button annuler = new Button("Annuler la commande");
             annuler.getStyleClass().add("danger-toolbar-btn");
@@ -185,72 +251,6 @@ public class MesCommandesController {
         a.showAndWait();
     }
 
-    private void ouvrirModifierAdresse(commandes c) {
-        final int idCommande = c.getId_commande();
-        final int clientId = SessionContext.getInstance().getClientDatabaseId();
-
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Modifier l’adresse de livraison");
-        dialog.setHeaderText(null);
-        Window owner = ordersContainer.getScene() != null ? ordersContainer.getScene().getWindow() : null;
-        dialog.initOwner(owner);
-        dialog.initModality(Modality.WINDOW_MODAL);
-
-        ButtonType saveType = new ButtonType("Enregistrer", ButtonBar.ButtonData.APPLY);
-        dialog.getDialogPane().getButtonTypes().setAll(saveType, ButtonType.CANCEL);
-
-        VBox body = new VBox(14);
-        body.setPadding(new Insets(4, 0, 0, 0));
-        body.setPrefWidth(460);
-
-        Label hint = new Label("Même format que lors de la commande : quartier, ville, pays (trois parties séparées par des virgules).\nExemple : cité Ibn Khaldoun, Tunis, Tunisie");
-        hint.getStyleClass().add("product-form-hint");
-        hint.setWrapText(true);
-
-        Label lab = new Label("Adresse de livraison");
-        lab.getStyleClass().add("product-form-field-label");
-
-        TextArea ta = new TextArea(c.getAdresse_commande() != null ? c.getAdresse_commande() : "");
-        ta.setPrefRowCount(4);
-        ta.setWrapText(true);
-        ta.getStyleClass().add("form-input");
-        AdresseCommandeValidator.appliquerLimiteLongueur(ta);
-
-        body.getChildren().addAll(hint, lab, ta);
-        dialog.getDialogPane().setContent(body);
-
-        Button saveBtn = (Button) dialog.getDialogPane().lookupButton(saveType);
-        saveBtn.addEventFilter(ActionEvent.ACTION, ev -> {
-            String err = AdresseCommandeValidator.valider(ta.getText());
-            if (err != null) {
-                ev.consume();
-                warn(err);
-                ta.requestFocus();
-            }
-        });
-
-        Optional<ButtonType> res = dialog.showAndWait();
-        if (res.isEmpty() || res.get() != saveType) {
-            return;
-        }
-        String err = AdresseCommandeValidator.valider(ta.getText());
-        if (err != null) {
-            warn(err);
-            return;
-        }
-        String formatted = AdresseCommandeValidator.formaterPourEnregistrement(ta.getText());
-        try {
-            if (commandesService.modifierAdresseCommande(idCommande, clientId, formatted)) {
-                info("Adresse de livraison mise à jour.");
-                refresh();
-            } else {
-                warn("Modification impossible (délai de 24 h dépassé, ou statut de la commande modifié).");
-            }
-        } catch (SQLException ex) {
-            error("Erreur : " + ex.getMessage());
-        }
-    }
-
     private void confirmAnnuler(int idCommande) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Annulation");
@@ -265,6 +265,7 @@ public class MesCommandesController {
             boolean ok = commandesService.annulerCommande(idCommande, clientId);
             if (ok) {
                 info("La commande a été annulée.");
+                fermerPanneauEdition();
                 refresh();
             } else {
                 warn("Annulation impossible (délai dépassé, statut déjà modifié, ou commande introuvable).");

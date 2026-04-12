@@ -1,19 +1,21 @@
 package org.example.controllers;
 
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import org.example.entities.CommandeAdminRow;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
@@ -34,21 +36,7 @@ public class AdminCommandesController {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @FXML
-    private TableView<CommandeAdminRow> tableCommandes;
-    @FXML
-    private TableColumn<CommandeAdminRow, String> colDate;
-    @FXML
-    private TableColumn<CommandeAdminRow, String> colClient;
-    @FXML
-    private TableColumn<CommandeAdminRow, String> colTotal;
-    @FXML
-    private TableColumn<CommandeAdminRow, String> colStatut;
-    @FXML
-    private TableColumn<CommandeAdminRow, String> colPaiement;
-    @FXML
-    private TableColumn<CommandeAdminRow, String> colAdresse;
-    @FXML
-    private TableColumn<CommandeAdminRow, Void> colAction;
+    private ListView<CommandeAdminRow> listCommandes;
     @FXML
     private Label purgeInfoLabel;
     @FXML
@@ -58,102 +46,89 @@ public class AdminCommandesController {
 
     @FXML
     public void initialize() {
-        tableCommandes.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        colDate.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(
-                formaterDate(data.getValue().getCommande().getDate_commande())));
-        colClient.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getLibelleClient()));
-
-        colTotal.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(
-                formaterMontant(data.getValue().getCommande().getTotal_commande())));
-
-        colStatut.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(
-                data.getValue().getCommande().getStatut_commande() != null
-                        ? data.getValue().getCommande().getStatut_commande()
-                        : "—"));
-        colStatut.setCellFactory(col -> new TableCell<>() {
+        listCommandes.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
+            protected void updateItem(CommandeAdminRow row, boolean empty) {
+                super.updateItem(row, empty);
+                if (empty || row == null) {
                     setGraphic(null);
+                    setText(null);
                     return;
                 }
-                Label chip = new Label(item);
-                chip.setMaxWidth(Double.MAX_VALUE);
+                commandes c = row.getCommande();
+                VBox card = new VBox(10);
+                card.getStyleClass().add("admin-order-list-card");
+                card.setPadding(new Insets(14, 16, 14, 16));
+
+                HBox top = new HBox(12);
+                top.setAlignment(Pos.CENTER_LEFT);
+                Label dateLbl = new Label(formaterDate(c.getDate_commande()));
+                dateLbl.getStyleClass().add("saas-stat-value");
+                Region sp = new Region();
+                HBox.setHgrow(sp, Priority.ALWAYS);
+                Label chip = new Label(c.getStatut_commande() != null ? c.getStatut_commande() : "—");
                 chip.getStyleClass().setAll("admin-order-chip");
-                String s = item.toLowerCase(Locale.ROOT);
-                if (s.contains("annul")) {
+                String st = c.getStatut_commande() != null ? c.getStatut_commande().toLowerCase(Locale.ROOT) : "";
+                if (st.contains("annul")) {
                     chip.getStyleClass().add("admin-order-chip-annule");
-                } else if (s.contains("valid")) {
+                } else if (st.contains("valid")) {
                     chip.getStyleClass().add("admin-order-chip-valide");
                 } else {
                     chip.getStyleClass().add("admin-order-chip-neutre");
                 }
-                HBox wrap = new HBox(chip);
-                HBox.setHgrow(chip, Priority.ALWAYS);
-                setGraphic(wrap);
-            }
-        });
+                top.getChildren().addAll(dateLbl, sp, chip);
 
-        colPaiement.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(
-                data.getValue().getCommande().getMode_paiement_commande() != null
-                        ? data.getValue().getCommande().getMode_paiement_commande()
-                        : "—"));
+                GridPane grid = new GridPane();
+                grid.setHgap(12);
+                grid.setVgap(6);
+                int r = 0;
+                grid.add(labelHint("Client"), 0, r);
+                grid.add(valueLabel(row.getLibelleClient()), 1, r++);
+                grid.add(labelHint("Montant"), 0, r);
+                grid.add(valueLabel(formaterMontant(c.getTotal_commande())), 1, r++);
+                grid.add(labelHint("Paiement"), 0, r);
+                grid.add(valueLabel(c.getMode_paiement_commande() != null ? c.getMode_paiement_commande() : "—"), 1, r++);
+                grid.add(labelHint("Livraison"), 0, r);
+                Label addr = valueLabel(c.getAdresse_commande() != null ? c.getAdresse_commande() : "—");
+                addr.setWrapText(true);
+                addr.setMaxWidth(Double.MAX_VALUE);
+                addr.getStyleClass().add("admin-order-address");
+                GridPane.setHgrow(addr, Priority.ALWAYS);
+                grid.add(addr, 1, r);
 
-        colAdresse.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(tronquer(
-                data.getValue().getCommande().getAdresse_commande() != null
-                        ? data.getValue().getCommande().getAdresse_commande()
-                        : "—", 72)));
-        colAdresse.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    return;
-                }
-                Label l = new Label(item);
-                l.setWrapText(true);
-                l.setMaxWidth(Double.MAX_VALUE);
-                l.getStyleClass().add("admin-order-address");
-                setGraphic(l);
-            }
-        });
-
-        colAction.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(null));
-        colAction.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("Supprimer");
-            {
-                btn.getStyleClass().add("danger-toolbar-btn");
-                btn.setMinWidth(Region.USE_PREF_SIZE);
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getTableRow() == null) {
-                    setGraphic(null);
-                    return;
-                }
-                CommandeAdminRow row = getTableRow().getItem();
-                if (row == null) {
-                    setGraphic(null);
-                    return;
-                }
-                String st = row.getCommande().getStatut_commande();
-                if (st != null && st.toLowerCase(Locale.ROOT).contains("annul")) {
-                    btn.setOnAction(e -> confirmerSuppression(row.getCommande()));
-                    setGraphic(btn);
+                HBox actions = new HBox(10);
+                actions.setAlignment(Pos.CENTER_RIGHT);
+                actions.setPadding(new Insets(6, 0, 0, 0));
+                if (st.contains("annul")) {
+                    Button sup = new Button("Supprimer");
+                    sup.getStyleClass().add("danger-toolbar-btn");
+                    sup.setOnAction(e -> confirmerSuppression(c));
+                    actions.getChildren().add(sup);
                 } else {
                     Label dash = new Label("—");
                     dash.getStyleClass().add("saas-stat-hint");
-                    setGraphic(dash);
+                    actions.getChildren().add(dash);
                 }
+
+                card.getChildren().addAll(top, grid, actions);
+                setGraphic(card);
             }
         });
 
         chargerTable();
+    }
+
+    private static Label labelHint(String t) {
+        Label l = new Label(t);
+        l.getStyleClass().add("saas-stat-label");
+        return l;
+    }
+
+    private static Label valueLabel(String t) {
+        Label l = new Label(t);
+        l.getStyleClass().add("saas-stat-hint");
+        l.setWrapText(true);
+        return l;
     }
 
     @FXML
@@ -178,7 +153,7 @@ public class AdminCommandesController {
 
             ObservableList<CommandeAdminRow> rows =
                     FXCollections.observableArrayList(commandesService.afficherPourAdmin());
-            tableCommandes.setItems(rows);
+            listCommandes.setItems(rows);
             if (countLabel != null) {
                 countLabel.setText(String.valueOf(rows.size()));
             }
@@ -228,16 +203,5 @@ public class AdminCommandesController {
 
     private static String formaterMontant(double total) {
         return String.format(Locale.FRENCH, "%.2f TND", total);
-    }
-
-    private static String tronquer(String s, int max) {
-        if (s == null) {
-            return "—";
-        }
-        String t = s.trim();
-        if (t.length() <= max) {
-            return t;
-        }
-        return t.substring(0, max - 1) + "…";
     }
 }

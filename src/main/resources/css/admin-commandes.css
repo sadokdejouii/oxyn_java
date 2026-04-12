@@ -1,146 +1,72 @@
 /*
- * Page Commandes admin — tableau aligné sur le shell (#0D1B3E / #1A2F5E).
- * JavaFX n’accepte PAS linear-gradient(to bottom, …) : utiliser
- * linear-gradient(from 0% 0% to 0% 100%, …) ou couleurs unies.
+ * Page Commandes admin — ListView alignée sur le shell (#0D1B3E / #1A2F5E).
  */
 
 .admin-commandes-root {
     -fx-background-color: transparent;
 }
 
-/* Carte « Détail » : le tableau se fond dans la carte sans double contour gris */
-.admin-orders-detail-card .table-view.admin-orders-table {
+.admin-orders-detail-card .list-view.admin-orders-list {
     -fx-border-color: rgba(79, 195, 247, 0.18);
 }
 
-/* TableView : priorité sur Modena (évite fond gris / en-tête gris clair) */
-.table-view.admin-orders-table {
+.list-view.admin-orders-list {
     -fx-background-color: #0D1B3E;
     -fx-control-inner-background: #0D1B3E;
     -fx-border-color: rgba(79, 195, 247, 0.28);
     -fx-border-radius: 12px;
     -fx-border-width: 1px;
     -fx-background-radius: 12px;
-    -fx-padding: 0;
-    -fx-background-insets: 0;
+    -fx-padding: 8 6 8 6;
 }
 
-.table-view.admin-orders-table:focused {
+.list-view.admin-orders-list:focused {
     -fx-border-color: rgba(79, 195, 247, 0.42);
 }
 
-/* Barre d’en-tête : même famille bleue que les cartes (pas de gris) */
-.table-view.admin-orders-table .column-header-background {
-    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%,
-            #1A2F5E 0%,
-            #152852 55%,
-            #0D1B3E 100%);
-    -fx-background-insets: 0;
-    -fx-border-color: rgba(79, 195, 247, 0.22);
-    -fx-border-width: 0 0 1 0;
-}
-
-.table-view.admin-orders-table .column-header-background .filler,
-.table-view.admin-orders-table .filler {
-    -fx-background-color: #1A2F5E;
-}
-
-.table-view.admin-orders-table .column-header,
-.table-view.admin-orders-table .column-header .label {
+.list-view.admin-orders-list .list-cell {
     -fx-background-color: transparent;
-    -fx-text-fill: rgba(220, 230, 245, 0.95);
-    -fx-font-weight: 600;
-    -fx-font-size: 12px;
-    -fx-padding: 10 12 10 12;
+    -fx-padding: 8 6 8 6;
 }
 
-.table-view.admin-orders-table .show-hide-column-image,
-.table-view.admin-orders-table .show-hide-columns-button {
-    -fx-background-color: #1A2F5E;
+.list-view.admin-orders-list .list-cell:filled:selected,
+.list-view.admin-orders-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.12);
 }
 
-/* Corps scrollable */
-.table-view.admin-orders-table .virtual-flow,
-.table-view.admin-orders-table .virtual-flow .clipped-container,
-.table-view.admin-orders-table .virtual-flow .clipped-container .sheet,
-.table-view.admin-orders-table .virtual-flow .corner {
+.list-view.admin-orders-list .list-cell:hover {
+    -fx-background-color: rgba(26, 47, 94, 0.35);
+}
+
+.list-view.admin-orders-list .virtual-flow .clipped-container .sheet,
+.list-view.admin-orders-list .virtual-flow .corner {
     -fx-background-color: #0D1B3E;
 }
 
-/* Lignes */
-.table-view.admin-orders-table .table-row-cell {
-    -fx-cell-size: 48px;
-    -fx-alignment: TOP_LEFT;
-    -fx-border-color: rgba(79, 195, 247, 0.1);
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 6 8 6 8;
-}
-
-.table-view.admin-orders-table .table-row-cell:odd {
-    -fx-background-color: #0D1B3E;
-}
-
-.table-view.admin-orders-table .table-row-cell:even {
-    -fx-background-color: rgba(26, 47, 94, 0.45);
-}
-
-.table-view.admin-orders-table .table-row-cell:hover {
-    -fx-background-color: rgba(36, 59, 127, 0.65);
-}
-
-.table-view.admin-orders-table .table-row-cell:selected {
-    -fx-background-color: rgba(0, 191, 255, 0.18);
-    -fx-background-insets: 0;
-}
-
-.table-view.admin-orders-table .table-row-cell:selected:hover {
-    -fx-background-color: rgba(0, 191, 255, 0.24);
-}
-
-/* Cellules : pas de fond blanc Modena */
-.table-view.admin-orders-table .table-cell {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-text-fill: rgba(232, 238, 247, 0.96);
-    -fx-font-size: 13px;
-    -fx-padding: 8 10 8 10;
-}
-
-.table-view.admin-orders-table .table-row-cell:selected .table-cell {
-    -fx-background-color: transparent;
-    -fx-text-fill: #FFFFFF;
-}
-
-.table-view.admin-orders-table .placeholder {
-    -fx-background-color: #0D1B3E;
-}
-
-.table-view.admin-orders-table .placeholder .label {
-    -fx-text-fill: rgba(160, 180, 204, 0.75);
-    -fx-font-size: 13px;
-}
-
-/* Scrollbars intégrées au tableau */
-.table-view.admin-orders-table .scroll-bar {
+.list-view.admin-orders-list .scroll-bar {
     -fx-background-color: rgba(13, 27, 62, 0.4);
 }
 
-.table-view.admin-orders-table .scroll-bar .track {
+.list-view.admin-orders-list .scroll-bar .track {
     -fx-background-color: rgba(13, 27, 62, 0.55);
 }
 
-.table-view.admin-orders-table .scroll-bar .thumb {
+.list-view.admin-orders-list .scroll-bar .thumb {
     -fx-background-color: rgba(0, 191, 255, 0.38);
     -fx-background-radius: 4px;
 }
 
-.table-view.admin-orders-table .scroll-bar .thumb:hover {
+.list-view.admin-orders-list .scroll-bar .thumb:hover {
     -fx-background-color: rgba(0, 191, 255, 0.55);
 }
 
-.table-view.admin-orders-table .scroll-bar .increment-button,
-.table-view.admin-orders-table .scroll-bar .decrement-button {
-    -fx-background-color: #0D1B3E;
+/* Carte par commande dans la liste */
+.admin-order-list-card {
+    -fx-background-color: rgba(18, 34, 72, 0.72);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
 }
 
 /* Pastilles statut */

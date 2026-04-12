@@ -3,9 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -36,17 +35,7 @@
 
         <VBox spacing="12" styleClass="saas-chart-card admin-orders-detail-card">
             <Label styleClass="saas-card-title" text="Détail des commandes" />
-            <TableView fx:id="tableCommandes" minHeight="420" prefHeight="560" styleClass="table-view data-table admin-orders-table">
-                <columns>
-                    <TableColumn fx:id="colDate" minWidth="140" prefWidth="160" text="Date" />
-                    <TableColumn fx:id="colClient" minWidth="160" prefWidth="200" text="Client" />
-                    <TableColumn fx:id="colTotal" minWidth="100" prefWidth="120" text="Montant" />
-                    <TableColumn fx:id="colStatut" minWidth="110" prefWidth="130" text="Statut" />
-                    <TableColumn fx:id="colPaiement" minWidth="110" prefWidth="140" text="Paiement" />
-                    <TableColumn fx:id="colAdresse" minWidth="200" prefWidth="260" text="Livraison" />
-                    <TableColumn fx:id="colAction" minWidth="100" prefWidth="120" text="Action" />
-                </columns>
-            </TableView>
+            <ListView fx:id="listCommandes" minHeight="420" prefHeight="560" styleClass="admin-orders-list" VBox.vgrow="ALWAYS" />
         </VBox>
     </VBox>
 </ScrollPane>

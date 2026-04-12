@@ -185,7 +185,8 @@ public class PanierController {
             rafraichirPanier();
             adresseField.clear();
         } else {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d’enregistrer la commande. Vérifiez la base de données (table ligne_commande, contraintes).");
+            showAlert(Alert.AlertType.ERROR, "Commande impossible",
+                    "L’enregistrement a échoué : stock insuffisant pour un ou plusieurs produits, ou erreur de base de données. Vérifiez les quantités disponibles.");
         }
     }
 

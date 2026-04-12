@@ -5,6 +5,7 @@ import org.example.entities.LigneCommandeAffichage;
 import org.example.entities.LignePanier;
 import org.example.entities.commandes;
 
+import org.example.utils.CommandeRegles;
 import org.example.utils.MyDataBase;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -64,10 +66,22 @@ public class CommandesService implements ICrud<commandes> {
         if (c == null || lignes == null || lignes.isEmpty()) {
             return false;
         }
+        List<LignePanier> lignesValides = new ArrayList<>();
+        for (LignePanier ligne : lignes) {
+            if (ligne.getProduit() == null || ligne.getQuantite() <= 0) {
+                continue;
+            }
+            lignesValides.add(ligne);
+        }
+        if (lignesValides.isEmpty()) {
+            return false;
+        }
         String insertCmd = "INSERT INTO commandes (date_commande, total_commande, statut_commande, mode_paiement_commande, id_client_commande, Adresse_commande) VALUES (?,?,?,?,?,?)";
         String insertLigne = "INSERT INTO ligne_commande ("
                 + "quantite_ligne_commande, prix_unitaire_ligne_commande, sous_total_ligne_commande, "
                 + "id_commande_ligne_commande, id_produit_ligne_commande) VALUES (?,?,?,?,?)";
+        String decrementStock = "UPDATE produits SET quantite_stock_produit = quantite_stock_produit - ? "
+                + "WHERE id_produit = ? AND quantite_stock_produit >= ?";
         boolean prevAuto = true;
         try {
             prevAuto = con.getAutoCommit();
@@ -91,10 +105,7 @@ public class CommandesService implements ICrud<commandes> {
             }
             c.setId_commande(idCommande);
             try (PreparedStatement ps = con.prepareStatement(insertLigne)) {
-                for (LignePanier ligne : lignes) {
-                    if (ligne.getProduit() == null) {
-                        continue;
-                    }
+                for (LignePanier ligne : lignesValides) {
                     int qte = ligne.getQuantite();
                     BigDecimal pu = BigDecimal.valueOf(ligne.getPrixUnitaire()).setScale(2, RoundingMode.HALF_UP);
                     BigDecimal sous = pu.multiply(BigDecimal.valueOf(qte)).setScale(2, RoundingMode.HALF_UP);
@@ -106,6 +117,19 @@ public class CommandesService implements ICrud<commandes> {
                     ps.addBatch();
                 }
                 ps.executeBatch();
+            }
+            try (PreparedStatement ps = con.prepareStatement(decrementStock)) {
+                for (LignePanier ligne : lignesValides) {
+                    int qte = ligne.getQuantite();
+                    int idProd = ligne.getProduit().getId_produit();
+                    ps.setInt(1, qte);
+                    ps.setInt(2, idProd);
+                    ps.setInt(3, qte);
+                    if (ps.executeUpdate() != 1) {
+                        con.rollback();
+                        return false;
+                    }
+                }
             }
             con.commit();
             return true;
@@ -163,19 +187,13 @@ public class CommandesService implements ICrud<commandes> {
         }
     }
 
-    private static boolean estStatutAnnule(String statut) {
-        if (statut == null) {
-            return false;
-        }
-        return statut.toLowerCase().contains("annul");
-    }
 
     /**
      * Back-office : suppression manuelle réservée aux commandes {@code annulée}.
      */
     public boolean supprimerCommandeAnnuleeParAdmin(int idCommande) throws SQLException {
         commandes c = findById(idCommande);
-        if (c == null || !estStatutAnnule(c.getStatut_commande())) {
+        if (c == null || !CommandeRegles.estStatutAnnule(c.getStatut_commande())) {
             return false;
         }
         supprimerCommandeEtLignes(idCommande);
@@ -192,7 +210,7 @@ public class CommandesService implements ICrud<commandes> {
         int n = 0;
         LocalDate today = LocalDate.now();
         for (commandes c : all) {
-            if (!estStatutAnnule(c.getStatut_commande())) {
+            if (!CommandeRegles.estStatutAnnule(c.getStatut_commande())) {
                 continue;
             }
             LocalDateTime dt = parseDateCommande(c.getDate_commande());
@@ -328,14 +346,62 @@ public class CommandesService implements ICrud<commandes> {
         if (!peutAnnuler(c)) {
             return false;
         }
-        String sql = "UPDATE commandes SET statut_commande = ? WHERE id_commande = ? AND id_client_commande = ? AND statut_commande = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, "annulée");
-            ps.setInt(2, idCommande);
-            ps.setInt(3, idClient);
-            ps.setString(4, "validée");
-            return ps.executeUpdate() == 1;
+        List<Map.Entry<Integer, Integer>> lignesStock = chargerQuantitesParProduit(idCommande);
+        boolean prev = con.getAutoCommit();
+        try {
+            con.setAutoCommit(false);
+            String sqlCmd = "UPDATE commandes SET statut_commande = ? WHERE id_commande = ? AND id_client_commande = ? AND statut_commande = ?";
+            try (PreparedStatement ps = con.prepareStatement(sqlCmd)) {
+                ps.setString(1, "annulée");
+                ps.setInt(2, idCommande);
+                ps.setInt(3, idClient);
+                ps.setString(4, "validée");
+                if (ps.executeUpdate() != 1) {
+                    con.rollback();
+                    return false;
+                }
+            }
+            String sqlStock = "UPDATE produits SET quantite_stock_produit = quantite_stock_produit + ? WHERE id_produit = ?";
+            try (PreparedStatement ps = con.prepareStatement(sqlStock)) {
+                for (Map.Entry<Integer, Integer> e : lignesStock) {
+                    ps.setInt(1, e.getValue());
+                    ps.setInt(2, e.getKey());
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            }
+            con.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                con.rollback();
+            } catch (SQLException ex) {
+                e.addSuppressed(ex);
+            }
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(prev);
+            } catch (SQLException ignored) {
+            }
         }
+    }
+
+    private List<Map.Entry<Integer, Integer>> chargerQuantitesParProduit(int idCommande) throws SQLException {
+        List<Map.Entry<Integer, Integer>> list = new ArrayList<>();
+        String sql = "SELECT id_produit_ligne_commande, quantite_ligne_commande FROM ligne_commande "
+                + "WHERE id_commande_ligne_commande = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idCommande);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new AbstractMap.SimpleEntry<>(
+                            rs.getInt("id_produit_ligne_commande"),
+                            rs.getInt("quantite_ligne_commande")));
+                }
+            }
+        }
+        return list;
     }
 
     public boolean peutAnnuler(commandes c) {
