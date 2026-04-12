@@ -672,6 +672,103 @@
     -fx-scale-y: 0.98;
 }
 
+/* Owner Edit/Delete Buttons */
+.owner-edit-btn {
+    -fx-background-color: rgba(59, 130, 246, 0.1);
+    -fx-text-fill: #3B82F6;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 12;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.owner-edit-btn:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.owner-delete-btn {
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 12;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.owner-delete-btn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.2);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* Icon Buttons for Edit/Delete */
+.icon-btn {
+    -fx-background-color: transparent;
+    -fx-font-size: 16px;
+    -fx-padding: 4 8;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.edit-icon-btn {
+    -fx-text-fill: #3B82F6;
+}
+
+.edit-icon-btn:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.delete-icon-btn {
+    -fx-text-fill: #EF4444;
+}
+
+.delete-icon-btn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+/* Owner Actions Box */
+.owner-actions-box {
+    -fx-border-color: rgba(203, 213, 225, 0.5);
+    -fx-border-width: 1 0 0 0;
+    -fx-background-color: rgba(248, 250, 252, 0.5);
+}
+
+/* Comment Action Buttons */
+.comment-action-btn {
+    -fx-background-color: transparent;
+    -fx-font-size: 12px;
+    -fx-padding: 4 8;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.comment-edit-btn {
+    -fx-text-fill: #3B82F6;
+}
+
+.comment-edit-btn:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.1);
+}
+
+.comment-delete-btn {
+    -fx-text-fill: #EF4444;
+}
+
+.comment-delete-btn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+}
+
 .like-count {
     -fx-font-size: 13px;
     -fx-text-fill: #3B82F6;
@@ -1084,4 +1181,47 @@
     -fx-border-radius: 12;
     -fx-padding: 16;
     -fx-spacing: 8;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BACKOFFICE INLINE EDIT PANELS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.edit-panel {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(59, 130, 246, 0.3);
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.2), 16, 0, 0, 6);
+    -fx-spacing: 12;
+}
+
+.edit-panel-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1E293B;
+}
+
+.edit-textarea {
+    -fx-font-size: 13px;
+    -fx-padding: 12;
+    -fx-background-color: rgba(248, 250, 252, 0.8);
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(203, 213, 225, 0.5);
+    -fx-border-width: 1;
+    -fx-text-fill: #1E293B;
+    -fx-prompt-text-fill: #94A3B8;
+}
+
+.edit-textarea:focused {
+    -fx-border-color: #3B82F6;
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.15), 8, 0, 0, 3);
+}
+
+.file-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748B;
 }

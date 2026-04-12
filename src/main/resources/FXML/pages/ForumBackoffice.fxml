@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.TextArea?>
 
 <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ForumBackofficeController">
     <VBox spacing="24" styleClass="page-root">
@@ -95,6 +96,23 @@
             </TableView>
         </VBox>
 
+        <!-- Inline Post Edit Panel (Hidden by default) -->
+        <VBox fx:id="postEditPanel" spacing="12" styleClass="edit-panel" visible="false" managed="false">
+            <padding>
+                <Insets bottom="16" left="16" right="16" top="16" />
+            </padding>
+            <Label styleClass="edit-panel-title" text="Edit Post" />
+            <TextArea fx:id="postEditContent" wrapText="true" prefRowCount="4" promptText="Post content..." styleClass="edit-textarea" />
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button fx:id="postEditFileBtn" text="📎 Attach/Replace File" styleClass="ghost-toolbar-btn" onAction="#handlePostEditFile" />
+                <Label fx:id="postEditFileLabel" text="No file selected" styleClass="file-label" />
+            </HBox>
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button text="Cancel" styleClass="ghost-toolbar-btn" onAction="#handlePostEditCancel" />
+                <Button text="Save Changes" styleClass="primary-toolbar-btn" onAction="#handlePostEditSave" />
+            </HBox>
+        </VBox>
+
         <!-- Comments Stats Row -->
         <HBox spacing="16" styleClass="stats-row">
             <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
@@ -133,6 +151,19 @@
                     <TableColumn fx:id="commentActionsColumn" prefWidth="120" text="Actions" />
                 </columns>
             </TableView>
+        </VBox>
+
+        <!-- Inline Comment Edit Panel (Hidden by default) -->
+        <VBox fx:id="commentEditPanel" spacing="12" styleClass="edit-panel" visible="false" managed="false">
+            <padding>
+                <Insets bottom="16" left="16" right="16" top="16" />
+            </padding>
+            <Label styleClass="edit-panel-title" text="Edit Comment" />
+            <TextArea fx:id="commentEditContent" wrapText="true" prefRowCount="3" promptText="Comment content..." styleClass="edit-textarea" />
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button text="Cancel" styleClass="ghost-toolbar-btn" onAction="#handleCommentEditCancel" />
+                <Button text="Save Changes" styleClass="primary-toolbar-btn" onAction="#handleCommentEditSave" />
+            </HBox>
         </VBox>
     </VBox>
 </ScrollPane>

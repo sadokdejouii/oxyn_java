@@ -384,11 +384,36 @@ public class ForumController implements Initializable {
 
         headerBox.getChildren().addAll(avatarLabel, userInfoBox, spacer, categoryBadge);
 
-        // Content
+        // Content - Editable container
+        VBox contentContainer = new VBox();
+        contentContainer.setPadding(new Insets(0, 16, 12, 16));
+
+        // View mode: Label
         Label contentLabel = new Label(post.getContent_post());
         contentLabel.setWrapText(true);
         contentLabel.getStyleClass().add("post-content");
-        contentLabel.setPadding(new Insets(0, 16, 12, 16));
+
+        // Edit mode: TextArea (initially hidden)
+        TextArea contentEditor = new TextArea(post.getContent_post());
+        contentEditor.getStyleClass().add("post-content-editor");
+        contentEditor.setWrapText(true);
+        contentEditor.setPrefRowCount(3);
+        contentEditor.setVisible(false);
+        contentEditor.setManaged(false);
+
+        // Edit action buttons (initially hidden)
+        HBox editActions = new HBox(8);
+        editActions.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        editActions.setVisible(false);
+        editActions.setManaged(false);
+
+        Button saveBtn = new Button("✓ Save");
+        saveBtn.getStyleClass().addAll("action-button", "save-btn");
+        Button cancelBtn = new Button("✕ Cancel");
+        cancelBtn.getStyleClass().addAll("action-button", "cancel-btn");
+        editActions.getChildren().addAll(cancelBtn, saveBtn);
+
+        contentContainer.getChildren().addAll(contentLabel, contentEditor, editActions);
 
         // Media support - check for file path or BLOB
         VBox mediaBox = new VBox();
@@ -467,12 +492,91 @@ public class ForumController implements Initializable {
 
         actionsBox.getChildren().addAll(likeBtn, commentBtn);
 
+        // Owner actions container (under the post)
+        HBox ownerActionsBox = null;
+
+        // Owner actions (edit/delete) - only for post author
+        boolean isOwner = post.getId_author_post() == currentUserId;
+        if (isOwner) {
+            ownerActionsBox = new HBox(8);
+            ownerActionsBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+            ownerActionsBox.setPadding(new Insets(8, 16, 8, 16));
+            ownerActionsBox.getStyleClass().add("owner-actions-box");
+
+            // Update icon button
+            Button editBtn = new Button("✎");
+            editBtn.getStyleClass().addAll("icon-btn", "edit-icon-btn");
+            editBtn.setTooltip(new Tooltip("Edit post"));
+            editBtn.setOnAction(e -> {
+                // Switch to edit mode
+                contentLabel.setVisible(false);
+                contentLabel.setManaged(false);
+                contentEditor.setVisible(true);
+                contentEditor.setManaged(true);
+                editActions.setVisible(true);
+                editActions.setManaged(true);
+                // Focus the editor
+                contentEditor.requestFocus();
+                contentEditor.positionCaret(contentEditor.getText().length());
+            });
+
+            // Trash icon button
+            Button deleteBtn = new Button("🗑");
+            deleteBtn.getStyleClass().addAll("icon-btn", "delete-icon-btn");
+            deleteBtn.setTooltip(new Tooltip("Delete post"));
+            deleteBtn.setOnAction(e -> handleDeletePost(post));
+
+            ownerActionsBox.getChildren().addAll(editBtn, deleteBtn);
+
+            // Edit action handlers with validation
+            saveBtn.setOnAction(e -> {
+                String newContent = contentEditor.getText().trim();
+                if (newContent.isEmpty()) {
+                    // Show inline error
+                    Label errorLabel = new Label("⚠ Content cannot be empty");
+                    errorLabel.getStyleClass().add("inline-error-label");
+                    errorLabel.setStyle("-fx-text-fill: #EF4444; -fx-font-size: 11px;");
+                    if (!editActions.getChildren().contains(errorLabel)) {
+                        editActions.getChildren().add(0, errorLabel);
+                    }
+                    return;
+                }
+                // Remove error if exists
+                editActions.getChildren().removeIf(node -> node instanceof Label && ((Label)node).getText().contains("empty"));
+                handleUpdatePost(post, newContent);
+                // Switch back to view mode
+                contentLabel.setText(newContent);
+                contentLabel.setVisible(true);
+                contentLabel.setManaged(true);
+                contentEditor.setVisible(false);
+                contentEditor.setManaged(false);
+                editActions.setVisible(false);
+                editActions.setManaged(false);
+            });
+
+            cancelBtn.setOnAction(e -> {
+                contentEditor.setText(post.getContent_post());
+                // Remove any error labels
+                editActions.getChildren().removeIf(node -> node instanceof Label && ((Label)node).getText().contains("empty"));
+                contentLabel.setVisible(true);
+                contentLabel.setManaged(true);
+                contentEditor.setVisible(false);
+                contentEditor.setManaged(false);
+                editActions.setVisible(false);
+                editActions.setManaged(false);
+            });
+        }
+
         // Build card
-        card.getChildren().addAll(headerBox, contentLabel);
+        card.getChildren().addAll(headerBox, contentContainer);
         if (!mediaBox.getChildren().isEmpty()) {
             card.getChildren().add(mediaBox);
         }
-        card.getChildren().addAll(actionsBox, commentsSection);
+        card.getChildren().add(actionsBox);
+        if (ownerActionsBox != null) {
+            card.getChildren().add(ownerActionsBox);
+        }
+        card.getChildren().add(commentsSection);
 
         return card;
     }
@@ -484,6 +588,35 @@ public class ForumController implements Initializable {
             displayPosts();
         } catch (SQLException e) {
             showError("Error liking post: " + e.getMessage());
+        }
+    }
+
+    private void handleDeletePost(Post post) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Post");
+        alert.setHeaderText("Are you sure you want to delete this post?");
+        alert.setContentText("This action cannot be undone.");
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    postService.supprimer(post.getId_post());
+                    displayPosts();
+                } catch (SQLException e) {
+                    showError("Error deleting post: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void handleUpdatePost(Post post, String newContent) {
+        try {
+            post.setContent_post(newContent);
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            post.setUpdated_at_post(timestamp);
+            postService.updatePost(post.getId_post(), post);
+        } catch (SQLException e) {
+            showError("Error updating post: " + e.getMessage());
         }
     }
 
@@ -776,10 +909,35 @@ public class ForumController implements Initializable {
         userInfoBox.getChildren().addAll(usernameLabel, dateLabel);
         headerBox.getChildren().addAll(avatarLabel, userInfoBox);
 
-        // Comment content
+        // Comment content container (for inline editing)
+        VBox contentContainer = new VBox(4);
+
+        // View mode: Label
         Label contentLabel = new Label(comment.getContent_comment());
         contentLabel.getStyleClass().add("comment-content");
         contentLabel.setWrapText(true);
+
+        // Edit mode: TextArea (initially hidden)
+        TextArea contentEditor = new TextArea(comment.getContent_comment());
+        contentEditor.getStyleClass().add("comment-content-editor");
+        contentEditor.setWrapText(true);
+        contentEditor.setPrefRowCount(2);
+        contentEditor.setVisible(false);
+        contentEditor.setManaged(false);
+
+        // Edit action buttons (initially hidden)
+        HBox editActions = new HBox(8);
+        editActions.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        editActions.setVisible(false);
+        editActions.setManaged(false);
+
+        Button saveBtn = new Button("✓ Save");
+        saveBtn.getStyleClass().addAll("comment-action-btn", "save-btn");
+        Button cancelBtn = new Button("✕ Cancel");
+        cancelBtn.getStyleClass().addAll("comment-action-btn", "cancel-btn");
+        editActions.getChildren().addAll(cancelBtn, saveBtn);
+
+        contentContainer.getChildren().addAll(contentLabel, contentEditor, editActions);
 
         // Comment actions
         HBox actionsBox = new HBox(16);
@@ -802,7 +960,66 @@ public class ForumController implements Initializable {
 
         actionsBox.getChildren().addAll(likeBtn, replyBtn);
 
-        commentBox.getChildren().addAll(headerBox, contentLabel, actionsBox);
+        // Owner actions (edit/delete) - only for comment author
+        boolean isCommentOwner = comment.getId_author_comment() == currentUserId;
+        if (isCommentOwner) {
+            Region spacer2 = new Region();
+            HBox.setHgrow(spacer2, Priority.ALWAYS);
+
+            Button editBtn = new Button("✎");
+            editBtn.getStyleClass().addAll("icon-btn", "edit-icon-btn");
+            editBtn.setTooltip(new Tooltip("Edit comment"));
+            editBtn.setOnAction(e -> {
+                // Switch to edit mode
+                contentLabel.setVisible(false);
+                contentLabel.setManaged(false);
+                contentEditor.setVisible(true);
+                contentEditor.setManaged(true);
+                editActions.setVisible(true);
+                editActions.setManaged(true);
+                // Focus the editor
+                contentEditor.requestFocus();
+                contentEditor.positionCaret(contentEditor.getText().length());
+            });
+
+            Button deleteBtn = new Button("🗑");
+            deleteBtn.getStyleClass().addAll("icon-btn", "delete-icon-btn");
+            deleteBtn.setTooltip(new Tooltip("Delete comment"));
+            deleteBtn.setOnAction(e -> handleDeleteComment(comment, post, commentsSection, commentBtn));
+
+            actionsBox.getChildren().addAll(spacer2, editBtn, deleteBtn);
+
+            // Edit action handlers with validation
+            saveBtn.setOnAction(e -> {
+                String newContent = contentEditor.getText().trim();
+                if (newContent.isEmpty()) {
+                    // Show inline error
+                    Label errorLabel = new Label("⚠ Comment cannot be empty");
+                    errorLabel.setStyle("-fx-text-fill: #EF4444; -fx-font-size: 11px;");
+                    if (!editActions.getChildren().contains(errorLabel)) {
+                        editActions.getChildren().add(0, errorLabel);
+                    }
+                    return;
+                }
+                // Remove error if exists
+                editActions.getChildren().removeIf(node -> node instanceof Label && ((Label)node).getText().contains("empty"));
+                handleUpdateComment(comment, newContent);
+                // Reload comments to show updated content
+                loadCommentsIntoSection(commentsSection, post, commentBtn);
+            });
+
+            cancelBtn.setOnAction(e -> {
+                contentEditor.setText(comment.getContent_comment());
+                contentLabel.setVisible(true);
+                contentLabel.setManaged(true);
+                contentEditor.setVisible(false);
+                contentEditor.setManaged(false);
+                editActions.setVisible(false);
+                editActions.setManaged(false);
+            });
+        }
+
+        commentBox.getChildren().addAll(headerBox, contentContainer, actionsBox);
 
         // Load replies if any
         try {
@@ -887,6 +1104,32 @@ public class ForumController implements Initializable {
             loadCommentsIntoSection(commentsSection, post, commentBtn);
         } catch (SQLException e) {
             showError("Erreur lors de la réponse: " + e.getMessage());
+        }
+    }
+
+    private void handleDeleteComment(ForumComment comment, Post post, VBox commentsSection, Button commentBtn) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Comment");
+        alert.setHeaderText("Are you sure you want to delete this comment?");
+        alert.setContentText("This action cannot be undone.");
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    commentService.supprimer(comment.getId_comment());
+                    loadCommentsIntoSection(commentsSection, post, commentBtn);
+                } catch (SQLException e) {
+                    showError("Error deleting comment: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void handleUpdateComment(ForumComment comment, String newContent) {
+        try {
+            commentService.updateComment(comment.getId_comment(), newContent);
+        } catch (SQLException e) {
+            showError("Error updating comment: " + e.getMessage());
         }
     }
 

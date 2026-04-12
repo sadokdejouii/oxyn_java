@@ -10,7 +10,10 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import java.io.File;
+import javafx.stage.FileChooser;
 import org.example.entities.Post;
 import org.example.entities.ForumComment;
 import org.example.services.ForumPostService;
@@ -55,6 +58,18 @@ public class ForumBackofficeController implements Initializable {
     @FXML private TableColumn<CommentRow, String> commentDateColumn;
     @FXML private TableColumn<CommentRow, Void> commentActionsColumn;
 
+    // Inline Edit Panels - Posts
+    @FXML private VBox postEditPanel;
+    @FXML private TextArea postEditContent;
+    @FXML private Label postEditFileLabel;
+    private File selectedEditFile;
+    private int editingPostId = -1;
+
+    // Inline Edit Panels - Comments
+    @FXML private VBox commentEditPanel;
+    @FXML private TextArea commentEditContent;
+    private int editingCommentId = -1;
+
     // Services
     private ForumPostService postService;
     private ForumCommentService commentService;
@@ -95,6 +110,7 @@ public class ForumBackofficeController implements Initializable {
     public static class CommentRow {
         private final int id;
         private final String content;
+        private final String fullContent;
         private final int postId;
         private final String author;
         private final int likes;
@@ -102,6 +118,7 @@ public class ForumBackofficeController implements Initializable {
 
         public CommentRow(int id, String content, int postId, String author, int likes, String date) {
             this.id = id;
+            this.fullContent = content;
             this.content = content.length() > 60 ? content.substring(0, 60) + "..." : content;
             this.postId = postId;
             this.author = author;
@@ -111,6 +128,7 @@ public class ForumBackofficeController implements Initializable {
 
         public int getId() { return id; }
         public String getContent() { return content; }
+        public String getFullContent() { return fullContent; }
         public int getPostId() { return postId; }
         public String getAuthor() { return author; }
         public int getLikes() { return likes; }
@@ -192,11 +210,19 @@ public class ForumBackofficeController implements Initializable {
             @Override
             public TableCell<CommentRow, Void> call(final TableColumn<CommentRow, Void> param) {
                 return new TableCell<>() {
+                    private final Button editBtn = new Button("✏️ Edit");
                     private final Button deleteBtn = new Button("🗑️ Delete");
-                    private final HBox pane = new HBox(8, deleteBtn);
+                    private final HBox pane = new HBox(8, editBtn, deleteBtn);
 
                     {
+                        editBtn.getStyleClass().addAll("action-btn", "edit");
                         deleteBtn.getStyleClass().addAll("action-btn", "delete");
+
+                        editBtn.setOnAction(event -> {
+                            CommentRow row = getTableView().getItems().get(getIndex());
+                            handleEditComment(row);
+                        });
+
                         deleteBtn.setOnAction(event -> {
                             CommentRow row = getTableView().getItems().get(getIndex());
                             handleDeleteComment(row);
@@ -375,24 +401,82 @@ public class ForumBackofficeController implements Initializable {
     }
 
     private void handleEdit(PostRow row) {
-        TextInputDialog dialog = new TextInputDialog(row.getContent());
-        dialog.setTitle("Edit Post");
-        dialog.setHeaderText("Edit post content (ID: " + row.getId() + ")");
-        dialog.setContentText("Content:");
+        // Show inline edit panel instead of dialog
+        editingPostId = row.getId();
+        postEditContent.setText(row.getContent());
+        selectedEditFile = null;
+        postEditFileLabel.setText("No file selected (keep existing or choose new)");
 
-        dialog.showAndWait().ifPresent(newContent -> {
-            try {
-                Post post = postService.getPostById(row.getId());
-                if (post != null) {
-                    post.setContent_post(newContent);
-                    postService.updatePost(row.getId(), post);
-                    handleRefresh();
-                    showInfo("Success", "Post updated successfully");
+        postEditPanel.setVisible(true);
+        postEditPanel.setManaged(true);
+        commentEditPanel.setVisible(false);
+        commentEditPanel.setManaged(false);
+
+        // Scroll to edit panel
+        postEditPanel.requestFocus();
+    }
+
+    @FXML
+    private void handlePostEditFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Media File");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif"),
+            new FileChooser.ExtensionFilter("Videos", "*.mp4", "*.avi", "*.mov"),
+            new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+        File file = fileChooser.showOpenDialog(postEditPanel.getScene().getWindow());
+        if (file != null) {
+            selectedEditFile = file;
+            postEditFileLabel.setText(file.getName());
+        }
+    }
+
+    @FXML
+    private void handlePostEditSave() {
+        if (editingPostId == -1) return;
+
+        String newContent = postEditContent.getText().trim();
+        if (newContent.isEmpty()) {
+            showError("Validation Error", "Post content cannot be empty");
+            return;
+        }
+
+        try {
+            Post post = postService.getPostById(editingPostId);
+            if (post != null) {
+                post.setContent_post(newContent);
+
+                // Handle file attachment
+                if (selectedEditFile != null) {
+                    post.setMedia_url_post(selectedEditFile.getAbsolutePath());
+                    // Determine media type
+                    String fileName = selectedEditFile.getName().toLowerCase();
+                    if (fileName.endsWith(".mp4") || fileName.endsWith(".avi") || fileName.endsWith(".mov")) {
+                        post.setMedia_type_post("video");
+                    } else {
+                        post.setMedia_type_post("image");
+                    }
                 }
-            } catch (SQLException e) {
-                showError("Update Error", "Failed to update post: " + e.getMessage());
+
+                postService.updatePost(editingPostId, post);
+                handlePostEditCancel();
+                handleRefresh();
+                showInfo("Success", "Post updated successfully");
             }
-        });
+        } catch (SQLException e) {
+            showError("Update Error", "Failed to update post: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handlePostEditCancel() {
+        editingPostId = -1;
+        selectedEditFile = null;
+        postEditContent.clear();
+        postEditFileLabel.setText("No file selected");
+        postEditPanel.setVisible(false);
+        postEditPanel.setManaged(false);
     }
 
     private void handleDelete(PostRow row) {
@@ -412,6 +496,48 @@ public class ForumBackofficeController implements Initializable {
                 }
             }
         });
+    }
+
+    private void handleEditComment(CommentRow row) {
+        // Show inline edit panel instead of dialog
+        editingCommentId = row.getId();
+        commentEditContent.setText(row.getFullContent());
+
+        commentEditPanel.setVisible(true);
+        commentEditPanel.setManaged(true);
+        postEditPanel.setVisible(false);
+        postEditPanel.setManaged(false);
+
+        // Scroll to edit panel
+        commentEditPanel.requestFocus();
+    }
+
+    @FXML
+    private void handleCommentEditSave() {
+        if (editingCommentId == -1) return;
+
+        String newContent = commentEditContent.getText().trim();
+        if (newContent.isEmpty()) {
+            showError("Validation Error", "Comment content cannot be empty");
+            return;
+        }
+
+        try {
+            commentService.updateComment(editingCommentId, newContent);
+            handleCommentEditCancel();
+            handleRefresh();
+            showInfo("Success", "Comment updated successfully");
+        } catch (SQLException e) {
+            showError("Update Error", "Failed to update comment: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleCommentEditCancel() {
+        editingCommentId = -1;
+        commentEditContent.clear();
+        commentEditPanel.setVisible(false);
+        commentEditPanel.setManaged(false);
     }
 
     private void handleDeleteComment(CommentRow row) {
