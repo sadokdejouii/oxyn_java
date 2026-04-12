@@ -37,16 +37,20 @@ import java.util.Set;
 public class MainLayoutController implements Initializable {
 
     private static final String PAGE_ADMIN_DASH = "/FXML/pages/AdminDashboard.fxml";
-    private static final String PAGE_STOCK = "/FXML/pages/StockManagement.fxml";
+    private static final String PAGE_STOCK = "/FXML/pages/AdminSalleHub.fxml";
     private static final String PAGE_EVENTS_ADMIN = "/FXML/pages/EventManagement.fxml";
     private static final String PAGE_USERS = "/FXML/pages/UserManagement.fxml";
     private static final String PAGE_REPORTS = "/FXML/pages/ReportsStatistics.fxml";
 
-    private static final String PAGE_CLIENT_HOME = "/FXML/pages/ClientHome.fxml";
+    private static final String PAGE_CLIENT_HOME   = "/FXML/pages/ClientHome.fxml";
+    private static final String PAGE_CLIENT_SALLE  = "/FXML/pages/ClientSalleList.fxml";
     private static final String PAGE_CLIENT_EVENTS = "/FXML/pages/ClientEvents.fxml";
     private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
     private static final String PAGE_PROFILE = "/FXML/pages/ProfilePage.fxml";
 
+    private static final String PAGE_ENC_HOME = "/FXML/pages/EncadrantHome.fxml";
+    private static final String PAGE_ENC_GROUPE = "/FXML/pages/EncadrantGroupe.fxml";
+    private static final String PAGE_ENC_PLANNING = "/FXML/pages/EncadrantPlanning.fxml";
     @FXML
     private BorderPane shellRoot;
 
@@ -70,6 +74,9 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private VBox adminNavGroup;
+
+    @FXML
+    private VBox encadrantNavGroup;
 
     @FXML
     private VBox clientNavGroup;
@@ -137,6 +144,24 @@ public class MainLayoutController implements Initializable {
     @FXML
     private Button profileBtn;
 
+    @FXML
+    private Button encDashboardBtn;
+
+    @FXML
+    private Button encEvenementsBtn;
+
+    @FXML
+    private Button encGroupeBtn;
+
+    @FXML
+    private Button encSalleBtn;
+
+    @FXML
+    private Button encBoutiqueBtn;
+
+    @FXML
+    private Button encForumBtn;
+
     private final List<Button> mainNavButtons = new ArrayList<>();
 
     private Button activeNavButton;
@@ -171,12 +196,20 @@ public class MainLayoutController implements Initializable {
         mainNavButtons.add(boutiqueBtn);
         mainNavButtons.add(forumBtn);
         mainNavButtons.add(profileBtn);
+        mainNavButtons.add(encDashboardBtn);
+        mainNavButtons.add(encEvenementsBtn);
+        mainNavButtons.add(encGroupeBtn);
+        mainNavButtons.add(encSalleBtn);
+        mainNavButtons.add(encSalleBtn);
+        mainNavButtons.add(encBoutiqueBtn);
+        mainNavButtons.add(encForumBtn);
 
         applyRoleShell(ctx);
         wireSearch();
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
+            navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
             navigate(PAGE_CLIENT_HOME, "Accueil encadrant", homeBtn);
         } else {
             navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
@@ -186,25 +219,19 @@ public class MainLayoutController implements Initializable {
     private void applyRoleShell(SessionContext ctx) {
         boolean admin = ctx.isAdmin();
         boolean encadrant = ctx.isEncadrant();
+        boolean client = !admin && !encadrant;
+
         adminNavGroup.setVisible(admin);
         adminNavGroup.setManaged(admin);
-        clientNavGroup.setVisible(!admin);
-        clientNavGroup.setManaged(!admin);
-        if (admin) {
-            shellModeLabel.setText("ADMINISTRATOR");
-        } else if (encadrant) {
-            shellModeLabel.setText("ENCADRANT");
-        } else {
-            shellModeLabel.setText("CLIENT");
-        }
+        encadrantNavGroup.setVisible(encadrant);
+        encadrantNavGroup.setManaged(encadrant);
+        clientNavGroup.setVisible(client);
+        clientNavGroup.setManaged(client);
+
+        String modeLabel = admin ? "ADMINISTRATOR" : encadrant ? "ENCADRANT" : "CLIENT";
+        shellModeLabel.setText(modeLabel);
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        if (admin) {
-            footerText.setText("Back office session");
-        } else if (encadrant) {
-            footerText.setText("Session encadrant");
-        } else {
-            footerText.setText("Front office session");
-        }
+        footerText.setText(admin ? "Back office session" : encadrant ? "Encadrant session" : "Front office session");
     }
 
     private void wireSearch() {
@@ -254,6 +281,7 @@ public class MainLayoutController implements Initializable {
             toggleText.setText(sidebarCompact ? "Expand" : "Collapse sidebar");
         }
         applyNavTextVisible(adminNavGroup, !sidebarCompact);
+        applyNavTextVisible(encadrantNavGroup, !sidebarCompact);
         applyNavTextVisible(clientNavGroup, !sidebarCompact);
         applyNavTextVisible(sidebarActionsBox, !sidebarCompact);
         applySectionTitlesVisible(!sidebarCompact);
@@ -272,6 +300,7 @@ public class MainLayoutController implements Initializable {
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
+            navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
             navigate(PAGE_CLIENT_HOME, "Accueil encadrant", homeBtn);
         } else {
             navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
@@ -296,18 +325,17 @@ public class MainLayoutController implements Initializable {
     private void applySectionTitlesVisible(boolean show) {
         if (adminNavGroup != null) {
             for (Node n : adminNavGroup.getChildren()) {
-                if (n instanceof Label) {
-                    n.setVisible(show);
-                    n.setManaged(show);
-                }
+                if (n instanceof Label) { n.setVisible(show); n.setManaged(show); }
+            }
+        }
+        if (encadrantNavGroup != null) {
+            for (Node n : encadrantNavGroup.getChildren()) {
+                if (n instanceof Label) { n.setVisible(show); n.setManaged(show); }
             }
         }
         if (clientNavGroup != null) {
             for (Node n : clientNavGroup.getChildren()) {
-                if (n instanceof Label) {
-                    n.setVisible(show);
-                    n.setManaged(show);
-                }
+                if (n instanceof Label) { n.setVisible(show); n.setManaged(show); }
             }
         }
         if (shellModeLabel != null) {
@@ -363,7 +391,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleSalle() {
-        navigate(PAGE_PLANNING, "Salle", salleBtn);
+        navigate(PAGE_CLIENT_SALLE, "Salles", salleBtn);
     }
 
     @FXML
@@ -384,6 +412,41 @@ public class MainLayoutController implements Initializable {
     @FXML
     private void handleProfile() {
         navigate(PAGE_PROFILE, "Profile", profileBtn);
+    }
+
+    @FXML
+    private void handleEncDashboard() {
+        navigate(PAGE_ENC_HOME, "Dashboard", encDashboardBtn);
+    }
+
+    @FXML
+    private void handleEncEvenements() {
+        navigate(PAGE_CLIENT_EVENTS, "Evenements", encEvenementsBtn);
+    }
+
+    @FXML
+    private void handleEncSalle() {
+        navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+    }
+
+    @FXML
+    private void handleEncPlanning() {
+        navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+    }
+
+    @FXML
+    private void handleEncBoutique() {
+        navigate(PAGE_PLANNING, "Boutique", encBoutiqueBtn);
+    }
+
+    @FXML
+    private void handleEncForum() {
+        navigate(PAGE_PLANNING, "Forum", encForumBtn);
+    }
+
+    @FXML
+    private void handleEncGroupe() {
+        navigate(PAGE_ENC_GROUPE, "Mes Groupes", encGroupeBtn);
     }
 
     @FXML

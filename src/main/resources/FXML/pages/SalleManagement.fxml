@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.SalleManagementController">
+
+    <!-- ── PAGE PRINCIPALE ── -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
+        <VBox spacing="18" styleClass="page-root">
+
+            <VBox spacing="6">
+                <Label styleClass="page-hero-title" text="Gestion des Salles" />
+                <Label styleClass="page-hero-sub" text="Ajoutez, modifiez ou désactivez les salles de sport." wrapText="true" />
+            </VBox>
+
+            <HBox spacing="10" styleClass="toolbar-card" alignment="CENTER_LEFT">
+                <Button onAction="#handleAjouter" styleClass="primary-toolbar-btn" text="+ Nouvelle salle" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser" />
+            </HBox>
+
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <padding><Insets left="4"/></padding>
+                <Label fx:id="countLabel" styleClass="saas-stat-label" text="0 salle(s)" />
+            </HBox>
+
+            <FlowPane fx:id="sallesGrid" hgap="18" vgap="18" prefWrapLength="900">
+                <padding><Insets bottom="20" left="4" right="4" top="4"/></padding>
+            </FlowPane>
+
+        </VBox>
+    </ScrollPane>
+
+    <!-- ── DIALOG OVERLAY ── -->
+    <StackPane fx:id="dialogOverlay" visible="false" managed="false" styleClass="dialog-overlay">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="680" styleClass="salle-dialog-scroll">
+            <VBox fx:id="dialogCard" maxWidth="500" spacing="14" styleClass="salle-dialog-card" alignment="TOP_LEFT">
+                <padding><Insets bottom="28" left="28" right="28" top="24"/></padding>
+
+                <Label fx:id="dialogTitle" styleClass="salle-dialog-title" text="Nouvelle salle" />
+
+                <!-- Zone photo -->
+                <VBox spacing="8">
+                    <Label styleClass="salle-field-label" text="Photo" />
+
+                    <!-- Preview (visible quand image choisie) -->
+                    <StackPane fx:id="previewPane" styleClass="salle-preview-pane" prefHeight="160" visible="false" managed="false">
+                        <ImageView fx:id="previewImage" fitWidth="444" fitHeight="160" preserveRatio="false" styleClass="salle-preview-img" />
+                        <Button fx:id="removeImageBtn" onAction="#handleRemoveImage" styleClass="salle-remove-img-btn" text="✕"
+                                StackPane.alignment="TOP_RIGHT" />
+                    </StackPane>
+
+                    <!-- Drop zone (visible quand pas d'image) -->
+                    <VBox fx:id="dropZone" styleClass="salle-drop-zone" prefHeight="100" alignment="CENTER" spacing="6"
+                          onMouseClicked="#handlePickImage">
+                        <Label styleClass="salle-drop-icon" text="📁" />
+                        <Label styleClass="salle-drop-text" text="Cliquez ou glissez une image ici" />
+                        <Label styleClass="salle-drop-hint" text="JPG, PNG, GIF — max 5 Mo" />
+                    </VBox>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label styleClass="salle-field-label" text="Nom *" />
+                    <TextField fx:id="fieldNom" promptText="Nom de la salle" styleClass="salle-field" maxWidth="Infinity" />
+                </VBox>
+                <VBox spacing="6">
+                    <Label styleClass="salle-field-label" text="Description" />
+                    <TextArea fx:id="fieldDescription" promptText="Description…" styleClass="salle-field" prefRowCount="3" maxWidth="Infinity" wrapText="true" />
+                </VBox>
+                <VBox spacing="6">
+                    <Label styleClass="salle-field-label" text="Adresse" />
+                    <TextField fx:id="fieldAdresse" promptText="Adresse complète" styleClass="salle-field" maxWidth="Infinity" />
+                </VBox>
+                <HBox spacing="12">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label styleClass="salle-field-label" text="Téléphone" />
+                        <TextField fx:id="fieldTelephone" promptText="+216 XX XXX XXX" styleClass="salle-field" maxWidth="Infinity" />
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label styleClass="salle-field-label" text="Email" />
+                        <TextField fx:id="fieldEmail" promptText="contact@salle.tn" styleClass="salle-field" maxWidth="Infinity" />
+                    </VBox>
+                </HBox>
+
+                <Label fx:id="dialogError" styleClass="salle-error-label" text="" wrapText="true" />
+
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button onAction="#handleDialogCancel" styleClass="ghost-toolbar-btn" text="Annuler" />
+                    <Button fx:id="dialogSaveBtn" onAction="#handleDialogSave" styleClass="primary-toolbar-btn" text="Enregistrer" />
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </StackPane>
+
+</StackPane>

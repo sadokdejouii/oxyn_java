@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.EncadrantHomeController">
+    <VBox spacing="18" styleClass="page-root">
+        <VBox spacing="6">
+            <Label styleClass="page-hero-title" text="Tableau de bord Encadrant" />
+            <Label styleClass="page-hero-sub" text="Suivez les événements que vous encadrez et la participation de vos groupes." wrapText="true" />
+        </VBox>
+
+        <HBox spacing="14" styleClass="saas-stat-row">
+            <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="ÉVÉNEMENTS ENCADRÉS" />
+                <Label fx:id="encEventsLabel" styleClass="saas-stat-value" text="—" />
+                <Label styleClass="saas-stat-hint" text="En cours et à venir" />
+            </VBox>
+            <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="PARTICIPANTS" />
+                <Label fx:id="encParticipantsLabel" styleClass="saas-stat-value" text="—" />
+                <Label styleClass="saas-stat-hint" text="Inscrits dans vos groupes" />
+            </VBox>
+            <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="PLANNINGS" />
+                <Label fx:id="encPlanningsLabel" styleClass="saas-stat-value" text="—" />
+                <Label styleClass="saas-stat-hint" text="Sessions planifiées" />
+            </VBox>
+        </HBox>
+
+        <VBox spacing="10" styleClass="saas-chart-card">
+            <Label styleClass="saas-card-title" text="Participation par événement" />
+            <BarChart fx:id="participationChart" animated="false" legendVisible="false" prefHeight="260" styleClass="saas-chart">
+                <xAxis>
+                    <CategoryAxis label="Événement" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Participants" autoRanging="true" />
+                </yAxis>
+            </BarChart>
+        </VBox>
+
+        <VBox spacing="0" styleClass="saas-activity-card">
+            <padding>
+                <Insets bottom="8" left="0" right="0" top="12" />
+            </padding>
+            <Label styleClass="saas-card-title">
+                <padding>
+                    <Insets bottom="6" left="18" right="18" top="0" />
+                </padding>
+                <text>Activité récente</text>
+            </Label>
+            <VBox fx:id="encActivityList" spacing="0" />
+        </VBox>
+    </VBox>
+</ScrollPane>

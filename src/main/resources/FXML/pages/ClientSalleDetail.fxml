@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.ClientSalleDetailController"
+           styleClass="cl-root">
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
+        <VBox spacing="28" styleClass="page-root">
+
+            <!-- Back button -->
+            <HBox>
+                <Button fx:id="btnBack" onAction="#handleBack"
+                        styleClass="cl-btn-back" text="← Retour aux salles" />
+            </HBox>
+
+            <!-- ── Section 1 : Infos salle ── -->
+            <VBox spacing="16" styleClass="cl-detail-card">
+                <padding><Insets bottom="24" left="24" right="24" top="20"/></padding>
+
+                <!-- Photo -->
+                <StackPane fx:id="photoPane" styleClass="cl-detail-photo-wrap" prefHeight="220">
+                    <ImageView fx:id="sallePhoto" fitWidth="900" fitHeight="220"
+                               preserveRatio="false" styleClass="cl-detail-photo" />
+                    <Label fx:id="photoPlaceholder" styleClass="cl-no-photo" text="Aucune photo" />
+                </StackPane>
+
+                <!-- Infos -->
+                <HBox spacing="20" alignment="TOP_LEFT">
+                    <VBox spacing="10" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label fx:id="salleName" styleClass="cl-detail-title" text="—" />
+                            <Label styleClass="cl-badge-active" text="● Actif" />
+                        </HBox>
+                        <Label fx:id="salleDesc" styleClass="cl-detail-desc" text="—" wrapText="true" />
+                    </VBox>
+                    <VBox spacing="8" minWidth="260">
+                        <Label fx:id="salleAddr"  styleClass="cl-detail-info" text="📍  —" />
+                        <Label fx:id="sallePhone" styleClass="cl-detail-info" text="📞  —" />
+                        <Label fx:id="salleEmail" styleClass="cl-detail-info" text="✉  —" />
+                        <Label fx:id="salleRating" styleClass="cl-detail-rating" text="★  —" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- ── Section 2 : Abonnements ── -->
+            <VBox spacing="14">
+                <Label styleClass="cl-section-title" text="💳  Abonnements disponibles" />
+                <Label fx:id="noOffres" styleClass="cl-empty-label"
+                       text="Aucun abonnement disponible pour cette salle." visible="false" managed="false" />
+                <FlowPane fx:id="offresGrid" hgap="20" vgap="20" prefWrapLength="1100" />
+            </VBox>
+
+            <!-- ── Section 3 : Sessions ── -->
+            <VBox spacing="14">
+                <Label styleClass="cl-section-title" text="🏋  Sessions a venir" />
+                <Label fx:id="noSessions" styleClass="cl-empty-label"
+                       text="Aucune session planifiee pour cette salle." visible="false" managed="false" />
+                <FlowPane fx:id="sessionsGrid" hgap="20" vgap="20" prefWrapLength="1100">
+                    <padding><Insets bottom="24"/></padding>
+                </FlowPane>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+
+</StackPane>
