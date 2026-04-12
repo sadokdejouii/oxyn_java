@@ -1,6 +1,7 @@
 package org.example.controllers;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -175,9 +176,11 @@ public class MainLayoutController implements Initializable {
         Platform.runLater(installIcons);
 
         SessionContext ctx = SessionContext.getInstance();
-        topbarUserName.setText(ctx.getDisplayName());
+        topbarUserName.textProperty().bind(ctx.displayNameProperty());
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        userAvatarLabel.setText(initials(ctx.getDisplayName()));
+        userAvatarLabel.textProperty().bind(Bindings.createStringBinding(
+                () -> initials(ctx.getDisplayName()),
+                ctx.displayNameProperty()));
 
         mainNavButtons.clear();
         mainNavButtons.add(adminDashboardBtn);
@@ -207,6 +210,7 @@ public class MainLayoutController implements Initializable {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
             navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+            navigate(PAGE_CLIENT_HOME, "Accueil encadrant", homeBtn);
         } else {
             navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
         }
@@ -297,6 +301,7 @@ public class MainLayoutController implements Initializable {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
             navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+            navigate(PAGE_CLIENT_HOME, "Accueil encadrant", homeBtn);
         } else {
             navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
         }
@@ -366,7 +371,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminBoutique() {
-        navigate(PAGE_USERS, "Boutique", adminBoutiqueBtn);
+        navigate(PAGE_USERS, "Utilisateurs", adminBoutiqueBtn);
     }
 
     @FXML
@@ -452,7 +457,7 @@ public class MainLayoutController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Login.fxml"));
             Parent root = loader.load();
             stage.setScene(new Scene(root, 1080, 720));
-            stage.setTitle("OXYN â€” Sign in");
+            stage.setTitle("OXYN — Connexion");
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();

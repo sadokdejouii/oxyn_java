@@ -5,22 +5,28 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MyDataBase {
+
+    private static final String HOST = "localhost";
+    private static final String PORT = "3306";
+    private static final String DB_NAME = "oxyn";
+
     private static final String USERNAME = "root";
-    private static final String URL      = "jdbc:mysql://localhost:3306/oxyn";
     private static final String PASSWORD = "";
+
+    /** Paramètres usuels pour MySQL 8 (fuseau, UTF-8). */
+    private static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME
+            + "?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8";
 
     private Connection connection;
     private static MyDataBase instance;
 
-    private MyDataBase() { connect(); }
-
-    private void connect() {
+    private MyDataBase() {
         try {
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            connection.setAutoCommit(true);
-            System.out.println("Connection established");
+            System.out.println("Connexion à la base « " + DB_NAME + " » établie.");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.err.println("Échec de connexion à « " + DB_NAME + " » : " + e.getMessage());
+            connection = null;
         }
     }
 
