@@ -12,8 +12,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AjouterProduitPageController">
-    <VBox alignment="TOP_CENTER" styleClass="page-root product-form-outer">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AjouterProduitPageController">
+    <VBox alignment="TOP_CENTER" styleClass="page-root product-form-page product-form-outer">
         <VBox spacing="20" styleClass="product-form-shell">
 
             <VBox spacing="8" styleClass="product-form-hero">
