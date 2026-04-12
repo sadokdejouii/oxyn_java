@@ -72,7 +72,7 @@
                 <VBox styleClass="sess-dialog-header" spacing="4">
                     <padding><Insets bottom="20" left="28" right="28" top="22"/></padding>
                     <HBox alignment="CENTER_LEFT" spacing="12">
-                        <Label styleClass="sess-dialog-header-icon" text="📋" />
+                        <Label styleClass="sess-dialog-header-icon" text="" />
                         <VBox spacing="2">
                             <Label fx:id="dialogTitle" styleClass="sess-dialog-title" text="Nouvelle session" />
                             <Label styleClass="sess-dialog-subtitle" text="Remplissez les informations de la session" />
@@ -87,7 +87,7 @@
                     <!-- Section : Informations générales -->
                     <VBox spacing="12">
                         <HBox alignment="CENTER_LEFT" spacing="8">
-                            <Label styleClass="sess-section-icon" text="📝" />
+                            <Label styleClass="sess-section-icon" text="" />
                             <Label styleClass="sess-section-title" text="Informations generales" />
                         </HBox>
                         <Region styleClass="sess-section-divider" prefHeight="1" maxWidth="Infinity" />
@@ -115,7 +115,7 @@
                     <!-- Section : Horaires -->
                     <VBox spacing="12">
                         <HBox alignment="CENTER_LEFT" spacing="8">
-                            <Label styleClass="sess-section-icon" text="🕐" />
+                            <Label styleClass="sess-section-icon" text="" />
                             <Label styleClass="sess-section-title" text="Horaires" />
                         </HBox>
                         <Region styleClass="sess-section-divider" prefHeight="1" maxWidth="Infinity" />
@@ -141,7 +141,7 @@
                     <!-- Section : Capacité & Prix -->
                     <VBox spacing="12">
                         <HBox alignment="CENTER_LEFT" spacing="8">
-                            <Label styleClass="sess-section-icon" text="👥" />
+                            <Label styleClass="sess-section-icon" text="" />
                             <Label styleClass="sess-section-title" text="Capacite et tarif" />
                         </HBox>
                         <Region styleClass="sess-section-divider" prefHeight="1" maxWidth="Infinity" />
@@ -163,7 +163,7 @@
                     <!-- Section : Notes -->
                     <VBox spacing="12">
                         <HBox alignment="CENTER_LEFT" spacing="8">
-                            <Label styleClass="sess-section-icon" text="💬" />
+                            <Label styleClass="sess-section-icon" text="" />
                             <Label styleClass="sess-section-title" text="Notes" />
                         </HBox>
                         <Region styleClass="sess-section-divider" prefHeight="1" maxWidth="Infinity" />

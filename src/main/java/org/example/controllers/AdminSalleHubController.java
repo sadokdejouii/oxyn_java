@@ -16,7 +16,6 @@ import org.example.services.SubscriptionOfferService;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -43,15 +42,29 @@ public class AdminSalleHubController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        loadBadges();
         activeTab = tabSalles;
+        // Load badges in background to avoid blocking UI thread
+        javafx.concurrent.Task<int[]> task = new javafx.concurrent.Task<>() {
+            @Override protected int[] call() throws Exception {
+                int s = 0, e = 0, o = 0;
+                try { s = salleService.afficher().size(); } catch (Exception ignored) {}
+                try { e = equipService.afficher().size(); } catch (Exception ignored) {}
+                try { o = subsService.afficher().size(); } catch (Exception ignored) {}
+                return new int[]{s, e, o};
+            }
+        };
+        task.setOnSucceeded(ev -> {
+            int[] counts = task.getValue();
+            badgeSalles.setText(String.valueOf(counts[0]));
+            badgeEquip.setText(String.valueOf(counts[1]));
+            badgeSubs.setText(String.valueOf(counts[2]));
+        });
+        task.setOnFailed(ev -> {
+            badgeSalles.setText("?"); badgeEquip.setText("?"); badgeSubs.setText("?");
+        });
+        new Thread(task, "badge-loader").start();
+        // Load first tab content
         showTab("SALLES");
-    }
-
-    private void loadBadges() {
-        try { badgeSalles.setText(String.valueOf(salleService.afficher().size())); } catch (SQLException e) { badgeSalles.setText("?"); }
-        try { badgeEquip.setText(String.valueOf(equipService.afficher().size())); }  catch (SQLException e) { badgeEquip.setText("?"); }
-        try { badgeSubs.setText(String.valueOf(subsService.afficher().size())); }    catch (SQLException e) { badgeSubs.setText("?"); }
     }
 
     @FXML
@@ -69,8 +82,23 @@ public class AdminSalleHubController implements Initializable {
     private void handleRefresh() {
         cache.remove(currentKey);
         controllers.remove(currentKey);
-        loadBadges();
-        showTab(currentKey);
+        javafx.concurrent.Task<int[]> task = new javafx.concurrent.Task<>() {
+            @Override protected int[] call() throws Exception {
+                int s = 0, e = 0, o = 0;
+                try { s = salleService.afficher().size(); } catch (Exception ignored) {}
+                try { e = equipService.afficher().size(); } catch (Exception ignored) {}
+                try { o = subsService.afficher().size(); } catch (Exception ignored) {}
+                return new int[]{s, e, o};
+            }
+        };
+        task.setOnSucceeded(ev -> {
+            int[] counts = task.getValue();
+            badgeSalles.setText(String.valueOf(counts[0]));
+            badgeEquip.setText(String.valueOf(counts[1]));
+            badgeSubs.setText(String.valueOf(counts[2]));
+            showTab(currentKey);
+        });
+        new Thread(task, "badge-refresh").start();
     }
 
     private void showTab(String key) {

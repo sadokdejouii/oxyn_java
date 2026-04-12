@@ -27,7 +27,7 @@ public class ClientSalleListController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
 
-    private static final String SORT_NOM    = "Nom (A→Z)";
+    private static final String SORT_NOM    = "Nom (A-Z)";
     private static final String SORT_NOTE   = "Meilleure note";
     private static final String SORT_AVIS   = "Plus d'avis";
 
@@ -113,17 +113,17 @@ public class ClientSalleListController implements Initializable {
 
         HBox topRow = new HBox(8); topRow.setAlignment(Pos.CENTER_LEFT);
         Label name = new Label(s.getName()); name.getStyleClass().add("cl-card-title"); name.setWrapText(true); HBox.setHgrow(name, Priority.ALWAYS);
-        Label badge = new Label("● Actif"); badge.getStyleClass().add("cl-badge-active");
+        Label badge = new Label("Actif"); badge.getStyleClass().add("cl-badge-active");
         topRow.getChildren().addAll(name, badge);
 
-        Label rating = new Label("★ " + String.format("%.1f", s.getRating()) + "  (" + s.getRatingCount() + " avis)");
+        Label rating = new Label("* " + String.format("%.1f", s.getRating()) + "  (" + s.getRatingCount() + " avis)");
         rating.getStyleClass().add("cl-card-rating");
 
         VBox infos = new VBox(4);
         infos.getChildren().addAll(
-            infoRow("📍", s.getAddress()),
-            infoRow("📞", s.getPhone()),
-            infoRow("✉", s.getEmail())
+            infoRow("[Adresse]", s.getAddress()),
+            infoRow("[Tel]", s.getPhone()),
+            infoRow("[Email]", s.getEmail())
         );
 
         Separator sep = new Separator();
@@ -153,12 +153,22 @@ public class ClientSalleListController implements Initializable {
             ClientSalleDetailController ctrl = loader.getController();
             ctrl.setSalle(salle);
 
-            // Find contentArea StackPane in the scene
-            javafx.scene.Node root = sallesGrid.getScene().getRoot();
-            javafx.scene.layout.StackPane contentArea =
-                (javafx.scene.layout.StackPane) root.lookup("#contentArea");
-            if (contentArea != null) {
-                contentArea.getChildren().setAll(detail);
+            // Walk up the parent chain to find contentArea StackPane
+            javafx.scene.Node node = sallesGrid;
+            while (node != null) {
+                if (node instanceof javafx.scene.layout.StackPane sp
+                        && "contentArea".equals(sp.getId())) {
+                    sp.getChildren().setAll(detail);
+                    return;
+                }
+                node = node.getParent();
+            }
+            // Fallback: scene-level lookup
+            javafx.scene.Node found = sallesGrid.getScene().getRoot().lookup("#contentArea");
+            if (found instanceof javafx.scene.layout.StackPane sp) {
+                sp.getChildren().setAll(detail);
+            } else {
+                System.err.println("[ClientSalleList] contentArea not found");
             }
         } catch (Exception e) {
             e.printStackTrace();
