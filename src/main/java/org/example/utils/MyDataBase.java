@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class MyDataBase {
+/**
+ * Connexion JDBC MySQL (base {@code oxyn}) — paramètres alignés sur {@code main} (fuseau, UTF-8).
+ */
+public final class MyDataBase {
 
     private static final String HOST = "localhost";
     private static final String PORT = "3306";
@@ -13,12 +16,12 @@ public class MyDataBase {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";
 
-    /** Paramètres usuels pour MySQL 8 (fuseau, UTF-8). */
     private static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME
             + "?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8";
 
-    private Connection connection;
     private static MyDataBase instance;
+
+    private Connection connection;
 
     private MyDataBase() {
         connect();
@@ -35,7 +38,9 @@ public class MyDataBase {
     }
 
     public static MyDataBase getInstance() {
-        if (instance == null) instance = new MyDataBase();
+        if (instance == null) {
+            instance = new MyDataBase();
+        }
         return instance;
     }
 
@@ -52,12 +57,24 @@ public class MyDataBase {
 
     /** Reset after writes so next read gets fresh data */
     public void resetConnection() {
-        try { if (connection != null && !connection.isClosed()) connection.close(); }
-        catch (SQLException ignored) {}
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException ignored) {
+        }
         connect();
     }
 
-    public static String getURL()      { return URL; }
-    public static String getUSERNAME() { return USERNAME; }
-    public static String getPASSWORD() { return PASSWORD; }
+    public static String getURL() {
+        return URL;
+    }
+
+    public static String getUSERNAME() {
+        return USERNAME;
+    }
+
+    public static String getPASSWORD() {
+        return PASSWORD;
+    }
 }

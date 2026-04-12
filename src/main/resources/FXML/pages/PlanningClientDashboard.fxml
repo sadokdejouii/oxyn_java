@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.PlanningClientDashboardController"
+           styleClass="pcd-dashboard-stack" maxWidth="Infinity"
+           stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-widgets.css,@../../css/planning-client-dashboard.css">
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="pcd-dashboard-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="20" styleClass="pcd-dashboard-inner" maxWidth="Infinity">
+            <GridPane styleClass="pcd-main-grid" hgap="20" vgap="20" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="100" prefWidth="160" percentWidth="25" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="100" prefWidth="160" percentWidth="25" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="100" prefWidth="160" percentWidth="25" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="100" prefWidth="160" percentWidth="25" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints valignment="TOP" />
+                    <RowConstraints valignment="TOP" />
+                    <RowConstraints vgrow="ALWAYS" minHeight="200" valignment="TOP" />
+                    <RowConstraints vgrow="ALWAYS" minHeight="280" valignment="TOP" />
+                </rowConstraints>
+
+                <!-- Ligne 1 : KPI -->
+                <VBox styleClass="saas-stat-card saas-stat--blue" spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <StackPane styleClass="saas-stat-icon-wrap">
+                            <FontIcon iconLiteral="fas-fire" iconSize="14" styleClass="saas-stat-icon" />
+                        </StackPane>
+                        <Label styleClass="saas-stat-k" text="Calories / jour" wrapText="true" />
+                    </HBox>
+                    <Label fx:id="lblCalories" styleClass="saas-stat-v" wrapText="true" text="—" />
+                    <Label styleClass="saas-stat-sub" text="Énergie cible" wrapText="true" />
+                </VBox>
+                <VBox styleClass="saas-stat-card saas-stat--green" spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <StackPane styleClass="saas-stat-icon-wrap">
+                            <FontIcon iconLiteral="fas-running" iconSize="14" styleClass="saas-stat-icon" />
+                        </StackPane>
+                        <Label styleClass="saas-stat-k" text="Activité" wrapText="true" />
+                    </HBox>
+                    <Label fx:id="lblDashActivite" styleClass="saas-stat-v" wrapText="true" text="—" />
+                    <Label styleClass="saas-stat-sub" text="Niveau déclaré" wrapText="true" />
+                </VBox>
+                <VBox styleClass="saas-stat-card saas-stat--purple" spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.columnSpan="2">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <StackPane styleClass="saas-stat-icon-wrap">
+                            <FontIcon iconLiteral="fas-bullseye" iconSize="14" styleClass="saas-stat-icon" />
+                        </StackPane>
+                        <Label styleClass="saas-stat-k" text="Objectif" wrapText="true" />
+                    </HBox>
+                    <Label fx:id="lblObjectifPrincipal" styleClass="saas-stat-v saas-stat-v--multiline" wrapText="true" text="—" />
+                    <Label styleClass="saas-stat-sub" text="Programme" wrapText="true" />
+                </VBox>
+
+                <!-- Ligne 2 : progression pleine largeur -->
+                <VBox spacing="14" styleClass="saas-card" maxWidth="Infinity"
+                       GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="4">
+                    <Label styleClass="saas-card-title" text="Progression &amp; semaine" />
+                    <Label styleClass="saas-card-sub" text="Graphique des tâches et suivi d’objectif" wrapText="true" />
+                    <VBox fx:id="chartSection" spacing="10" maxWidth="Infinity">
+                        <BarChart fx:id="weekProgressChart" legendVisible="false" animated="true" minHeight="180" prefHeight="200" categoryGap="24" barGap="6" maxWidth="Infinity" styleClass="pcd-week-chart">
+                            <xAxis>
+                                <CategoryAxis side="BOTTOM" />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis side="LEFT" minorTickCount="0" />
+                            </yAxis>
+                        </BarChart>
+                    </VBox>
+                    <Label fx:id="lblNoObjectif" managed="false" visible="false" styleClass="w-empty-hint" wrapText="true" maxWidth="Infinity" />
+                    <VBox fx:id="progressDashBlock" spacing="10">
+                        <Label fx:id="lblDashProgressPct" styleClass="pcd-progress-hero-pct" text="—" />
+                        <ProgressBar fx:id="progressWeek" maxWidth="Infinity" prefHeight="12" minHeight="12"
+                                     styleClass="w-progress-track w-progress-track--compact" progress="0" />
+                        <Label fx:id="lblDashProgressDetail" styleClass="pcd-progress-hero-detail" wrapText="true" text="" />
+                        <Label fx:id="lblEncouragement" styleClass="pcd-progress-hero-quote" wrapText="true" text="" />
+                    </VBox>
+                </VBox>
+
+                <!-- Ligne 3 : fiche | IA -->
+                <VBox styleClass="saas-card" spacing="14" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <FontIcon iconLiteral="fas-heartbeat" iconSize="16" styleClass="saas-card-title-icon" />
+                        <VBox spacing="2" HBox.hgrow="ALWAYS">
+                            <Label styleClass="saas-card-title" text="Fiche santé" />
+                            <Label styleClass="saas-card-sub" text="Profil biométrique" wrapText="true" />
+                        </VBox>
+                    </HBox>
+                    <GridPane hgap="12" vgap="12" styleClass="w-kv-grid">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="80" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="80" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="80" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="80" />
+                        </columnConstraints>
+                        <VBox styleClass="w-kv-tile" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label styleClass="w-kv-tile__label" text="Genre" />
+                            <Label fx:id="lblGenre" styleClass="w-kv-tile__value" wrapText="true" />
+                        </VBox>
+                        <VBox styleClass="w-kv-tile" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label styleClass="w-kv-tile__label" text="Âge" />
+                            <Label fx:id="lblAge" styleClass="w-kv-tile__value" wrapText="true" />
+                        </VBox>
+                        <VBox styleClass="w-kv-tile" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                            <Label styleClass="w-kv-tile__label" text="Taille" />
+                            <Label fx:id="lblTaille" styleClass="w-kv-tile__value" wrapText="true" />
+                        </VBox>
+                        <VBox styleClass="w-kv-tile" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                            <Label styleClass="w-kv-tile__label" text="Poids" />
+                            <Label fx:id="lblPoids" styleClass="w-kv-tile__value" wrapText="true" />
+                        </VBox>
+                        <VBox styleClass="w-kv-tile" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                            <Label styleClass="w-kv-tile__label" text="Objectif" />
+                            <Label fx:id="lblObjectif" styleClass="w-kv-tile__value" wrapText="true" />
+                        </VBox>
+                        <VBox styleClass="w-kv-tile" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                            <Label styleClass="w-kv-tile__label" text="Niveau d&apos;activité" />
+                            <Label fx:id="lblNiveau" styleClass="w-kv-tile__value" wrapText="true" />
+                        </VBox>
+                    </GridPane>
+                    <Button fx:id="btnEditFiche" mnemonicParsing="false" text="Modifier la fiche santé" styleClass="w-btn-primary" maxWidth="Infinity" />
+                </VBox>
+
+                <VBox spacing="14" styleClass="saas-card" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.columnSpan="2" GridPane.vgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <FontIcon iconLiteral="fas-robot" iconSize="16" styleClass="saas-card-title-icon" />
+                        <VBox spacing="2" HBox.hgrow="ALWAYS">
+                            <Label styleClass="saas-card-title" text="Assistant IA" />
+                            <Label styleClass="saas-card-sub" text="Synthèse locale" wrapText="true" />
+                        </VBox>
+                    </HBox>
+                    <Label fx:id="lblAiMotto" styleClass="pcd-ai-motto-inline" wrapText="true"
+                           text="Chaque petit pas compte — ton programme est là pour t’accompagner." />
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label styleClass="w-ai-pill" text="Assistant" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnAiRegenerate" mnemonicParsing="false" text="Régénérer" styleClass="w-btn-ghost" />
+                        <Button fx:id="btnAiCopy" mnemonicParsing="false" text="Copier" styleClass="w-btn-ghost" />
+                    </HBox>
+                    <Label styleClass="w-ai-disclaimer" wrapText="true" text="Généré sur cette machine (sans API externe)." />
+                    <TextArea fx:id="chatbotArea" editable="false" wrapText="true" styleClass="w-ai-text pcd-ai-text-tight" prefRowCount="8" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
+                    <Label styleClass="saas-card-title" text="Résumé — conseils" />
+                    <TextArea fx:id="conseilsArea" editable="false" wrapText="true" styleClass="w-conseils-text pcd-conseils-compact" prefRowCount="4" maxWidth="Infinity" />
+                </VBox>
+
+                <!-- Ligne 4 : programme | tâches -->
+                <VBox styleClass="saas-card" spacing="12" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2" GridPane.vgrow="ALWAYS">
+                    <VBox fx:id="programmeKcalHero" spacing="6" styleClass="pcd-programme-kcal-hero" maxWidth="Infinity">
+                        <Label styleClass="pcd-programme-kcal-hero__eyebrow" text="Objectif énergétique quotidien" wrapText="true" />
+                        <Label fx:id="lblProgrammeDailyKcal" styleClass="pcd-programme-kcal-hero__value" wrapText="true" text="—" />
+                        <Label styleClass="pcd-programme-kcal-hero__hint" text="Apport recommandé en moyenne par jour pour soutenir votre objectif et le plan nutritionnel ci-dessous." wrapText="true" />
+                    </VBox>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <FontIcon iconLiteral="fas-dumbbell" iconSize="16" styleClass="saas-card-title-icon" />
+                        <VBox spacing="2" HBox.hgrow="ALWAYS">
+                            <Label styleClass="saas-card-title" text="Programme généré" />
+                            <Label styleClass="saas-card-sub" text="Entraînement et nutrition" wrapText="true" />
+                        </VBox>
+                    </HBox>
+                    <Label fx:id="lblNoProgram" managed="false" visible="false" styleClass="w-empty-message" wrapText="true" maxWidth="Infinity" />
+                    <ScrollPane fx:id="programmeScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="w-scroll pcd-scroll-flat" maxHeight="720" minViewportHeight="280" VBox.vgrow="ALWAYS">
+                        <VBox spacing="22" styleClass="w-programme-inner pcd-programme-scroll-inner">
+                            <VBox spacing="8">
+                                <Label styleClass="w-section-title" text="Entraînement" />
+                                <VBox fx:id="trainingTimeline" spacing="0" styleClass="pcd-training-timeline-host" />
+                            </VBox>
+                            <VBox spacing="8">
+                                <Label styleClass="w-section-title" text="Nutrition" />
+                                <VBox fx:id="nutritionStack" spacing="12" styleClass="pcd-nutrition-stack" />
+                            </VBox>
+                        </VBox>
+                    </ScrollPane>
+                </VBox>
+
+                <VBox spacing="12" styleClass="saas-card" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="3" GridPane.columnSpan="2" GridPane.vgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <FontIcon iconLiteral="fas-check-double" iconSize="14" styleClass="saas-card-title-icon" />
+                        <Label styleClass="saas-card-title" text="Tâches de la semaine" />
+                    </HBox>
+                    <VBox fx:id="tasksBox" spacing="10" VBox.vgrow="ALWAYS" />
+                </VBox>
+            </GridPane>
+        </VBox>
+    </ScrollPane>
+
+    <StackPane fx:id="ficheOverlay" managed="false" visible="false" styleClass="pcd-fiche-overlay" maxWidth="Infinity" maxHeight="Infinity">
+        <Region fx:id="ficheDim" styleClass="pcd-fiche-dim" maxWidth="Infinity" maxHeight="Infinity" />
+        <VBox styleClass="pcd-fiche-modal" maxWidth="620" StackPane.alignment="CENTER">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label styleClass="pcd-fiche-modal-title" text="Modifier la fiche santé" HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnFicheModalClose" mnemonicParsing="false" text="Fermer" styleClass="w-btn-ghost pcd-fiche-close" />
+            </HBox>
+            <Label styleClass="pcd-fiche-modal-sub" wrapText="true"
+                   text="La validation enregistre la fiche et régénère votre programme personnalisé." />
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="pcd-fiche-modal-scroll" maxHeight="520">
+                <StackPane fx:id="ficheFormMount" styleClass="pcd-fiche-form-mount" minWidth="400" />
+            </ScrollPane>
+        </VBox>
+    </StackPane>
+</StackPane>

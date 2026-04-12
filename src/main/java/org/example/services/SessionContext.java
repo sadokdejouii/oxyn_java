@@ -7,20 +7,23 @@ import org.example.entities.User;
 import java.util.Objects;
 
 /**
- * Session applicative après authentification (utilisateur typé + rôle dérivé).
+ * Session après connexion : modèle {@link User}, propriété JavaFX pour la barre du haut,
+ * hook navigation discussion depuis le planning, et identifiant client pour les modules boutique/commandes.
  */
 public final class SessionContext {
 
     private static final SessionContext INSTANCE = new SessionContext();
 
     private User currentUser;
+
     private String displayName = "Guest";
     private UserRole role = UserRole.CLIENT;
-    /** Identifiant client en base (table commandes.id_client_commande). */
-    private int clientDatabaseId = 1;
+    private int legacyUserId = -1;
+    private String legacyEmail = "";
 
-    /** Lié à la barre supérieure pour se mettre à jour après modification du profil. */
     private final ReadOnlyStringWrapper displayNameWrapper = new ReadOnlyStringWrapper("Guest");
+
+    private Runnable openDiscussionFromPlanningAction;
 
     private SessionContext() {
     }
@@ -34,13 +37,14 @@ public final class SessionContext {
     }
 
     private void pushDisplayName(String name) {
-        this.displayName = name != null ? name : "User";
+        if (name == null || name.isBlank()) {
+            this.displayName = "User";
+        } else {
+            this.displayName = name.trim();
+        }
         displayNameWrapper.set(this.displayName);
     }
 
-    /**
-     * Connexion à partir du modèle polymorphe {@link User} (Admin / Client / Coach).
-     */
     public void login(User user) {
         this.currentUser = Objects.requireNonNull(user);
         String nom = user.getNom() != null ? user.getNom().trim() : "";
@@ -51,19 +55,19 @@ public final class SessionContext {
         }
         pushDisplayName(composed);
         this.role = UserRole.fromUser(user);
+        this.legacyUserId = user.getId();
+        this.legacyEmail = user.getEmail() != null ? user.getEmail().trim() : "";
     }
 
-    /** @deprecated Utiliser {@link #login(User)} */
+    /** @deprecated Préférer {@link #login(User)}. */
     @Deprecated
     public void login(String displayName, UserRole role) {
-        login(displayName, role, 1);
+        login(displayName, role, -1, "");
     }
 
-    public void login(String displayName, UserRole role, int clientDatabaseId) {
-        this.displayName = Objects.requireNonNullElse(displayName, "User").trim();
-        if (this.displayName.isEmpty()) {
-            this.displayName = "User";
-        }
+    /** @deprecated Préférer {@link #login(User)}. */
+    @Deprecated
+    public void login(String displayName, UserRole role, int userId, String email) {
         this.currentUser = null;
         String n = Objects.requireNonNullElse(displayName, "User").trim();
         if (n.isEmpty()) {
@@ -71,25 +75,35 @@ public final class SessionContext {
         }
         pushDisplayName(n);
         this.role = Objects.requireNonNullElse(role, UserRole.CLIENT);
-        this.clientDatabaseId = clientDatabaseId > 0 ? clientDatabaseId : 1;
+        this.legacyUserId = userId;
+        this.legacyEmail = email == null ? "" : email.trim();
     }
 
-    public void logout() {
-        this.currentUser = null;
-        pushDisplayName("Guest");
-        this.role = UserRole.CLIENT;
-        this.clientDatabaseId = 1;
-    }
-
-    /**
-     * Après mise à jour du profil en base : remplace l'utilisateur en session et rafraîchit le nom affiché.
-     */
     public void applyRefreshedUser(User user) {
         Objects.requireNonNull(user);
         if (currentUser != null && user.getId() != currentUser.getId()) {
             throw new IllegalStateException("Identifiant utilisateur incohérent avec la session.");
         }
         login(user);
+    }
+
+    public void setOpenDiscussionFromPlanningAction(Runnable action) {
+        this.openDiscussionFromPlanningAction = action;
+    }
+
+    public void openDiscussionFromPlanning() {
+        if (openDiscussionFromPlanningAction != null) {
+            openDiscussionFromPlanningAction.run();
+        }
+    }
+
+    public void logout() {
+        this.currentUser = null;
+        pushDisplayName("Guest");
+        this.role = UserRole.CLIENT;
+        this.legacyUserId = -1;
+        this.legacyEmail = "";
+        this.openDiscussionFromPlanningAction = null;
     }
 
     public User getCurrentUser() {
@@ -104,15 +118,41 @@ public final class SessionContext {
         return role;
     }
 
+    public int getUserId() {
+        if (currentUser != null) {
+            return currentUser.getId();
+        }
+        return legacyUserId;
+    }
+
+    public String getEmail() {
+        if (currentUser != null && currentUser.getEmail() != null) {
+            return currentUser.getEmail();
+        }
+        return legacyEmail;
+    }
+
+    /**
+     * Identifiant client pour boutique / commandes (API attendue par la branche {@code main}).
+     */
+    public int getClientDatabaseId() {
+        int id = getUserId();
+        return id > 0 ? id : 1;
+    }
+
     public boolean isAdmin() {
         return role == UserRole.ADMIN;
     }
 
-    public int getClientDatabaseId() {
-        return clientDatabaseId;
-    }
-
     public boolean isEncadrant() {
         return role == UserRole.ENCADRANT;
+    }
+
+    public boolean isClientUser() {
+        return role == UserRole.CLIENT;
+    }
+
+    public boolean hasDbUser() {
+        return getUserId() > 0;
     }
 }
