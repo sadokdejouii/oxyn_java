@@ -52,6 +52,8 @@ public class MainLayoutController implements Initializable {
     private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
     private static final String PAGE_CLIENT_BOUTIQUE = "/FXML/pages/ClientBoutique.fxml";
     private static final String PAGE_PROFILE = "/FXML/pages/ProfilePage.fxml";
+    private static final String PAGE_FORUM = "/FXML/pages/Forum.fxml";
+    private static final String PAGE_FORUM_BACKOFFICE = "/FXML/pages/ForumBackoffice.fxml";
 
     private static final String PAGE_ENC_HOME = "/FXML/pages/EncadrantHome.fxml";
     private static final String PAGE_ENC_GROUPE = "/FXML/pages/EncadrantGroupe.fxml";
@@ -398,7 +400,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminForum() {
-        navigate(PAGE_REPORTS, "Forum", adminForumBtn);
+        navigate(PAGE_FORUM_BACKOFFICE, "Forum Management", adminForumBtn);
     }
 
     @FXML
@@ -428,7 +430,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleForum() {
-        navigate(PAGE_PLANNING, "Forum", forumBtn);
+        navigate(PAGE_FORUM, "Forum", forumBtn);
     }
 
     @FXML

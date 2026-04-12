@@ -784,6 +784,228 @@
     -fx-padding: 4px;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   FORUM BACKOFFICE — Modern Management UI
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Stats Row */
+.stats-row {
+    -fx-spacing: 16;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Stat Card - Modern glass effect */
+.stat-card {
+    -fx-spacing: 6;
+    -fx-padding: 20 22;
+    -fx-min-width: 180;
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 100% 100%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%),
+            rgba(26, 47, 94, 0.6);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(79, 195, 247, 0.25);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 20, 0, 0, 6);
+    -fx-transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    -fx-border-color: rgba(0, 191, 255, 0.45);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.2), 24, 0, 0, 8);
+    -fx-translate-y: -2;
+}
+
+.stat-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(160, 180, 204, 0.8);
+    -fx-letter-spacing: 0.06em;
+}
+
+.stat-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00BFFF;
+}
+
+.stat-hint {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(160, 180, 204, 0.55);
+}
+
+/* Chart Card */
+.chart-card {
+    -fx-spacing: 12;
+    -fx-padding: 20;
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 0% 40%, rgba(255, 255, 255, 0.06) 0%, transparent 100%),
+            rgba(13, 27, 62, 0.65);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(79, 195, 247, 0.22);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 24, 0, 0, 8);
+}
+
+.chart-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* Modern Chart Styling */
+.modern-chart {
+    -fx-padding: 8 0 0 0;
+}
+
+.modern-chart .chart-title {
+    -fx-text-fill: #FFFFFF;
+}
+
+.modern-chart .axis-label {
+    -fx-text-fill: rgba(160, 180, 204, 0.85);
+}
+
+.modern-chart .axis {
+    -fx-tick-label-fill: rgba(160, 180, 204, 0.75);
+}
+
+.modern-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.modern-chart .chart-vertical-grid-lines,
+.modern-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(79, 195, 247, 0.1);
+}
+
+/* Pie Chart specific */
+.modern-chart .chart-pie-label {
+    -fx-fill: rgba(232, 238, 247, 0.95);
+    -fx-font-size: 11px;
+}
+
+/* Section Title */
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* Table Card */
+.table-card {
+    -fx-spacing: 14;
+    -fx-padding: 20;
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 0% 30%, rgba(255, 255, 255, 0.05) 0%, transparent 100%),
+            rgba(13, 27, 62, 0.6);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 24, 0, 0, 8);
+}
+
+/* Modern Table */
+.modern-table {
+    -fx-background-color: transparent;
+    -fx-table-cell-border-color: transparent;
+}
+
+.modern-table .column-header-background {
+    -fx-background-color: rgba(0, 191, 255, 0.15);
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 4 0;
+}
+
+.modern-table .column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 12 8;
+}
+
+.modern-table .table-cell {
+    -fx-text-fill: rgba(232, 238, 247, 0.95);
+    -fx-font-size: 12px;
+    -fx-padding: 12 8;
+    -fx-border-color: transparent;
+}
+
+.modern-table .table-row-cell {
+    -fx-background-color: rgba(13, 27, 62, 0.35);
+    -fx-border-color: transparent;
+    -fx-transition: all 0.2s ease;
+}
+
+.modern-table .table-row-cell:odd {
+    -fx-background-color: rgba(13, 27, 62, 0.45);
+}
+
+.modern-table .table-row-cell:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.15);
+}
+
+.modern-table .table-row-cell:selected {
+    -fx-background-color: rgba(0, 191, 255, 0.25);
+    -fx-border-color: rgba(0, 191, 255, 0.4);
+    -fx-border-width: 0 0 0 3;
+}
+
+/* Search Input */
+.search-input {
+    -fx-font-size: 13px;
+    -fx-padding: 10 14;
+    -fx-border-color: rgba(79, 195, 247, 0.25);
+    -fx-border-radius: 10px;
+    -fx-background-color: rgba(26, 47, 94, 0.4);
+    -fx-text-fill: #FFFFFF;
+    -fx-prompt-text-fill: rgba(160, 180, 204, 0.6);
+    -fx-border-width: 1;
+}
+
+.search-input:focused {
+    -fx-border-color: rgba(0, 191, 255, 0.5);
+    -fx-background-color: rgba(26, 47, 94, 0.55);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.2), 8, 0, 0, 2);
+}
+
+/* Action Buttons in Table */
+.action-btn {
+    -fx-background-radius: 6px;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-min-width: 60;
+}
+
+.action-btn.edit {
+    -fx-background-color: linear-gradient(to bottom, rgba(79, 195, 247, 0.3) 0%, rgba(0, 191, 255, 0.4) 100%);
+    -fx-border-color: rgba(79, 195, 247, 0.5);
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #FFFFFF;
+}
+
+.action-btn.edit:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(79, 195, 247, 0.45) 0%, rgba(0, 191, 255, 0.55) 100%);
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.3), 8, 0, 0, 2);
+}
+
+.action-btn.delete {
+    -fx-background-color: linear-gradient(to bottom, rgba(255, 107, 107, 0.3) 0%, rgba(255, 82, 82, 0.4) 100%);
+    -fx-border-color: rgba(255, 107, 107, 0.5);
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #FFFFFF;
+}
+
+.action-btn.delete:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(255, 107, 107, 0.45) 0%, rgba(255, 82, 82, 0.55) 100%);
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 107, 0.3), 8, 0, 0, 2);
 /* Mes commandes — panneau d’édition d’adresse (inline) */
 .mes-commandes-edit-panel {
     -fx-border-color: rgba(79, 195, 247, 0.28);
