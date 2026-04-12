@@ -125,6 +125,27 @@
     -fx-background-color: transparent;
 }
 
+.combo-box.form-input,
+.combo-box-base.form-input {
+    -fx-background-color: rgba(13, 27, 62, 0.85);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(79, 195, 247, 0.22);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-font-size: 14px;
+}
+
+.combo-box.form-input .list-cell,
+.combo-box-base.form-input .list-cell {
+    -fx-text-fill: #FFFFFF;
+    -fx-background-color: transparent;
+}
+
+.combo-box.form-input:hover,
+.combo-box-base.form-input:hover {
+    -fx-border-color: rgba(0, 191, 255, 0.45);
+}
+
 /* Zone image */
 .product-form-image-frame {
     -fx-padding: 12px;

@@ -1,5 +1,8 @@
 package org.example.utils;
 
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.TextInputControl;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +17,21 @@ public final class AdresseCommandeValidator {
     public static final int SEGMENT_MIN = 2;
 
     private AdresseCommandeValidator() {
+    }
+
+    /**
+     * Limite la saisie à {@link #LONGUEUR_MAX} caractères (panier, dialogue mes commandes, etc.).
+     */
+    public static void appliquerLimiteLongueur(TextInputControl champ) {
+        if (champ == null) {
+            return;
+        }
+        champ.setTextFormatter(new TextFormatter<>(change -> {
+            if (change.getControlNewText().length() > LONGUEUR_MAX) {
+                return null;
+            }
+            return change;
+        }));
     }
 
     /**

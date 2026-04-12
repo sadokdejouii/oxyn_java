@@ -1,21 +1,28 @@
 package org.example.controllers;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Window;
 import org.example.entities.LigneCommandeAffichage;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
 import org.example.services.SessionContext;
+import org.example.utils.AdresseCommandeValidator;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -114,9 +121,9 @@ public class MesCommandesController {
         total.getStyleClass().add("saas-stat-value");
 
         Label addrTitle = new Label("Adresse de livraison");
-        addrTitle.getStyleClass().add("saas-stat-label");
+        addrTitle.getStyleClass().add("product-form-field-label");
         Label addr = new Label(c.getAdresse_commande() != null ? c.getAdresse_commande() : "—");
-        addr.getStyleClass().add("page-hero-sub");
+        addr.getStyleClass().add("product-form-hint");
         addr.setWrapText(true);
 
         Separator sep = new Separator();
@@ -140,11 +147,16 @@ public class MesCommandesController {
 
         card.getChildren().addAll(header, meta, total, addrTitle, addr, sep, lignesTitle, lignesBox);
 
-        if (commandesService.peutAnnuler(c)) {
+        if (commandesService.peutModifierAdresse(c)) {
+            Button modifierAdresse = new Button("Modifier l’adresse");
+            modifierAdresse.getStyleClass().add("ghost-toolbar-btn");
+            modifierAdresse.setOnAction(e -> ouvrirModifierAdresse(c));
+
             Button annuler = new Button("Annuler la commande");
             annuler.getStyleClass().add("danger-toolbar-btn");
-            annuler.setOnAction(e -> confirmAnnuler(c.getId_commande()));
-            HBox actions = new HBox(annuler);
+            annuler.setOnAction(ev -> confirmAnnuler(c.getId_commande()));
+
+            HBox actions = new HBox(10, modifierAdresse, annuler);
             actions.setAlignment(Pos.CENTER_RIGHT);
             card.getChildren().add(actions);
         }
@@ -171,6 +183,72 @@ public class MesCommandesController {
         a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    private void ouvrirModifierAdresse(commandes c) {
+        final int idCommande = c.getId_commande();
+        final int clientId = SessionContext.getInstance().getClientDatabaseId();
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Modifier l’adresse de livraison");
+        dialog.setHeaderText(null);
+        Window owner = ordersContainer.getScene() != null ? ordersContainer.getScene().getWindow() : null;
+        dialog.initOwner(owner);
+        dialog.initModality(Modality.WINDOW_MODAL);
+
+        ButtonType saveType = new ButtonType("Enregistrer", ButtonBar.ButtonData.APPLY);
+        dialog.getDialogPane().getButtonTypes().setAll(saveType, ButtonType.CANCEL);
+
+        VBox body = new VBox(14);
+        body.setPadding(new Insets(4, 0, 0, 0));
+        body.setPrefWidth(460);
+
+        Label hint = new Label("Même format que lors de la commande : quartier, ville, pays (trois parties séparées par des virgules).\nExemple : cité Ibn Khaldoun, Tunis, Tunisie");
+        hint.getStyleClass().add("product-form-hint");
+        hint.setWrapText(true);
+
+        Label lab = new Label("Adresse de livraison");
+        lab.getStyleClass().add("product-form-field-label");
+
+        TextArea ta = new TextArea(c.getAdresse_commande() != null ? c.getAdresse_commande() : "");
+        ta.setPrefRowCount(4);
+        ta.setWrapText(true);
+        ta.getStyleClass().add("form-input");
+        AdresseCommandeValidator.appliquerLimiteLongueur(ta);
+
+        body.getChildren().addAll(hint, lab, ta);
+        dialog.getDialogPane().setContent(body);
+
+        Button saveBtn = (Button) dialog.getDialogPane().lookupButton(saveType);
+        saveBtn.addEventFilter(ActionEvent.ACTION, ev -> {
+            String err = AdresseCommandeValidator.valider(ta.getText());
+            if (err != null) {
+                ev.consume();
+                warn(err);
+                ta.requestFocus();
+            }
+        });
+
+        Optional<ButtonType> res = dialog.showAndWait();
+        if (res.isEmpty() || res.get() != saveType) {
+            return;
+        }
+        String err = AdresseCommandeValidator.valider(ta.getText());
+        if (err != null) {
+            warn(err);
+            return;
+        }
+        String formatted = AdresseCommandeValidator.formaterPourEnregistrement(ta.getText());
+        try {
+            if (commandesService.modifierAdresseCommande(idCommande, clientId, formatted)) {
+                info("Adresse de livraison mise à jour.");
+                refresh();
+            } else {
+                warn("Modification impossible (délai de 24 h dépassé, ou statut de la commande modifié).");
+            }
+        } catch (SQLException ex) {
+            error("Erreur : " + ex.getMessage());
+        }
     }
 
     private void confirmAnnuler(int idCommande) {

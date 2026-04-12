@@ -15,8 +15,9 @@
             <Label styleClass="page-hero-sub" text="Gestion des produits et commandes. Ajoutez, modifiez ou supprimez des produits." wrapText="true" />
         </VBox>
 
-        <HBox spacing="10" styleClass="toolbar-card">
+        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="toolbar-card">
             <Button onAction="#handleAjouterProduit" styleClass="primary-toolbar-btn" text="Ajouter un produit" />
+            <Button onAction="#handleVoirCommandes" styleClass="ghost-toolbar-btn" text="Commandes clients" />
             <HBox HBox.hgrow="ALWAYS" />
             <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser" />
         </HBox>

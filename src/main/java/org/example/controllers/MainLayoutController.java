@@ -40,6 +40,7 @@ public class MainLayoutController implements Initializable {
     private static final String PAGE_EVENTS_ADMIN = "/FXML/pages/EventManagement.fxml";
     private static final String PAGE_USERS = "/FXML/pages/UserManagement.fxml";
     private static final String PAGE_REPORTS = "/FXML/pages/ReportsStatistics.fxml";
+    private static final String PAGE_ADMIN_COMMANDES = "/FXML/pages/AdminCommandes.fxml";
     private static final String PAGE_BOUTIQUE = "/FXML/pages/BoutiquePage.fxml";
     private static final String PAGE_AJOUTER_PRODUIT = "/FXML/pages/AjouterProduitPage.fxml";
     private static final String PAGE_MODIFIER_PRODUIT = "/FXML/pages/ModifierProduitPage.fxml";
@@ -328,6 +329,13 @@ public class MainLayoutController implements Initializable {
     @FXML
     private void handleAdminBoutique() {
         navigate(PAGE_BOUTIQUE, "Boutique", adminBoutiqueBtn);
+    }
+
+    /**
+     * Ouvert depuis la page Boutique : garde l’entrée « Boutique » active dans la barre latérale.
+     */
+    public void navigateToAdminCommandes() {
+        navigate(PAGE_ADMIN_COMMANDES, "Commandes", adminBoutiqueBtn);
     }
 
     @FXML

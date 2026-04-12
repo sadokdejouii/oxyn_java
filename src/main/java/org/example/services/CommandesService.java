@@ -1,5 +1,6 @@
 package org.example.services;
 
+import org.example.entities.CommandeAdminRow;
 import org.example.entities.LigneCommandeAffichage;
 import org.example.entities.LignePanier;
 import org.example.entities.commandes;
@@ -19,7 +20,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * CRUD commandes + lignes. Table {@code ligne_commande} attendue (noms phpMyAdmin) :
@@ -121,10 +127,146 @@ public class CommandesService implements ICrud<commandes> {
 
     @Override
     public void supprimer(int id) throws SQLException {
-        String sql = "DELETE FROM commandes WHERE id_commande=?";
+        supprimerCommandeEtLignes(id);
+    }
+
+    /**
+     * Supprime d’abord les lignes ({@code ligne_commande}) puis la commande (contraintes FK).
+     */
+    public void supprimerCommandeEtLignes(int idCommande) throws SQLException {
+        boolean prev = con.getAutoCommit();
+        try {
+            con.setAutoCommit(false);
+            String delLignes = "DELETE FROM ligne_commande WHERE id_commande_ligne_commande = ?";
+            try (PreparedStatement ps = con.prepareStatement(delLignes)) {
+                ps.setInt(1, idCommande);
+                ps.executeUpdate();
+            }
+            String delCmd = "DELETE FROM commandes WHERE id_commande = ?";
+            try (PreparedStatement ps = con.prepareStatement(delCmd)) {
+                ps.setInt(1, idCommande);
+                ps.executeUpdate();
+            }
+            con.commit();
+        } catch (SQLException e) {
+            try {
+                con.rollback();
+            } catch (SQLException ex) {
+                e.addSuppressed(ex);
+            }
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(prev);
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    private static boolean estStatutAnnule(String statut) {
+        if (statut == null) {
+            return false;
+        }
+        return statut.toLowerCase().contains("annul");
+    }
+
+    /**
+     * Back-office : suppression manuelle réservée aux commandes {@code annulée}.
+     */
+    public boolean supprimerCommandeAnnuleeParAdmin(int idCommande) throws SQLException {
+        commandes c = findById(idCommande);
+        if (c == null || !estStatutAnnule(c.getStatut_commande())) {
+            return false;
+        }
+        supprimerCommandeEtLignes(idCommande);
+        return true;
+    }
+
+    /**
+     * Supprime automatiquement les commandes au statut <strong>annulé</strong> dont la date de création remonte à au moins {@code jours} jours.
+     *
+     * @return nombre de commandes supprimées
+     */
+    public int purgerCommandesAnnuleesPlusAnciennesQue(int jours) throws SQLException {
+        List<commandes> all = afficher();
+        int n = 0;
+        LocalDate today = LocalDate.now();
+        for (commandes c : all) {
+            if (!estStatutAnnule(c.getStatut_commande())) {
+                continue;
+            }
+            LocalDateTime dt = parseDateCommande(c.getDate_commande());
+            if (dt == null) {
+                continue;
+            }
+            long days = ChronoUnit.DAYS.between(dt.toLocalDate(), today);
+            if (days >= jours) {
+                supprimerCommandeEtLignes(c.getId_commande());
+                n++;
+            }
+        }
+        return n;
+    }
+
+    /**
+     * Liste toutes les commandes pour le back-office avec un libellé client (sans afficher d’identifiant).
+     */
+    public List<CommandeAdminRow> afficherPourAdmin() throws SQLException {
+        List<commandes> liste = afficher();
+        Set<Integer> ids = new LinkedHashSet<>();
+        for (commandes c : liste) {
+            if (c.getId_client_commande() > 0) {
+                ids.add(c.getId_client_commande());
+            }
+        }
+        Map<Integer, String> libelles = chargerLibellesClients(ids);
+        List<CommandeAdminRow> rows = new ArrayList<>(liste.size());
+        for (commandes c : liste) {
+            int idCl = c.getId_client_commande();
+            String lib = idCl > 0 ? libelles.getOrDefault(idCl, "Client") : "—";
+            rows.add(new CommandeAdminRow(c, lib));
+        }
+        return rows;
+    }
+
+    /**
+     * Tente de résoudre un libellé lisible (ex. email) pour chaque compte client — jamais un identifiant numérique affiché.
+     */
+    private Map<Integer, String> chargerLibellesClients(Set<Integer> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        List<Integer> idList = new ArrayList<>(ids);
+        String placeholders = idList.stream().map(i -> "?").collect(Collectors.joining(","));
+        Map<Integer, String> primaire = chargerEmailsParRequete(
+                "SELECT id_utilisateur AS cid, email AS lbl FROM utilisateur WHERE id_utilisateur IN (" + placeholders + ")",
+                idList);
+        if (!primaire.isEmpty()) {
+            return primaire;
+        }
+        return chargerEmailsParRequete(
+                "SELECT id AS cid, email AS lbl FROM user WHERE id IN (" + placeholders + ")",
+                idList);
+    }
+
+    private Map<Integer, String> chargerEmailsParRequete(String sql, List<Integer> idList) {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
+            for (int i = 0; i < idList.size(); i++) {
+                ps.setInt(i + 1, idList.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                Map<Integer, String> map = new HashMap<>();
+                while (rs.next()) {
+                    int id = rs.getInt("cid");
+                    String lbl = rs.getString("lbl");
+                    if (lbl != null && !lbl.isBlank()) {
+                        map.put(id, lbl.trim());
+                    }
+                }
+                return map;
+            }
+        } catch (SQLException ignored) {
+            return Map.of();
         }
     }
 
@@ -209,6 +351,31 @@ public class CommandesService implements ICrud<commandes> {
             return false;
         }
         return ChronoUnit.HOURS.between(dt, LocalDateTime.now()) < 24;
+    }
+
+    /**
+     * Même fenêtre que l’annulation : commande {@code validée}, moins de 24 h après la date enregistrée.
+     */
+    public boolean peutModifierAdresse(commandes c) {
+        return peutAnnuler(c);
+    }
+
+    /**
+     * Met à jour {@code Adresse_commande} si la commande appartient au client, est validée et dans les 24 h.
+     */
+    public boolean modifierAdresseCommande(int idCommande, int idClient, String nouvelleAdresse) throws SQLException {
+        commandes c = findById(idCommande);
+        if (c == null || c.getId_client_commande() != idClient || !peutModifierAdresse(c)) {
+            return false;
+        }
+        String sql = "UPDATE commandes SET Adresse_commande = ? WHERE id_commande = ? AND id_client_commande = ? AND statut_commande = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nouvelleAdresse);
+            ps.setInt(2, idCommande);
+            ps.setInt(3, idClient);
+            ps.setString(4, "validée");
+            return ps.executeUpdate() == 1;
+        }
     }
 
     private commandes findById(int id) throws SQLException {

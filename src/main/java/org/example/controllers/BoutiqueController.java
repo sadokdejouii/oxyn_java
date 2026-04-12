@@ -147,6 +147,15 @@ public class BoutiqueController {
         loadProduits();
     }
 
+    @FXML
+    private void handleVoirCommandes() {
+        if (mainLayoutController != null) {
+            mainLayoutController.navigateToAdminCommandes();
+        } else {
+            showAlert("Erreur", "Navigation indisponible.");
+        }
+    }
+
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);

@@ -1,23 +1,26 @@
 package org.example.controllers;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextFormatter;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
 import org.example.entities.LignePanier;
 import org.example.entities.PanierSession;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
 import org.example.services.SessionContext;
 import org.example.utils.AdresseCommandeValidator;
+import org.example.utils.ProductImageStorage;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,15 +31,9 @@ public class PanierController {
     private static final DateTimeFormatter DATE_HEURE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @FXML
-    private TableView<LignePanier> tablePanier;
+    private VBox panierLignesContainer;
     @FXML
-    private TableColumn<LignePanier, String> colNom;
-    @FXML
-    private TableColumn<LignePanier, Double> colPrix;
-    @FXML
-    private TableColumn<LignePanier, Integer> colQte;
-    @FXML
-    private TableColumn<LignePanier, Double> colSousTotal;
+    private Label panierCountLabel;
     @FXML
     private TextArea adresseField;
     @FXML
@@ -56,22 +53,9 @@ public class PanierController {
 
     @FXML
     public void initialize() {
-        colNom.setCellValueFactory(new PropertyValueFactory<>("nomProduit"));
-        colPrix.setCellValueFactory(new PropertyValueFactory<>("prixUnitaire"));
-        colQte.setCellValueFactory(new PropertyValueFactory<>("quantite"));
-        colSousTotal.setCellValueFactory(new PropertyValueFactory<>("sousTotal"));
         paiementCombo.setItems(FXCollections.observableArrayList("En ligne", "En espèces"));
         paiementCombo.getSelectionModel().selectFirst();
-        if (adresseField != null) {
-            int max = AdresseCommandeValidator.LONGUEUR_MAX;
-            adresseField.setTextFormatter(new TextFormatter<>(change -> {
-                String next = change.getControlNewText();
-                if (next.length() > max) {
-                    return null;
-                }
-                return change;
-            }));
-        }
+        AdresseCommandeValidator.appliquerLimiteLongueur(adresseField);
         rafraichirPanier();
     }
 
@@ -89,10 +73,81 @@ public class PanierController {
 
     private void rafraichirPanier() {
         List<LignePanier> lignes = panier.getLignes();
-        ObservableList<LignePanier> observableList = FXCollections.observableArrayList(lignes);
-        tablePanier.setItems(observableList);
+        panierLignesContainer.getChildren().clear();
+
+        int n = lignes.size();
+        if (panierCountLabel != null) {
+            panierCountLabel.setText(n == 0 ? "Panier vide" : (n == 1 ? "1 article" : n + " articles"));
+        }
+
+        if (lignes.isEmpty()) {
+            panierLignesContainer.setAlignment(Pos.CENTER);
+            Label empty = new Label("Aucun article pour le moment.\nAjoutez des produits depuis la boutique.");
+            empty.getStyleClass().add("panier-vide-placeholder");
+            empty.setMaxWidth(Double.MAX_VALUE);
+            empty.setAlignment(Pos.CENTER);
+            panierLignesContainer.getChildren().add(empty);
+        } else {
+            panierLignesContainer.setAlignment(Pos.TOP_LEFT);
+            for (LignePanier ligne : lignes) {
+                panierLignesContainer.getChildren().add(creerCarteLigne(ligne));
+            }
+        }
+
         totalLabel.setText(String.format("%.2f TND", panier.getTotal()));
         validerBtn.setDisable(lignes.isEmpty());
+    }
+
+    private HBox creerCarteLigne(LignePanier ligne) {
+        HBox card = new HBox(16);
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setPadding(new Insets(0));
+        card.getStyleClass().add("panier-ligne-card");
+
+        VBox thumbWrap = new VBox();
+        thumbWrap.setAlignment(Pos.CENTER);
+        thumbWrap.getStyleClass().add("panier-ligne-thumb-wrap");
+
+        ImageView thumb = new ImageView();
+        thumb.getStyleClass().add("panier-ligne-thumb");
+        thumb.setFitWidth(60);
+        thumb.setFitHeight(60);
+        thumb.setPreserveRatio(true);
+        thumb.setSmooth(true);
+        if (ligne.getProduit() != null) {
+            ProductImageStorage.applyToImageView(thumb, ligne.getProduit().getImage_produit());
+        }
+        thumbWrap.getChildren().add(thumb);
+
+        VBox infos = new VBox(6);
+        HBox.setHgrow(infos, Priority.ALWAYS);
+
+        Label nom = new Label(ligne.getNomProduit());
+        nom.getStyleClass().add("panier-ligne-nom");
+        nom.setWrapText(true);
+
+        HBox meta = new HBox(10);
+        meta.setAlignment(Pos.CENTER_LEFT);
+
+        Label qteBadge = new Label("Qté " + ligne.getQuantite());
+        qteBadge.getStyleClass().add("panier-ligne-qte-badge");
+
+        Label detail = new Label(String.format("×  %.2f TND  l’unité", ligne.getPrixUnitaire()));
+        detail.getStyleClass().add("panier-ligne-detail");
+
+        meta.getChildren().addAll(qteBadge, detail);
+        infos.getChildren().addAll(nom, meta);
+
+        VBox prixCol = new VBox(2);
+        prixCol.setAlignment(Pos.CENTER_RIGHT);
+        Label sous = new Label(String.format("%.2f TND", ligne.getSousTotal()));
+        sous.getStyleClass().add("panier-ligne-sous-total");
+        Label hint = new Label("Sous-total");
+        hint.getStyleClass().add("panier-ligne-sous-total-hint");
+        prixCol.getChildren().addAll(sous, hint);
+
+        card.getChildren().addAll(thumbWrap, infos, prixCol);
+        return card;
     }
 
     private void validerCommande() {
