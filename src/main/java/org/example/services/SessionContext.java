@@ -16,6 +16,8 @@ public final class SessionContext {
     private User currentUser;
     private String displayName = "Guest";
     private UserRole role = UserRole.CLIENT;
+    /** Identifiant client en base (table commandes.id_client_commande). */
+    private int clientDatabaseId = 1;
 
     /** Lié à la barre supérieure pour se mettre à jour après modification du profil. */
     private final ReadOnlyStringWrapper displayNameWrapper = new ReadOnlyStringWrapper("Guest");
@@ -54,6 +56,13 @@ public final class SessionContext {
     /** @deprecated Utiliser {@link #login(User)} */
     @Deprecated
     public void login(String displayName, UserRole role) {
+        login(displayName, role, 1);
+    }
+
+    public void login(String displayName, UserRole role, int clientDatabaseId) {
+        this.displayName = Objects.requireNonNullElse(displayName, "User").trim();
+        if (this.displayName.isEmpty()) {
+            this.displayName = "User";
         this.currentUser = null;
         String n = Objects.requireNonNullElse(displayName, "User").trim();
         if (n.isEmpty()) {
@@ -61,12 +70,14 @@ public final class SessionContext {
         }
         pushDisplayName(n);
         this.role = Objects.requireNonNullElse(role, UserRole.CLIENT);
+        this.clientDatabaseId = clientDatabaseId > 0 ? clientDatabaseId : 1;
     }
 
     public void logout() {
         this.currentUser = null;
         pushDisplayName("Guest");
         this.role = UserRole.CLIENT;
+        this.clientDatabaseId = 1;
     }
 
     /**
@@ -96,6 +107,8 @@ public final class SessionContext {
         return role == UserRole.ADMIN;
     }
 
+    public int getClientDatabaseId() {
+        return clientDatabaseId;
     public boolean isEncadrant() {
         return role == UserRole.ENCADRANT;
     }
