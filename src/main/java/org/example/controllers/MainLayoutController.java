@@ -160,6 +160,12 @@ public class MainLayoutController implements Initializable {
     private Button encDashboardBtn;
 
     @FXML
+    private Button encPlanningBtn;
+
+    @FXML
+    private Button encDiscussionBtn;
+
+    @FXML
     private Button encEvenementsBtn;
 
     @FXML
@@ -210,6 +216,8 @@ public class MainLayoutController implements Initializable {
         mainNavButtons.add(forumBtn);
         mainNavButtons.add(profileBtn);
         mainNavButtons.add(encDashboardBtn);
+        mainNavButtons.add(encPlanningBtn);
+        mainNavButtons.add(encDiscussionBtn);
         mainNavButtons.add(encEvenementsBtn);
         mainNavButtons.add(encGroupeBtn);
         mainNavButtons.add(encSalleBtn);
@@ -223,7 +231,7 @@ public class MainLayoutController implements Initializable {
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
-            navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+            navigate(PAGE_PLANNING, "Planning", encPlanningBtn);
         } else {
             navigate(PAGE_PLANNING, "Planning", planningBtn);
         }
@@ -251,7 +259,7 @@ public class MainLayoutController implements Initializable {
         ctx.setOpenDiscussionFromPlanningAction(() -> {
             try {
                 Button nav = ctx.isAdmin() ? adminPlanningBtn
-                        : ctx.isEncadrant() ? encSalleBtn : planningBtn;
+                        : ctx.isEncadrant() ? encPlanningBtn : planningBtn;
                 PageLoader.show(contentArea, PAGE_DISCUSSION, this);
                 topbarPageTitle.setText("Discussion");
                 setActiveNav(nav);
@@ -346,7 +354,7 @@ public class MainLayoutController implements Initializable {
         if (ctx.isAdmin()) {
             navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
         } else if (ctx.isEncadrant()) {
-            navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+            navigate(PAGE_PLANNING, "Planning", encPlanningBtn);
         } else {
             navigate(PAGE_PLANNING, "Planning", planningBtn);
         }
@@ -490,7 +498,12 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleEncPlanning() {
-        navigate(PAGE_ENC_PLANNING, "Sessions", encSalleBtn);
+        navigate(PAGE_PLANNING, "Planning", encPlanningBtn);
+    }
+
+    @FXML
+    private void handleEncDiscussion() {
+        navigate(PAGE_DISCUSSION, "Discussion", encDiscussionBtn);
     }
 
     @FXML
