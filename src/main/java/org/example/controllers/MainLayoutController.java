@@ -1,6 +1,7 @@
 package org.example.controllers;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -132,6 +133,8 @@ public class MainLayoutController implements Initializable {
 
     private final List<Button> mainNavButtons = new ArrayList<>();
 
+    private Button activeNavButton;
+
     private boolean sidebarCompact;
 
     @Override
@@ -141,9 +144,11 @@ public class MainLayoutController implements Initializable {
         Platform.runLater(installIcons);
 
         SessionContext ctx = SessionContext.getInstance();
-        topbarUserName.setText(ctx.getDisplayName());
+        topbarUserName.textProperty().bind(ctx.displayNameProperty());
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        userAvatarLabel.setText(initials(ctx.getDisplayName()));
+        userAvatarLabel.textProperty().bind(Bindings.createStringBinding(
+                () -> initials(ctx.getDisplayName()),
+                ctx.displayNameProperty()));
 
         mainNavButtons.clear();
         mainNavButtons.add(adminDashboardBtn);
@@ -252,6 +257,7 @@ public class MainLayoutController implements Initializable {
                 b.getStyleClass().remove("active");
             }
         }
+        activeNavButton = button;
         if (button != null && !button.getStyleClass().contains("active")) {
             button.getStyleClass().add("active");
         }

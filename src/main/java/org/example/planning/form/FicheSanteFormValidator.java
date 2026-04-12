@@ -15,11 +15,12 @@ public final class FicheSanteFormValidator {
     private static final Set<String> OBJECTIFS = Set.of("perte_poids", "gain_poids", "devenir_muscle", "maintien");
     private static final Set<String> NIVEAUX = Set.of("sedentaire", "peu_actif", "moderement_actif", "tres_actif");
 
-    private static final int AGE_MIN = 12;
-    private static final int AGE_MAX = 110;
-    private static final int TAILLE_MIN_CM = 120;
-    private static final int TAILLE_MAX_CM = 230;
-    private static final double POIDS_MIN_KG = 35.0;
+    /** 7 &lt; âge &lt; 100 → entiers 8 … 99 */
+    private static final int AGE_MIN = 8;
+    private static final int AGE_MAX = 99;
+    /** 80 &lt; taille &lt; 210 (cm) → 81 … 209 */
+    private static final int TAILLE_MIN_CM = 81;
+    private static final int TAILLE_MAX_CM = 209;
     private static final double POIDS_MAX_KG = 220.0;
 
     public record Result(boolean ok, List<String> errors, FicheSanteFormData data) {
@@ -47,19 +48,19 @@ public final class FicheSanteFormValidator {
         if (draft.age() == null) {
             err.add("L’âge est obligatoire.");
         } else if (draft.age() < AGE_MIN || draft.age() > AGE_MAX) {
-            err.add("L’âge doit être compris entre " + AGE_MIN + " et " + AGE_MAX + " ans.");
+            err.add("L’âge doit être strictement entre 7 et 100 ans (saisie autorisée : " + AGE_MIN + " à " + AGE_MAX + " ans).");
         }
 
         if (draft.tailleCm() == null) {
             err.add("La taille est obligatoire.");
         } else if (draft.tailleCm() < TAILLE_MIN_CM || draft.tailleCm() > TAILLE_MAX_CM) {
-            err.add("La taille doit être entre " + TAILLE_MIN_CM + " et " + TAILLE_MAX_CM + " cm.");
+            err.add("La taille doit être strictement entre 80 et 210 cm (saisie autorisée : " + TAILLE_MIN_CM + " à " + TAILLE_MAX_CM + " cm).");
         }
 
         if (draft.poidsKg() == null) {
             err.add("Le poids est obligatoire.");
-        } else if (draft.poidsKg() < POIDS_MIN_KG || draft.poidsKg() > POIDS_MAX_KG) {
-            err.add("Le poids doit être entre " + (int) POIDS_MIN_KG + " et " + (int) POIDS_MAX_KG + " kg.");
+        } else if (draft.poidsKg() <= 30.0 || draft.poidsKg() > POIDS_MAX_KG) {
+            err.add("Le poids doit être strictement supérieur à 30 kg et au plus égal à " + (int) POIDS_MAX_KG + " kg.");
         }
 
         if (draft.objectif() == null || draft.objectif().isBlank()) {

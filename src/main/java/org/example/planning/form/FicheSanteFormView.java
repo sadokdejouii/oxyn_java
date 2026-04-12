@@ -8,24 +8,30 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.example.model.planning.FicheSanteFormData;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Vue JavaFX du formulaire fiche santé (création / édition). {@code user_id} et horodatages : hors UI.
+ * Formulaire fiche santé — présentation type produit SaaS : hero, jalons visuels, cartes thématiques, IMC live.
  */
 public final class FicheSanteFormView {
 
     private final VBox root;
-    private final ComboBox<String> genreCombo = new ComboBox<>();
+    private final ToggleGroup genreGroup = new ToggleGroup();
+    private final ToggleButton genreMale = new ToggleButton("Homme");
+    private final ToggleButton genreFemale = new ToggleButton("Femme");
     private final Spinner<Integer> ageSpinner = new Spinner<>();
     private final Spinner<Integer> tailleSpinner = new Spinner<>();
     private final Spinner<Double> poidsSpinner = new Spinner<>();
@@ -33,63 +39,40 @@ public final class FicheSanteFormView {
     private final ComboBox<String> niveauCombo = new ComboBox<>();
     private final VBox errorBox = new VBox(6);
     private final Label errorTitle = new Label();
+    private final Label bmiValue = new Label("—");
+    private final Label bmiHint = new Label("Indice calculé à partir de votre taille et poids.");
     private Consumer<FicheSanteFormData> onSubmit;
 
     public FicheSanteFormView(FicheSanteFormMode mode, FicheSanteFormData initial) {
         this(mode, initial, null);
     }
 
-    /**
-     * @param onCancel si non null, affiche un bouton « Annuler » (ex. fermeture dialogue).
-     */
     public FicheSanteFormView(FicheSanteFormMode mode, FicheSanteFormData initial, Runnable onCancel) {
-        this.root = new VBox(18);
-        root.getStyleClass().add("planning-fiche-form-root");
-        root.setPadding(new Insets(4, 0, 8, 0));
+        this.root = new VBox(0);
+        root.getStyleClass().add("fs-form-shell");
 
-        Label headline = new Label(mode == FicheSanteFormMode.CREATION
-                ? "Création de votre fiche santé"
-                : "Modifier votre fiche santé");
-        headline.getStyleClass().add("planning-fiche-form-headline");
-
-        Label sub = new Label(mode == FicheSanteFormMode.CREATION
-                ? "Les champs marqués d’une astérisque (*) sont obligatoires. Après enregistrement, votre programme sera généré automatiquement."
-                : "La validation régénère votre programme personnalisé à partir de ces données.");
-        sub.setWrapText(true);
-        sub.getStyleClass().add("planning-fiche-form-sub");
-
-        setupGenre(initial.genre());
+        setupGenreToggles(initial.genre());
         setupAge(initial.age());
         setupTaille(initial.tailleCm());
         setupPoids(initial.poidsKg());
         setupObjectif(initial.objectif());
         setupNiveau(initial.niveauActivite());
 
-        GridPane grid = new GridPane();
-        grid.setHgap(20);
-        grid.setVgap(14);
-        grid.getStyleClass().add("planning-fiche-form-grid");
+        VBox hero = buildHero(mode);
+        HBox steps = buildStepRail();
+        HBox bmiStrip = buildBmiStrip();
+        wireBmiUpdates();
 
-        ColumnConstraints c0 = new ColumnConstraints();
-        c0.setMinWidth(160);
-        ColumnConstraints c1 = new ColumnConstraints();
-        c1.setHgrow(Priority.ALWAYS);
-        c1.setMinWidth(220);
-        grid.getColumnConstraints().addAll(c0, c1);
+        Region profileCard = buildProfileCard();
+        Region bodyCard = buildBodyCard();
+        HBox topRow = new HBox(18, profileCard, bodyCard);
+        topRow.setAlignment(Pos.TOP_LEFT);
+        HBox.setHgrow(profileCard, Priority.ALWAYS);
+        HBox.setHgrow(bodyCard, Priority.ALWAYS);
+        profileCard.setMinWidth(280);
+        bodyCard.setMinWidth(280);
 
-        int r = 0;
-        grid.add(rowLabel("Genre *"), 0, r);
-        grid.add(wrapField(genreCombo), 1, r++);
-        grid.add(rowLabel("Âge *"), 0, r);
-        grid.add(wrapField(ageSpinner), 1, r++);
-        grid.add(rowLabel("Taille (cm) *"), 0, r);
-        grid.add(wrapField(tailleSpinner), 1, r++);
-        grid.add(rowLabel("Poids (kg) *"), 0, r);
-        grid.add(wrapField(poidsSpinner), 1, r++);
-        grid.add(rowLabel("Objectif *"), 0, r);
-        grid.add(wrapField(objectifCombo), 1, r++);
-        grid.add(rowLabel("Niveau d’activité *"), 0, r);
-        grid.add(wrapField(niveauCombo), 1, r++);
+        Region goalsCard = buildGoalsCard();
 
         errorBox.setVisible(false);
         errorBox.setManaged(false);
@@ -99,13 +82,15 @@ public final class FicheSanteFormView {
         errorTitle.setVisible(false);
         errorTitle.setManaged(false);
 
-        Button submit = new Button(mode == FicheSanteFormMode.CREATION ? "Enregistrer" : "Mettre à jour");
-        submit.getStyleClass().addAll("planning-primary-btn", "planning-fiche-submit");
+        Button submit = new Button(mode == FicheSanteFormMode.CREATION ? "Enregistrer et générer mon programme" : "Mettre à jour et régénérer");
+        submit.getStyleClass().addAll("planning-primary-btn", "planning-fiche-submit", "fs-form-submit");
         submit.setMaxWidth(Double.MAX_VALUE);
         submit.setOnAction(e -> handleSubmit());
 
         HBox actions = new HBox(12);
         actions.setAlignment(Pos.CENTER_LEFT);
+        actions.setPadding(new Insets(8, 0, 0, 0));
+        actions.getStyleClass().add("fs-form-actions");
         actions.getChildren().add(submit);
         if (onCancel != null) {
             Button cancel = new Button("Annuler");
@@ -115,7 +100,264 @@ public final class FicheSanteFormView {
         }
         HBox.setHgrow(submit, Priority.ALWAYS);
 
-        root.getChildren().addAll(headline, sub, grid, errorBox, actions);
+        VBox bodyStack = new VBox(20);
+        bodyStack.setPadding(new Insets(0, 0, 8, 0));
+        bodyStack.getStyleClass().add("fs-form-body-stack");
+        bodyStack.getChildren().addAll(steps, bmiStrip, topRow, goalsCard, errorBox, actions);
+
+        root.getChildren().addAll(hero, bodyStack);
+    }
+
+    private VBox buildHero(FicheSanteFormMode mode) {
+        VBox hero = new VBox(10);
+        hero.getStyleClass().add("fs-form-hero");
+        hero.setPadding(new Insets(22, 26, 22, 26));
+
+        HBox heroTop = new HBox(16);
+        heroTop.setAlignment(Pos.CENTER_LEFT);
+
+        StackPane iconWrap = new StackPane();
+        iconWrap.getStyleClass().add("fs-form-hero-icon-wrap");
+        FontIcon pulse = new FontIcon("fas-heartbeat");
+        pulse.setIconSize(22);
+        pulse.getStyleClass().add("fs-form-hero-icon");
+        iconWrap.getChildren().add(pulse);
+
+        VBox titles = new VBox(6);
+        HBox.setHgrow(titles, Priority.ALWAYS);
+        Label kicker = new Label(mode == FicheSanteFormMode.CREATION ? "Onboarding santé" : "Mise à jour profil");
+        kicker.getStyleClass().add("fs-form-hero-kicker");
+        Label headline = new Label(mode == FicheSanteFormMode.CREATION
+                ? "Construisez votre fiche santé"
+                : "Affinez votre fiche santé");
+        headline.getStyleClass().add("fs-form-hero-title");
+        headline.setWrapText(true);
+        Label sub = new Label(mode == FicheSanteFormMode.CREATION
+                ? "Quelques informations suffisent : nous calculons votre IMC, adaptons vos objectifs et générons un programme sur mesure à l’enregistrement."
+                : "Les changements régénèrent votre programme personnalisé à partir de ces données.");
+        sub.setWrapText(true);
+        sub.getStyleClass().add("fs-form-hero-sub");
+        titles.getChildren().addAll(kicker, headline, sub);
+
+        Label chip = new Label("≈ 2 min");
+        chip.getStyleClass().add("fs-form-hero-chip");
+        heroTop.getChildren().addAll(iconWrap, titles, chip);
+
+        hero.getChildren().add(heroTop);
+        return hero;
+    }
+
+    private HBox buildStepRail() {
+        HBox row = new HBox(10);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("fs-form-steps");
+        String[] labels = {"Profil", "Mesures", "Objectifs"};
+        for (int i = 0; i < labels.length; i++) {
+            HBox step = new HBox(8);
+            step.setAlignment(Pos.CENTER_LEFT);
+            step.getStyleClass().add("fs-form-step");
+            Label num = new Label(String.valueOf(i + 1));
+            num.getStyleClass().add("fs-form-step-num");
+            Label tx = new Label(labels[i]);
+            tx.getStyleClass().add("fs-form-step-label");
+            step.getChildren().addAll(num, tx);
+            row.getChildren().add(step);
+            if (i < labels.length - 1) {
+                Region dash = new Region();
+                dash.getStyleClass().add("fs-form-step-connector");
+                dash.setMinWidth(24);
+                dash.setPrefHeight(2);
+                HBox.setHgrow(dash, Priority.SOMETIMES);
+                row.getChildren().add(dash);
+            }
+        }
+        return row;
+    }
+
+    private HBox buildBmiStrip() {
+        HBox strip = new HBox(16);
+        strip.setAlignment(Pos.CENTER_LEFT);
+        strip.getStyleClass().add("fs-form-bmi-strip");
+        strip.setPadding(new Insets(14, 18, 14, 18));
+
+        VBox left = new VBox(4);
+        Label t = new Label("IMC estimé");
+        t.getStyleClass().add("fs-form-bmi-title");
+        bmiHint.getStyleClass().add("fs-form-bmi-hint");
+        bmiHint.setWrapText(true);
+        left.getChildren().addAll(t, bmiHint);
+        HBox.setHgrow(left, Priority.ALWAYS);
+
+        VBox right = new VBox(2);
+        right.setAlignment(Pos.CENTER_RIGHT);
+        bmiValue.getStyleClass().add("fs-form-bmi-value");
+        right.getChildren().add(bmiValue);
+
+        strip.getChildren().addAll(left, right);
+        refreshBmi();
+        return strip;
+    }
+
+    private void wireBmiUpdates() {
+        tailleSpinner.valueProperty().addListener((o, a, b) -> refreshBmi());
+        poidsSpinner.valueProperty().addListener((o, a, b) -> refreshBmi());
+    }
+
+    private void refreshBmi() {
+        try {
+            int cm = tailleSpinner.getValue();
+            double kg = poidsSpinner.getValue();
+            if (cm <= 0) {
+                bmiValue.setText("—");
+                return;
+            }
+            double m = cm / 100.0;
+            double bmi = kg / (m * m);
+            bmiValue.setText(String.format("%.1f", bmi));
+            bmiHint.setText(bmiCategory(bmi) + " · mis à jour automatiquement.");
+        } catch (Exception e) {
+            bmiValue.setText("—");
+        }
+    }
+
+    private static String bmiCategory(double bmi) {
+        if (bmi < 18.5) {
+            return "Profil maigreur";
+        }
+        if (bmi < 25) {
+            return "Corpulence normale";
+        }
+        if (bmi < 30) {
+            return "Surpoids modéré";
+        }
+        return "Obésité — suivi renforcé recommandé";
+    }
+
+    private Region buildProfileCard() {
+        VBox card = new VBox(14);
+        card.getStyleClass().addAll("fs-form-card");
+        card.setPadding(new Insets(18, 20, 20, 20));
+
+        card.getChildren().add(cardHeader("fas-id-card", "Identité", "Genre et tranche d’âge"));
+
+        Label gLab = fieldCaption("Genre");
+        genreMale.setToggleGroup(genreGroup);
+        genreFemale.setToggleGroup(genreGroup);
+        genreMale.getStyleClass().addAll("fs-seg", "fs-seg-left");
+        genreFemale.getStyleClass().addAll("fs-seg", "fs-seg-right");
+        HBox seg = new HBox(0, genreMale, genreFemale);
+        seg.setAlignment(Pos.CENTER_LEFT);
+        seg.getStyleClass().add("fs-seg-row");
+
+        Label aLab = fieldCaption("Âge");
+        styleSpinner(ageSpinner);
+
+        card.getChildren().addAll(gLab, seg, aLab, wrapFull(ageSpinner));
+        return card;
+    }
+
+    private Region buildBodyCard() {
+        VBox card = new VBox(14);
+        card.getStyleClass().addAll("fs-form-card");
+        card.setPadding(new Insets(18, 20, 20, 20));
+
+        card.getChildren().add(cardHeader("fas-ruler-combined", "Anthropométrie", "Taille & poids pour calibrer charge et nutrition"));
+
+        GridPane g = new GridPane();
+        g.setHgap(14);
+        g.setVgap(12);
+        ColumnConstraints half = new ColumnConstraints();
+        half.setPercentWidth(50);
+        half.setHgrow(Priority.ALWAYS);
+        g.getColumnConstraints().addAll(half, half);
+
+        VBox c0 = metricBlock("Taille", "cm", tailleSpinner);
+        VBox c1 = metricBlock("Poids", "kg", poidsSpinner);
+        g.add(c0, 0, 0);
+        g.add(c1, 1, 0);
+
+        card.getChildren().add(g);
+        return card;
+    }
+
+    private VBox metricBlock(String title, String unit, Region control) {
+        VBox v = new VBox(6);
+        HBox cap = new HBox(6);
+        cap.setAlignment(Pos.CENTER_LEFT);
+        Label t = new Label(title);
+        t.getStyleClass().add("fs-form-field-title");
+        Label u = new Label(unit);
+        u.getStyleClass().add("fs-form-field-unit");
+        cap.getChildren().addAll(t, u);
+        styleSpinner((Spinner<?>) control);
+        v.getChildren().addAll(cap, wrapFull(control));
+        return v;
+    }
+
+    private Region buildGoalsCard() {
+        VBox card = new VBox(14);
+        card.getStyleClass().addAll("fs-form-card", "fs-form-card--wide");
+        card.setPadding(new Insets(18, 20, 20, 20));
+
+        card.getChildren().add(cardHeader("fas-bullseye", "Objectifs & rythme", "Nous adaptons volume d’entraînement et déficit calorique"));
+
+        GridPane grid = new GridPane();
+        grid.setHgap(20);
+        grid.setVgap(14);
+        ColumnConstraints c0 = new ColumnConstraints();
+        c0.setPercentWidth(50);
+        ColumnConstraints c1 = new ColumnConstraints();
+        c1.setPercentWidth(50);
+        c0.setHgrow(Priority.ALWAYS);
+        c1.setHgrow(Priority.ALWAYS);
+        grid.getColumnConstraints().addAll(c0, c1);
+
+        VBox oBox = new VBox(6);
+        oBox.getChildren().addAll(fieldCaption("Objectif principal"), wrapFull(objectifCombo));
+        VBox nBox = new VBox(6);
+        nBox.getChildren().addAll(fieldCaption("Niveau d’activité"), wrapFull(niveauCombo));
+        grid.add(oBox, 0, 0);
+        grid.add(nBox, 1, 0);
+
+        card.getChildren().add(grid);
+        return card;
+    }
+
+    private static HBox cardHeader(String iconLiteral, String title, String subtitle) {
+        HBox h = new HBox(12);
+        h.setAlignment(Pos.TOP_LEFT);
+        FontIcon ic = new FontIcon(iconLiteral);
+        ic.setIconSize(18);
+        ic.getStyleClass().add("fs-form-card-icon");
+        VBox tx = new VBox(4);
+        HBox.setHgrow(tx, Priority.ALWAYS);
+        Label t = new Label(title);
+        t.getStyleClass().add("fs-form-card-heading");
+        Label s = new Label(subtitle);
+        s.setWrapText(true);
+        s.getStyleClass().add("fs-form-card-sub");
+        tx.getChildren().addAll(t, s);
+        h.getChildren().addAll(ic, tx);
+        return h;
+    }
+
+    private static Label fieldCaption(String text) {
+        Label l = new Label(text);
+        l.getStyleClass().add("fs-form-field-caption");
+        return l;
+    }
+
+    private static void styleSpinner(Spinner<?> sp) {
+        sp.getStyleClass().add("planning-fiche-spinner");
+        sp.setMaxWidth(Double.MAX_VALUE);
+    }
+
+    private static Region wrapFull(Region field) {
+        HBox h = new HBox(field);
+        h.setAlignment(Pos.CENTER_LEFT);
+        field.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(field, Priority.ALWAYS);
+        return h;
     }
 
     public Region getRoot() {
@@ -140,8 +382,9 @@ public final class FicheSanteFormView {
     }
 
     private FicheSanteFormData readFromControls() {
+        String g = genreMale.isSelected() ? "M" : "F";
         return new FicheSanteFormData(
-                genreCombo.getValue(),
+                g,
                 ageSpinner.getValue(),
                 tailleSpinner.getValue(),
                 poidsSpinner.getValue(),
@@ -173,58 +416,34 @@ public final class FicheSanteFormView {
         errorTitle.setManaged(false);
     }
 
-    private static Label rowLabel(String text) {
-        Label l = new Label(text);
-        l.getStyleClass().add("planning-fiche-form-label");
-        l.setMinHeight(Region.USE_PREF_SIZE);
-        l.setAlignment(Pos.CENTER_LEFT);
-        return l;
-    }
-
-    private static HBox wrapField(Region field) {
-        HBox h = new HBox(field);
-        h.setAlignment(Pos.CENTER_LEFT);
-        field.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(field, Priority.ALWAYS);
-        return h;
-    }
-
-    private void setupGenre(String initialGenre) {
-        genreCombo.getItems().addAll("M", "F");
-        genreCombo.getStyleClass().add("planning-fiche-combo");
-        genreCombo.setMaxWidth(Double.MAX_VALUE);
+    private void setupGenreToggles(String initialGenre) {
         String g = initialGenre != null ? initialGenre.trim().toUpperCase() : "M";
-        if (!"M".equals(g) && !"F".equals(g)) {
-            g = "M";
+        if ("F".equals(g)) {
+            genreFemale.setSelected(true);
+        } else {
+            genreMale.setSelected(true);
         }
-        genreCombo.setValue(g);
     }
 
     private void setupAge(Integer initialAge) {
         int v = initialAge != null ? initialAge : 30;
-        v = Math.max(12, Math.min(110, v));
-        ageSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(12, 110, v, 1));
+        v = Math.max(8, Math.min(99, v));
+        ageSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(8, 99, v, 1));
         ageSpinner.setEditable(true);
-        ageSpinner.getStyleClass().add("planning-fiche-spinner");
-        ageSpinner.setMaxWidth(Double.MAX_VALUE);
     }
 
     private void setupTaille(Integer initialCm) {
         int v = initialCm != null ? initialCm : 170;
-        v = Math.max(120, Math.min(230, v));
-        tailleSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(120, 230, v, 1));
+        v = Math.max(81, Math.min(209, v));
+        tailleSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(81, 209, v, 1));
         tailleSpinner.setEditable(true);
-        tailleSpinner.getStyleClass().add("planning-fiche-spinner");
-        tailleSpinner.setMaxWidth(Double.MAX_VALUE);
     }
 
     private void setupPoids(Double initialKg) {
         double v = initialKg != null ? initialKg : 70.0;
-        v = Math.max(35.0, Math.min(220.0, v));
-        poidsSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(35.0, 220.0, v, 0.5));
+        v = Math.max(30.5, Math.min(220.0, v));
+        poidsSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(30.5, 220.0, v, 0.5));
         poidsSpinner.setEditable(true);
-        poidsSpinner.getStyleClass().add("planning-fiche-spinner");
-        poidsSpinner.setMaxWidth(Double.MAX_VALUE);
     }
 
     private void setupObjectif(String code) {
@@ -280,27 +499,24 @@ public final class FicheSanteFormView {
 
     private static String labelObjectif(String code) {
         return switch (code) {
-            case "perte_poids" -> "perte_poids — Perte de poids";
-            case "gain_poids" -> "gain_poids — Prise de masse";
-            case "devenir_muscle" -> "devenir_muscle — Musculation / tonification";
-            case "maintien" -> "maintien — Maintien";
+            case "perte_poids" -> "Perte de poids";
+            case "gain_poids" -> "Prise de masse";
+            case "devenir_muscle" -> "Musculation / tonification";
+            case "maintien" -> "Maintien";
             default -> code;
         };
     }
 
     private static String labelNiveau(String code) {
         return switch (code) {
-            case "sedentaire" -> "sedentaire — Sédentaire";
-            case "peu_actif" -> "peu_actif — Peu actif";
-            case "moderement_actif" -> "moderement_actif — Modérément actif";
-            case "tres_actif" -> "tres_actif — Très actif";
+            case "sedentaire" -> "Sédentaire";
+            case "peu_actif" -> "Peu actif";
+            case "moderement_actif" -> "Modérément actif";
+            case "tres_actif" -> "Très actif";
             default -> code;
         };
     }
 
-    /**
-     * Valeurs historiques base / Symfony → valeurs formulaire.
-     */
     public static String normalizeNiveauFromDb(String db) {
         if (db == null || db.isBlank()) {
             return "peu_actif";
@@ -322,17 +538,21 @@ public final class FicheSanteFormView {
     }
 
     public void applyInitial(FicheSanteFormData data) {
-        if (data.genre() != null && genreCombo.getItems().contains(data.genre())) {
-            genreCombo.setValue(data.genre());
+        if (data.genre() != null) {
+            if ("F".equalsIgnoreCase(data.genre().trim())) {
+                genreFemale.setSelected(true);
+            } else {
+                genreMale.setSelected(true);
+            }
         }
         if (data.age() != null) {
-            ageSpinner.getValueFactory().setValue(clamp(data.age(), 12, 110));
+            ageSpinner.getValueFactory().setValue(clamp(data.age(), 8, 99));
         }
         if (data.tailleCm() != null) {
-            tailleSpinner.getValueFactory().setValue(clamp(data.tailleCm(), 120, 230));
+            tailleSpinner.getValueFactory().setValue(clamp(data.tailleCm(), 81, 209));
         }
         if (data.poidsKg() != null) {
-            double p = Math.max(35, Math.min(220, data.poidsKg()));
+            double p = Math.max(30.5, Math.min(220, data.poidsKg()));
             poidsSpinner.getValueFactory().setValue(p);
         }
         if (data.objectif() != null && objectifCombo.getItems().contains(data.objectif())) {
@@ -345,6 +565,7 @@ public final class FicheSanteFormView {
             }
         }
         clearErrors();
+        refreshBmi();
     }
 
     private static int clamp(int v, int min, int max) {

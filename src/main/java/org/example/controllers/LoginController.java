@@ -3,83 +3,121 @@ package org.example.controllers;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.example.entities.AuthUser;
-import org.example.services.DemoLoginService;
+import org.example.entities.User;
+import org.example.services.AuthService;
+import org.example.services.AuthValidation;
 import org.example.services.SessionContext;
+import org.example.utils.AuthNavigation;
+import org.example.utils.FormFieldFeedback;
 
+import java.net.URL;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 
 /**
- * Connexion démo temporaire : e-mail existant en base, sans mot de passe.
+ * Connexion standard (e-mail + mot de passe), alignée sur le flux {@code main} / DAO.
  */
-public class LoginController {
+public class LoginController implements Initializable {
+
+    private static final boolean LOGIN_THEME = true;
 
     @FXML
     private TextField emailField;
 
     @FXML
-    private Label demoHintLabel;
-
-    private final DemoLoginService demoLogin = new DemoLoginService();
+    private Label emailErrorLabel;
 
     @FXML
-    public void initialize() {
-        if (demoHintLabel != null) {
-            demoHintLabel.setText("Démo : saisissez l’e-mail d’un compte présent dans la table users (aucun mot de passe).");
+    private PasswordField passwordField;
+
+    @FXML
+    private Label passwordErrorLabel;
+
+    private final AuthService authService = new AuthService();
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        if (emailField != null) {
+            emailField.textProperty().addListener((o, a, b) ->
+                    FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME));
+        }
+        if (passwordField != null) {
+            passwordField.textProperty().addListener((o, a, b) ->
+                    FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME));
         }
     }
 
     @FXML
     private void handleLogin(ActionEvent event) {
-        String raw = emailField != null ? emailField.getText() : "";
-        if (raw == null || raw.isBlank()) {
-            showAlert(Alert.AlertType.WARNING, "E-mail requis", "Veuillez saisir une adresse e-mail.");
+        clearFieldErrors();
+
+        String email = emailField != null ? emailField.getText().trim() : "";
+        String password = passwordField != null ? passwordField.getText() : "";
+
+        boolean ok = true;
+        String emailErr = AuthValidation.validateEmailContent(emailField != null ? emailField.getText() : "");
+        if (emailErr != null) {
+            FormFieldFeedback.setInputError(emailField, emailErrorLabel, emailErr, LOGIN_THEME);
+            ok = false;
+        }
+        if (password == null || password.isEmpty()) {
+            FormFieldFeedback.setInputError(passwordField, passwordErrorLabel,
+                    "Le mot de passe est obligatoire.", LOGIN_THEME);
+            ok = false;
+        }
+        if (!ok) {
             return;
         }
+
         try {
-            var opt = demoLogin.loginByEmail(raw);
-            if (opt.isEmpty()) {
-                showUnknownEmailDialog(raw.trim());
+            User user = authService.login(email, password);
+            if (user == null) {
+                FormFieldFeedback.setInputError(passwordField, passwordErrorLabel,
+                        "E-mail ou mot de passe incorrect, ou compte désactivé.", LOGIN_THEME);
                 return;
             }
-            AuthUser user = opt.get();
-            SessionContext ctx = SessionContext.getInstance();
-            ctx.login(user);
-            ctx.setDemoAuthentication(true);
+            SessionContext.getInstance().login(user);
             openMain(event);
-        } catch (SQLException ex) {
-            showAlert(Alert.AlertType.ERROR, "Base de données",
-                    ex.getMessage() != null ? ex.getMessage() : ex.toString());
+        } catch (SQLException e) {
+            showError("Erreur base de données",
+                    e.getMessage() != null ? e.getMessage() : e.toString());
+        } catch (Exception e) {
+            showError("Erreur", e.getMessage() != null ? e.getMessage() : e.toString());
+            e.printStackTrace();
         }
     }
 
-    private static void showUnknownEmailDialog(String entered) {
-        Alert a = new Alert(Alert.AlertType.WARNING);
-        a.setTitle("Compte introuvable");
-        a.setHeaderText("Connexion démo");
-        a.setContentText("« " + entered + " » ne correspond à aucun utilisateur actif dans la table users.");
-        a.getDialogPane().setStyle("-fx-min-width: 360px;");
-        a.showAndWait();
+    @FXML
+    private void handleGoRegister(ActionEvent event) {
+        try {
+            Node source = (Node) event.getSource();
+            Stage stage = (Stage) source.getScene().getWindow();
+            AuthNavigation.showRegister(stage);
+        } catch (Exception e) {
+            showError("Navigation", e.getMessage() != null ? e.getMessage() : e.toString());
+        }
     }
 
-    private static void showAlert(Alert.AlertType type, String title, String message) {
-        Alert a = new Alert(type);
-        a.setTitle(title);
-        a.setHeaderText(null);
-        a.setContentText(message);
-        a.showAndWait();
+    private void clearFieldErrors() {
+        FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME);
+        FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME);
     }
 
     private void openMain(ActionEvent event) {
         try {
-            Node source = emailField;
+            Node source = emailField != null ? emailField : passwordField;
+            if (source == null || source.getScene() == null) {
+                source = (Node) event.getSource();
+            }
             Stage stage = (Stage) source.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/MainLayout.fxml"));
             Parent root = loader.load();
@@ -90,8 +128,16 @@ public class LoginController {
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur",
+            showError("Erreur",
                     "Impossible d’ouvrir l’application : " + e.getMessage());
         }
+    }
+
+    private static void showError(String title, String msg) {
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle(title);
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 }

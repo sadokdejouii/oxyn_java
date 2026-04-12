@@ -1,5 +1,7 @@
 package org.example.entities;
 
+import org.example.services.UserRole;
+
 /**
  * Utilisateur authentifié (table {@code users} Symfony).
  */

@@ -123,11 +123,8 @@ public final class PlanningClientController {
 
 
         container.getChildren().addAll(
-
                 sectionShell("Bienvenue", intro),
-
-                PlanningUi.card("Fiche santé", "Formulaire", "live", "fas-file-medical", wrap(form.getRoot()))
-
+                wrap(form.getRoot())
         );
 
     }

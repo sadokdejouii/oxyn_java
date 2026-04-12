@@ -1,9 +1,11 @@
 package org.example.services;
 
-import at.favre.lib.crypto.bcrypt.BCrypt;
+import org.example.dao.UserDAO;
 import org.example.entities.AuthUser;
-import org.example.entities.UserRole;
+import org.example.entities.Client;
+import org.example.entities.User;
 import org.example.utils.MyDataBase;
+import org.example.utils.PasswordUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,11 +14,20 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 /**
- * Charge les utilisateurs depuis la table Symfony {@code users} et vérifie les hash bcrypt ({@code $2y$}).
+ * Authentification : voie {@code main} (DAO polymorphe + inscription) et voie Symfony / JDBC directe (optionnelle).
  */
 public final class AuthService {
 
-    public Optional<AuthUser> authenticate(String emailInput, String plainPassword) throws SQLException {
+    private final UserDAO userDAO = new UserDAO();
+
+    public User login(String email, String password) throws SQLException {
+        return userDAO.login(email, password);
+    }
+
+    /**
+     * Authentification complète (mot de passe) sur la table {@code users} (hash bcrypt / PHP {@code $2y$}).
+     */
+    public Optional<AuthUser> authenticateSymfonyUser(String emailInput, String plainPassword) throws SQLException {
         if (emailInput == null || emailInput.isBlank()) {
             return Optional.empty();
         }
@@ -25,7 +36,6 @@ public final class AuthService {
         if (c == null) {
             return Optional.empty();
         }
-
         String sql = """
                 SELECT id_user, email_user, password_user, roles_user, first_name_user, last_name_user
                 FROM users
@@ -42,8 +52,7 @@ public final class AuthService {
                 String rolesJson = rs.getString("roles_user");
                 String fn = rs.getString("first_name_user");
                 String ln = rs.getString("last_name_user");
-
-                if (plainPassword == null || !verifyBcrypt(plainPassword, hash)) {
+                if (plainPassword == null || !PasswordUtils.matches(plainPassword, hash)) {
                     return Optional.empty();
                 }
                 return Optional.of(new AuthUser(id, email, fn, ln, UserRole.fromSymfonyRolesJson(rolesJson)));
@@ -51,13 +60,18 @@ public final class AuthService {
         }
     }
 
-    private static boolean verifyBcrypt(String plain, String storedHash) {
-        if (storedHash == null || storedHash.isBlank()) {
+    public boolean registerClient(String nom, String prenom, String email, String telephone,
+                                  String plainPassword, String confirmPassword) throws SQLException {
+        String err = AuthValidation.validateRegistrationForm(nom, prenom, email, telephone, plainPassword, confirmPassword);
+        if (err != null) {
+            throw new IllegalArgumentException(err);
+        }
+        String em = email.trim().toLowerCase();
+        if (userDAO.findByEmail(em) != null) {
             return false;
         }
-        String normalized = storedHash.startsWith("$2y$")
-                ? "$2a$" + storedHash.substring(4)
-                : storedHash;
-        return BCrypt.verifyer().verify(plain.toCharArray(), normalized).verified;
+        String hash = PasswordUtils.hash(plainPassword);
+        Client client = new Client(0, em, hash, nom.trim(), prenom.trim(), telephone.trim(), true);
+        return userDAO.register(client);
     }
 }

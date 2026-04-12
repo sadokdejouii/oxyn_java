@@ -2,10 +2,13 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -24,23 +27,33 @@
         <StackPane styleClass="login-logo-wrap">
             <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true" styleClass="login-logo-image">
                 <image>
-                    <Image url="@../../images/oxynLogo.png" />
+                    <Image url="@../images/oxynLogo.png" />
                 </image>
             </ImageView>
         </StackPane>
         <Label styleClass="login-eyebrow" text="OXYN" />
-        <Label styleClass="login-title" text="Connexion démo" />
-        <Label fx:id="demoHintLabel" styleClass="login-sub" text="" wrapText="true" />
+        <Label styleClass="login-title" text="Connexion" />
+        <Label styleClass="login-sub" text="Connectez-vous avec votre e-mail et votre mot de passe." wrapText="true" />
 
         <Region prefHeight="8" />
 
-        <VBox spacing="8">
+        <VBox spacing="6">
             <Label styleClass="field-label" text="E-mail" />
-            <TextField fx:id="emailField" promptText="exemple@domaine.com (compte users)" styleClass="login-field" onAction="#handleLogin" />
+            <TextField fx:id="emailField" promptText="vous@exemple.com" styleClass="login-field" onAction="#handleLogin" />
+            <Label fx:id="emailErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
         </VBox>
 
-        <Button defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="login-primary" text="Continuer" />
+        <VBox spacing="6">
+            <Label styleClass="field-label" text="Mot de passe" />
+            <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="login-field" onAction="#handleLogin" />
+            <Label fx:id="passwordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
+        </VBox>
 
-        <Label styleClass="login-hint" text="Démo : l’e-mail doit exister dans MySQL (table users) — sans mot de passe." wrapText="true" />
+        <Button defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="login-primary" text="Se connecter" />
+
+        <HBox alignment="CENTER" spacing="6">
+            <Label styleClass="login-hint" text="Pas encore de compte ?" />
+            <Hyperlink styleClass="login-link" text="Créer un compte" onAction="#handleGoRegister" />
+        </HBox>
     </VBox>
 </VBox>

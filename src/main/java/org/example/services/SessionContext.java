@@ -1,24 +1,29 @@
 package org.example.services;
 
-import org.example.entities.AuthUser;
-import org.example.entities.UserRole;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import org.example.entities.User;
 
 import java.util.Objects;
 
 /**
- * Session utilisateur courante après connexion.
+ * Session après connexion : modèle {@link User} (comme {@code main}), propriété JavaFX pour la barre du haut,
+ * et hook navigation discussion depuis le planning.
  */
 public final class SessionContext {
 
     private static final SessionContext INSTANCE = new SessionContext();
 
+    private User currentUser;
+
     private String displayName = "Guest";
     private UserRole role = UserRole.CLIENT;
-    /** Symfony {@code users.id_user}; -1 si non connecté. */
-    private int userId = -1;
-    private String email = "";
-    /** Connexion démo (e-mail sans mot de passe). */
-    private boolean demoAuthentication;
+    private int legacyUserId = -1;
+    private String legacyEmail = "";
+
+    private final ReadOnlyStringWrapper displayNameWrapper = new ReadOnlyStringWrapper("Guest");
+
+    private Runnable openDiscussionFromPlanningAction;
 
     private SessionContext() {
     }
@@ -27,27 +32,60 @@ public final class SessionContext {
         return INSTANCE;
     }
 
+    public ReadOnlyStringProperty displayNameProperty() {
+        return displayNameWrapper.getReadOnlyProperty();
+    }
+
+    private void pushDisplayName(String name) {
+        if (name == null || name.isBlank()) {
+            this.displayName = "User";
+        } else {
+            this.displayName = name.trim();
+        }
+        displayNameWrapper.set(this.displayName);
+    }
+
+    public void login(User user) {
+        this.currentUser = Objects.requireNonNull(user);
+        String nom = user.getNom() != null ? user.getNom().trim() : "";
+        String prenom = user.getPrenom() != null ? user.getPrenom().trim() : "";
+        String composed = (prenom + " " + nom).trim();
+        if (composed.isEmpty()) {
+            composed = user.getEmail() != null ? user.getEmail() : "User";
+        }
+        pushDisplayName(composed);
+        this.role = UserRole.fromUser(user);
+        this.legacyUserId = user.getId();
+        this.legacyEmail = user.getEmail() != null ? user.getEmail().trim() : "";
+    }
+
+    /** @deprecated Préférer {@link #login(User)}. */
+    @Deprecated
     public void login(String displayName, UserRole role) {
         login(displayName, role, -1, "");
     }
 
+    /** @deprecated Préférer {@link #login(User)}. */
+    @Deprecated
     public void login(String displayName, UserRole role, int userId, String email) {
-        this.displayName = Objects.requireNonNullElse(displayName, "User").trim();
-        if (this.displayName.isEmpty()) {
-            this.displayName = "User";
+        this.currentUser = null;
+        String n = Objects.requireNonNullElse(displayName, "User").trim();
+        if (n.isEmpty()) {
+            n = "User";
         }
+        pushDisplayName(n);
         this.role = Objects.requireNonNullElse(role, UserRole.CLIENT);
-        this.userId = userId;
-        this.email = email == null ? "" : email.trim();
+        this.legacyUserId = userId;
+        this.legacyEmail = email == null ? "" : email.trim();
     }
 
-    /** Session après résolution JDBC (table {@code users}). */
-    public void login(AuthUser user) {
-        Objects.requireNonNull(user, "user");
-        login(user.fullDisplayName(), user.role(), user.id(), user.email());
+    public void applyRefreshedUser(User user) {
+        Objects.requireNonNull(user);
+        if (currentUser != null && user.getId() != currentUser.getId()) {
+            throw new IllegalStateException("Identifiant utilisateur incohérent avec la session.");
+        }
+        login(user);
     }
-
-    private Runnable openDiscussionFromPlanningAction;
 
     public void setOpenDiscussionFromPlanningAction(Runnable action) {
         this.openDiscussionFromPlanningAction = action;
@@ -60,20 +98,16 @@ public final class SessionContext {
     }
 
     public void logout() {
-        this.displayName = "Guest";
+        this.currentUser = null;
+        pushDisplayName("Guest");
         this.role = UserRole.CLIENT;
-        this.userId = -1;
-        this.email = "";
-        this.demoAuthentication = false;
+        this.legacyUserId = -1;
+        this.legacyEmail = "";
         this.openDiscussionFromPlanningAction = null;
     }
 
-    public void setDemoAuthentication(boolean demoAuthentication) {
-        this.demoAuthentication = demoAuthentication;
-    }
-
-    public boolean isDemoAuthentication() {
-        return demoAuthentication;
+    public User getCurrentUser() {
+        return currentUser;
     }
 
     public String getDisplayName() {
@@ -85,11 +119,17 @@ public final class SessionContext {
     }
 
     public int getUserId() {
-        return userId;
+        if (currentUser != null) {
+            return currentUser.getId();
+        }
+        return legacyUserId;
     }
 
     public String getEmail() {
-        return email;
+        if (currentUser != null && currentUser.getEmail() != null) {
+            return currentUser.getEmail();
+        }
+        return legacyEmail;
     }
 
     public boolean isAdmin() {
@@ -105,6 +145,6 @@ public final class SessionContext {
     }
 
     public boolean hasDbUser() {
-        return userId > 0;
+        return getUserId() > 0;
     }
 }
