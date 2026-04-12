@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.EquipmentController">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
+        <VBox spacing="20" styleClass="page-root">
+
+            <VBox spacing="4">
+                <Label styleClass="page-hero-title" text="Equipements" />
+                <Label styleClass="page-hero-sub" text="Gerez les equipements par salle." wrapText="true"/>
+            </VBox>
+
+            <HBox spacing="14" styleClass="saas-stat-row">
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="TOTAL" />
+                    <Label fx:id="statTotal" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="Equipements" />
+                </VBox>
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="ACTIFS" />
+                    <Label fx:id="statActifs" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="En service" />
+                </VBox>
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="QUANTITE TOTALE" />
+                    <Label fx:id="statQte" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="Unites" />
+                </VBox>
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-card">
+                <Button onAction="#handleAjouter" styleClass="primary-toolbar-btn" text="+ Nouvel equipement" />
+                <Region HBox.hgrow="ALWAYS"/>
+                <ComboBox fx:id="filterSalle" styleClass="sess-field" promptText="Toutes les salles" />
+                <ToggleButton fx:id="filterAll"      onAction="#handleFilter" styleClass="sess-filter-btn" text="Tous"     userData="ALL"      selected="true"/>
+                <ToggleButton fx:id="filterActive"   onAction="#handleFilter" styleClass="sess-filter-btn" text="Actifs"   userData="ACTIVE"/>
+                <ToggleButton fx:id="filterInactive" onAction="#handleFilter" styleClass="sess-filter-btn" text="Inactifs" userData="INACTIVE"/>
+                <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser"/>
+            </HBox>
+
+            <Label fx:id="countLabel" styleClass="saas-stat-label" text="0 equipement(s)"/>
+
+            <FlowPane fx:id="equipGrid" hgap="18" vgap="18" prefWrapLength="1000">
+                <padding><Insets bottom="24" left="2" right="2" top="4"/></padding>
+            </FlowPane>
+        </VBox>
+    </ScrollPane>
+
+    <!-- DIALOG -->
+    <StackPane fx:id="dialogOverlay" visible="false" managed="false" styleClass="sess-overlay">
+        <VBox maxWidth="480" spacing="14" styleClass="sess-dialog-card" alignment="TOP_LEFT">
+            <padding><Insets bottom="28" left="28" right="28" top="24"/></padding>
+            <Label fx:id="dialogTitle" styleClass="sess-dialog-title" text="Nouvel equipement"/>
+            <VBox spacing="5">
+                <Label styleClass="sess-lbl" text="Nom *"/>
+                <TextField fx:id="fieldName" promptText="Nom de l'equipement" styleClass="sess-field" maxWidth="Infinity"/>
+            </VBox>
+            <HBox spacing="12">
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label styleClass="sess-lbl" text="Quantite *"/>
+                    <TextField fx:id="fieldQty" promptText="ex: 10" styleClass="sess-field" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label styleClass="sess-lbl" text="Salle"/>
+                    <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="sess-field" promptText="Aucune"/>
+                </VBox>
+            </HBox>
+            <VBox spacing="5">
+                <Label styleClass="sess-lbl" text="Description"/>
+                <TextArea fx:id="fieldDesc" promptText="Description..." styleClass="sess-field" prefRowCount="3" maxWidth="Infinity" wrapText="true"/>
+            </VBox>
+            <Label fx:id="dialogError" styleClass="sess-error" text="" wrapText="true"/>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button onAction="#handleCancel"  styleClass="sess-btn-cancel"  text="Annuler"/>
+                <Button onAction="#handleSave"    styleClass="sess-btn-save"    text="Enregistrer"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- CONFIRM DELETE -->
+    <StackPane fx:id="confirmOverlay" visible="false" managed="false" styleClass="sess-overlay">
+        <VBox maxWidth="360" spacing="16" styleClass="sess-confirm-card" alignment="CENTER">
+            <padding><Insets bottom="24" left="24" right="24" top="20"/></padding>
+            <Label styleClass="sess-confirm-icon" text="!"/>
+            <Label styleClass="sess-confirm-title" text="Supprimer l'equipement ?"/>
+            <Label fx:id="confirmMsg" styleClass="page-hero-sub" text="" wrapText="true"/>
+            <HBox spacing="12" alignment="CENTER">
+                <Button onAction="#handleConfirmCancel" styleClass="sess-btn-cancel" text="Annuler"/>
+                <Button onAction="#handleConfirmDelete" styleClass="sess-btn-danger"  text="Supprimer"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+</StackPane>

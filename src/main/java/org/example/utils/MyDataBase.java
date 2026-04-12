@@ -31,13 +31,29 @@ public class MyDataBase {
     }
 
     public static MyDataBase getInstance() {
-        if (instance == null){
-            instance = new MyDataBase();
-        }
+        if (instance == null) instance = new MyDataBase();
         return instance;
     }
 
     public Connection getConnection() {
+        try {
+            if (connection == null || connection.isClosed() || !connection.isValid(1)) {
+                connect();
+            }
+        } catch (SQLException e) {
+            connect();
+        }
         return connection;
     }
+
+    /** Reset after writes so next read gets fresh data */
+    public void resetConnection() {
+        try { if (connection != null && !connection.isClosed()) connection.close(); }
+        catch (SQLException ignored) {}
+        connect();
+    }
+
+    public static String getURL()      { return URL; }
+    public static String getUSERNAME() { return USERNAME; }
+    public static String getPASSWORD() { return PASSWORD; }
 }

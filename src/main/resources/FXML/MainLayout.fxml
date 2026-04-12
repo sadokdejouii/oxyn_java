@@ -121,6 +121,55 @@
                         </Button>
                     </VBox>
 
+                    <VBox fx:id="encadrantNavGroup" spacing="6">
+                        <Label styleClass="nav-title" text="ENCADREMENT" />
+
+                        <Button fx:id="encDashboardBtn" onAction="#handleEncDashboard" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-chart-pie,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Dashboard" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="encEvenementsBtn" onAction="#handleEncEvenements" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-calendar-alt,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Evenements" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="encSalleBtn" onAction="#handleEncSalle" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-building,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Salle" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="encBoutiqueBtn" onAction="#handleEncBoutique" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-shopping-cart,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Boutique" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="encForumBtn" onAction="#handleEncForum" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-comments,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Forum" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+                    </VBox>
+
                     <VBox fx:id="clientNavGroup" spacing="6">
                         <Label styleClass="nav-title" text="FRONT OFFICE" />
 

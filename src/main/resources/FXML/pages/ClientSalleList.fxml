@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.ClientSalleListController"
+           styleClass="cl-root">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
+        <VBox spacing="24" styleClass="page-root">
+
+            <!-- Header -->
+            <VBox spacing="4">
+                <Label styleClass="page-hero-title" text="🏢  Nos Salles de Sport" />
+                <Label styleClass="page-hero-sub"
+                       text="Decouvrez nos salles, consultez les abonnements et reservez vos sessions."
+                       wrapText="true" />
+            </VBox>
+
+            <!-- Stats -->
+            <HBox spacing="14" styleClass="saas-stat-row">
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="SALLES DISPONIBLES" />
+                    <Label fx:id="statSalles" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="Actives" />
+                </VBox>
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="OFFRES D'ABONNEMENT" />
+                    <Label fx:id="statOffres" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="Disponibles" />
+                </VBox>
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="SESSIONS A VENIR" />
+                    <Label fx:id="statSessions" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="Planifiees" />
+                </VBox>
+            </HBox>
+
+            <!-- Search + Sort bar -->
+            <HBox spacing="10" styleClass="toolbar-card" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="Rechercher une salle..."
+                           styleClass="sess-field" HBox.hgrow="ALWAYS" />
+                <ComboBox fx:id="sortCombo" styleClass="sess-field" promptText="Trier par..." />
+                <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="🔄 Actualiser" />
+            </HBox>
+
+            <Label fx:id="countLabel" styleClass="saas-stat-label" text="0 salle(s)" />
+
+            <!-- Grid 3 columns -->
+            <FlowPane fx:id="sallesGrid" hgap="20" vgap="20" prefWrapLength="1100">
+                <padding><Insets bottom="24" left="2" right="2" top="4"/></padding>
+            </FlowPane>
+
+        </VBox>
+    </ScrollPane>
+
+</StackPane>
