@@ -37,6 +37,8 @@ public class MesCommandesController {
 
     private static final DateTimeFormatter ISO_DT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter AFFICHAGE_DATE_CLIENT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.FRENCH);
 
     @FXML
     private VBox ordersContainer;
@@ -226,13 +228,22 @@ public class MesCommandesController {
 
     private static boolean commandeCorrespondRecherche(commandes c, String q) {
         String bloc = String.join(" ",
-                String.valueOf(c.getId_commande()),
                 c.getStatut_commande() != null ? c.getStatut_commande() : "",
                 c.getMode_paiement_commande() != null ? c.getMode_paiement_commande() : "",
                 c.getAdresse_commande() != null ? c.getAdresse_commande() : "",
                 c.getDate_commande() != null ? c.getDate_commande() : "",
+                formaterDatePourTitre(c),
                 String.format(Locale.FRENCH, "%.2f", c.getTotal_commande()));
         return TexteRecherche.correspond(bloc, q);
+    }
+
+    /** Titre sans identifiant technique (recherche inclut cette forme de date). */
+    private static String formaterDatePourTitre(commandes c) {
+        LocalDateTime dt = parseDateCommande(c);
+        if (LocalDateTime.MIN.equals(dt)) {
+            return c.getDate_commande() != null ? c.getDate_commande() : "";
+        }
+        return dt.format(AFFICHAGE_DATE_CLIENT);
     }
 
     private static Comparator<commandes> comparateurTriMesCommandes(String libelle) {
@@ -281,7 +292,7 @@ public class MesCommandesController {
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
 
-        Label idLbl = new Label("Commande #" + c.getId_commande());
+        Label idLbl = new Label("Commande du " + formaterDatePourTitre(c));
         idLbl.getStyleClass().add("saas-card-title");
 
         Region spacer = new Region();
