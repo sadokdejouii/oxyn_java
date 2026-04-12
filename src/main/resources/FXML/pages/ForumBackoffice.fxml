@@ -104,7 +104,7 @@
             <Label styleClass="edit-panel-title" text="Edit Post" />
             <TextArea fx:id="postEditContent" wrapText="true" prefRowCount="4" promptText="Post content..." styleClass="edit-textarea" />
             <HBox spacing="12" alignment="CENTER_LEFT">
-                <Button fx:id="postEditFileBtn" text="📎 Attach/Replace File" styleClass="ghost-toolbar-btn" onAction="#handlePostEditFile" />
+                <Button fx:id="postEditFileBtn" text="📎 Attach/Replace File" styleClass="primary-toolbar-btn" onAction="#handlePostEditFile" />
                 <Label fx:id="postEditFileLabel" text="No file selected" styleClass="file-label" />
             </HBox>
             <HBox spacing="12" alignment="CENTER_RIGHT">
