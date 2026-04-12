@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/admin-commandes.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AdminCommandesController">
+    <VBox spacing="22" styleClass="page-root admin-commandes-root">
+        <padding>
+            <Insets bottom="24" left="8" right="8" top="8" />
+        </padding>
+
+        <HBox alignment="TOP_LEFT" spacing="20" styleClass="saas-stat-row">
+            <VBox spacing="6" styleClass="saas-stat-card">
+                <Label styleClass="saas-stat-label" text="Commandes listées" />
+                <Label fx:id="countLabel" styleClass="saas-stat-value" text="0" />
+            </VBox>
+            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                <Label styleClass="page-hero-title" text="Commandes clients" />
+                <Label styleClass="page-hero-sub" text="Vue consolidée de toutes les commandes. Aucun identifiant interne n’est affiché. Les commandes annulées depuis au moins 7 jours sont retirées automatiquement de la base ; vous pouvez aussi supprimer manuellement une commande annulée récente." wrapText="true" />
+            </VBox>
+        </HBox>
+
+        <Label fx:id="purgeInfoLabel" managed="false" styleClass="saas-stat-hint" visible="false" wrapText="true" />
+
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="toolbar-card">
+            <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser" />
+            <Region prefWidth="12" />
+            <Label styleClass="product-form-field-label" text="Recherche" />
+            <TextField fx:id="rechercheCommandes" onAction="#handleRechercheOuTri" prefWidth="220" promptText="Client, statut, adresse…" styleClass="topbar-search" HBox.hgrow="SOMETIMES" />
+            <Label styleClass="product-form-field-label" text="Trier par" />
+            <ComboBox fx:id="triCommandes" onAction="#handleRechercheOuTri" prefWidth="220" />
+            <Region HBox.hgrow="ALWAYS" />
+        </HBox>
+
+        <VBox spacing="12" styleClass="saas-chart-card admin-orders-detail-card">
+            <Label styleClass="saas-card-title" text="Détail des commandes" />
+            <ListView fx:id="listCommandes" minHeight="420" prefHeight="560" styleClass="list-view admin-orders-list" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </VBox>
+</ScrollPane>

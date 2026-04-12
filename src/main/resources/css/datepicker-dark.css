@@ -1,0 +1,107 @@
+/* ================================================================
+   DATEPICKER-DARK.CSS — OXYN
+   Applied directly to the DatePicker popup scene.
+   ================================================================ */
+
+.date-picker-popup {
+    -fx-background-color: #0f1e36;
+    -fx-border-color: rgba(79,195,247,0.4);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.65), 22, 0, 0, 6);
+}
+
+/* ── Navigation bar ── */
+.date-picker-popup .month-year-pane {
+    -fx-background-color: #0a1628;
+    -fx-padding: 6px 10px;
+}
+
+.date-picker-popup .spinner {
+    -fx-background-color: transparent;
+}
+
+.date-picker-popup .spinner > .button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.date-picker-popup .spinner > .button:hover {
+    -fx-background-color: rgba(79,195,247,0.15);
+    -fx-background-radius: 4px;
+}
+
+.date-picker-popup .spinner > .button > .left-arrow,
+.date-picker-popup .spinner > .button > .right-arrow {
+    -fx-background-color: #4FC3F7;
+}
+
+.date-picker-popup .spinner > .label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* ── Day-of-week headers ── */
+.date-picker-popup .day-name-cell {
+    -fx-text-fill: #8a9bb5;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+/* ── Day cells ── */
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-alignment: center;
+    -fx-background-radius: 6px;
+    -fx-padding: 4px;
+}
+
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: #1e3a5f;
+    -fx-text-fill: #ffffff;
+}
+
+/* ── Today ── */
+.date-picker-popup .today {
+    -fx-border-color: #38bdf8;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: #38bdf8;
+    -fx-font-weight: bold;
+}
+
+/* ── Selected ── */
+.date-picker-popup .selected {
+    -fx-background-color: #0ea5e9;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+}
+
+.date-picker-popup .selected:hover {
+    -fx-background-color: #0284c7;
+}
+
+/* ── Other month ── */
+.date-picker-popup .other-month {
+    -fx-text-fill: #8a9bb5;
+    -fx-opacity: 0.55;
+}
+
+/* ── Disabled / past dates ── */
+.date-picker-popup .day-cell:disabled {
+    -fx-text-fill: #8a9bb5;
+    -fx-opacity: 0.3;
+    -fx-background-color: transparent;
+}
+
+/* ── Week numbers ── */
+.date-picker-popup .week-number-cell {
+    -fx-text-fill: rgba(79,195,247,0.45);
+    -fx-font-size: 10px;
+}

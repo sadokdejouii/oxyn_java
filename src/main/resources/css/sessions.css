@@ -1,0 +1,637 @@
+/* ================================================================
+   SESSIONS.CSS — OXYN  |  Gestion des Sessions
+   Only defines classes NOT already in dashboard-saas.css
+   ================================================================ */
+
+/* ── FILTER TOGGLES ────────────────────────────────────────────── */
+.sess-filter-btn {
+    -fx-background-color: rgba(255,255,255,0.05);
+    -fx-text-fill: rgba(160,180,204,0.85);
+    -fx-font-size: 12px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(79,195,247,0.2);
+    -fx-border-width: 1px;
+    -fx-padding: 6px 14px;
+    -fx-cursor: hand;
+}
+
+.sess-filter-btn:hover {
+    -fx-background-color: rgba(79,195,247,0.12);
+    -fx-text-fill: #ffffff;
+}
+
+.sess-filter-btn:selected {
+    -fx-background-color: rgba(0,191,255,0.22);
+    -fx-text-fill: #00BFFF;
+    -fx-border-color: rgba(0,191,255,0.5);
+    -fx-font-weight: bold;
+}
+
+/* ── SESSION CARD ──────────────────────────────────────────────── */
+.sess-card {
+    -fx-background-color:
+        linear-gradient(from 0% 0% to 0% 40%, rgba(255,255,255,0.06) 0%, transparent 100%),
+        rgba(13,27,62,0.75);
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: rgba(79,195,247,0.22);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 14, 0, 0, 4);
+}
+
+.sess-card:hover {
+    -fx-border-color: rgba(0,191,255,0.45);
+    -fx-effect: dropshadow(gaussian, rgba(0,191,255,0.18), 20, 0, 0, 6);
+}
+
+/* ── CARD HEADER ───────────────────────────────────────────────── */
+.sess-card-header {
+    -fx-background-color: rgba(0,0,0,0.25);
+    -fx-background-radius: 14px 14px 0px 0px;
+    -fx-padding: 14px 16px 12px 16px;
+    -fx-border-color: transparent transparent rgba(79,195,247,0.15) transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.sess-card-type {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e6edf3;
+}
+
+/* ── BADGES ────────────────────────────────────────────────────── */
+.sess-badge-planifiee {
+    -fx-background-color: rgba(35,134,54,0.25);
+    -fx-text-fill: #3fb950;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: rgba(63,185,80,0.5);
+    -fx-border-width: 1px;
+    -fx-padding: 3px 10px;
+}
+
+.sess-badge-terminee {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-text-fill: rgba(160,180,204,0.7);
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: rgba(160,180,204,0.25);
+    -fx-border-width: 1px;
+    -fx-padding: 3px 10px;
+}
+
+.sess-badge-inactive {
+    -fx-background-color: rgba(218,54,51,0.2);
+    -fx-text-fill: #f85149;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: rgba(248,81,73,0.45);
+    -fx-border-width: 1px;
+    -fx-padding: 3px 10px;
+}
+
+/* ── CARD BODY ─────────────────────────────────────────────────── */
+.sess-card-body {
+    -fx-padding: 12px 16px 8px 16px;
+}
+
+.sess-card-info {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(200,214,230,0.9);
+}
+
+.sess-card-notes {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(160,180,204,0.65);
+    -fx-font-style: italic;
+    -fx-padding: 4px 0 0 0;
+}
+
+/* ── CARD ACTIONS ──────────────────────────────────────────────── */
+.sess-card-actions {
+    -fx-padding: 10px 16px 14px 16px;
+    -fx-border-color: rgba(79,195,247,0.12) transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.sess-btn-edit {
+    -fx-background-color: rgba(0,191,255,0.12);
+    -fx-text-fill: #4FC3F7;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 7px;
+    -fx-border-radius: 7px;
+    -fx-border-color: rgba(79,195,247,0.35);
+    -fx-border-width: 1px;
+    -fx-padding: 5px 14px;
+    -fx-cursor: hand;
+}
+
+.sess-btn-edit:hover {
+    -fx-background-color: rgba(0,191,255,0.25);
+    -fx-text-fill: #ffffff;
+}
+
+.sess-btn-delete {
+    -fx-background-color: rgba(218,54,51,0.12);
+    -fx-text-fill: #f85149;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 7px;
+    -fx-border-radius: 7px;
+    -fx-border-color: rgba(248,81,73,0.35);
+    -fx-border-width: 1px;
+    -fx-padding: 5px 14px;
+    -fx-cursor: hand;
+}
+
+.sess-btn-delete:hover {
+    -fx-background-color: rgba(218,54,51,0.3);
+    -fx-text-fill: #ffffff;
+}
+
+/* ── OVERLAY ───────────────────────────────────────────────────── */
+.sess-overlay {
+    -fx-background-color: rgba(1,4,9,0.72);
+}
+
+/* ── DIALOG CARD ───────────────────────────────────────────────── */
+.sess-dialog-card {
+    -fx-background-color:
+        linear-gradient(from 0% 0% to 0% 30%, rgba(255,255,255,0.07) 0%, transparent 100%),
+        #161b22;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-color: rgba(79,195,247,0.3);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.65), 40, 0, 0, 12);
+}
+
+.sess-dialog-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e6edf3;
+    -fx-padding: 0 0 6px 0;
+}
+
+.sess-dialog-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.sess-dialog-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ── FORM FIELDS ───────────────────────────────────────────────── */
+.sess-lbl {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(160,180,204,0.85);
+}
+
+.sess-field {
+    -fx-background-color: #0d1b3e;
+    -fx-border-color: rgba(79,195,247,0.25);
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 13px;
+    -fx-text-fill: #ffffff;
+    -fx-text-inner-color: #ffffff;
+    -fx-prompt-text-fill: rgba(160,180,204,0.5);
+    -fx-highlight-fill: rgba(0,191,255,0.3);
+    -fx-highlight-text-fill: #ffffff;
+}
+
+.sess-field .text {
+    -fx-fill: #ffffff;
+}
+
+/* TextArea: kill the white inner content pane */
+.sess-field .content {
+    -fx-background-color: #0d1b3e;
+}
+
+.sess-field .scroll-pane {
+    -fx-background-color: #0d1b3e;
+    -fx-border-color: transparent;
+}
+
+.sess-field .scroll-pane .viewport {
+    -fx-background-color: #0d1b3e;
+}
+
+.sess-field:focused {
+    -fx-border-color: rgba(0,191,255,0.6);
+    -fx-effect: dropshadow(gaussian, rgba(0,191,255,0.15), 6, 0, 0, 0);
+}
+
+.sess-error {
+    -fx-text-fill: #f85149;
+    -fx-font-size: 12px;
+}
+
+/* ── CONFIRM DIALOG ────────────────────────────────────────────── */
+.sess-confirm-card {
+    -fx-background-color: #161b22;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-color: rgba(248,81,73,0.5);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(218,54,51,0.3), 30, 0, 0, 8);
+}
+
+.sess-confirm-icon {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f85149;
+}
+
+.sess-confirm-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e6edf3;
+}
+
+.sess-btn-danger {
+    -fx-background-color: rgba(218,54,51,0.85);
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #f85149;
+    -fx-border-width: 1px;
+    -fx-padding: 8px 18px;
+    -fx-cursor: hand;
+}
+
+.sess-btn-danger:hover {
+    -fx-background-color: #da3633;
+}
+
+/* ── DIALOG HEADER ─────────────────────────────────────────────── */
+.sess-dialog-header {
+    -fx-background-color:
+        linear-gradient(to right, rgba(0,191,255,0.18) 0%, rgba(56,139,253,0.08) 100%),
+        rgba(13,27,62,0.9);
+    -fx-background-radius: 16px 16px 0px 0px;
+    -fx-border-color: transparent transparent rgba(79,195,247,0.2) transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.sess-dialog-header-icon {
+    -fx-font-size: 28px;
+}
+
+.sess-dialog-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(160,180,204,0.7);
+}
+
+/* ── DIALOG BODY ───────────────────────────────────────────────── */
+.sess-dialog-body {
+    -fx-background-color: transparent;
+}
+
+/* ── SECTION HEADERS ───────────────────────────────────────────── */
+.sess-section-icon {
+    -fx-font-size: 14px;
+}
+
+.sess-section-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4FC3F7;
+    -fx-letter-spacing: 0.05em;
+}
+
+.sess-section-divider {
+    -fx-background-color: rgba(79,195,247,0.15);
+}
+
+/* ── DIALOG FOOTER ─────────────────────────────────────────────── */
+.sess-dialog-footer {
+    -fx-background-color: rgba(0,0,0,0.2);
+    -fx-background-radius: 0px 0px 16px 16px;
+    -fx-border-color: rgba(79,195,247,0.15) transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* ── SAVE / CANCEL BUTTONS ─────────────────────────────────────── */
+.sess-btn-save {
+    -fx-background-color: linear-gradient(to bottom, rgba(0,191,255,0.35) 0%, rgba(0,153,204,0.5) 100%);
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: rgba(79,195,247,0.55);
+    -fx-border-width: 1px;
+    -fx-padding: 10px 22px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,191,255,0.25), 10, 0, 0, 3);
+}
+
+.sess-btn-save:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(79,195,247,0.45) 0%, rgba(0,191,255,0.55) 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0,191,255,0.4), 14, 0, 0, 4);
+}
+
+.sess-btn-cancel {
+    -fx-background-color: rgba(255,255,255,0.05);
+    -fx-text-fill: rgba(160,180,204,0.9);
+    -fx-font-size: 13px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: rgba(79,195,247,0.2);
+    -fx-border-width: 1px;
+    -fx-padding: 10px 18px;
+    -fx-cursor: hand;
+}
+
+.sess-btn-cancel:hover {
+    -fx-background-color: rgba(255,255,255,0.1);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(79,195,247,0.4);
+}
+
+/* ── DARK DATE PICKER ──────────────────────────────────────────── */
+
+/* Main field */
+.sess-field.date-picker {
+    -fx-background-color: #0d1b3e;
+    -fx-text-fill: #ffffff;
+}
+
+.sess-field.date-picker .text-field {
+    -fx-background-color: #0d1b3e;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: rgba(160,180,204,0.5);
+    -fx-border-color: transparent;
+    -fx-padding: 6px 8px;
+}
+
+.sess-field.date-picker .text-field .text {
+    -fx-fill: #ffffff;
+}
+
+/* Arrow button */
+.sess-field.date-picker .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.sess-field.date-picker .arrow-button .arrow {
+    -fx-background-color: #4FC3F7;
+}
+
+/* Popup calendar container */
+.sess-field.date-picker .date-picker-popup {
+    -fx-background-color: #0d1b3e;
+    -fx-border-color: rgba(79,195,247,0.35);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 20, 0, 0, 6);
+}
+
+/* Month/year header */
+.sess-field.date-picker .date-picker-popup > * > .spinner {
+    -fx-background-color: #0a1628;
+    -fx-border-color: transparent transparent rgba(79,195,247,0.2) transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 6px;
+}
+
+.sess-field.date-picker .date-picker-popup > * > .spinner .button {
+    -fx-background-color: transparent;
+}
+
+.sess-field.date-picker .date-picker-popup > * > .spinner .button .left-arrow,
+.sess-field.date-picker .date-picker-popup > * > .spinner .button .right-arrow {
+    -fx-background-color: #4FC3F7;
+}
+
+.sess-field.date-picker .date-picker-popup > * > .spinner .label {
+    -fx-text-fill: #e6edf3;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* Day-of-week headers */
+.sess-field.date-picker .date-picker-popup > * > .grid .day-name-cell {
+    -fx-text-fill: rgba(79,195,247,0.8);
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* Day cells */
+.sess-field.date-picker .date-picker-popup > * > .grid .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c9d1d9;
+    -fx-font-size: 12px;
+    -fx-background-radius: 6px;
+}
+
+.sess-field.date-picker .date-picker-popup > * > .grid .day-cell:hover {
+    -fx-background-color: rgba(0,191,255,0.18);
+    -fx-text-fill: #ffffff;
+}
+
+/* Today */
+.sess-field.date-picker .date-picker-popup > * > .grid .today {
+    -fx-border-color: rgba(0,191,255,0.6);
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: #00BFFF;
+    -fx-font-weight: bold;
+}
+
+/* Selected date */
+.sess-field.date-picker .date-picker-popup > * > .grid .selected {
+    -fx-background-color: rgba(0,191,255,0.35);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+/* Past dates — disabled/greyed out */
+.sess-field.date-picker .date-picker-popup > * > .grid .day-cell:disabled {
+    -fx-text-fill: rgba(160,180,204,0.25);
+    -fx-background-color: transparent;
+    -fx-opacity: 0.4;
+}
+
+/* Other month days */
+.sess-field.date-picker .date-picker-popup > * > .grid .other-month {
+    -fx-text-fill: rgba(160,180,204,0.3);
+}
+
+/* ── DATE PICKER POPUP — global selectors (popup is a separate scene) ── */
+
+.date-picker-popup {
+    -fx-background-color: #0f1e36;
+    -fx-border-color: rgba(79,195,247,0.35);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 20, 0, 0, 6);
+}
+
+/* Month/year navigation bar */
+.date-picker-popup .month-year-pane {
+    -fx-background-color: #0a1628;
+    -fx-padding: 6px 10px;
+    -fx-border-color: transparent transparent rgba(79,195,247,0.2) transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.date-picker-popup .spinner {
+    -fx-background-color: transparent;
+}
+
+.date-picker-popup .spinner > .button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.date-picker-popup .spinner > .button:hover {
+    -fx-background-color: rgba(79,195,247,0.15);
+    -fx-background-radius: 4px;
+}
+
+.date-picker-popup .spinner > .button > .left-arrow,
+.date-picker-popup .spinner > .button > .right-arrow {
+    -fx-background-color: #4FC3F7;
+}
+
+.date-picker-popup .spinner > .label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* Day-of-week headers (Lun, Mar…) */
+.date-picker-popup .day-name-cell {
+    -fx-text-fill: #8a9bb5;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+/* All day cells */
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-alignment: center;
+    -fx-background-radius: 6px;
+    -fx-padding: 4px;
+}
+
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: #1e3a5f;
+    -fx-text-fill: #ffffff;
+}
+
+/* Today */
+.date-picker-popup .today {
+    -fx-border-color: #38bdf8;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: #38bdf8;
+    -fx-font-weight: bold;
+}
+
+/* Selected */
+.date-picker-popup .selected {
+    -fx-background-color: #0ea5e9;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+}
+
+.date-picker-popup .selected:hover {
+    -fx-background-color: #0284c7;
+}
+
+/* Other month days */
+.date-picker-popup .other-month {
+    -fx-text-fill: #8a9bb5;
+    -fx-opacity: 0.6;
+}
+
+/* Past dates — disabled */
+.date-picker-popup .day-cell:disabled {
+    -fx-text-fill: #8a9bb5;
+    -fx-opacity: 0.35;
+    -fx-background-color: transparent;
+}
+
+/* Week number column */
+.date-picker-popup .week-number-cell {
+    -fx-text-fill: rgba(79,195,247,0.5);
+    -fx-font-size: 10px;
+}
+
+/* ── SUBSCRIPTION CARD BUTTONS — compact to fit 4 buttons ─── */
+.sess-card-actions .sess-btn-edit,
+.sess-card-actions .sess-btn-delete {
+    -fx-font-size: 11px;
+    -fx-padding: 5px 10px;
+}
+
+/* ── COMBOBOX POPUP — list cells dark theme ────────────────── */
+.sess-field .list-cell {
+    -fx-background-color: #0d1b3e;
+    -fx-text-fill: #e6edf3;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 12px;
+}
+
+.sess-field .list-cell:hover {
+    -fx-background-color: rgba(0,191,255,0.15);
+    -fx-text-fill: #ffffff;
+}
+
+.sess-field .list-cell:selected {
+    -fx-background-color: rgba(0,191,255,0.3);
+    -fx-text-fill: #ffffff;
+}
+
+/* Target the popup container itself */
+.combo-box-popup .list-view {
+    -fx-background-color: #0d1b3e;
+    -fx-border-color: rgba(79,195,247,0.4);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 12, 0, 0, 4);
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: #0d1b3e;
+    -fx-text-fill: #e6edf3;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 12px;
+}
+
+.combo-box-popup .list-view .list-cell:filled:hover {
+    -fx-background-color: rgba(0,191,255,0.18);
+    -fx-text-fill: #ffffff;
+}
+
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: rgba(0,191,255,0.35);
+    -fx-text-fill: #ffffff;
+}
+
+.combo-box-popup .list-view .list-cell:empty {
+    -fx-background-color: #0d1b3e;
+}

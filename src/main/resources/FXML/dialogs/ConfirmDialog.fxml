@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="dialogRoot" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.dialog.ConfirmDialogController" styleClass="app-dialog-root" stylesheets="@../../css/dialogs.css">
+    <top>
+        <HBox styleClass="app-dialog-header" alignment="CENTER_LEFT" spacing="12">
+            <Label fx:id="titleLabel" styleClass="app-dialog-title" text="Confirmer" HBox.hgrow="ALWAYS" />
+            <Button focusTraversable="false" onAction="#handleCancel" styleClass="app-dialog-close" text="✕" />
+        </HBox>
+    </top>
+    <center>
+        <VBox styleClass="app-dialog-body" spacing="8">
+            <Label fx:id="messageLabel" styleClass="app-dialog-message" wrapText="true" text="" />
+        </VBox>
+    </center>
+    <bottom>
+        <HBox styleClass="app-dialog-footer" alignment="CENTER_RIGHT" spacing="10">
+            <Button onAction="#handleCancel" styleClass="dialog-btn-ghost" text="Annuler" />
+            <Button fx:id="confirmButton" defaultButton="true" onAction="#handleConfirm" styleClass="dialog-btn-primary" text="Confirmer" />
+        </HBox>
+    </bottom>
+</BorderPane>
