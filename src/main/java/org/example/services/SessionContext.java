@@ -63,6 +63,7 @@ public final class SessionContext {
         this.displayName = Objects.requireNonNullElse(displayName, "User").trim();
         if (this.displayName.isEmpty()) {
             this.displayName = "User";
+        }
         this.currentUser = null;
         String n = Objects.requireNonNullElse(displayName, "User").trim();
         if (n.isEmpty()) {
@@ -109,6 +110,8 @@ public final class SessionContext {
 
     public int getClientDatabaseId() {
         return clientDatabaseId;
+    }
+
     public boolean isEncadrant() {
         return role == UserRole.ENCADRANT;
     }

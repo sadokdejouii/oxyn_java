@@ -394,9 +394,10 @@ public class MainLayoutController implements Initializable {
         navigate(PAGE_ADMIN_COMMANDES, "Commandes", adminBoutiqueBtn);
     }
 
+    @FXML
     private void handleAdminUsers() {
-    navigate(PAGE_USERS, "Utilisateurs", adminUsersBtn);  // ✅ nouveau bouton
-}
+        navigate(PAGE_USERS, "Utilisateurs", adminUsersBtn);
+    }
 
     @FXML
     private void handleAdminForum() {
