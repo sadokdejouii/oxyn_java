@@ -6,9 +6,11 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -18,12 +20,23 @@ import org.example.entities.commandes;
 import org.example.services.CommandesService;
 import org.example.services.SessionContext;
 import org.example.utils.AdresseCommandeValidator;
+import org.example.utils.TexteRecherche;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class MesCommandesController {
+
+    private static final DateTimeFormatter ISO_DT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @FXML
     private VBox ordersContainer;
@@ -34,9 +47,17 @@ public class MesCommandesController {
     @FXML
     private TextArea editAdresseArea;
 
+    @FXML
+    private TextField rechercheMesCommandes;
+
+    @FXML
+    private ComboBox<String> triMesCommandes;
+
     private MainLayoutController mainLayoutController;
 
     private final CommandesService commandesService = new CommandesService();
+
+    private final List<commandes> toutesMesCommandes = new ArrayList<>();
 
     /** Commande en cours d’édition d’adresse (null si panneau fermé). */
     private commandes commandeEditionAdresse;
@@ -49,6 +70,18 @@ public class MesCommandesController {
     public void initialize() {
         if (editAdresseArea != null) {
             AdresseCommandeValidator.appliquerLimiteLongueur(editAdresseArea);
+        }
+        if (triMesCommandes != null) {
+            triMesCommandes.getItems().setAll(
+                    "Date (récent d’abord)",
+                    "Date (ancien d’abord)",
+                    "Total (croissant)",
+                    "Total (décroissant)",
+                    "Statut (A → Z)");
+            triMesCommandes.getSelectionModel().selectFirst();
+        }
+        if (rechercheMesCommandes != null) {
+            rechercheMesCommandes.textProperty().addListener((o, a, b) -> reafficherListe());
         }
         refresh();
     }
@@ -63,7 +96,15 @@ public class MesCommandesController {
     @FXML
     private void handleRefresh() {
         fermerPanneauEdition();
+        if (rechercheMesCommandes != null) {
+            rechercheMesCommandes.clear();
+        }
         refresh();
+    }
+
+    @FXML
+    private void handleRechercheOuTriMesCommandes() {
+        reafficherListe();
     }
 
     @FXML
@@ -125,31 +166,111 @@ public class MesCommandesController {
     }
 
     private void refresh() {
-        ordersContainer.getChildren().clear();
         int clientId = SessionContext.getInstance().getClientDatabaseId();
         try {
-            List<commandes> liste = commandesService.afficherParClient(clientId);
-            if (liste.isEmpty()) {
-                Label empty = new Label("Vous n’avez pas encore passé de commande.");
-                empty.getStyleClass().add("page-hero-sub");
-                empty.setWrapText(true);
-                ordersContainer.getChildren().add(empty);
-                return;
+            toutesMesCommandes.clear();
+            toutesMesCommandes.addAll(commandesService.afficherParClient(clientId));
+            if (triMesCommandes != null && triMesCommandes.getSelectionModel().getSelectedIndex() < 0) {
+                triMesCommandes.getSelectionModel().selectFirst();
             }
-            for (commandes c : liste) {
-                try {
-                    ordersContainer.getChildren().add(buildOrderCard(c));
-                } catch (SQLException ex) {
-                    error("Erreur lors du chargement d’une commande : " + ex.getMessage());
-                    break;
-                }
-            }
+            reafficherListe();
         } catch (SQLException e) {
+            ordersContainer.getChildren().clear();
             Label err = new Label("Impossible de charger les commandes : " + e.getMessage());
             err.setWrapText(true);
             err.setStyle("-fx-text-fill: #c62828;");
             ordersContainer.getChildren().add(err);
         }
+    }
+
+    private void reafficherListe() {
+        ordersContainer.getChildren().clear();
+        if (toutesMesCommandes.isEmpty()) {
+            Label empty = new Label("Vous n’avez pas encore passé de commande.");
+            empty.getStyleClass().add("page-hero-sub");
+            empty.setWrapText(true);
+            ordersContainer.getChildren().add(empty);
+            return;
+        }
+
+        String q = rechercheMesCommandes != null ? rechercheMesCommandes.getText() : "";
+        String tri = triMesCommandes != null && triMesCommandes.getValue() != null
+                ? triMesCommandes.getValue()
+                : "Date (récent d’abord)";
+
+        List<commandes> vue = new ArrayList<>();
+        for (commandes c : toutesMesCommandes) {
+            if (commandeCorrespondRecherche(c, q)) {
+                vue.add(c);
+            }
+        }
+        vue.sort(comparateurTriMesCommandes(tri));
+
+        if (vue.isEmpty()) {
+            Label rien = new Label("Aucune commande ne correspond à votre recherche.");
+            rien.getStyleClass().add("page-hero-sub");
+            rien.setWrapText(true);
+            ordersContainer.getChildren().add(rien);
+            return;
+        }
+
+        for (commandes c : vue) {
+            try {
+                ordersContainer.getChildren().add(buildOrderCard(c));
+            } catch (SQLException ex) {
+                error("Erreur lors du chargement d’une commande : " + ex.getMessage());
+                break;
+            }
+        }
+    }
+
+    private static boolean commandeCorrespondRecherche(commandes c, String q) {
+        String bloc = String.join(" ",
+                String.valueOf(c.getId_commande()),
+                c.getStatut_commande() != null ? c.getStatut_commande() : "",
+                c.getMode_paiement_commande() != null ? c.getMode_paiement_commande() : "",
+                c.getAdresse_commande() != null ? c.getAdresse_commande() : "",
+                c.getDate_commande() != null ? c.getDate_commande() : "",
+                String.format(Locale.FRENCH, "%.2f", c.getTotal_commande()));
+        return TexteRecherche.correspond(bloc, q);
+    }
+
+    private static Comparator<commandes> comparateurTriMesCommandes(String libelle) {
+        Comparator<commandes> parDateDesc = Comparator.comparing(MesCommandesController::parseDateCommande).reversed();
+        Comparator<commandes> parDateAsc = Comparator.comparing(MesCommandesController::parseDateCommande);
+        if (libelle == null) {
+            return parDateDesc;
+        }
+        return switch (libelle) {
+            case "Date (ancien d’abord)" -> parDateAsc;
+            case "Total (croissant)" -> Comparator.comparingDouble(commandes::getTotal_commande);
+            case "Total (décroissant)" -> Comparator.comparingDouble(commandes::getTotal_commande).reversed();
+            case "Statut (A → Z)" -> Comparator.comparing(
+                    c -> c.getStatut_commande() != null ? c.getStatut_commande().toLowerCase(Locale.ROOT) : "",
+                    String.CASE_INSENSITIVE_ORDER);
+            default -> parDateDesc;
+        };
+    }
+
+    private static LocalDateTime parseDateCommande(commandes c) {
+        String raw = c.getDate_commande();
+        if (raw == null || raw.isBlank()) {
+            return LocalDateTime.MIN;
+        }
+        String s = raw.trim();
+        try {
+            return LocalDateTime.parse(s, ISO_DT);
+        } catch (DateTimeParseException ignored) {
+        }
+        try {
+            return LocalDateTime.parse(s);
+        } catch (DateTimeParseException ignored) {
+        }
+        try {
+            return LocalDate.parse(s).atStartOfDay();
+        } catch (DateTimeParseException ignored) {
+        }
+        return LocalDateTime.MIN;
     }
 
     private VBox buildOrderCard(commandes c) throws SQLException {

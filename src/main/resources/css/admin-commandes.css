@@ -10,6 +10,7 @@
     -fx-border-color: rgba(79, 195, 247, 0.18);
 }
 
+/* Fond bleu sur toute la chaîne ListView (évite le blanc Modena sur cellules vides / flow) */
 .list-view.admin-orders-list {
     -fx-background-color: #0D1B3E;
     -fx-control-inner-background: #0D1B3E;
@@ -20,13 +21,25 @@
     -fx-padding: 8 6 8 6;
 }
 
+.list-view.admin-orders-list .virtual-flow {
+    -fx-background-color: #0D1B3E;
+}
+
+.list-view.admin-orders-list .clip-container {
+    -fx-background-color: #0D1B3E;
+}
+
 .list-view.admin-orders-list:focused {
     -fx-border-color: rgba(79, 195, 247, 0.42);
 }
 
 .list-view.admin-orders-list .list-cell {
-    -fx-background-color: transparent;
+    -fx-background-color: #0D1B3E;
     -fx-padding: 8 6 8 6;
+}
+
+.list-view.admin-orders-list .list-cell:empty {
+    -fx-background-color: #0D1B3E;
 }
 
 .list-view.admin-orders-list .list-cell:filled:selected,
@@ -95,4 +108,21 @@
 .admin-order-address {
     -fx-font-size: 12px;
     -fx-text-fill: rgba(200, 210, 225, 0.92);
+}
+
+/* Texte lisible sur les cartes (évite gris trop clair sur fond pâle) */
+.admin-order-list-card .label {
+    -fx-text-fill: rgba(232, 238, 247, 0.95);
+}
+
+.admin-order-list-card .saas-stat-hint {
+    -fx-text-fill: rgba(200, 210, 225, 0.92);
+}
+
+.admin-order-list-card .saas-stat-label {
+    -fx-text-fill: rgba(160, 180, 204, 0.9);
+}
+
+.admin-order-list-card .saas-stat-value {
+    -fx-text-fill: #00BFFF;
 }

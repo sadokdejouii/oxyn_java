@@ -379,3 +379,23 @@
     -fx-border-radius: 16px;
     -fx-border-width: 1px;
 }
+
+/* Boutique admin — ListView produits (fond bleu cohérent) */
+.list-view.boutique-admin-pro-list {
+    -fx-background-color: #0D1B3E;
+    -fx-control-inner-background: #0D1B3E;
+    -fx-border-color: rgba(79, 195, 247, 0.22);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.list-view.boutique-admin-pro-list .virtual-flow,
+.list-view.boutique-admin-pro-list .list-cell,
+.list-view.boutique-admin-pro-list .list-cell:empty {
+    -fx-background-color: #0D1B3E;
+}
+
+.list-view.boutique-admin-pro-list .list-cell:filled:selected,
+.list-view.boutique-admin-pro-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.15);
+}

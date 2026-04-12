@@ -2,8 +2,10 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -19,8 +21,12 @@
             <Label styleClass="page-hero-sub" text="Historique de vos achats. Vous pouvez annuler une commande validée dans les 24 heures suivant la validation." wrapText="true" />
         </VBox>
 
-        <HBox spacing="10" styleClass="toolbar-card">
+        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="toolbar-card">
             <Button onAction="#handleRetourBoutique" styleClass="ghost-toolbar-btn" text="← Retour à la boutique" />
+            <Label styleClass="product-form-field-label" text="Recherche" />
+            <TextField fx:id="rechercheMesCommandes" onAction="#handleRechercheOuTriMesCommandes" prefWidth="200" promptText="Statut, adresse, paiement…" styleClass="topbar-search" HBox.hgrow="SOMETIMES" />
+            <Label styleClass="product-form-field-label" text="Trier" />
+            <ComboBox fx:id="triMesCommandes" onAction="#handleRechercheOuTriMesCommandes" prefWidth="200" />
             <HBox HBox.hgrow="ALWAYS" />
             <Button onAction="#handleRefresh" styleClass="primary-toolbar-btn" text="Actualiser" />
         </HBox>
