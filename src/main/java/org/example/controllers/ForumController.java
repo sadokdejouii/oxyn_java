@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -341,7 +342,7 @@ public class ForumController implements Initializable {
         VBox card = new VBox(0);
         card.getStyleClass().add("post-card");
         card.setPrefWidth(isGridView ? 400 : Double.MAX_VALUE);
-        card.setMinHeight(300);
+        // Removed fixed minHeight to allow flexible resizing when comments are toggled
 
         // Header with user info and badge
         HBox headerBox = new HBox(12);
@@ -389,24 +390,56 @@ public class ForumController implements Initializable {
         contentLabel.getStyleClass().add("post-content");
         contentLabel.setPadding(new Insets(0, 16, 12, 16));
 
-        // Media
+        // Media support - check for file path or BLOB
         VBox mediaBox = new VBox();
-        if (post.getMedia_url_post() != null && !post.getMedia_url_post().isEmpty()) {
-            VBox mediaContainer = new VBox();
-            mediaContainer.getStyleClass().add("post-media-container");
-            mediaContainer.setPrefHeight(180);
-            mediaContainer.setAlignment(javafx.geometry.Pos.CENTER);
-            mediaContainer.setPadding(new Insets(20));
+        String mediaUrl = post.getMedia_url_post();
+        byte[] mediaBlob = post.getMedia_blob_post();
+        String mediaType = post.getMedia_type_post();
 
-            Label mediaLabel = new Label("📹 Média");
-            mediaLabel.getStyleClass().add("post-media-label");
+        System.out.println("Post ID: " + post.getId_post() + " - URL: " + mediaUrl + " - BLOB size: " + (mediaBlob != null ? mediaBlob.length : 0) + " - Type: " + mediaType);
 
-            Hyperlink youtubeLink = new Hyperlink("Regarder sur YouTube");
-            youtubeLink.getStyleClass().add("post-attachment-link");
+        if (mediaUrl != null && !mediaUrl.isEmpty()) {
+            // Load from file path
+            if (mediaType != null && mediaType.toLowerCase().contains("image")) {
+                ImageView imageView = createImageViewFromPath(mediaUrl);
+                if (imageView != null) {
+                    imageView.getStyleClass().add("post-image-view");
+                    imageView.setPreserveRatio(true);
+                    imageView.setFitWidth(isGridView ? 360 : 600);
+                    imageView.setFitHeight(350);
+                    mediaBox.getChildren().add(imageView);
+                    mediaBox.setPadding(new Insets(0, 16, 12, 16));
+                }
+            } else if (mediaType != null && mediaType.toLowerCase().contains("video")) {
+                // Video placeholder
+                VBox videoContainer = new VBox(8);
+                videoContainer.getStyleClass().add("post-video-container");
+                videoContainer.setAlignment(javafx.geometry.Pos.CENTER);
+                videoContainer.setPadding(new Insets(16));
+                videoContainer.setStyle("-fx-background-color: rgba(15, 23, 42, 0.9); -fx-background-radius: 12;");
 
-            mediaContainer.getChildren().addAll(mediaLabel, youtubeLink);
-            mediaBox.getChildren().add(mediaContainer);
-            mediaBox.setPadding(new Insets(0, 16, 12, 16));
+                Label videoIcon = new Label("▶");
+                videoIcon.setStyle("-fx-font-size: 48px; -fx-text-fill: #3B82F6;");
+
+                Label videoLabel = new Label("Vidéo");
+                videoLabel.getStyleClass().add("post-media-label");
+                videoLabel.setStyle("-fx-text-fill: white;");
+
+                videoContainer.getChildren().addAll(videoIcon, videoLabel);
+                mediaBox.getChildren().add(videoContainer);
+                mediaBox.setPadding(new Insets(0, 16, 12, 16));
+            }
+        } else if (mediaBlob != null && mediaBlob.length > 0) {
+            // Load from BLOB
+            ImageView imageView = createImageViewFromBlob(mediaBlob);
+            if (imageView != null) {
+                imageView.getStyleClass().add("post-image-view");
+                imageView.setPreserveRatio(true);
+                imageView.setFitWidth(isGridView ? 360 : 600);
+                imageView.setFitHeight(350);
+                mediaBox.getChildren().add(imageView);
+                mediaBox.setPadding(new Insets(0, 16, 12, 16));
+            }
         }
 
         // Actions and stats
@@ -420,18 +453,26 @@ public class ForumController implements Initializable {
         likeBtn.getStyleClass().add("action-button");
         likeBtn.setOnAction(e -> likePost(post));
 
-        // Comment button
-        Button commentBtn = new Button("💬 Commenter");
+        // Comments section (expandable, initially hidden)
+        VBox commentsSection = new VBox(0);
+        commentsSection.getStyleClass().add("comments-section");
+        commentsSection.setVisible(false);
+        commentsSection.setManaged(false);
+
+        // Comment count label for button
+        int commentCount = getCommentCount(post.getId_post());
+        Button commentBtn = new Button("💬 " + (commentCount > 0 ? commentCount : "Commenter"));
         commentBtn.getStyleClass().add("action-button");
-        commentBtn.setOnAction(e -> showCommentsDialog(post));
+        commentBtn.setOnAction(e -> toggleCommentsSection(commentsSection, post, commentBtn));
 
         actionsBox.getChildren().addAll(likeBtn, commentBtn);
 
+        // Build card
         card.getChildren().addAll(headerBox, contentLabel);
         if (!mediaBox.getChildren().isEmpty()) {
             card.getChildren().add(mediaBox);
         }
-        card.getChildren().add(actionsBox);
+        card.getChildren().addAll(actionsBox, commentsSection);
 
         return card;
     }
@@ -550,77 +591,302 @@ public class ForumController implements Initializable {
         emojiStage.show();
     }
 
-    private void showCommentsDialog(Post post) {
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Commentaires");
-        dialog.initModality(Modality.APPLICATION_MODAL);
+    private int getCommentCount(int postId) {
+        try {
+            return commentService.getCommentsByPostId(postId).size();
+        } catch (SQLException e) {
+            return 0;
+        }
+    }
 
-        VBox content = new VBox(12);
-        content.setPadding(new Insets(16));
+    private void toggleCommentsSection(VBox commentsSection, Post post, Button commentBtn) {
+        boolean isVisible = commentsSection.isVisible();
+
+        if (isVisible) {
+            // Hide comments
+            commentsSection.setVisible(false);
+            commentsSection.setManaged(false);
+            int count = getCommentCount(post.getId_post());
+            commentBtn.setText("💬 " + (count > 0 ? count : "Commenter"));
+        } else {
+            // Show and load comments
+            commentsSection.setVisible(true);
+            commentsSection.setManaged(true);
+            loadCommentsIntoSection(commentsSection, post, commentBtn);
+            commentBtn.setText("💬 Masquer");
+        }
+    }
+
+    private void loadCommentsIntoSection(VBox commentsSection, Post post, Button commentBtn) {
+        commentsSection.getChildren().clear();
 
         try {
             List<ForumComment> comments = commentService.getCommentsByPostId(post.getId_post());
 
-            // Comments list
-            VBox commentsListBox = new VBox(8);
-            ScrollPane scrollPane = new ScrollPane(commentsListBox);
-            scrollPane.setFitToWidth(true);
-            scrollPane.setPrefHeight(300);
+            // Comments header with count
+            HBox headerBox = new HBox(8);
+            headerBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            headerBox.setPadding(new Insets(12, 16, 8, 16));
 
-            for (ForumComment comment : comments) {
-                VBox commentItem = new VBox(4);
-                commentItem.setStyle("-fx-background-color: #f9fafc; -fx-border-radius: 4; -fx-padding: 8;");
+            Label commentsTitle = new Label("Commentaires (" + comments.size() + ")");
+            commentsTitle.getStyleClass().add("comments-header-title");
 
-                Label commentUser = new Label(comment.getUsername());
-                commentUser.setStyle("-fx-font-size: 11px; -fx-font-weight: bold;");
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
 
-                Label commentText = new Label(comment.getContent());
-                commentText.setWrapText(true);
-                commentText.setStyle("-fx-font-size: 12px;");
+            Button closeBtn = new Button("✕");
+            closeBtn.getStyleClass().add("comments-close-btn");
+            closeBtn.setOnAction(e -> toggleCommentsSection(commentsSection, post, commentBtn));
 
-                commentItem.getChildren().addAll(commentUser, commentText);
-                commentsListBox.getChildren().add(commentItem);
-            }
+            headerBox.getChildren().addAll(commentsTitle, spacer, closeBtn);
+            commentsSection.getChildren().add(headerBox);
 
-            // Add comment input
-            HBox inputBox = new HBox(8);
-            TextField commentField = new TextField();
-            commentField.setPromptText("Ajouter un commentaire...");
-            commentField.setStyle("-fx-padding: 8;");
-            HBox.setHgrow(commentField, Priority.ALWAYS);
+            // Separator
+            Separator separator = new Separator();
+            separator.getStyleClass().add("comments-separator");
+            commentsSection.getChildren().add(separator);
 
-            Button postBtn = new Button("Poster");
-            postBtn.setStyle("-fx-background-color: #1142c1; -fx-text-fill: white; -fx-padding: 8 16;");
-            postBtn.setOnAction(e -> {
-                String text = commentField.getText().trim();
+            // Add comment input section (NOW FIRST - before comments list)
+            VBox inputSection = new VBox(8);
+            inputSection.getStyleClass().add("comment-input-section");
+            inputSection.setPadding(new Insets(12, 16, 16, 16));
+
+            HBox inputBox = new HBox(10);
+            inputBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            // Current user avatar
+            String initials = getInitialsForAuthor(currentUserId);
+            Label userAvatar = new Label(initials);
+            userAvatar.getStyleClass().addAll("comment-avatar", "standard-avatar");
+
+            // Text input
+            TextArea commentInput = new TextArea();
+            commentInput.setPromptText("Écrivez un commentaire...");
+            commentInput.getStyleClass().add("comment-input");
+            commentInput.setWrapText(true);
+            commentInput.setPrefRowCount(2);
+            HBox.setHgrow(commentInput, Priority.ALWAYS);
+
+            inputBox.getChildren().addAll(userAvatar, commentInput);
+
+            // Action buttons
+            HBox actionBox = new HBox(10);
+            actionBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+
+            Button cancelBtn = new Button("Annuler");
+            cancelBtn.getStyleClass().add("comment-cancel-btn");
+            cancelBtn.setOnAction(e -> commentInput.clear());
+
+            Button submitBtn = new Button("Commenter");
+            submitBtn.getStyleClass().add("comment-submit-btn");
+            submitBtn.setOnAction(e -> {
+                String text = commentInput.getText().trim();
                 if (!text.isEmpty()) {
-                    try {
-                        ForumComment comment = new ForumComment(
-                                post.getId_post(),
-                                currentUserId,
-                                currentUsername,
-                                currentUserAvatar,
-                                text,
-                                new Date()
-                        );
-                        commentService.ajouter(comment);
-                        commentField.clear();
-                        showCommentsDialog(post);
-                    } catch (SQLException ex) {
-                        showError("Error: " + ex.getMessage());
-                    }
+                    addComment(post, text, commentsSection, commentBtn);
+                    commentInput.clear();
                 }
             });
 
-            inputBox.getChildren().addAll(commentField, postBtn);
+            // Error label for validation (initially hidden)
+            Label errorLabel = new Label("");
+            errorLabel.getStyleClass().add("comment-error-label");
+            errorLabel.setVisible(false);
+            errorLabel.setManaged(false);
 
-            content.getChildren().addAll(scrollPane, inputBox);
-            dialog.getDialogPane().setContent(content);
-            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-            dialog.showAndWait();
+            actionBox.getChildren().addAll(cancelBtn, submitBtn, errorLabel);
+
+            // Update submit action to validate
+            submitBtn.setOnAction(e -> {
+                String text = commentInput.getText().trim();
+                if (text.isEmpty()) {
+                    errorLabel.setText("⚠ Le commentaire ne peut pas être vide");
+                    errorLabel.setVisible(true);
+                    errorLabel.setManaged(true);
+                } else {
+                    errorLabel.setVisible(false);
+                    errorLabel.setManaged(false);
+                    addComment(post, text, commentsSection, commentBtn);
+                    commentInput.clear();
+                }
+            });
+
+            inputSection.getChildren().addAll(inputBox, actionBox);
+            commentsSection.getChildren().add(inputSection);
+
+            // Second separator before comments list
+            Separator separator2 = new Separator();
+            separator2.getStyleClass().add("comments-separator");
+            commentsSection.getChildren().add(separator2);
+
+            // Comments list (NOW AFTER input section)
+            VBox commentsList = new VBox(8);
+            commentsList.getStyleClass().add("comments-list");
+            commentsList.setPadding(new Insets(8, 16, 8, 16));
+
+            if (comments.isEmpty()) {
+                Label noCommentsLabel = new Label("Aucun commentaire. Soyez le premier à commenter !");
+                noCommentsLabel.getStyleClass().add("no-comments-label");
+                commentsList.getChildren().add(noCommentsLabel);
+            } else {
+                for (ForumComment comment : comments) {
+                    VBox commentBox = createCommentBox(comment, post, commentsSection, commentBtn);
+                    commentsList.getChildren().add(commentBox);
+                }
+            }
+
+            commentsSection.getChildren().add(commentsList);
 
         } catch (SQLException e) {
-            showError("Error loading comments: " + e.getMessage());
+            e.printStackTrace();
+            Label errorLabel = new Label("Erreur: " + e.getMessage());
+            errorLabel.getStyleClass().add("error-label");
+            errorLabel.setWrapText(true);
+            commentsSection.getChildren().add(errorLabel);
+        }
+    }
+
+    private VBox createCommentBox(ForumComment comment, Post post, VBox commentsSection, Button commentBtn) {
+        VBox commentBox = new VBox(6);
+        commentBox.getStyleClass().add("comment-box");
+
+        // Comment header with avatar and user info
+        HBox headerBox = new HBox(10);
+        headerBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        String initials = getInitialsForAuthor(comment.getId_author_comment());
+        Label avatarLabel = new Label(initials);
+        avatarLabel.getStyleClass().addAll("comment-avatar", "standard-avatar");
+        avatarLabel.setStyle("-fx-min-width: 32; -fx-max-width: 32; -fx-min-height: 32; -fx-max-height: 32; -fx-font-size: 12px;");
+
+        VBox userInfoBox = new VBox(2);
+        String fullName = getFullNameForAuthor(comment.getId_author_comment());
+        Label usernameLabel = new Label(fullName);
+        usernameLabel.getStyleClass().add("comment-username");
+
+        // Date label
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm");
+        String dateStr = comment.getCreated_at_comment() != null ?
+                sdf.format(comment.getCreated_at_comment()) : "";
+        if (comment.isIs_edited()) {
+            dateStr += " (modifié)";
+        }
+        Label dateLabel = new Label(dateStr);
+        dateLabel.getStyleClass().add("comment-date");
+
+        userInfoBox.getChildren().addAll(usernameLabel, dateLabel);
+        headerBox.getChildren().addAll(avatarLabel, userInfoBox);
+
+        // Comment content
+        Label contentLabel = new Label(comment.getContent_comment());
+        contentLabel.getStyleClass().add("comment-content");
+        contentLabel.setWrapText(true);
+
+        // Comment actions
+        HBox actionsBox = new HBox(16);
+        actionsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        Button likeBtn = new Button("❤ " + (comment.getLike_count() > 0 ? comment.getLike_count() : "J'aime"));
+        likeBtn.getStyleClass().add("comment-like-btn");
+        likeBtn.setOnAction(e -> {
+            try {
+                commentService.likeComment(comment.getId_comment());
+                loadCommentsIntoSection(commentsSection, post, commentBtn);
+            } catch (SQLException ex) {
+                showError("Erreur: " + ex.getMessage());
+            }
+        });
+
+        Button replyBtn = new Button("↩ Répondre");
+        replyBtn.getStyleClass().add("comment-reply-btn");
+        replyBtn.setOnAction(e -> showReplyInput(comment, post, commentsSection, commentBtn));
+
+        actionsBox.getChildren().addAll(likeBtn, replyBtn);
+
+        commentBox.getChildren().addAll(headerBox, contentLabel, actionsBox);
+
+        // Load replies if any
+        try {
+            List<ForumComment> replies = commentService.getRepliesByCommentId(comment.getId_comment());
+            if (!replies.isEmpty()) {
+                VBox repliesBox = new VBox(6);
+                repliesBox.getStyleClass().add("replies-box");
+                repliesBox.setPadding(new Insets(8, 0, 0, 32)); // Indent replies
+
+                for (ForumComment reply : replies) {
+                    VBox replyBox = createCommentBox(reply, post, commentsSection, commentBtn);
+                    replyBox.getStyleClass().add("reply-box");
+                    repliesBox.getChildren().add(replyBox);
+                }
+                commentBox.getChildren().add(repliesBox);
+            }
+        } catch (SQLException e) {
+            // Ignore reply loading errors
+        }
+
+        return commentBox;
+    }
+
+    private void showReplyInput(ForumComment parentComment, Post post, VBox commentsSection, Button commentBtn) {
+        // Find the comment box and add reply input below it
+        VBox replyInputBox = new VBox(8);
+        replyInputBox.getStyleClass().add("reply-input-box");
+        replyInputBox.setPadding(new Insets(8, 0, 8, 40));
+
+        HBox inputRow = new HBox(10);
+        inputRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        TextArea replyInput = new TextArea();
+        replyInput.setPromptText("Répondre à ce commentaire...");
+        replyInput.getStyleClass().add("comment-input");
+        replyInput.setWrapText(true);
+        replyInput.setPrefRowCount(2);
+        HBox.setHgrow(replyInput, Priority.ALWAYS);
+
+        inputRow.getChildren().add(replyInput);
+
+        HBox actionRow = new HBox(10);
+        actionRow.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+
+        Button cancelBtn = new Button("Annuler");
+        cancelBtn.getStyleClass().add("comment-cancel-btn");
+        cancelBtn.setOnAction(e -> commentsSection.getChildren().remove(replyInputBox));
+
+        Button submitBtn = new Button("Répondre");
+        submitBtn.getStyleClass().add("comment-submit-btn");
+        submitBtn.setOnAction(e -> {
+            String text = replyInput.getText().trim();
+            if (!text.isEmpty()) {
+                addReply(post, parentComment, text, commentsSection, commentBtn);
+            }
+        });
+
+        actionRow.getChildren().addAll(cancelBtn, submitBtn);
+        replyInputBox.getChildren().addAll(inputRow, actionRow);
+
+        // Add to comments section
+        commentsSection.getChildren().add(replyInputBox);
+        replyInput.requestFocus();
+    }
+
+    private void addComment(Post post, String content, VBox commentsSection, Button commentBtn) {
+        try {
+            ForumComment comment = new ForumComment(content, currentUserId, post.getId_post());
+            commentService.ajouter(comment);
+            loadCommentsIntoSection(commentsSection, post, commentBtn);
+            commentBtn.setText("💬 Masquer");
+        } catch (SQLException e) {
+            showError("Erreur lors de l'ajout du commentaire: " + e.getMessage());
+        }
+    }
+
+    private void addReply(Post post, ForumComment parentComment, String content, VBox commentsSection, Button commentBtn) {
+        try {
+            ForumComment reply = new ForumComment(content, currentUserId, post.getId_post());
+            reply.setParent_id(parentComment.getId_comment());
+            commentService.ajouter(reply);
+            loadCommentsIntoSection(commentsSection, post, commentBtn);
+        } catch (SQLException e) {
+            showError("Erreur lors de la réponse: " + e.getMessage());
         }
     }
 
@@ -635,6 +901,106 @@ public class ForumController implements Initializable {
         if (extension.matches("mp4|avi|mov|mkv")) return "video";
         if (extension.matches("mp3|wav|flac|aac")) return "audio";
         return "file";
+    }
+
+    private ImageView createImageViewFromPath(String filePath) {
+        try {
+            if (filePath == null || filePath.isEmpty()) return null;
+            System.out.println("Loading image from path: " + filePath);
+
+            // Check if it's a URL or local file path
+            if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+                javafx.scene.image.Image image = new javafx.scene.image.Image(filePath, true);
+                if (image.isError()) {
+                    System.err.println("Error loading image from URL: " + image.getException().getMessage());
+                    return null;
+                }
+                return new ImageView(image);
+            } else {
+                // Local file path
+                java.io.File file = new java.io.File(filePath);
+                if (!file.exists()) {
+                    System.err.println("File does not exist: " + filePath);
+                    return null;
+                }
+                javafx.scene.image.Image image = new javafx.scene.image.Image(file.toURI().toString());
+                if (image.isError()) {
+                    System.err.println("Error loading image from file: " + image.getException().getMessage());
+                    return null;
+                }
+                System.out.println("Image loaded successfully: " + image.getWidth() + "x" + image.getHeight());
+                return new ImageView(image);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading image from path: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private ImageView createImageViewFromBlob(byte[] blobData) {
+        try {
+            if (blobData == null || blobData.length == 0) return null;
+            System.out.println("Loading image from BLOB, size: " + blobData.length + " bytes");
+            javafx.scene.image.Image image = new javafx.scene.image.Image(new java.io.ByteArrayInputStream(blobData));
+            if (image.isError()) return null;
+            return new ImageView(image);
+        } catch (Exception e) {
+            System.err.println("Error loading image from blob: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private String detectImageFormat(byte[] data) {
+        if (data.length < 8) return "unknown";
+        // Print first 20 bytes for debugging
+        StringBuilder hex = new StringBuilder("First 20 bytes: ");
+        StringBuilder ascii = new StringBuilder("ASCII: ");
+        for (int i = 0; i < Math.min(20, data.length); i++) {
+            hex.append(String.format("%02X ", data[i]));
+            char c = (char)(data[i] & 0xFF);
+            ascii.append((c >= 32 && c < 127) ? c : '.');
+        }
+        System.out.println(hex.toString());
+        System.out.println(ascii.toString());
+
+        // Check magic numbers
+        if (data[0] == (byte)0xFF && data[1] == (byte)0xD8) return "JPEG";
+        if (data[0] == (byte)0x89 && data[1] == (byte)0x50) return "PNG";
+        if (data[0] == (byte)0x47 && data[1] == (byte)0x49) return "GIF";
+        if (data[0] == (byte)0x42 && data[1] == (byte)0x4D) return "BMP";
+        if (data[0] == (byte)0x52 && data[1] == (byte)0x49) return "WEBP";
+        return "unknown";
+    }
+
+    private ImageView loadImageViaBufferedImage(byte[] blobData) {
+        try {
+            javax.imageio.ImageIO.setUseCache(false);
+            java.awt.image.BufferedImage bufferedImage = javax.imageio.ImageIO.read(
+                new java.io.ByteArrayInputStream(blobData)
+            );
+            if (bufferedImage == null) {
+                System.err.println("BufferedImage is null - data may not be a valid image");
+                return null;
+            }
+            System.out.println("Loaded via BufferedImage: " + bufferedImage.getWidth() + "x" + bufferedImage.getHeight());
+
+            // Convert to JavaFX Image
+            javafx.scene.image.WritableImage writableImage = new javafx.scene.image.WritableImage(
+                bufferedImage.getWidth(), bufferedImage.getHeight()
+            );
+            javafx.scene.image.PixelWriter pixelWriter = writableImage.getPixelWriter();
+
+            for (int x = 0; x < bufferedImage.getWidth(); x++) {
+                for (int y = 0; y < bufferedImage.getHeight(); y++) {
+                    pixelWriter.setArgb(x, y, bufferedImage.getRGB(x, y));
+                }
+            }
+
+            return new ImageView(writableImage);
+        } catch (Exception e) {
+            System.err.println("Error in BufferedImage conversion: " + e.getMessage());
+            return null;
+        }
     }
 
     private void showError(String message) {

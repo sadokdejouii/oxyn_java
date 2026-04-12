@@ -82,7 +82,7 @@
         <!-- Posts Table -->
         <VBox spacing="12" styleClass="table-card">
             <Label styleClass="section-title" text="All Posts" />
-            <TableView fx:id="postsTable" prefHeight="400" styleClass="modern-table">
+            <TableView fx:id="postsTable" prefHeight="350" styleClass="modern-table">
                 <columns>
                     <TableColumn fx:id="idColumn" prefWidth="60" text="ID" />
                     <TableColumn fx:id="contentColumn" prefWidth="280" text="Content" />
@@ -91,6 +91,46 @@
                     <TableColumn fx:id="likesColumn" prefWidth="70" text="Likes" />
                     <TableColumn fx:id="dateColumn" prefWidth="120" text="Date" />
                     <TableColumn fx:id="actionsColumn" prefWidth="140" text="Actions" />
+                </columns>
+            </TableView>
+        </VBox>
+
+        <!-- Comments Stats Row -->
+        <HBox spacing="16" styleClass="stats-row">
+            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="stat-label" text="TOTAL COMMENTS" />
+                <Label fx:id="totalCommentsLabel" styleClass="stat-value" text="0" />
+                <Label styleClass="stat-hint" text="All comments" />
+            </VBox>
+            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="stat-label" text="COMMENTS TODAY" />
+                <Label fx:id="todayCommentsLabel" styleClass="stat-value" text="0" />
+                <Label styleClass="stat-hint" text="New comments today" />
+            </VBox>
+            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="stat-label" text="TOP POST" />
+                <Label fx:id="topCommentedPostLabel" styleClass="stat-value" text="-" />
+                <Label styleClass="stat-hint" text="Most commented" />
+            </VBox>
+            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="stat-label" text="AVG PER POST" />
+                <Label fx:id="avgCommentsLabel" styleClass="stat-value" text="0" />
+                <Label styleClass="stat-hint" text="Comments per post" />
+            </VBox>
+        </HBox>
+
+        <!-- Comments Table -->
+        <VBox spacing="12" styleClass="table-card">
+            <Label styleClass="section-title" text="Recent Comments" />
+            <TableView fx:id="commentsTable" prefHeight="300" styleClass="modern-table">
+                <columns>
+                    <TableColumn fx:id="commentIdColumn" prefWidth="60" text="ID" />
+                    <TableColumn fx:id="commentContentColumn" prefWidth="300" text="Comment" />
+                    <TableColumn fx:id="commentPostColumn" prefWidth="80" text="Post ID" />
+                    <TableColumn fx:id="commentAuthorColumn" prefWidth="100" text="Author" />
+                    <TableColumn fx:id="commentLikesColumn" prefWidth="70" text="Likes" />
+                    <TableColumn fx:id="commentDateColumn" prefWidth="150" text="Date" />
+                    <TableColumn fx:id="commentActionsColumn" prefWidth="120" text="Actions" />
                 </columns>
             </TableView>
         </VBox>

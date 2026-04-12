@@ -817,3 +817,271 @@
 .scroll-bar .corner {
     -fx-background-color: transparent;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MODERN INLINE COMMENTS SECTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Comments Section Container */
+.comments-section {
+    -fx-background-color:
+        linear-gradient(from 0% 0% to 100% 100%,
+            rgba(248, 250, 252, 0.98),
+            rgba(241, 245, 249, 0.95));
+    -fx-border-color:
+        linear-gradient(from 0% 0% to 100% 0%,
+            rgba(59, 130, 246, 0.15),
+            rgba(147, 51, 234, 0.15));
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 0;
+}
+
+/* Comments Header */
+.comments-header-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1E293B;
+    -fx-font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+.comments-close-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748B;
+    -fx-font-size: 16px;
+    -fx-padding: 4 8;
+    -fx-cursor: hand;
+    -fx-background-radius: 4;
+    -fx-transition: all 0.2s ease;
+}
+
+.comments-close-btn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+    -fx-text-fill: #EF4444;
+}
+
+.comments-separator {
+    -fx-padding: 0;
+}
+
+.comments-separator .line {
+    -fx-border-color: rgba(203, 213, 225, 0.5);
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Comments List */
+.comments-list {
+    -fx-spacing: 12;
+}
+
+.no-comments-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #94A3B8;
+    -fx-font-style: italic;
+    -fx-padding: 16 0;
+}
+
+/* Individual Comment Box */
+.comment-box {
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(203, 213, 225, 0.3);
+    -fx-border-width: 1;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.03), 6, 0, 0, 2);
+    -fx-transition: all 0.3s ease;
+}
+
+.comment-box:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.08), 12, 0, 0, 4);
+}
+
+/* Comment Avatar */
+.comment-avatar {
+    -fx-min-width: 32;
+    -fx-max-width: 32;
+    -fx-min-height: 32;
+    -fx-max-height: 32;
+    -fx-background-radius: 16;
+    -fx-font-size: 12px;
+}
+
+/* Comment Username */
+.comment-username {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1E293B;
+    -fx-font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Comment Date */
+.comment-date {
+    -fx-font-size: 11px;
+    -fx-text-fill: #94A3B8;
+    -fx-font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Comment Content */
+.comment-content {
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+    -fx-font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    -fx-wrap-text: true;
+    -fx-padding: 4 0;
+    -fx-line-spacing: 1.4;
+}
+
+/* Comment Actions */
+.comment-like-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-padding: 4 8;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+    -fx-transition: all 0.2s ease;
+}
+
+.comment-like-btn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.2), 4, 0, 0, 2);
+}
+
+.comment-reply-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748B;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-padding: 4 8;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+    -fx-transition: all 0.2s ease;
+}
+
+.comment-reply-btn:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.08);
+    -fx-text-fill: #3B82F6;
+}
+
+/* Replies Box */
+.replies-box {
+    -fx-spacing: 8;
+}
+
+.reply-box {
+    -fx-background-color: rgba(248, 250, 252, 0.9);
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: rgba(203, 213, 225, 0.25);
+    -fx-border-width: 1;
+    -fx-padding: 10;
+}
+
+/* Comment Input Section */
+.comment-input-section {
+    -fx-background-color:
+        linear-gradient(from 0% 0% to 100% 0%,
+            rgba(241, 245, 249, 0.8),
+            rgba(248, 250, 252, 0.9));
+    -fx-border-color: rgba(203, 213, 225, 0.4);
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Comment Input */
+.comment-input {
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(203, 213, 225, 0.5);
+    -fx-border-width: 1;
+    -fx-padding: 10 12;
+    -fx-font-size: 13px;
+    -fx-font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    -fx-text-fill: #1E293B;
+    -fx-prompt-text-fill: #94A3B8;
+    -fx-transition: all 0.3s ease;
+}
+
+.comment-input:focused {
+    -fx-background-color: rgba(255, 255, 255, 1);
+    -fx-border-color: rgba(59, 130, 246, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.15), 12, 0, 0, 4);
+}
+
+/* Comment Buttons */
+.comment-cancel-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748B;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-transition: all 0.2s ease;
+}
+
+.comment-cancel-btn:hover {
+    -fx-background-color: rgba(100, 116, 139, 0.1);
+    -fx-text-fill: #475569;
+}
+
+.comment-submit-btn {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #3B82F6, #2563EB);
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.3), 8, 0, 0, 3);
+    -fx-transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.comment-submit-btn:hover {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #2563EB, #1D4ED8);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 12, 0, 0, 4);
+    -fx-translate-y: -1;
+}
+
+/* Reply Input Box */
+.reply-input-box {
+    -fx-background-color: rgba(248, 250, 252, 0.7);
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: rgba(59, 130, 246, 0.15);
+    -fx-border-width: 1;
+}
+
+/* Comment Error Label */
+.comment-error-label {
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-padding: 0 8;
+}
+
+/* Post Image from BLOB */
+.post-image-view {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 12, 0, 0, 4);
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+.post-image-view:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 16, 0, 0, 6);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Post Video Container */
+.post-video-container {
+    -fx-background-color: rgba(15, 23, 42, 0.9);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 16;
+    -fx-spacing: 8;
+}
