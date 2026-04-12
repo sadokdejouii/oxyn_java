@@ -3,9 +3,12 @@ package org.example.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import org.example.planning.PlanningUi;
@@ -19,6 +22,18 @@ public class PlanningPageController implements Initializable {
 
     @FXML
     private VBox dynamicContainer;
+
+    @FXML
+    private VBox planningMainShell;
+
+    @FXML
+    private StackPane planningPageStack;
+
+    @FXML
+    private ScrollPane planningPageScroll;
+
+    @FXML
+    private VBox planningRoot;
 
     @FXML
     private Label heroSub;
@@ -39,9 +54,10 @@ public class PlanningPageController implements Initializable {
         if (avatarInitials != null) {
             avatarInitials.setText(initialsFromDisplayName(CurrentSession.context().getDisplayName()));
         }
+        var ctx = CurrentSession.context();
+        applyAdminPlanningDarkTheme(ctx.isAdmin());
         dynamicContainer.getChildren().clear();
 
-        var ctx = CurrentSession.context();
         if (ctx.isEncadrant()) {
             buildEncadrantView();
         } else if (ctx.isAdmin()) {
@@ -64,6 +80,7 @@ public class PlanningPageController implements Initializable {
     }
 
     private void buildClientView() {
+        applyAdminPlanningDarkTheme(false);
         var ctx = CurrentSession.context();
         if (!ctx.hasDbUser()) {
             VBox req = new VBox(PlanningUi.hintLabel(
@@ -75,6 +92,7 @@ public class PlanningPageController implements Initializable {
     }
 
     private void buildEncadrantView() {
+        applyAdminPlanningDarkTheme(false);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/pages/EncadrantPlanningHub.fxml"));
             Parent root = loader.load();
@@ -99,10 +117,37 @@ public class PlanningPageController implements Initializable {
             dynamicContainer.getChildren().add(root);
             VBox.setVgrow(root, Priority.ALWAYS);
         } catch (Exception e) {
+            applyAdminPlanningDarkTheme(false);
             Throwable t = e.getCause() != null ? e.getCause() : e;
             String msg = t.getMessage() != null ? t.getMessage() : t.toString();
             VBox err = new VBox(PlanningUi.hintLabel("Impossible de charger la vue admin Planning : " + msg));
             dynamicContainer.getChildren().add(PlanningUi.card("Erreur", null, null, wrapGrow(err)));
+        }
+    }
+
+    private static final String ADMIN_PLANNING_SHELL = "planning-main-shell--admin-dark";
+    private static final String ADMIN_PAGE_STACK = "planning-page-stack--admin-dark";
+    private static final String ADMIN_PAGE_ROOT = "planning-page-root--admin-dark";
+    private static final String ADMIN_PAGE_SCROLL = "planning-scroll--admin-dark";
+
+    /** Aligne toute la vue Planning admin sur le shell sombre du Dashboard (.content-area). */
+    private void applyAdminPlanningDarkTheme(boolean on) {
+        toggleStyle(planningMainShell, ADMIN_PLANNING_SHELL, on);
+        toggleStyle(planningPageStack, ADMIN_PAGE_STACK, on);
+        toggleStyle(planningRoot, ADMIN_PAGE_ROOT, on);
+        toggleStyle(planningPageScroll, ADMIN_PAGE_SCROLL, on);
+    }
+
+    private static void toggleStyle(Node node, String styleClass, boolean on) {
+        if (node == null) {
+            return;
+        }
+        if (on) {
+            if (!node.getStyleClass().contains(styleClass)) {
+                node.getStyleClass().add(styleClass);
+            }
+        } else {
+            node.getStyleClass().remove(styleClass);
         }
     }
 

@@ -1,24 +1,31 @@
 package org.example.controllers;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 import org.example.model.planning.encadrant.EncadrantClientCardRow;
 import org.example.services.EncadrantClientPlanningService;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Grille de clients avec fiche + vue détail inline (sans changement de page).
@@ -39,35 +46,179 @@ public final class EncadrantPlanningHubController {
     private Label lblDetailTitle;
     @FXML
     private StackPane detailMount;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<EncadrantHubSort> sortCombo;
+    @FXML
+    private Label lblMatchHint;
 
     private final EncadrantClientPlanningService service = new EncadrantClientPlanningService();
+    private final List<EncadrantClientCardRow> loadedRows = new ArrayList<>();
 
     public void setup() {
         btnRefresh.setOnAction(e -> loadGrid());
         btnBack.setOnAction(e -> showList());
+        wireSearchAndSort();
         loadGrid();
     }
 
+    private void wireSearchAndSort() {
+        sortCombo.setItems(FXCollections.observableArrayList(EncadrantHubSort.values()));
+        sortCombo.getSelectionModel().selectFirst();
+        sortCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(EncadrantHubSort object) {
+                return object == null ? "" : object.label;
+            }
+
+            @Override
+            public EncadrantHubSort fromString(String string) {
+                return null;
+            }
+        });
+        searchField.textProperty().addListener((o, a, b) -> applySearchSortAndRender());
+        sortCombo.valueProperty().addListener((o, a, b) -> applySearchSortAndRender());
+    }
+
     private void loadGrid() {
-        clientsGrid.getChildren().clear();
+        loadedRows.clear();
         try {
-            List<EncadrantClientCardRow> rows = service.listActiveClientsWithFicheCards();
-            if (rows.isEmpty()) {
-                Label empty = new Label("Aucun client actif avec fiche santé. Créez une fiche côté client ou activez un compte ROLE_CLIENT.");
-                empty.setWrapText(true);
-                empty.getStyleClass().add("eph-empty");
-                clientsGrid.getChildren().add(empty);
-                return;
-            }
-            for (EncadrantClientCardRow row : rows) {
-                clientsGrid.getChildren().add(buildClientCard(row));
-            }
+            loadedRows.addAll(service.listActiveClientsWithFicheCards());
         } catch (SQLException ex) {
+            clientsGrid.getChildren().clear();
             Label err = new Label("Erreur chargement : " + (ex.getMessage() != null ? ex.getMessage() : ex));
             err.setWrapText(true);
             err.getStyleClass().add("eph-empty");
             clientsGrid.getChildren().add(err);
+            updateMatchHint(0, 0);
+            return;
         }
+        applySearchSortAndRender();
+    }
+
+    private void applySearchSortAndRender() {
+        String raw = searchField.getText() == null ? "" : searchField.getText().trim();
+        String q = raw.toLowerCase(Locale.ROOT);
+        EncadrantHubSort sort = sortCombo.getValue() != null ? sortCombo.getValue() : EncadrantHubSort.NAME_ASC;
+
+        List<EncadrantClientCardRow> filtered = new ArrayList<>();
+        for (EncadrantClientCardRow r : loadedRows) {
+            if (matchesSearch(r, q)) {
+                filtered.add(r);
+            }
+        }
+        filtered.sort(sort.comparator);
+
+        clientsGrid.getChildren().clear();
+        int n = loadedRows.size();
+        int m = filtered.size();
+        updateMatchHint(n, m);
+
+        if (n == 0) {
+            Label empty = new Label("Aucun client actif avec fiche santé. Créez une fiche côté client ou activez un compte ROLE_CLIENT.");
+            empty.setWrapText(true);
+            empty.getStyleClass().add("eph-empty");
+            clientsGrid.getChildren().add(empty);
+            return;
+        }
+        if (m == 0) {
+            Label none = new Label("Aucun client ne correspond à votre recherche. Essayez d’autres mots-clés.");
+            none.setWrapText(true);
+            none.getStyleClass().add("eph-empty");
+            clientsGrid.getChildren().add(none);
+            return;
+        }
+        for (EncadrantClientCardRow row : filtered) {
+            clientsGrid.getChildren().add(buildClientCard(row));
+        }
+    }
+
+    private void updateMatchHint(int total, int shown) {
+        if (lblMatchHint == null) {
+            return;
+        }
+        if (total == 0) {
+            lblMatchHint.setText("");
+            return;
+        }
+        if (shown == total) {
+            lblMatchHint.setText(shown == 1 ? "1 client" : shown + " clients");
+        } else {
+            lblMatchHint.setText(shown + " sur " + total + " affichés");
+        }
+    }
+
+    private static boolean matchesSearch(EncadrantClientCardRow r, String q) {
+        if (q.isEmpty()) {
+            return true;
+        }
+        return contains(r.displayName(), q)
+                || contains(r.email(), q)
+                || contains(r.objectif(), q)
+                || contains(r.niveauActivite(), q)
+                || contains(r.statusBadge(), q);
+    }
+
+    private static boolean contains(String field, String q) {
+        if (field == null) {
+            return false;
+        }
+        return field.toLowerCase(Locale.ROOT).contains(q);
+    }
+
+    private enum EncadrantHubSort {
+        NAME_ASC("Nom (A → Z)", Comparator
+                .comparing(EncadrantClientCardRow::displayName, String.CASE_INSENSITIVE_ORDER)),
+        NAME_DESC("Nom (Z → A)", Comparator
+                .comparing(EncadrantClientCardRow::displayName, String.CASE_INSENSITIVE_ORDER)
+                .reversed()),
+        PROGRESS_DESC("Progression (élevée d’abord)", EncadrantPlanningHubController::compareProgressDesc),
+        PROGRESS_ASC("Progression (faible d’abord)", EncadrantPlanningHubController::compareProgressAsc),
+        TASKS_DESC("Tâches semaine (↓)", Comparator
+                .comparingInt(EncadrantClientCardRow::tasksTotalWeek).reversed()
+                .thenComparing(EncadrantClientCardRow::displayName, String.CASE_INSENSITIVE_ORDER));
+
+        private final String label;
+        private final Comparator<EncadrantClientCardRow> comparator;
+
+        EncadrantHubSort(String label, Comparator<EncadrantClientCardRow> comparator) {
+            this.label = label;
+            this.comparator = comparator;
+        }
+    }
+
+    private static int compareProgressDesc(EncadrantClientCardRow a, EncadrantClientCardRow b) {
+        return compareProgress(a, b, true);
+    }
+
+    private static int compareProgressAsc(EncadrantClientCardRow a, EncadrantClientCardRow b) {
+        return compareProgress(a, b, false);
+    }
+
+    private static int compareProgress(EncadrantClientCardRow a, EncadrantClientCardRow b, boolean highFirst) {
+        double pa = a.progressPct();
+        double pb = b.progressPct();
+        boolean na = pa < 0;
+        boolean nb = pb < 0;
+        if (na && nb) {
+            return String.CASE_INSENSITIVE_ORDER.compare(
+                    a.displayName() != null ? a.displayName() : "",
+                    b.displayName() != null ? b.displayName() : "");
+        }
+        if (na) {
+            return 1;
+        }
+        if (nb) {
+            return -1;
+        }
+        int c = highFirst ? Double.compare(pb, pa) : Double.compare(pa, pb);
+        if (c != 0) {
+            return c;
+        }
+        return String.CASE_INSENSITIVE_ORDER.compare(
+                a.displayName() != null ? a.displayName() : "",
+                b.displayName() != null ? b.displayName() : "");
     }
 
     private VBox buildClientCard(EncadrantClientCardRow row) {

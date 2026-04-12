@@ -464,3 +464,58 @@
 .planning-discussion-fab .planning-fab-icon {
     -fx-icon-color: #ffffff;
 }
+
+/* Coque Planning en mode admin — alignée sur dashboard dark premium */
+.planning-main-shell--admin-dark {
+    -fx-background-color: linear-gradient(to bottom, #0f172a 0%, #0b1426 45%, #0b1426 100%);
+    -fx-border-color: rgba(56, 189, 248, 0.14);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 28, 0.22, 0, 6);
+}
+
+.planning-main-shell--admin-dark .planning-hero-title {
+    -fx-text-fill: #f8fafc;
+}
+
+.planning-main-shell--admin-dark .planning-hero-sub {
+    -fx-text-fill: #8ba3c4;
+}
+
+.planning-main-shell--admin-dark .planning-hero-meta {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--admin-dark .planning-user-avatar-ring {
+    -fx-fill: rgba(56, 189, 248, 0.22);
+    -fx-stroke: rgba(56, 189, 248, 0.45);
+}
+
+.planning-main-shell--admin-dark .planning-user-avatar-fill {
+    -fx-fill: #162238;
+}
+
+.planning-main-shell--admin-dark .planning-user-avatar-text {
+    -fx-text-fill: #38bdf8;
+}
+
+/* Fond plein page Planning admin = même dégradé que .content-area (Dashboard) */
+.planning-page-stack.planning-page-stack--admin-dark {
+    -fx-background-color:
+            radial-gradient(center 50% -15%, radius 55%, rgba(0, 191, 255, 0.11) 0%, transparent 50%),
+            radial-gradient(center 72% -8%, radius 95%, rgba(0, 191, 255, 0.07) 0%, transparent 55%),
+            radial-gradient(center 5% 85%, radius 50%, rgba(36, 59, 127, 0.55) 0%, transparent 52%),
+            radial-gradient(center 20% 100%, radius 75%, rgba(36, 59, 127, 0.35) 0%, transparent 50%),
+            linear-gradient(to bottom, #0a1634 0%, #0D1B3E 42%, #081228 100%);
+}
+
+.planning-page-root.planning-page-root--admin-dark {
+    -fx-background-color: transparent;
+    -fx-padding: 24px 28px 40px 28px;
+}
+
+.page-scroll.planning-scroll--admin-dark,
+.page-scroll.planning-scroll--admin-dark > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}

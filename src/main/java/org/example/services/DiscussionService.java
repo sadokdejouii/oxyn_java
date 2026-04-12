@@ -2,7 +2,9 @@ package org.example.services;
 
 import org.example.entities.ConversationInboxItem;
 import org.example.entities.ConversationItem;
+import org.example.entities.MessageEntity;
 import org.example.entities.MessageRow;
+import org.example.repository.MessageRepository;
 import org.example.utils.MyDataBase;
 
 import java.sql.Connection;
@@ -24,6 +26,8 @@ public final class DiscussionService {
 
     public static final String TYPE_MESSAGE = "MESSAGE";
     public static final String TYPE_CONSEIL = "CONSEIL";
+
+    private final MessageRepository messageRepository = new MessageRepository();
 
     public Optional<Integer> findConversationIdByClientId(int clientId) throws SQLException {
         Connection c = conn();
@@ -149,7 +153,10 @@ public final class DiscussionService {
                         ORDER BY m.id DESC LIMIT 1) AS last_body,
                        (SELECT m.created_at FROM messages m
                         WHERE m.conversation_id = c.id
-                        ORDER BY m.id DESC LIMIT 1) AS last_at
+                        ORDER BY m.id DESC LIMIT 1) AS last_at,
+                       (SELECT m.sender_id FROM messages m
+                        WHERE m.conversation_id = c.id
+                        ORDER BY m.id DESC LIMIT 1) AS last_sender_id
                 FROM conversations c
                 JOIN users u ON u.id_user = c.client_id
                 WHERE c.is_active = 1
@@ -171,6 +178,11 @@ public final class DiscussionService {
                 if (preview != null && preview.length() > 120) {
                     preview = preview.substring(0, 117) + "…";
                 }
+                Integer lastSid = null;
+                Object lsObj = rs.getObject("last_sender_id");
+                if (lsObj != null) {
+                    lastSid = rs.getInt("last_sender_id");
+                }
                 list.add(new ConversationInboxItem(
                         rs.getInt("id"),
                         rs.getInt("client_id"),
@@ -178,7 +190,8 @@ public final class DiscussionService {
                         rs.getString("email_user") != null ? rs.getString("email_user") : "",
                         preview != null ? preview : "Aucun message",
                         la != null ? la.toLocalDateTime() : null,
-                        up != null ? up.toLocalDateTime() : null
+                        up != null ? up.toLocalDateTime() : null,
+                        lastSid
                 ));
             }
         }
@@ -249,6 +262,65 @@ public final class DiscussionService {
             }
         }
         return -1;
+    }
+
+    /**
+     * Supprime un message si l’utilisateur est bien l’expéditeur et la conversation correspond.
+     * Types éditables : {@link #TYPE_MESSAGE}, {@link #TYPE_CONSEIL}.
+     */
+    public void deleteOwnMessageInConversation(int conversationId, int messageId, int userId) throws SQLException {
+        MessageEntity msg = messageRepository.findById(messageId)
+                .orElseThrow(() -> new SQLException("Message introuvable."));
+        if (msg.conversationId() != conversationId) {
+            throw new SQLException("Conversation incorrecte.");
+        }
+        if (msg.senderId() != userId) {
+            throw new SQLException("Vous ne pouvez supprimer que vos propres messages.");
+        }
+        if (!isEditableUserMessageType(msg.type())) {
+            throw new SQLException("Ce message ne peut pas être supprimé.");
+        }
+        messageRepository.deleteById(messageId);
+        Connection c = conn();
+        if (c != null) {
+            touchConversation(c, conversationId);
+        }
+    }
+
+    /**
+     * Met à jour le texte d’un message envoyé par l’utilisateur (même contrôle que la suppression).
+     */
+    public void updateOwnMessageInConversation(int conversationId, int messageId, int userId, String newBody)
+            throws SQLException {
+        String trimmed = newBody == null ? "" : newBody.trim();
+        if (trimmed.isEmpty()) {
+            throw new SQLException("Le message ne peut pas être vide.");
+        }
+        MessageEntity msg = messageRepository.findById(messageId)
+                .orElseThrow(() -> new SQLException("Message introuvable."));
+        if (msg.conversationId() != conversationId) {
+            throw new SQLException("Conversation incorrecte.");
+        }
+        if (msg.senderId() != userId) {
+            throw new SQLException("Vous ne pouvez modifier que vos propres messages.");
+        }
+        if (!isEditableUserMessageType(msg.type())) {
+            throw new SQLException("Ce message ne peut pas être modifié.");
+        }
+        messageRepository.update(messageId, trimmed, msg.type());
+        Connection c = conn();
+        if (c != null) {
+            touchConversation(c, conversationId);
+        }
+    }
+
+    /** Types de messages qu’un utilisateur peut modifier ou supprimer (ses propres envois). */
+    public static boolean messageTypeAllowsUserEdit(String type) {
+        return TYPE_MESSAGE.equals(type) || TYPE_CONSEIL.equals(type);
+    }
+
+    private static boolean isEditableUserMessageType(String type) {
+        return messageTypeAllowsUserEdit(type);
     }
 
     private static void touchConversation(Connection c, int conversationId) throws SQLException {

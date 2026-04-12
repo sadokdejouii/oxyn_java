@@ -3,19 +3,31 @@ package org.example.controllers;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
+import javafx.util.StringConverter;
 import org.example.discussion.ui.ChatBubble;
 import org.example.discussion.ui.ChatHeader;
+import org.example.discussion.ui.DiscussionInboxSortMode;
+import org.example.discussion.ui.InlineMessageEditor;
 import org.example.discussion.ui.MessageInput;
 import org.example.discussion.ui.UserListItemCell;
 import org.example.entities.ConversationInboxItem;
@@ -23,9 +35,13 @@ import org.example.entities.MessageRow;
 import org.example.services.DiscussionService;
 import org.example.services.SessionContext;
 
+import javafx.scene.control.DialogPane;
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class DiscussionPageController implements Initializable {
@@ -37,6 +53,9 @@ public class DiscussionPageController implements Initializable {
 
     @FXML
     private VBox conversationSidebar;
+
+    @FXML
+    private VBox inboxToolbarMount;
 
     @FXML
     private ListView<ConversationInboxItem> conversationList;
@@ -61,8 +80,18 @@ public class DiscussionPageController implements Initializable {
 
     private ChatHeader chatHeader;
 
+    private final ObservableList<ConversationInboxItem> inboxSource = FXCollections.observableArrayList();
+    private FilteredList<ConversationInboxItem> inboxFiltered;
+    private SortedList<ConversationInboxItem> inboxSorted;
+
+    private TextField inboxSearchField;
+    private ComboBox<DiscussionInboxSortMode> inboxSortCombo;
+    private CheckBox inboxUnreadOnlyCheck;
+
     private final DiscussionService discussionService = new DiscussionService();
     private int activeConversationId = -1;
+    /** Édition inline : id du message en cours, ou -1. */
+    private int editingMessageId = -1;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -74,6 +103,8 @@ public class DiscussionPageController implements Initializable {
             messageField.setDisable(true);
             sendButton.setDisable(true);
             updateThreadHeader("Équipe", "", "Sélectionnez une discussion à gauche.");
+            wireInboxDataModel();
+            mountInboxToolbar();
             wireInboxSelection(false);
             loadConversationList();
             statusLabel.setText("");
@@ -82,12 +113,18 @@ public class DiscussionPageController implements Initializable {
         if (ctx.isEncadrant()) {
             subtitleLabel.setText("Échangez avec vos clients — réponses enregistrées comme messages d’accompagnement.");
             updateThreadHeader("Messagerie", "", "Choisissez un contact pour afficher la conversation.");
+            wireInboxDataModel();
+            mountInboxToolbar();
             wireInboxSelection(true);
             loadConversationList();
             statusLabel.setText("");
         } else {
             subtitleLabel.setText("Échangez en direct avec votre encadrant.");
             updateThreadHeaderForClient(ctx);
+            if (inboxToolbarMount != null) {
+                inboxToolbarMount.setManaged(false);
+                inboxToolbarMount.setVisible(false);
+            }
             if (conversationSidebar != null) {
                 conversationSidebar.setVisible(false);
                 conversationSidebar.setManaged(false);
@@ -113,6 +150,100 @@ public class DiscussionPageController implements Initializable {
         mi.refreshButton().setOnAction(e -> handleRefresh());
 
         messagesBox.prefWidthProperty().bind(messagesScroll.widthProperty());
+    }
+
+    private void wireInboxDataModel() {
+        inboxFiltered = new FilteredList<>(inboxSource, p -> true);
+        inboxSorted = new SortedList<>(inboxFiltered);
+        inboxSorted.setComparator(DiscussionInboxSortMode.RECENT.comparator());
+        conversationList.setItems(inboxSorted);
+    }
+
+    private void mountInboxToolbar() {
+        if (inboxToolbarMount == null) {
+            return;
+        }
+        VBox toolbar = new VBox(12);
+        toolbar.getStyleClass().addAll("msg-inbox-toolbar", "planning-filter-toolbar", "planning-filter-panel");
+
+        inboxSearchField = new TextField();
+        inboxSearchField.setPromptText("Rechercher un contact, un e-mail ou un message…");
+        inboxSearchField.getStyleClass().add("planning-search-premium");
+
+        HBox row = new HBox(14);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("planning-filter-row");
+        Label tri = new Label("TRI");
+        tri.getStyleClass().add("planning-filter-label");
+        inboxSortCombo = new ComboBox<>(FXCollections.observableArrayList(DiscussionInboxSortMode.values()));
+        inboxSortCombo.setValue(DiscussionInboxSortMode.RECENT);
+        inboxSortCombo.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(inboxSortCombo, Priority.ALWAYS);
+        inboxSortCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(DiscussionInboxSortMode m) {
+                return m == null ? "" : m.label();
+            }
+
+            @Override
+            public DiscussionInboxSortMode fromString(String s) {
+                for (DiscussionInboxSortMode m : DiscussionInboxSortMode.values()) {
+                    if (m.label().equalsIgnoreCase(s)) {
+                        return m;
+                    }
+                }
+                return DiscussionInboxSortMode.RECENT;
+            }
+        });
+        inboxSortCombo.getStyleClass().add("planning-select-premium");
+
+        inboxUnreadOnlyCheck = new CheckBox("Non lus seulement");
+        inboxUnreadOnlyCheck.getStyleClass().addAll("msg-inbox-filter-check", "planning-filter-check");
+
+        row.getChildren().addAll(tri, inboxSortCombo, inboxUnreadOnlyCheck);
+        toolbar.getChildren().addAll(inboxSearchField, row);
+        inboxToolbarMount.getChildren().setAll(toolbar);
+
+        inboxSearchField.textProperty().addListener((o, a, b) -> applyInboxFilter());
+        inboxSortCombo.valueProperty().addListener((o, a, b) -> applyInboxSort());
+        inboxUnreadOnlyCheck.selectedProperty().addListener((o, a, b) -> applyInboxFilter());
+    }
+
+    private void applyInboxFilter() {
+        if (inboxFiltered == null) {
+            return;
+        }
+        String raw = inboxSearchField == null ? "" : inboxSearchField.getText();
+        String q = raw.trim().toLowerCase(Locale.ROOT);
+        boolean unreadOnly = inboxUnreadOnlyCheck != null && inboxUnreadOnlyCheck.isSelected();
+        inboxFiltered.setPredicate(item -> {
+            if (unreadOnly && !item.awaitingStaffReply()) {
+                return false;
+            }
+            if (q.isEmpty()) {
+                return true;
+            }
+            return textContains(item.clientName(), q)
+                    || textContains(item.clientEmail(), q)
+                    || textContains(item.lastMessagePreview(), q);
+        });
+    }
+
+    private static boolean textContains(String field, String q) {
+        if (field == null) {
+            return false;
+        }
+        return field.toLowerCase(Locale.ROOT).contains(q);
+    }
+
+    private void applyInboxSort() {
+        if (inboxSorted == null) {
+            return;
+        }
+        DiscussionInboxSortMode m = inboxSortCombo != null && inboxSortCombo.getValue() != null
+                ? inboxSortCombo.getValue()
+                : DiscussionInboxSortMode.RECENT;
+        inboxSorted.setComparator(m.comparator());
     }
 
     private void updateThreadHeader(String title, String subtitle, String status) {
@@ -162,15 +293,35 @@ public class DiscussionPageController implements Initializable {
     }
 
     private void loadConversationList() {
+        if (inboxFiltered == null) {
+            return;
+        }
         try {
+            int prev = activeConversationId;
             List<ConversationInboxItem> items = discussionService.listConversationInbox();
-            ObservableList<ConversationInboxItem> obs = FXCollections.observableArrayList(items);
-            conversationList.setItems(obs);
-            if (!items.isEmpty() && conversationList.getSelectionModel().getSelectedItem() == null) {
-                conversationList.getSelectionModel().selectFirst();
-            }
+            inboxSource.setAll(items);
+            applyInboxFilter();
+            applyInboxSort();
+            Platform.runLater(() -> restoreInboxSelection(prev));
         } catch (Exception e) {
             statusLabel.setText("Impossible de charger la liste des discussions.");
+        }
+    }
+
+    private void restoreInboxSelection(int previousConversationId) {
+        if (inboxSorted == null || conversationList == null) {
+            return;
+        }
+        if (previousConversationId > 0) {
+            for (ConversationInboxItem it : inboxSorted) {
+                if (it.conversationId() == previousConversationId) {
+                    conversationList.getSelectionModel().select(it);
+                    return;
+                }
+            }
+        }
+        if (!inboxSorted.isEmpty() && conversationList.getSelectionModel().getSelectedItem() == null) {
+            conversationList.getSelectionModel().selectFirst();
         }
     }
 
@@ -181,6 +332,7 @@ public class DiscussionPageController implements Initializable {
                 discussionService.assignEncadrantToConversation(item.conversationId(), ctx.getUserId());
             }
             activeConversationId = item.conversationId();
+            editingMessageId = -1;
             String sub = item.clientEmail() != null && !item.clientEmail().isBlank() ? item.clientEmail() : "";
             if (chatHeader != null) {
                 chatHeader.update(item.clientName(), sub, item.presenceLabel(), initials(item.clientName()));
@@ -231,16 +383,95 @@ public class DiscussionPageController implements Initializable {
         try {
             List<MessageRow> rows = discussionService.loadMessages(activeConversationId, 0);
             SessionContext ctx = SessionContext.getInstance();
+            Window owner = messagesScroll.getScene() != null ? messagesScroll.getScene().getWindow() : null;
             for (MessageRow m : rows) {
                 boolean mine = ctx.hasDbUser() && m.senderId() == ctx.getUserId();
                 String timeStr = m.createdAt() != null ? TIME.format(m.createdAt()) : "";
                 String peerIni = initials(m.senderName());
+                boolean showMenu = mine
+                        && !ctx.isAdmin()
+                        && ctx.hasDbUser()
+                        && DiscussionService.messageTypeAllowsUserEdit(m.type());
+                if (showMenu && m.id() == editingMessageId) {
+                    messagesBox.getChildren().add(InlineMessageEditor.createMineRow(
+                            m,
+                            messagesBox.widthProperty(),
+                            text -> commitInlineEdit(m, text),
+                            this::cancelInlineEdit));
+                    continue;
+                }
+                Runnable onEdit = showMenu ? () -> startInlineEdit(m) : null;
+                Runnable onDelete = showMenu ? () -> offerDeleteMessage(owner, m) : null;
                 messagesBox.getChildren().add(
-                        ChatBubble.createRow(m, mine, timeStr, peerIni, messagesBox.widthProperty()));
+                        ChatBubble.createRow(m, mine, timeStr, peerIni, messagesBox.widthProperty(), showMenu, onEdit, onDelete));
             }
             Platform.runLater(() -> messagesScroll.setVvalue(1.0));
         } catch (Exception ignored) {
             appendSystem("Impossible de charger les messages pour le moment. Réessayez dans un instant.");
+        }
+    }
+
+    private void startInlineEdit(MessageRow m) {
+        editingMessageId = m.id();
+        reloadMessages();
+    }
+
+    private void cancelInlineEdit() {
+        editingMessageId = -1;
+        reloadMessages();
+    }
+
+    private void commitInlineEdit(MessageRow m, String newText) {
+        try {
+            discussionService.updateOwnMessageInConversation(
+                    activeConversationId,
+                    m.id(),
+                    SessionContext.getInstance().getUserId(),
+                    newText);
+            editingMessageId = -1;
+            reloadMessages();
+            refreshStaffInbox();
+        } catch (SQLException ex) {
+            alert(ex.getMessage() != null ? ex.getMessage() : "Modification impossible.");
+        }
+    }
+
+    private void offerDeleteMessage(Window owner, MessageRow m) {
+        ButtonType supprimer = new ButtonType("Supprimer", ButtonBar.ButtonData.OK_DONE);
+        ButtonType annuler = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        Alert conf = new Alert(Alert.AlertType.CONFIRMATION,
+                "Ce message sera retiré définitivement de la conversation pour tous les participants.",
+                annuler,
+                supprimer);
+        conf.initOwner(owner);
+        conf.setTitle("Supprimer le message");
+        conf.setHeaderText("Confirmer la suppression ?");
+        DialogPane dp = conf.getDialogPane();
+        dp.getStyleClass().add("msg-confirm-dialog");
+        URL css = getClass().getResource("/css/planning-discussion-page.css");
+        if (css != null) {
+            dp.getStylesheets().add(css.toExternalForm());
+        }
+        Optional<ButtonType> r = conf.showAndWait();
+        if (r.isEmpty() || r.get() != supprimer) {
+            return;
+        }
+        try {
+            discussionService.deleteOwnMessageInConversation(
+                    activeConversationId,
+                    m.id(),
+                    SessionContext.getInstance().getUserId());
+            reloadMessages();
+            refreshStaffInbox();
+        } catch (SQLException ex) {
+            alert(ex.getMessage() != null ? ex.getMessage() : "Suppression impossible.");
+        }
+    }
+
+    private void refreshStaffInbox() {
+        SessionContext ctx = SessionContext.getInstance();
+        if (ctx.isEncadrant() || ctx.isAdmin()) {
+            loadConversationList();
         }
     }
 
@@ -258,7 +489,7 @@ public class DiscussionPageController implements Initializable {
     private void appendSystem(String s) {
         HBox wrap = new HBox();
         wrap.setAlignment(Pos.CENTER);
-        wrap.setPadding(new javafx.geometry.Insets(10, 20, 10, 20));
+        wrap.setPadding(new Insets(10, 20, 10, 20));
         Label l = new Label(s);
         l.setWrapText(true);
         l.getStyleClass().add("msg-system-line");
@@ -269,6 +500,10 @@ public class DiscussionPageController implements Initializable {
     private static void alert(String msg) {
         Alert a = new Alert(Alert.AlertType.WARNING);
         a.setContentText(msg);
+        URL css = DiscussionPageController.class.getResource("/css/planning-discussion-page.css");
+        if (css != null) {
+            a.getDialogPane().getStylesheets().add(css.toExternalForm());
+        }
         a.showAndWait();
     }
 }

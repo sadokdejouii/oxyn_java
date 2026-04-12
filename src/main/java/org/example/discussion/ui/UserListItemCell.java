@@ -23,7 +23,9 @@ public final class UserListItemCell extends ListCell<ConversationInboxItem> {
     private final StackPane avatar = new StackPane();
     private final Label avText = new Label();
     private final VBox textCol = new VBox(4);
+    private final HBox nameRow = new HBox(8);
     private final Label name = new Label();
+    private final Label awaitPill = new Label("À répondre");
     private final Label preview = new Label();
     private final HBox metaRow = new HBox(8);
     private final Label time = new Label();
@@ -37,18 +39,24 @@ public final class UserListItemCell extends ListCell<ConversationInboxItem> {
         avatar.getStyleClass().add("msg-user-item-avatar");
         avText.getStyleClass().add("msg-user-item-avatar-text");
         avatar.getChildren().add(avText);
+        nameRow.setAlignment(Pos.CENTER_LEFT);
         name.getStyleClass().add("msg-user-item-name");
+        name.setTextOverrun(OverrunStyle.ELLIPSIS);
+        HBox.setHgrow(name, Priority.ALWAYS);
+        name.setMaxWidth(Double.MAX_VALUE);
+        awaitPill.getStyleClass().add("msg-inbox-await-pill");
+        awaitPill.setManaged(false);
+        awaitPill.setVisible(false);
+        nameRow.getChildren().addAll(name, awaitPill);
         preview.getStyleClass().add("msg-user-item-preview");
         preview.setWrapText(true);
         preview.setTextOverrun(OverrunStyle.ELLIPSIS);
         preview.setMaxWidth(200);
-        name.setTextOverrun(OverrunStyle.ELLIPSIS);
-        name.setMaxWidth(200);
         time.getStyleClass().add("msg-user-item-time");
         presence.getStyleClass().add("msg-user-item-presence");
         metaRow.setAlignment(Pos.CENTER_LEFT);
         metaRow.getChildren().addAll(time, presence);
-        textCol.getChildren().addAll(name, preview, metaRow);
+        textCol.getChildren().addAll(nameRow, preview, metaRow);
         HBox.setHgrow(textCol, Priority.ALWAYS);
         root.getChildren().addAll(avatar, textCol);
     }
@@ -62,6 +70,9 @@ public final class UserListItemCell extends ListCell<ConversationInboxItem> {
         }
         avText.setText(initials(item.clientName()));
         name.setText(item.clientName());
+        boolean awaiting = item.awaitingStaffReply();
+        awaitPill.setVisible(awaiting);
+        awaitPill.setManaged(awaiting);
         preview.setText(item.lastMessagePreview() != null ? item.lastMessagePreview() : "");
         time.setText(item.lastMessageAt() != null ? TIME.format(item.lastMessageAt()) : "");
         presence.setText(item.presenceLabel());

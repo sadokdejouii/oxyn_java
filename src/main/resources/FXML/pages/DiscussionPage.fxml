@@ -34,6 +34,7 @@
                         <Label styleClass="msg-user-list-title" text="Discussions" />
                         <Label styleClass="msg-user-list-sub" text="Vos contacts" wrapText="true" />
                     </VBox>
+                    <VBox fx:id="inboxToolbarMount" styleClass="msg-inbox-toolbar-host" maxWidth="Infinity" />
                     <ListView fx:id="conversationList" VBox.vgrow="ALWAYS" styleClass="msg-user-listview" />
                 </VBox>
                 <!-- Colonne chat -->

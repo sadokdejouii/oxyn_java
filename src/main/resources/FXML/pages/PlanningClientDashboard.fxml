@@ -59,17 +59,7 @@
                     <Label fx:id="lblDashActivite" styleClass="saas-stat-v" wrapText="true" text="—" />
                     <Label styleClass="saas-stat-sub" text="Niveau déclaré" wrapText="true" />
                 </VBox>
-                <VBox styleClass="saas-stat-card saas-stat--orange" spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <StackPane styleClass="saas-stat-icon-wrap">
-                            <FontIcon iconLiteral="fas-chart-line" iconSize="14" styleClass="saas-stat-icon" />
-                        </StackPane>
-                        <Label styleClass="saas-stat-k" text="Progression" wrapText="true" />
-                    </HBox>
-                    <Label fx:id="lblKpiProgressPct" styleClass="saas-stat-v" wrapText="true" text="—" />
-                    <Label fx:id="lblKpiProgressSub" styleClass="saas-stat-sub" wrapText="true" text="" />
-                </VBox>
-                <VBox styleClass="saas-stat-card saas-stat--purple" spacing="6" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                <VBox styleClass="saas-stat-card saas-stat--purple" spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.columnSpan="2">
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <StackPane styleClass="saas-stat-icon-wrap">
                             <FontIcon iconLiteral="fas-bullseye" iconSize="14" styleClass="saas-stat-icon" />

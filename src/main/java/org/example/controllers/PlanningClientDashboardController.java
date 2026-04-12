@@ -68,10 +68,6 @@ public final class PlanningClientDashboardController {
     @FXML
     private Label lblObjectifPrincipal;
     @FXML
-    private Label lblKpiProgressPct;
-    @FXML
-    private Label lblKpiProgressSub;
-    @FXML
     private Label lblNoProgram;
     @FXML
     private VBox programmeKcalHero;
@@ -328,15 +324,6 @@ public final class PlanningClientDashboardController {
         return l;
     }
 
-    private void syncKpiProgress(String pctText, String subText) {
-        if (lblKpiProgressPct != null) {
-            lblKpiProgressPct.setText(pctText);
-        }
-        if (lblKpiProgressSub != null) {
-            lblKpiProgressSub.setText(subText != null ? subText : "");
-        }
-    }
-
     private void fillProgression(Optional<ObjectifRow> obj, WeeklyTaskSummary tasks) {
         boolean hasTasks = tasks.total() > 0;
         if (!hasTasks && obj.isEmpty()) {
@@ -345,9 +332,7 @@ public final class PlanningClientDashboardController {
             lblNoObjectif.setVisible(true);
             lblNoObjectif.setManaged(true);
             lblNoObjectif.setText("Pas encore d’objectif ni de tâches pour cette semaine — elles seront créées automatiquement lorsque votre fiche est complète.");
-            syncKpiProgress("—", "");
             applyProgressHeroPctStyle(-1);
-            applyKpiTilePctStyle(-1);
             if (weekProgressChart != null) {
                 weekProgressChart.getData().clear();
             }
@@ -396,9 +381,7 @@ public final class PlanningClientDashboardController {
             detail = "Semaine courante · suivi des tâches";
         }
         lblDashProgressDetail.setText(detail);
-        syncKpiProgress(pct, detail);
         applyProgressHeroPctStyle(taux);
-        applyKpiTilePctStyle(taux);
 
         double p = Math.min(1, Math.max(0, taux / 100.0));
         progressWeek.setProgress(p);
@@ -448,25 +431,6 @@ public final class PlanningClientDashboardController {
             lblDashProgressPct.getStyleClass().add("pcd-progress-hero-pct--warn");
         } else {
             lblDashProgressPct.getStyleClass().add("pcd-progress-hero-pct--bad");
-        }
-    }
-
-    /** Couleur du pourcentage dans la tuile KPI « Progression ». */
-    private void applyKpiTilePctStyle(double taux) {
-        if (lblKpiProgressPct == null) {
-            return;
-        }
-        lblKpiProgressPct.getStyleClass().removeIf(c -> c.startsWith("saas-stat-pct--"));
-        if (taux < 0 || Double.isNaN(taux)) {
-            lblKpiProgressPct.getStyleClass().add("saas-stat-pct--na");
-            return;
-        }
-        if (taux >= 75) {
-            lblKpiProgressPct.getStyleClass().add("saas-stat-pct--good");
-        } else if (taux >= 40) {
-            lblKpiProgressPct.getStyleClass().add("saas-stat-pct--warn");
-        } else {
-            lblKpiProgressPct.getStyleClass().add("saas-stat-pct--bad");
         }
     }
 

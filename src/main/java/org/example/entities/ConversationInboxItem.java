@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 /**
  * Élément de liste type Messenger (conversation + dernier message).
+ *
+ * @param lastSenderId expéditeur du dernier message (null si aucun message) — sert au tri « non lus » côté staff.
  */
 public record ConversationInboxItem(
         int conversationId,
@@ -13,8 +15,16 @@ public record ConversationInboxItem(
         String clientEmail,
         String lastMessagePreview,
         LocalDateTime lastMessageAt,
-        LocalDateTime conversationUpdatedAt
+        LocalDateTime conversationUpdatedAt,
+        Integer lastSenderId
 ) {
+    /**
+     * Dernier message émis par le client : l’encadrant / l’admin peut considérer la conversation comme « à traiter ».
+     */
+    public boolean awaitingStaffReply() {
+        return lastSenderId != null && lastSenderId == clientId;
+    }
+
     public String presenceLabel() {
         LocalDateTime ref = lastMessageAt != null ? lastMessageAt : conversationUpdatedAt;
         if (ref == null) {

@@ -8,6 +8,8 @@
     -fx-padding: 0 0 4 0;
 }
 
+/* Filtres / tri : voir planning-saas-theme (.planning-filter-panel, .planning-select-premium, …) */
+
 .eph-title {
     -fx-font-size: 22px;
     -fx-font-weight: bold;

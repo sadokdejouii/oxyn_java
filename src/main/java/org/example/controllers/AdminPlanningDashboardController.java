@@ -1,11 +1,15 @@
 package org.example.controllers;
 
 import javafx.animation.FadeTransition;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -13,13 +17,17 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.util.StringConverter;
 import org.example.model.planning.admin.AdminPlanningModuleStats;
 import org.example.model.planning.admin.AdminPlanningUserRow;
 import org.example.services.AdminPlanningDashboardService;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Vue admin Planning — KPI + grille de cartes utilisateurs (sans tableau).
@@ -47,31 +55,67 @@ public final class AdminPlanningDashboardController {
     @FXML
     private Region detailDim;
     @FXML
+    private Label detailEyebrow;
+    @FXML
     private Label detailAvatarLetter;
     @FXML
     private Label detailName;
     @FXML
     private Label detailEmail;
     @FXML
-    private Label detailRole;
+    private Label detailRoleChip;
     @FXML
-    private Label detailFiche;
+    private Label detailGenreVal;
     @FXML
-    private Label detailProg;
+    private Label detailAgeVal;
     @FXML
-    private Label detailTaches;
+    private Label detailPoidsVal;
     @FXML
-    private Label detailExtra;
+    private Label detailProgrammeVal;
+    @FXML
+    private Label detailProgrammeHint;
+    @FXML
+    private Label detailTachesVal;
+    @FXML
+    private Label detailObjectifVal;
+    @FXML
+    private Label detailActiviteVal;
     @FXML
     private Button btnDetailClose;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<AdminPlanningSort> sortCombo;
+    @FXML
+    private Label lblMatchHint;
 
     private final AdminPlanningDashboardService service = new AdminPlanningDashboardService();
+    private final List<AdminPlanningUserRow> loadedRows = new ArrayList<>();
     private boolean overlayWired;
 
     public void setup() {
         wireDetailOverlay();
+        wireSearchAndSort();
         btnRefresh.setOnAction(e -> loadAll());
         loadAll();
+    }
+
+    private void wireSearchAndSort() {
+        sortCombo.setItems(FXCollections.observableArrayList(AdminPlanningSort.values()));
+        sortCombo.getSelectionModel().selectFirst();
+        sortCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(AdminPlanningSort object) {
+                return object == null ? "" : object.label;
+            }
+
+            @Override
+            public AdminPlanningSort fromString(String string) {
+                return null;
+            }
+        });
+        searchField.textProperty().addListener((o, a, b) -> applySearchSortAndRender());
+        sortCombo.valueProperty().addListener((o, a, b) -> applySearchSortAndRender());
     }
 
     private void wireDetailOverlay() {
@@ -81,18 +125,28 @@ public final class AdminPlanningDashboardController {
         overlayWired = true;
         btnDetailClose.setOnAction(e -> hideDetail());
         detailDim.setOnMouseClicked(e -> hideDetail());
+        btnDetailClose.setTooltip(new Tooltip("Fermer"));
     }
 
     private void showDetail(AdminPlanningUserRow row) {
-        detailName.setText(row.displayName());
-        detailEmail.setText(row.email() != null ? row.email() : "—");
-        detailRole.setText("Rôle : " + row.roleSummary());
-        detailFiche.setText("Fiche santé : genre " + dash(row.genre())
-                + " · âge " + (row.age() != null ? row.age() + " ans" : "—")
-                + " · poids " + (row.poids() != null ? row.poids() + " kg" : "—"));
-        detailProg.setText("Programme généré : " + (row.programmeGenere() ? "Oui" : "Non"));
-        detailTaches.setText("Tâches enregistrées (total) : " + row.nbTaches());
-        detailExtra.setText("Objectif : " + dash(row.objectif()) + "\nActivité : " + dash(row.niveauActivite()));
+        if (detailEyebrow != null) {
+            detailEyebrow.setText("Planning · compte n° " + row.userId());
+        }
+        detailName.setText(row.displayName() != null && !row.displayName().isBlank() ? row.displayName() : "—");
+        detailEmail.setText(row.email() != null && !row.email().isBlank() ? row.email() : "—");
+        detailRoleChip.setText(row.roleSummary() != null ? row.roleSummary() : "—");
+        detailGenreVal.setText(formatGenre(row.genre()));
+        detailAgeVal.setText(row.age() != null ? row.age() + " ans" : "—");
+        detailPoidsVal.setText(formatPoids(row.poids()));
+        detailProgrammeVal.setText(row.programmeGenere() ? "Oui" : "Non");
+        detailProgrammeVal.getStyleClass().removeAll("apd-detail-stat-v--yes", "apd-detail-stat-v--no");
+        detailProgrammeVal.getStyleClass().add(row.programmeGenere() ? "apd-detail-stat-v--yes" : "apd-detail-stat-v--no");
+        detailProgrammeHint.setText(row.programmeGenere()
+                ? "Programme personnalisé présent en base."
+                : "Aucun programme généré enregistré pour ce compte.");
+        detailTachesVal.setText(String.valueOf(row.nbTaches()));
+        detailObjectifVal.setText(formatObjectif(row.objectif()));
+        detailActiviteVal.setText(formatNiveauActivite(row.niveauActivite()));
         detailAvatarLetter.setText(initials(row.displayName()));
         detailOverlay.setManaged(true);
         detailOverlay.setVisible(true);
@@ -134,9 +188,10 @@ public final class AdminPlanningDashboardController {
             lblStatConv.setText(String.valueOf(s.conversationsSuivi()));
             lblStatMsg.setText(String.valueOf(s.messagesSuivi()));
 
-            List<AdminPlanningUserRow> rows = service.listUsersWithPlanningActivity();
-            lblStatUsers.setText(String.valueOf(rows.size()));
-            rebuildUserCards(rows);
+            loadedRows.clear();
+            loadedRows.addAll(service.listUsersWithPlanningActivity());
+            lblStatUsers.setText(String.valueOf(loadedRows.size()));
+            applySearchSortAndRender();
         } catch (SQLException ex) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setTitle("Planning admin");
@@ -146,10 +201,99 @@ public final class AdminPlanningDashboardController {
         }
     }
 
-    private void rebuildUserCards(List<AdminPlanningUserRow> rows) {
+    private void applySearchSortAndRender() {
+        String raw = searchField.getText() == null ? "" : searchField.getText().trim();
+        String q = raw.toLowerCase(Locale.ROOT);
+        AdminPlanningSort sort = sortCombo.getValue() != null ? sortCombo.getValue() : AdminPlanningSort.NAME_ASC;
+
+        List<AdminPlanningUserRow> filtered = new ArrayList<>();
+        for (AdminPlanningUserRow r : loadedRows) {
+            if (matchesSearch(r, q)) {
+                filtered.add(r);
+            }
+        }
+        filtered.sort(sort.comparator);
+
+        int n = loadedRows.size();
+        int m = filtered.size();
+        updateMatchHint(n, m);
+
         userCardsHost.getChildren().clear();
-        for (AdminPlanningUserRow row : rows) {
+        if (n == 0) {
+            return;
+        }
+        if (m == 0) {
+            Label none = new Label("Aucun utilisateur ne correspond à votre recherche.");
+            none.setWrapText(true);
+            none.getStyleClass().add("apd-empty-filter");
+            userCardsHost.getChildren().add(none);
+            return;
+        }
+        for (AdminPlanningUserRow row : filtered) {
             userCardsHost.getChildren().add(buildUserCard(row));
+        }
+    }
+
+    private void updateMatchHint(int total, int shown) {
+        if (lblMatchHint == null) {
+            return;
+        }
+        if (total == 0) {
+            lblMatchHint.setText("");
+            return;
+        }
+        if (shown == total) {
+            lblMatchHint.setText(shown == 1 ? "1 utilisateur" : shown + " utilisateurs");
+        } else {
+            lblMatchHint.setText(shown + " sur " + total + " affichés");
+        }
+    }
+
+    private static boolean matchesSearch(AdminPlanningUserRow r, String q) {
+        if (q.isEmpty()) {
+            return true;
+        }
+        return contains(r.displayName(), q)
+                || contains(r.email(), q)
+                || contains(r.roleSummary(), q)
+                || contains(r.genre(), q)
+                || contains(r.objectif(), q)
+                || contains(r.niveauActivite(), q)
+                || q.equals("oui") && r.programmeGenere()
+                || q.equals("non") && !r.programmeGenere();
+    }
+
+    private static boolean contains(String field, String q) {
+        if (field == null) {
+            return false;
+        }
+        return field.toLowerCase(Locale.ROOT).contains(q);
+    }
+
+    private enum AdminPlanningSort {
+        NAME_ASC("Nom (A → Z)", Comparator
+                .comparing(AdminPlanningUserRow::displayName, String.CASE_INSENSITIVE_ORDER)),
+        NAME_DESC("Nom (Z → A)", Comparator
+                .comparing(AdminPlanningUserRow::displayName, String.CASE_INSENSITIVE_ORDER)
+                .reversed()),
+        TASKS_DESC("Tâches enregistrées (↓)", Comparator
+                .comparingInt(AdminPlanningUserRow::nbTaches).reversed()
+                .thenComparing(AdminPlanningUserRow::displayName, String.CASE_INSENSITIVE_ORDER)),
+        TASKS_ASC("Tâches enregistrées (↑)", Comparator
+                .comparingInt(AdminPlanningUserRow::nbTaches)
+                .thenComparing(AdminPlanningUserRow::displayName, String.CASE_INSENSITIVE_ORDER)),
+        PROGRAMME_FIRST("Programme généré d’abord", Comparator
+                .comparing(AdminPlanningUserRow::programmeGenere).reversed()
+                .thenComparing(AdminPlanningUserRow::displayName, String.CASE_INSENSITIVE_ORDER)),
+        ROLE_ASC("Rôle (A → Z)", Comparator
+                .comparing(AdminPlanningUserRow::roleSummary, String.CASE_INSENSITIVE_ORDER));
+
+        private final String label;
+        private final Comparator<AdminPlanningUserRow> comparator;
+
+        AdminPlanningSort(String label, Comparator<AdminPlanningUserRow> comparator) {
+            this.label = label;
+            this.comparator = comparator;
         }
     }
 
@@ -217,4 +361,76 @@ public final class AdminPlanningDashboardController {
         return s == null || s.isBlank() ? "—" : s;
     }
 
+    private static String formatPoids(Double kg) {
+        if (kg == null) {
+            return "—";
+        }
+        double v = kg;
+        if (Math.abs(v - Math.rint(v)) < 1e-6) {
+            return String.format(Locale.FRANCE, "%.0f kg", v);
+        }
+        return String.format(Locale.FRANCE, "%.1f kg", v);
+    }
+
+    private static String formatGenre(String g) {
+        if (g == null || g.isBlank()) {
+            return "—";
+        }
+        String x = g.trim();
+        if (x.equalsIgnoreCase("M") || x.equalsIgnoreCase("H")) {
+            return "Masculin";
+        }
+        if (x.equalsIgnoreCase("F")) {
+            return "Féminin";
+        }
+        return x;
+    }
+
+    private static String formatObjectif(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "—";
+        }
+        String k = raw.trim().toLowerCase(Locale.ROOT).replace(' ', '_');
+        return switch (k) {
+            case "perte_poids", "perte-de-poids" -> "Perte de poids";
+            case "prise_masse", "prise-masse" -> "Prise de masse";
+            case "maintien" -> "Maintien";
+            case "forme", "remise_en_forme" -> "Remise en forme";
+            case "endurance" -> "Endurance";
+            default -> humanizeSnake(raw.trim());
+        };
+    }
+
+    private static String formatNiveauActivite(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "—";
+        }
+        String k = raw.trim().toLowerCase(Locale.ROOT).replace(' ', '_');
+        return switch (k) {
+            case "sedentaire", "sédentaire" -> "Sédentaire";
+            case "peu_actif", "peu-actif" -> "Peu actif";
+            case "modere", "modéré", "moyen" -> "Modéré";
+            case "actif" -> "Actif";
+            case "tres_actif", "très_actif", "tres-actif" -> "Très actif";
+            default -> humanizeSnake(raw.trim());
+        };
+    }
+
+    private static String humanizeSnake(String s) {
+        String[] p = s.replace('-', '_').split("_");
+        StringBuilder b = new StringBuilder();
+        for (String part : p) {
+            if (part.isBlank()) {
+                continue;
+            }
+            if (b.length() > 0) {
+                b.append(' ');
+            }
+            b.append(Character.toUpperCase(part.charAt(0)));
+            if (part.length() > 1) {
+                b.append(part.substring(1).toLowerCase(Locale.ROOT));
+            }
+        }
+        return b.length() == 0 ? s : b.toString();
+    }
 }
