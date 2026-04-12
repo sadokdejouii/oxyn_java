@@ -19,7 +19,9 @@ import org.example.entities.PanierSession;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
 import org.example.services.SessionContext;
+import org.example.services.UserRole;
 import org.example.utils.AdresseCommandeValidator;
+import org.example.utils.CommandeClientResolver;
 import org.example.utils.ProductImageStorage;
 
 import java.time.LocalDateTime;
@@ -168,7 +170,16 @@ public class PanierController {
             showAlert(Alert.AlertType.INFORMATION, "Panier vide", "Ajoutez des produits depuis la boutique avant de valider.");
             return;
         }
-        int idClient = SessionContext.getInstance().getClientDatabaseId();
+        SessionContext session = SessionContext.getInstance();
+        if (session.getRole() != UserRole.CLIENT) {
+            showAlert(Alert.AlertType.WARNING, "Compte non autorisé", "Seuls les clients peuvent valider une commande depuis le panier.");
+            return;
+        }
+        int idClient = CommandeClientResolver.idClientConnecte();
+        if (idClient <= 0) {
+            showAlert(Alert.AlertType.ERROR, "Session", "Identifiant client introuvable. Déconnectez-vous puis reconnectez-vous.");
+            return;
+        }
         commandes commande = new commandes(
                 LocalDateTime.now().format(DATE_HEURE),
                 panier.getTotal(),

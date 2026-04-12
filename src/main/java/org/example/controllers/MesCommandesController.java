@@ -19,7 +19,9 @@ import org.example.entities.LigneCommandeAffichage;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
 import org.example.services.SessionContext;
+import org.example.services.UserRole;
 import org.example.utils.AdresseCommandeValidator;
+import org.example.utils.CommandeClientResolver;
 import org.example.utils.TexteRecherche;
 
 import java.sql.SQLException;
@@ -115,7 +117,7 @@ public class MesCommandesController {
             return;
         }
         final int idCommande = commandeEditionAdresse.getId_commande();
-        final int clientId = SessionContext.getInstance().getClientDatabaseId();
+        final int clientId = CommandeClientResolver.idClientConnecte();
 
         String err = AdresseCommandeValidator.valider(editAdresseArea.getText());
         if (err != null) {
@@ -168,7 +170,24 @@ public class MesCommandesController {
     }
 
     private void refresh() {
-        int clientId = SessionContext.getInstance().getClientDatabaseId();
+        SessionContext session = SessionContext.getInstance();
+        if (session.getRole() != UserRole.CLIENT) {
+            ordersContainer.getChildren().clear();
+            Label msg = new Label("Cette page est réservée aux comptes client.");
+            msg.getStyleClass().add("page-hero-sub");
+            msg.setWrapText(true);
+            ordersContainer.getChildren().add(msg);
+            return;
+        }
+        int clientId = CommandeClientResolver.idClientConnecte();
+        if (clientId <= 0) {
+            ordersContainer.getChildren().clear();
+            Label msg = new Label("Session client invalide. Déconnectez-vous puis reconnectez-vous.");
+            msg.setStyle("-fx-text-fill: #c62828;");
+            msg.setWrapText(true);
+            ordersContainer.getChildren().add(msg);
+            return;
+        }
         try {
             toutesMesCommandes.clear();
             toutesMesCommandes.addAll(commandesService.afficherParClient(clientId));
@@ -392,7 +411,7 @@ public class MesCommandesController {
         if (res.isEmpty() || res.get() != ButtonType.OK) {
             return;
         }
-        int clientId = SessionContext.getInstance().getClientDatabaseId();
+        int clientId = CommandeClientResolver.idClientConnecte();
         try {
             boolean ok = commandesService.annulerCommande(idCommande, clientId);
             if (ok) {

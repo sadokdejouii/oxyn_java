@@ -11,8 +11,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/admin-commandes.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AdminCommandesController">
-    <VBox spacing="22" styleClass="page-root admin-commandes-root">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/admin-commandes.css,@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AdminCommandesController">
+    <VBox spacing="22" styleClass="page-root admin-commandes-root product-form-page">
         <padding>
             <Insets bottom="24" left="8" right="8" top="8" />
         </padding>
@@ -30,7 +30,7 @@
 
         <Label fx:id="purgeInfoLabel" managed="false" styleClass="saas-stat-hint" visible="false" wrapText="true" />
 
-        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="toolbar-card">
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="toolbar-card product-form-toolbar">
             <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser" />
             <Region prefWidth="12" />
             <Label styleClass="product-form-field-label" text="Recherche" />

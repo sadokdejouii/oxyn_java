@@ -1,6 +1,24 @@
 /* ═══════════════════════════════════════════════════════════════════
-   OXYN — Formulaires produit (ajout / modification)
+   OXYN — Formulaires produit / commande (thème back-office sombre +
+   champs clairs, boutons teal, sections typées)
    ═══════════════════════════════════════════════════════════════════ */
+
+.product-form-page {
+    -fx-font-family: "Segoe UI", "Inter", system-ui, sans-serif;
+}
+
+/* Titres de page (fenêtres chargées avec seulement product-form.css) */
+.product-form-page .page-hero-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255, 255, 255, 0.97);
+}
+
+.product-form-page .page-hero-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: rgba(185, 200, 220, 0.92);
+    -fx-wrap-text: true;
+}
 
 .product-form-outer {
     -fx-padding: 8 12 28 12;
@@ -31,6 +49,16 @@
     -fx-wrap-text: false;
 }
 
+/* Barre d’actions type fiche (alignée maquette) */
+.product-form-page .toolbar-card {
+    -fx-background-color: rgba(13, 27, 62, 0.35);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 12 16;
+}
+
 /* Carte de section */
 .product-form-section {
     -fx-spacing: 0;
@@ -55,14 +83,14 @@
 .product-form-section-kicker {
     -fx-font-size: 10px;
     -fx-letter-spacing: 0.12em;
-    -fx-text-fill: rgba(0, 191, 255, 0.75);
+    -fx-text-fill: rgba(0, 191, 255, 0.85);
     -fx-font-weight: bold;
 }
 
 .product-form-section-title {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-text-fill: rgba(255, 255, 255, 0.95);
+    -fx-text-fill: rgba(255, 255, 255, 0.96);
 }
 
 .product-form-section-body {
@@ -75,46 +103,50 @@
     -fx-opacity: 0.35;
 }
 
-/* Grille 2 colonnes (prix / stock, statut / date) */
 .product-form-grid {
     -fx-hgap: 20px;
     -fx-vgap: 16px;
 }
 
-/* Champs */
 .product-form-field-label {
     -fx-font-size: 12px;
-    -fx-text-fill: rgba(200, 214, 232, 0.92);
+    -fx-text-fill: rgba(220, 232, 248, 0.95);
     -fx-font-weight: bold;
 }
 
 .product-form-hint {
     -fx-font-size: 11px;
-    -fx-text-fill: rgba(160, 180, 204, 0.72);
+    -fx-text-fill: rgba(160, 180, 204, 0.78);
     -fx-wrap-text: true;
     -fx-padding: 4 0 0 0;
     -fx-line-spacing: 2px;
 }
 
+/* ─── Champs clairs (contraste sur fond sombre) ─── */
 .form-input {
-    -fx-background-color: rgba(13, 27, 62, 0.85);
-    -fx-background-radius: 10px;
-    -fx-border-color: rgba(79, 195, 247, 0.22);
-    -fx-border-radius: 10px;
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-border-color: rgba(90, 110, 140, 0.4);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
     -fx-border-width: 1px;
-    -fx-text-fill: #FFFFFF;
-    -fx-prompt-text-fill: rgba(160, 180, 204, 0.55);
+    -fx-text-fill: #0d1b3e;
+    -fx-prompt-text-fill: rgba(13, 27, 62, 0.42);
     -fx-font-size: 14px;
     -fx-padding: 10 14;
 }
 
 .form-input:focused {
-    -fx-border-color: rgba(0, 191, 255, 0.55);
-    -fx-background-color: rgba(13, 27, 62, 0.95);
+    -fx-border-color: rgba(0, 168, 176, 0.95);
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 180, 190, 0.22), 8, 0.2, 0, 0);
 }
 
 .form-input:disabled {
-    -fx-opacity: 0.65;
+    -fx-background-color: #f0f4f8;
+    -fx-control-inner-background: #f0f4f8;
+    -fx-text-fill: rgba(13, 27, 62, 0.5);
+    -fx-opacity: 1;
 }
 
 .text-area.form-input {
@@ -122,27 +154,96 @@
 }
 
 .text-area.form-input .content {
-    -fx-background-color: transparent;
+    -fx-background-color: #ffffff;
 }
 
 .combo-box.form-input,
 .combo-box-base.form-input {
-    -fx-background-color: rgba(13, 27, 62, 0.85);
-    -fx-background-radius: 10px;
-    -fx-border-color: rgba(79, 195, 247, 0.22);
-    -fx-border-radius: 10px;
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-border-color: rgba(90, 110, 140, 0.4);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
     -fx-border-width: 1px;
     -fx-font-size: 14px;
 }
 
 .combo-box.form-input .list-cell,
 .combo-box-base.form-input .list-cell {
-    -fx-text-fill: #FFFFFF;
-    -fx-background-color: transparent;
+    -fx-text-fill: #0d1b3e;
+    -fx-background-color: #ffffff;
 }
 
 .combo-box.form-input:hover,
 .combo-box-base.form-input:hover {
+    -fx-border-color: rgba(0, 168, 176, 0.65);
+}
+
+.combo-box.form-input:focused,
+.combo-box-base.form-input:focused {
+    -fx-border-color: rgba(0, 168, 176, 0.95);
+}
+
+/* Toolbar recherche / tri (Mes commandes, etc.) */
+.product-form-page .toolbar-card .text-field {
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-border-color: rgba(90, 110, 140, 0.4);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #0d1b3e;
+    -fx-prompt-text-fill: rgba(13, 27, 62, 0.42);
+    -fx-padding: 8 12;
+}
+
+.product-form-page .toolbar-card .combo-box-base {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(90, 110, 140, 0.4);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.product-form-page .toolbar-card .combo-box-base .list-cell {
+    -fx-text-fill: #0d1b3e;
+}
+
+/* Bouton principal teal plein */
+.product-form-page .primary-toolbar-btn {
+    -fx-background-color: linear-gradient(to bottom, #00b4c0 0%, #009aa8 100%);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(0, 200, 210, 0.5);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 6, 0, 0, 1);
+}
+
+.product-form-page .primary-toolbar-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #00c8d4 0%, #00aebc 100%);
+    -fx-border-color: rgba(120, 235, 242, 0.65);
+}
+
+.product-form-page .primary-toolbar-btn:pressed {
+    -fx-background-color: #008a96;
+}
+
+/* Boutons secondaires bordés */
+.product-form-page .ghost-toolbar-btn {
+    -fx-background-color: rgba(8, 18, 45, 0.55);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(200, 220, 245, 0.45);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-text-fill: rgba(255, 255, 255, 0.95);
+    -fx-padding: 10 18;
+    -fx-cursor: hand;
+}
+
+.product-form-page .ghost-toolbar-btn:hover {
+    -fx-background-color: rgba(20, 40, 80, 0.65);
     -fx-border-color: rgba(0, 191, 255, 0.45);
 }
 
@@ -165,4 +266,15 @@
 
 .product-form-image-actions {
     -fx-spacing: 10px;
+}
+
+/* Bloc récap panier : même langage visuel que les sections */
+.product-form-page .panier-recap-card {
+    -fx-spacing: 0;
+    -fx-background-color: rgba(26, 47, 94, 0.35);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(79, 195, 247, 0.18);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 16 18 18 18;
 }
