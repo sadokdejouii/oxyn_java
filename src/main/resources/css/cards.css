@@ -345,3 +345,263 @@
     -fx-scale-x: 0.97;
     -fx-scale-y: 0.97;
 }
+
+/* ========== BOUTIQUE LISTVIEW STYLES ========== */
+.data-list {
+    -fx-background-color: #1A2F5E;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 8;
+}
+
+.data-list .scroll-bar:vertical {
+    -fx-background-color: #243B7F;
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+.data-list .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.data-list .scroll-bar:vertical .thumb {
+    -fx-background-color: #4FC3F7;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+}
+
+.data-list .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #00BFFF;
+}
+
+.data-list .scroll-bar:horizontal {
+    -fx-background-color: #243B7F;
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+.data-list .scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+}
+
+.data-list .scroll-bar:horizontal .thumb {
+    -fx-background-color: #4FC3F7;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+}
+
+.data-list .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #00BFFF;
+}
+
+.data-list .list-cell {
+    -fx-background-color: #243B7F;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(79, 195, 247, 0.15);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-padding: 12;
+    -fx-cell-size: 140;
+    -fx-text-fill: #FFFFFF;
+}
+
+.data-list .list-cell:hover {
+    -fx-background-color: #2A4A8F;
+    -fx-border-color: rgba(0, 191, 255, 0.3);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.2), 8, 0, 0, 2);
+}
+
+.data-list .list-cell:selected {
+    -fx-background-color: #00BFFF;
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.4), 10, 0, 0, 3);
+}
+
+.data-list .list-cell:filled:selected:hover {
+    -fx-background-color: #4FC3F7;
+}
+
+/* Styles pour les boutons dans la ListView */
+.list-cell .button {
+    -fx-background-radius: 20px;
+    -fx-cursor: hand;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-min-width: 60px;
+}
+
+.list-cell .modifier-btn {
+    -fx-background-color: linear-gradient(to bottom, #FF9800, #F57C00);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.3), 6, 0, 0, 1);
+}
+
+.list-cell .modifier-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #FB8C00, #EF6C00);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.list-cell .supprimer-btn {
+    -fx-background-color: linear-gradient(to bottom, #f44336, #d32f2f);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.3), 6, 0, 0, 1);
+}
+
+.list-cell .supprimer-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #e53935, #c62828);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* ========== PRODUCT CARDS STYLES ========== */
+.products-scroll {
+    -fx-background-color: #1A2F5E;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 10;
+}
+
+.products-grid {
+    -fx-background-color: transparent;
+}
+
+.product-card {
+    -fx-background-color: #243B7F;
+    -fx-background-radius: 15px;
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-width: 1px;
+    -fx-border-radius: 15px;
+    -fx-padding: 15;
+    -fx-pref-width: 280;
+    -fx-pref-height: 380;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 12, 0, 0, 3);
+    -fx-cursor: hand;
+}
+
+.product-card:hover {
+    -fx-background-color: #2A4A8F;
+    -fx-border-color: rgba(0, 191, 255, 0.4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.3), 15, 0, 0, 4);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.product-image {
+    -fx-background-color: #1A2F5E;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-fit-width: 250;
+    -fx-fit-height: 150;
+    -fx-smooth: true;
+}
+
+.product-brand {
+    -fx-font-size: 12px;
+    -fx-text-fill: #4FC3F7;
+    -fx-font-weight: bold;
+    -fx-text-transform: uppercase;
+}
+
+.product-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-wrap-text: true;
+}
+
+.product-rating {
+    -fx-font-size: 12px;
+    -fx-text-fill: #FFB74D;
+}
+
+.product-price {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4FC3F7;
+}
+
+.product-stock {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 8;
+    -fx-background-radius: 8px;
+}
+
+.stock-available {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+}
+
+.stock-out {
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+}
+
+.product-actions {
+    -fx-spacing: 8;
+    -fx-alignment: center;
+}
+
+.product-btn {
+    -fx-background-radius: 20px;
+    -fx-cursor: hand;
+    -fx-padding: 8 16;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-min-width: 70;
+}
+
+.btn-view {
+    -fx-background-color: linear-gradient(to bottom, #4FC3F7, #2196F3);
+    -fx-text-fill: white;
+}
+
+.btn-view:hover {
+    -fx-background-color: linear-gradient(to bottom, #29B6F6, #03A9F4);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-add {
+    -fx-background-color: linear-gradient(to bottom, #4CAF50, #388E3C);
+    -fx-text-fill: white;
+}
+
+.btn-add:hover {
+    -fx-background-color: linear-gradient(to bottom, #66BB6A, #4CAF50);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-rupture {
+    -fx-background-color: linear-gradient(to bottom, #f44336, #d32f2f);
+    -fx-text-fill: white;
+}
+
+.btn-rupture:hover {
+    -fx-background-color: linear-gradient(to bottom, #e53935, #f44336);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.rupture-badge {
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 6;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+}

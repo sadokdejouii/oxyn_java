@@ -41,11 +41,16 @@ public class MainLayoutController implements Initializable {
     private static final String PAGE_EVENTS_ADMIN = "/FXML/pages/EventManagement.fxml";
     private static final String PAGE_USERS = "/FXML/pages/UserManagement.fxml";
     private static final String PAGE_REPORTS = "/FXML/pages/ReportsStatistics.fxml";
+    private static final String PAGE_ADMIN_COMMANDES = "/FXML/pages/AdminCommandes.fxml";
+    private static final String PAGE_BOUTIQUE = "/FXML/pages/BoutiquePage.fxml";
+    private static final String PAGE_AJOUTER_PRODUIT = "/FXML/pages/AjouterProduitPage.fxml";
+    private static final String PAGE_MODIFIER_PRODUIT = "/FXML/pages/ModifierProduitPage.fxml";
 
     private static final String PAGE_CLIENT_HOME   = "/FXML/pages/ClientHome.fxml";
     private static final String PAGE_CLIENT_SALLE  = "/FXML/pages/ClientSalleList.fxml";
     private static final String PAGE_CLIENT_EVENTS = "/FXML/pages/ClientEvents.fxml";
     private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
+    private static final String PAGE_CLIENT_BOUTIQUE = "/FXML/pages/ClientBoutique.fxml";
     private static final String PAGE_PROFILE = "/FXML/pages/ProfilePage.fxml";
 
     private static final String PAGE_ENC_HOME = "/FXML/pages/EncadrantHome.fxml";
@@ -104,7 +109,10 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private Label userAvatarLabel;
-
+    
+    @FXML
+    private Button adminUsersBtn;
+  
     @FXML
     private Button adminDashboardBtn;
 
@@ -183,6 +191,7 @@ public class MainLayoutController implements Initializable {
                 ctx.displayNameProperty()));
 
         mainNavButtons.clear();
+        mainNavButtons.add(adminUsersBtn);
         mainNavButtons.add(adminDashboardBtn);
         mainNavButtons.add(adminEvenementsBtn);
         mainNavButtons.add(adminSalleBtn);
@@ -244,9 +253,9 @@ public class MainLayoutController implements Initializable {
         });
     }
 
-    private void navigate(String classpath, String title, Button navButton) {
+    public void navigate(String classpath, String title, Button navButton) {
         try {
-            PageLoader.show(contentArea, classpath);
+            PageLoader.show(contentArea, classpath, this);
             topbarPageTitle.setText(title);
             setActiveNav(navButton);
         } catch (Exception e) {
@@ -343,7 +352,9 @@ public class MainLayoutController implements Initializable {
             shellModeLabel.setManaged(show);
         }
     }
-
+    
+  
+   
     @FXML
     private void handleNotifications() {
         info("Notifications", "You have no unread notifications (demo).");
@@ -371,8 +382,19 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminBoutique() {
-        navigate(PAGE_USERS, "Utilisateurs", adminBoutiqueBtn);
+        navigate(PAGE_BOUTIQUE, "Boutique", adminBoutiqueBtn);
     }
+
+    /**
+     * Ouvert depuis la page Boutique : garde l’entrée « Boutique » active dans la barre latérale.
+     */
+    public void navigateToAdminCommandes() {
+        navigate(PAGE_ADMIN_COMMANDES, "Commandes", adminBoutiqueBtn);
+    }
+
+    private void handleAdminUsers() {
+    navigate(PAGE_USERS, "Utilisateurs", adminUsersBtn);  // ✅ nouveau bouton
+}
 
     @FXML
     private void handleAdminForum() {
@@ -401,7 +423,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleBoutique() {
-        navigate(PAGE_PLANNING, "Boutique", boutiqueBtn);
+        navigate(PAGE_CLIENT_BOUTIQUE, "Boutique", boutiqueBtn);
     }
 
     @FXML
