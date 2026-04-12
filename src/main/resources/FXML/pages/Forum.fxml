@@ -41,21 +41,20 @@
 
     <!-- MAIN CONTENT -->
     <center>
-        <VBox spacing="16" styleClass="forum-main-content" VBox.vgrow="ALWAYS">
+        <VBox spacing="10" styleClass="forum-main-content" VBox.vgrow="ALWAYS">
             <padding>
-                <Insets bottom="20" left="20" right="20" top="16" />
+                <Insets bottom="12" left="16" right="16" top="8" />
             </padding>
 
             <!-- CREATE POST SECTION -->
-            <VBox styleClass="create-post-section" spacing="12">
+            <VBox styleClass="create-post-section" spacing="10">
                 <padding>
-                    <Insets bottom="16" left="16" right="16" top="16" />
+                    <Insets bottom="12" left="14" right="14" top="12" />
                 </padding>
 
-                <!-- User Header -->
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <Label text="👤" styleClass="create-post-avatar" />
-                    <Label text="Créer un nouveau post" styleClass="create-post-label" />
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="✨ Créer un nouveau post" styleClass="create-post-header" />
                 </HBox>
 
                 <!-- Content Area -->
@@ -82,7 +81,7 @@
             </VBox>
 
             <!-- Filter & Controls Section -->
-            <HBox spacing="12" alignment="CENTER_LEFT">
+            <HBox spacing="8" alignment="CENTER_LEFT">
                 <Label text="Trier par:" styleClass="filter-label" />
                 <ComboBox fx:id="sortComboBox" prefWidth="180" styleClass="sort-combo" />
 
@@ -97,7 +96,7 @@
 
             <!-- Posts Container -->
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="posts-scroll" VBox.vgrow="ALWAYS">
-                <VBox fx:id="postsContainer" spacing="16" styleClass="posts-container" />
+                <VBox fx:id="postsContainer" spacing="12" styleClass="posts-container" />
             </ScrollPane>
         </VBox>
     </center>

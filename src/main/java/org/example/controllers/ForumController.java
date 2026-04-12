@@ -56,6 +56,15 @@ public class ForumController implements Initializable {
     private String currentUsername = "User";
     private String currentUserAvatar = "👤";
 
+    // Random names for generating initials based on author ID
+    private final String[][] RANDOM_NAMES = {
+        {"Ahmed", "Ben Salah"}, {"Fatima", "Zahra"}, {"Mohamed", "Ali"}, {"Sarra", "Khalil"},
+        {"Omar", "Dridi"}, {"Leila", "Mansour"}, {"Karim", "Guesmi"}, {"Nadia", "Farsi"},
+        {"Youssef", "Bouaziz"}, {"Amina", "Cherif"}, {"Hassan", "Miladi"}, {"Rania", "Saidi"},
+        {"Tarek", "Jaziri"}, {"Mona", "Haddad"}, {"Sami", "Karray"}, {"Dorra", "Zarrouk"},
+        {"Anis", "Mabrouk"}, {"Ines", "Ben Amor"}, {"Wael", "Gharbi"}, {"Sonia", "Trabelsi"}
+    };
+
     // State
     private List<Post> allPosts = new ArrayList<>();
     private boolean isGridView = true;
@@ -224,13 +233,13 @@ public class ForumController implements Initializable {
 
     private VBox createRecentPostItem(Post post) {
         VBox item = new VBox(4);
-        item.setStyle("-fx-background-color: white; -fx-border-color: #f0f0f0; -fx-border-radius: 4; -fx-padding: 8; -fx-cursor: hand;");
+        item.getStyleClass().add("recent-post-item");
 
         Label usernameLabel = new Label("👤 Author ID: " + post.getId_author_post());
-        usernameLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #1a2332;");
+        usernameLabel.getStyleClass().add("recent-post-author");
 
         Label dateLabel = new Label(post.getCreated_at_post());
-        dateLabel.setStyle("-fx-font-size: 9px; -fx-text-fill: #999;");
+        dateLabel.getStyleClass().add("recent-post-date");
 
         item.getChildren().addAll(usernameLabel, dateLabel);
         item.setOnMouseClicked(e -> scrollToPost(post.getId_post()));
@@ -330,24 +339,27 @@ public class ForumController implements Initializable {
 
     private Node createModernPostCard(Post post) {
         VBox card = new VBox(0);
-        card.setStyle("-fx-background-color: white; -fx-border-color: #e8ecf0; -fx-border-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 4, 0, 0, 1);");
+        card.getStyleClass().add("post-card");
         card.setPrefWidth(isGridView ? 400 : Double.MAX_VALUE);
         card.setMinHeight(300);
 
         // Header with user info and badge
         HBox headerBox = new HBox(12);
+        headerBox.getStyleClass().add("post-header");
         headerBox.setPadding(new Insets(16));
-        headerBox.setStyle("-fx-background-color: white;");
 
-        Label avatarLabel = new Label("👤");
-        avatarLabel.setStyle("-fx-font-size: 40px;");
+        String initials = getInitialsForAuthor(post.getId_author_post());
+        Label avatarLabel = new Label(initials);
+        avatarLabel.getStyleClass().addAll("post-avatar", "standard-avatar");
 
         VBox userInfoBox = new VBox(4);
-        Label usernameLabel = new Label("Author ID: " + post.getId_author_post());
-        usernameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a2332;");
+        userInfoBox.getStyleClass().add("post-user-info");
+        String fullName = getFullNameForAuthor(post.getId_author_post());
+        Label usernameLabel = new Label(fullName);
+        usernameLabel.getStyleClass().add("post-username");
 
         Label dateLabel = new Label(post.getCreated_at_post());
-        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #999;");
+        dateLabel.getStyleClass().add("post-date");
 
         userInfoBox.getChildren().addAll(usernameLabel, dateLabel);
 
@@ -356,31 +368,41 @@ public class ForumController implements Initializable {
 
         // Category Badge
         Label categoryBadge = new Label(post.getCategory_post().toUpperCase());
-        String badgeColor = categoryColors.getOrDefault(post.getCategory_post(), "#1142c1");
-        categoryBadge.setStyle("-fx-font-size: 9px; -fx-font-weight: bold; -fx-padding: 4 8; -fx-background-color: " + badgeColor + "; -fx-text-fill: white; -fx-border-radius: 12;");
+        categoryBadge.getStyleClass().add("post-category-badge");
+        // Apply category-specific style class if matches
+        String cat = post.getCategory_post().toLowerCase().replace(" ", "-");
+        if (cat.contains("wellness") || cat.contains("nutrition")) {
+            categoryBadge.getStyleClass().add("wellness");
+        } else if (cat.contains("cardio") || cat.contains("force")) {
+            categoryBadge.getStyleClass().add("cardio");
+        } else if (cat.contains("workout") || cat.contains("conseil")) {
+            categoryBadge.getStyleClass().add("workout-tips");
+        } else if (cat.contains("trend") || cat.contains("tendance")) {
+            categoryBadge.getStyleClass().add("trending");
+        }
 
         headerBox.getChildren().addAll(avatarLabel, userInfoBox, spacer, categoryBadge);
 
         // Content
         Label contentLabel = new Label(post.getContent_post());
         contentLabel.setWrapText(true);
-        contentLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #333; -fx-line-spacing: 1.5;");
+        contentLabel.getStyleClass().add("post-content");
         contentLabel.setPadding(new Insets(0, 16, 12, 16));
 
         // Media
         VBox mediaBox = new VBox();
         if (post.getMedia_url_post() != null && !post.getMedia_url_post().isEmpty()) {
             VBox mediaContainer = new VBox();
-            mediaContainer.setStyle("-fx-background-color: #1a1a1a; -fx-border-radius: 8;");
+            mediaContainer.getStyleClass().add("post-media-container");
             mediaContainer.setPrefHeight(180);
             mediaContainer.setAlignment(javafx.geometry.Pos.CENTER);
             mediaContainer.setPadding(new Insets(20));
 
-            Label mediaLabel = new Label("Vidéo non disponible");
-            mediaLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+            Label mediaLabel = new Label("📹 Média");
+            mediaLabel.getStyleClass().add("post-media-label");
 
             Hyperlink youtubeLink = new Hyperlink("Regarder sur YouTube");
-            youtubeLink.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
+            youtubeLink.getStyleClass().add("post-attachment-link");
 
             mediaContainer.getChildren().addAll(mediaLabel, youtubeLink);
             mediaBox.getChildren().add(mediaContainer);
@@ -389,29 +411,21 @@ public class ForumController implements Initializable {
 
         // Actions and stats
         HBox actionsBox = new HBox(16);
+        actionsBox.getStyleClass().add("post-actions");
         actionsBox.setPadding(new Insets(12, 16, 16, 16));
-        actionsBox.setStyle("-fx-border-color: #f0f0f0; -fx-border-width: 1 0 0 0;");
         actionsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         // Like button with count
         Button likeBtn = new Button("❤ " + post.getLike_count_post());
-        likeBtn.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 12px; -fx-text-fill: #666; -fx-cursor: hand;");
+        likeBtn.getStyleClass().add("action-button");
         likeBtn.setOnAction(e -> likePost(post));
 
         // Comment button
         Button commentBtn = new Button("💬 Commenter");
-        commentBtn.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 12px; -fx-text-fill: #666; -fx-cursor: hand;");
+        commentBtn.getStyleClass().add("action-button");
         commentBtn.setOnAction(e -> showCommentsDialog(post));
 
-        // Share button
-        Button shareBtn = new Button("🔊 Écouter");
-        shareBtn.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 12px; -fx-text-fill: #666; -fx-cursor: hand;");
-
-        // Translate button
-        Button translateBtn = new Button("🗣 Traduire");
-        translateBtn.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 12px; -fx-text-fill: #666; -fx-cursor: hand;");
-
-        actionsBox.getChildren().addAll(likeBtn, commentBtn, shareBtn, translateBtn);
+        actionsBox.getChildren().addAll(likeBtn, commentBtn);
 
         card.getChildren().addAll(headerBox, contentLabel);
         if (!mediaBox.getChildren().isEmpty()) {
@@ -635,5 +649,18 @@ public class ForumController implements Initializable {
         alert.setTitle("Success");
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private String getInitialsForAuthor(int authorId) {
+        // Use author ID to deterministically pick a name
+        int index = Math.abs(authorId) % RANDOM_NAMES.length;
+        String firstName = RANDOM_NAMES[index][0];
+        String lastName = RANDOM_NAMES[index][1];
+        return (firstName.charAt(0) + "" + lastName.charAt(0)).toUpperCase();
+    }
+
+    private String getFullNameForAuthor(int authorId) {
+        int index = Math.abs(authorId) % RANDOM_NAMES.length;
+        return RANDOM_NAMES[index][0] + " " + RANDOM_NAMES[index][1];
     }
 }

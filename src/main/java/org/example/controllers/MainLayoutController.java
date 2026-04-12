@@ -46,6 +46,7 @@ public class MainLayoutController implements Initializable {
     private static final String PAGE_PLANNING = "/FXML/pages/PlanningPage.fxml";
     private static final String PAGE_PROFILE = "/FXML/pages/ProfilePage.fxml";
     private static final String PAGE_FORUM = "/FXML/pages/Forum.fxml";
+    private static final String PAGE_FORUM_BACKOFFICE = "/FXML/pages/ForumBackoffice.fxml";
 
     @FXML
     private BorderPane shellRoot;
@@ -329,7 +330,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     private void handleAdminForum() {
-        navigate(PAGE_FORUM, "Forum", adminForumBtn);
+        navigate(PAGE_FORUM_BACKOFFICE, "Forum Management", adminForumBtn);
     }
 
     @FXML
