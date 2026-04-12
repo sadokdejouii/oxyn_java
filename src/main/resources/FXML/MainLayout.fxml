@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- Ikonli FontIcon is swapped in at runtime (see MainLayoutController): Scene Builder has no Ikonli on its classpath. Placeholders use Region + classes ikonli-slot, fas-*, sz-*. -->
-<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css,@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
+<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css,@../css/login.css,@../css/user-management.css,@../css/profile-page.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
 
     <left>
         <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="272" spacing="0" styleClass="sidebar">
@@ -105,13 +105,72 @@
                         <Button fx:id="adminBoutiqueBtn" onAction="#handleAdminBoutique" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-users,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Utilisateurs" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="adminUsersBtn" onAction="#handleAdminUsers" styleClass="nav-link">
+                         <graphic>
+                             <HBox alignment="CENTER_LEFT" spacing="12">
+                              <Region styleClass="ikonli-slot,fas-users,sz-18,nav-icon-fa" 
+                               minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                              <Label styleClass="nav-label" text="Utilisateurs" />
+                             </HBox>
+                         </graphic>
+                        </Button>
+
+                        <Button fx:id="adminForumBtn" onAction="#handleAdminForum" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-comments,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Forum" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+                    </VBox>
+
+                    <VBox fx:id="encadrantNavGroup" spacing="6">
+                        <Label styleClass="nav-title" text="ENCADREMENT" />
+
+                        <Button fx:id="encDashboardBtn" onAction="#handleEncDashboard" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-chart-pie,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Dashboard" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="encEvenementsBtn" onAction="#handleEncEvenements" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-calendar-alt,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Evenements" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="encSalleBtn" onAction="#handleEncSalle" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-building,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Salle" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="encBoutiqueBtn" onAction="#handleEncBoutique" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
                                     <Region styleClass="ikonli-slot,fas-shopping-cart,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
                                     <Label styleClass="nav-label" text="Boutique" />
                                 </HBox>
                             </graphic>
                         </Button>
 
-                        <Button fx:id="adminForumBtn" onAction="#handleAdminForum" styleClass="nav-link">
+                        <Button fx:id="encForumBtn" onAction="#handleEncForum" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
                                     <Region styleClass="ikonli-slot,fas-comments,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.SessionManagementController">
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE PRINCIPALE
+    ══════════════════════════════════════════════════════ -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
+        <VBox spacing="20" styleClass="page-root">
+
+            <!-- Header -->
+            <VBox spacing="4">
+                <Label styleClass="page-hero-title" text="Gestion des Sessions" />
+                <Label styleClass="page-hero-sub"
+                       text="Planifiez, modifiez et suivez vos sessions sportives."
+                       wrapText="true" />
+            </VBox>
+
+            <!-- Stat cards -->
+            <HBox spacing="14" styleClass="saas-stat-row">
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="TOTAL SESSIONS" />
+                    <Label fx:id="statTotal" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="Toutes confondues" />
+                </VBox>
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="PLANIFIEES" />
+                    <Label fx:id="statPlanifiees" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="A venir" />
+                </VBox>
+                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="CAPACITE TOTALE" />
+                    <Label fx:id="statInscrits" styleClass="saas-stat-value" text="—" />
+                    <Label styleClass="saas-stat-hint" text="Places disponibles" />
+                </VBox>
+            </HBox>
+
+            <!-- Toolbar -->
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-card">
+                <Button onAction="#handleAjouter" styleClass="primary-toolbar-btn" text="+ Nouvelle session" />
+                <Region HBox.hgrow="ALWAYS" />
+                <ToggleButton fx:id="filterAll"      onAction="#handleFilter" styleClass="sess-filter-btn" text="Tous"      userData="ALL"      selected="true" />
+                <ToggleButton fx:id="filterActive"   onAction="#handleFilter" styleClass="sess-filter-btn" text="Actives"   userData="ACTIVE" />
+                <ToggleButton fx:id="filterInactive" onAction="#handleFilter" styleClass="sess-filter-btn" text="Inactives" userData="INACTIVE" />
+                <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser" />
+            </HBox>
+
+            <!-- Compteur -->
+            <Label fx:id="countLabel" styleClass="saas-stat-label" text="0 session(s)" />
+
+            <!-- Grille de cards -->
+            <FlowPane fx:id="sessionsGrid" hgap="18" vgap="18" prefWrapLength="1000">
+                <padding><Insets bottom="24" left="2" right="2" top="4"/></padding>
+            </FlowPane>
+
+        </VBox>
+    </ScrollPane>
+
+    <!-- ══════════════════════════════════════════════════════
+         DIALOG OVERLAY
+    ══════════════════════════════════════════════════════ -->
+    <StackPane fx:id="dialogOverlay" visible="false" managed="false" styleClass="sess-overlay">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="720" styleClass="sess-dialog-scroll">
+            <VBox maxWidth="560" styleClass="sess-dialog-card" alignment="TOP_LEFT" spacing="0">
+
+                <!-- ── Dialog Header ── -->
+                <VBox styleClass="sess-dialog-header" spacing="4">
+                    <padding><Insets bottom="20" left="28" right="28" top="22"/></padding>
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label styleClass="sess-dialog-header-icon" text="📋" />
+                        <VBox spacing="2">
+                            <Label fx:id="dialogTitle" styleClass="sess-dialog-title" text="Nouvelle session" />
+                            <Label styleClass="sess-dialog-subtitle" text="Remplissez les informations de la session" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- ── Form Body ── -->
+                <VBox spacing="20" styleClass="sess-dialog-body">
+                    <padding><Insets bottom="24" left="28" right="28" top="22"/></padding>
+
+                    <!-- Section : Informations générales -->
+                    <VBox spacing="12">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label styleClass="sess-section-icon" text="📝" />
+                            <Label styleClass="sess-section-title" text="Informations generales" />
+                        </HBox>
+                        <Region styleClass="sess-section-divider" prefHeight="1" maxWidth="Infinity" />
+
+                        <VBox spacing="6">
+                            <Label styleClass="sess-lbl" text="Titre de la session *" />
+                            <TextField fx:id="fieldTitle" promptText="ex: Yoga du matin, Cardio intensif..."
+                                       styleClass="sess-field" maxWidth="Infinity" />
+                        </VBox>
+
+                        <HBox spacing="14">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="sess-lbl" text="Type d'activite *" />
+                                <ComboBox fx:id="fieldActivite" maxWidth="Infinity" styleClass="sess-field"
+                                          promptText="Selectionner..." />
+                            </VBox>
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="sess-lbl" text="Salle associee" />
+                                <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="sess-field"
+                                          promptText="Aucune salle" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Section : Horaires -->
+                    <VBox spacing="12">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label styleClass="sess-section-icon" text="🕐" />
+                            <Label styleClass="sess-section-title" text="Horaires" />
+                        </HBox>
+                        <Region styleClass="sess-section-divider" prefHeight="1" maxWidth="Infinity" />
+
+                        <HBox spacing="14">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="sess-lbl" text="Date *" />
+                                <DatePicker fx:id="fieldDate" maxWidth="Infinity" styleClass="sess-field" />
+                            </VBox>
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="sess-lbl" text="Heure debut * (HH:mm)" />
+                                <TextField fx:id="fieldHeureDebut" promptText="09:00"
+                                           styleClass="sess-field" maxWidth="Infinity" />
+                            </VBox>
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="sess-lbl" text="Heure fin (HH:mm)" />
+                                <TextField fx:id="fieldHeureFin" promptText="10:30"
+                                           styleClass="sess-field" maxWidth="Infinity" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Section : Capacité & Prix -->
+                    <VBox spacing="12">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label styleClass="sess-section-icon" text="👥" />
+                            <Label styleClass="sess-section-title" text="Capacite et tarif" />
+                        </HBox>
+                        <Region styleClass="sess-section-divider" prefHeight="1" maxWidth="Infinity" />
+
+                        <HBox spacing="14">
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="sess-lbl" text="Nombre de places *" />
+                                <TextField fx:id="fieldCapacite" promptText="ex: 20"
+                                           styleClass="sess-field" maxWidth="Infinity" />
+                            </VBox>
+                            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                <Label styleClass="sess-lbl" text="Prix (TND)" />
+                                <TextField fx:id="fieldPrice" promptText="0.00"
+                                           styleClass="sess-field" maxWidth="Infinity" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Section : Notes -->
+                    <VBox spacing="12">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label styleClass="sess-section-icon" text="💬" />
+                            <Label styleClass="sess-section-title" text="Notes" />
+                        </HBox>
+                        <Region styleClass="sess-section-divider" prefHeight="1" maxWidth="Infinity" />
+
+                        <TextArea fx:id="fieldDescription"
+                                  promptText="Informations complementaires, equipements requis, niveau..."
+                                  styleClass="sess-field" prefRowCount="3"
+                                  maxWidth="Infinity" wrapText="true" />
+                    </VBox>
+
+                    <!-- Erreur -->
+                    <Label fx:id="dialogError" styleClass="sess-error" text="" wrapText="true" />
+
+                </VBox>
+
+                <!-- ── Dialog Footer ── -->
+                <HBox styleClass="sess-dialog-footer" spacing="10" alignment="CENTER_RIGHT">
+                    <padding><Insets bottom="20" left="28" right="28" top="16"/></padding>
+                    <Button onAction="#handleDialogCancel" styleClass="sess-btn-cancel" text="Annuler" />
+                    <Button onAction="#handleDialogSave"   styleClass="sess-btn-save"   text="Enregistrer la session" />
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </StackPane>
+
+</StackPane>
