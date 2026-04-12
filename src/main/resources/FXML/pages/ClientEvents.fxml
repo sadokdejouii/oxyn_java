@@ -1,36 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ClientEventsController">
-    <VBox spacing="18" styleClass="page-root">
-        <VBox spacing="6">
-            <Label styleClass="page-hero-title" text="Events" />
-            <Label styleClass="page-hero-sub" text="Browse upcoming field days, trainings, and meetups. Registration flows can be connected next." wrapText="true" />
-        </VBox>
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="front-events-scroll" stylesheets="@../../css/front-events.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.FrontEventsController">
+    <VBox spacing="22" styleClass="front-page">
+        
 
-        <HBox spacing="10" styleClass="toolbar-card">
-            <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Refresh" />
-            <Button onAction="#handleDetails" styleClass="primary-toolbar-btn" text="View details" />
-            <HBox HBox.hgrow="ALWAYS" />
+        <StackPane styleClass="front-hero-banner">
+            <VBox alignment="CENTER" spacing="8">
+                <Label styleClass="front-banner-title" text="Événements" />
+                <Label styleClass="front-banner-subtitle" text="Découvrez nos événements" />
+                <Label styleClass="front-banner-text" text="Explorez facilement les activités sportives, bien-être et loisirs qui vous correspondent." wrapText="true" />
+            
+            </VBox>
+        </StackPane>
+
+        <HBox alignment="CENTER" spacing="12" styleClass="front-toolbar">
+            <TextField fx:id="searchField" promptText="Rechercher par titre, ville, lieu ou statut..." styleClass="front-search" />
+            <ComboBox fx:id="sortCombo" promptText="Trier par" styleClass="front-sort" />
         </HBox>
 
-        <VBox spacing="8" styleClass="saas-chart-card">
-            <Label styleClass="saas-card-title" text="Catalog" />
-            <TableView fx:id="eventsTable" prefHeight="480" styleClass="data-table">
-                <columns>
-                    <TableColumn fx:id="titleColumn" prefWidth="220" text="Title" />
-                    <TableColumn fx:id="villeColumn" prefWidth="120" text="City" />
-                    <TableColumn fx:id="debutColumn" prefWidth="160" text="Start" />
-                    <TableColumn fx:id="statutColumn" prefWidth="120" text="Status" />
-                </columns>
-            </TableView>
-        </VBox>
+        <FlowPane fx:id="eventsContainer" hgap="18" prefWrapLength="1040" styleClass="front-events-grid" vgap="18" />
     </VBox>
 </ScrollPane>

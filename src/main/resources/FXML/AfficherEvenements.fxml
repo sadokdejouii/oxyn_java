@@ -1,18 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
 
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AfficherEvenementsController">
+    <VBox spacing="16" styleClass="page-root" VBox.vgrow="ALWAYS">
+        <!-- Header with Add Button -->
+        <HBox spacing="12" style="-fx-alignment: CENTER_LEFT;">
+            <Button fx:id="ajouterBtn" mnemonicParsing="false" onAction="#openAddEventForm" styleClass="action-btn-primary" text="➕ Ajouter un Événement" />
+            <HBox HBox.hgrow="ALWAYS" />
+        </HBox>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AfficherEvenementsController">
-   <children>
-      <TableView layoutX="161.0" layoutY="70.0" prefHeight="176.0" prefWidth="408.0">
-        <columns>
-          <TableColumn prefWidth="75.0" text="titre " />
-          <TableColumn prefWidth="75.0" text="description" />
-            <TableColumn prefWidth="75.0" text="ville" />
-        </columns>
-      </TableView>
-   </children>
-</AnchorPane>
+        <!-- Events Table -->
+        <TableView fx:id="eventsTable" prefHeight="400.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="titreColumn" prefWidth="120.0" text="Titre" />
+                <TableColumn fx:id="descriptionColumn" prefWidth="150.0" text="Description" />
+                <TableColumn fx:id="dateDebutColumn" prefWidth="100.0" text="Début" />
+                <TableColumn fx:id="dateFinColumn" prefWidth="100.0" text="Fin" />
+                <TableColumn fx:id="lieuColumn" prefWidth="80.0" text="Lieu" />
+                <TableColumn fx:id="villeColumn" prefWidth="80.0" text="Ville" />
+                <TableColumn fx:id="placesColumn" prefWidth="70.0" text="Places" />
+                <TableColumn fx:id="statutColumn" prefWidth="80.0" text="Statut" />
+                <TableColumn fx:id="actionsColumn" prefWidth="180.0" text="Actions" sortable="false" />
+            </columns>
+        </TableView>
+    </VBox>
+</ScrollPane>
+

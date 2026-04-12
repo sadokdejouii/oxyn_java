@@ -229,3 +229,191 @@
     -fx-background-color: #e0e0e0;
     -fx-background-radius: 10px;
 }
+
+/* ========== SEARCH AND SORT BAR ========== */
+.search-sort-bar {
+    -fx-background-color: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(245, 250, 255, 0.98));
+    -fx-border-color: rgba(0, 191, 255, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.15), 12, 0, 0, 2);
+    -fx-padding: 16;
+}
+
+/* Search Field */
+.search-field {
+    -fx-font-size: 13px;
+    -fx-padding: 12 16;
+    -fx-border-radius: 10;
+    -fx-border-color: rgba(0, 191, 255, 0.3);
+    -fx-border-width: 2;
+    -fx-background-color: white;
+    -fx-text-fill: #1a1a1a;
+    -fx-control-inner-background: white;
+    -fx-faint-focus-color: transparent;
+    -fx-focus-color: rgba(0, 191, 255, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.1), 8, 0, 0, 1);
+    -fx-pref-width: 350;
+    -fx-min-width: 300;
+}
+
+.search-field:focused {
+    -fx-border-color: rgba(0, 191, 255, 0.8);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.3), 12, 0, 0, 3);
+}
+
+.search-field:hover {
+    -fx-border-color: rgba(0, 191, 255, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.2), 10, 0, 0, 2);
+}
+
+/* ========================================
+   BEAUTIFUL SORT/TRIE DESIGN - ENHANCED
+   ======================================== */
+
+/* Sort Label - Eye-catching */
+.sort-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-text-fill: rgba(0, 191, 255, 1);
+    -fx-letter-spacing: 1.5;
+}
+
+/* Sort Combo Box - Main Container */
+.sort-combo,
+.sort-order-combo {
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-weight: 500;
+    -fx-padding: 12 16;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(0, 191, 255, 0.4);
+    -fx-border-width: 2;
+    -fx-background-color: white;
+    -fx-text-fill: #1a1a2e;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.1), 8, 0, 0, 2);
+}
+
+.sort-combo {
+    -fx-pref-width: 170;
+}
+
+.sort-order-combo {
+    -fx-pref-width: 150;
+}
+
+/* HOVER STATE */
+.sort-combo:hover,
+.sort-order-combo:hover {
+    -fx-border-color: rgba(0, 191, 255, 0.7);
+    -fx-border-width: 2;
+    -fx-text-fill: rgba(0, 191, 255, 0.95);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.3), 14, 0, 0, 3);
+    -fx-padding: 12 16;
+}
+
+/* FOCUSED STATE */
+.sort-combo:focused,
+.sort-order-combo:focused {
+    -fx-border-color: rgba(0, 191, 255, 0.9);
+    -fx-border-width: 2;
+    -fx-text-fill: rgba(0, 191, 255, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.45), 18, 0, 0, 4);
+}
+
+/* PRESSED STATE */
+.sort-combo:pressed,
+.sort-order-combo:pressed {
+    -fx-border-color: rgba(0, 191, 255, 0.8);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.25), 10, 0, 0, 2);
+}
+
+/* ComboBox Popup Container */
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-border-color: rgba(0, 191, 255, 0.5);
+    -fx-border-width: 2;
+    -fx-border-radius: 6;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 16, 0, 0, 5);
+}
+
+/* List View Scrollbar */
+.combo-box-popup .list-view .scroll-bar:vertical {
+    -fx-padding: 0;
+}
+
+.combo-box-popup .list-view .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(0, 191, 255, 0.3);
+    -fx-background-radius: 5;
+    -fx-padding: 2;
+}
+
+.combo-box-popup .list-view .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.6);
+}
+
+/* List Cell - Base Style */
+.combo-box-popup .list-view .list-cell {
+    -fx-padding: 12 16;
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI", Arial;
+    -fx-font-weight: 500;
+    -fx-text-fill: #2a2a2e;
+    -fx-background-color: white;
+    -fx-text-alignment: left;
+}
+
+/* List Cell - Separator Line */
+.combo-box-popup .list-view .list-cell:not(:last-visible-cell) {
+    -fx-border-color: rgba(0, 191, 255, 0.1);
+    -fx-border-width: 0 0 1 0;
+}
+
+/* List Cell - HOVER */
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.12);
+    -fx-text-fill: rgba(0, 191, 255, 1);
+    -fx-font-weight: 600;
+}
+
+/* List Cell - FOCUSED */
+.combo-box-popup .list-view .list-cell:focused {
+    -fx-background-color: rgba(0, 191, 255, 0.15);
+    -fx-text-fill: rgba(0, 191, 255, 1);
+    -fx-font-weight: 600;
+}
+
+/* List Cell - SELECTED */
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: rgba(0, 191, 255, 0.3);
+    -fx-text-fill: rgba(0, 191, 255, 1);
+    -fx-font-weight: bold;
+    -fx-border-color: rgba(0, 191, 255, 0.4);
+    -fx-border-width: 0 3 0 0;
+}
+
+/* List Cell - SELECTED + FOCUSED */
+.combo-box-popup .list-view .list-cell:filled:selected:focused {
+    -fx-background-color: rgba(0, 191, 255, 0.35);
+    -fx-border-color: rgba(0, 191, 255, 0.6);
+    -fx-border-width: 0 3 0 0;
+    -fx-text-fill: rgba(0, 191, 255, 1);
+}
+
+/* VirtualizedScrollPane for list */
+.combo-box-popup .virtualized-scroll-pane {
+    -fx-padding: 0;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.15);
+    -fx-text-fill: #00BFFF;
+}
+
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: rgba(0, 191, 255, 0.3);
+    -fx-text-fill: #00BFFF;
+}

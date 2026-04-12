@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controllers.AdminSalleHubController"
+      styleClass="hub-root" spacing="0">
+
+    <!-- HEADER -->
+    <VBox styleClass="hub-header" spacing="14">
+        <padding><Insets bottom="0" left="28" right="28" top="20"/></padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="16">
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleRefresh" styleClass="hub-btn-refresh" text="🔄">
+                <tooltip><Tooltip text="Actualiser" /></tooltip>
+            </Button>
+        </HBox>
+
+        <!-- Tab buttons — identified by fx:id, NOT userData -->
+        <HBox spacing="0" alignment="BOTTOM_LEFT">
+            <VBox fx:id="tabSalles" onMouseClicked="#handleTab"
+                  styleClass="hub-tab,hub-tab-active" spacing="0" minWidth="150">
+                <HBox alignment="CENTER" spacing="8" styleClass="hub-tab-inner">
+                    <Label text="🏢" style="-fx-font-size:13px;" />
+                    <Label styleClass="hub-tab-label" text="Salles" />
+                    <Label fx:id="badgeSalles" styleClass="hub-badge-active" text="…" />
+                </HBox>
+                <Region fx:id="indSalles" styleClass="hub-tab-indicator-active" prefHeight="3" maxWidth="Infinity" />
+            </VBox>
+
+            <VBox fx:id="tabEquip" onMouseClicked="#handleTab"
+                  styleClass="hub-tab" spacing="0" minWidth="170">
+                <HBox alignment="CENTER" spacing="8" styleClass="hub-tab-inner">
+                    <Label text="🏋" style="-fx-font-size:13px;" />
+                    <Label styleClass="hub-tab-label" text="Equipements" />
+                    <Label fx:id="badgeEquip" styleClass="hub-badge" text="…" />
+                </HBox>
+                <Region fx:id="indEquip" styleClass="hub-tab-indicator" prefHeight="3" maxWidth="Infinity" />
+            </VBox>
+
+            <VBox fx:id="tabSubs" onMouseClicked="#handleTab"
+                  styleClass="hub-tab" spacing="0" minWidth="170">
+                <HBox alignment="CENTER" spacing="8" styleClass="hub-tab-inner">
+                    <Label text="💳" style="-fx-font-size:13px;" />
+                    <Label styleClass="hub-tab-label" text="Abonnements" />
+                    <Label fx:id="badgeSubs" styleClass="hub-badge" text="…" />
+                </HBox>
+                <Region fx:id="indSubs" styleClass="hub-tab-indicator" prefHeight="3" maxWidth="Infinity" />
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <Region prefHeight="1" maxWidth="Infinity" styleClass="hub-separator" />
+
+    <!-- CONTENT -->
+    <StackPane fx:id="hubContent" VBox.vgrow="ALWAYS" styleClass="hub-content" />
+
+</VBox>

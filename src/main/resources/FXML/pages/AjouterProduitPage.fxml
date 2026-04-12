@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AjouterProduitPageController">
+    <VBox alignment="TOP_CENTER" styleClass="page-root product-form-outer">
+        <VBox spacing="20" styleClass="product-form-shell">
+
+            <VBox spacing="8" styleClass="product-form-hero">
+                <Label styleClass="page-hero-title" text="Ajouter un produit" />
+                <Label styleClass="page-hero-sub" text="Créez une fiche complète : texte de vente, tarif, visuel et disponibilité. Les champs marqués d’une astérisque sont obligatoires." wrapText="true" />
+                <Label styleClass="product-form-required-legend" text="* Champs obligatoires" />
+            </VBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="toolbar-card product-form-toolbar">
+                <Button onAction="#handleSave" styleClass="primary-toolbar-btn" text="Enregistrer le produit" />
+                <Button onAction="#handleCancel" styleClass="ghost-toolbar-btn" text="Annuler" />
+                <HBox HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleClear" styleClass="ghost-toolbar-btn" text="Vider le formulaire" />
+            </HBox>
+
+            <!-- Section 1 : Identité -->
+            <VBox styleClass="product-form-section">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="PRÉSENTATION" />
+                    <Label styleClass="product-form-section-title" text="Nom et description" />
+                    <Label styleClass="product-form-hint" text="Ce texte est visible par les clients sur la boutique." wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body">
+                    <VBox spacing="6">
+                        <Label styleClass="product-form-field-label" text="Nom du produit *" />
+                        <TextField fx:id="nomField" promptText="Ex. Pack décoration table premium" styleClass="form-input" />
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label styleClass="product-form-field-label" text="Description *" />
+                        <TextArea fx:id="descriptionField" prefHeight="110" promptText="Décrivez le produit, le contenu, les usages…" styleClass="form-input" wrapText="true" />
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <!-- Section 2 : Prix & stock -->
+            <VBox styleClass="product-form-section">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="COMMERCE" />
+                    <Label styleClass="product-form-section-title" text="Prix et inventaire" />
+                    <Label styleClass="product-form-hint" text="Le prix est affiché en TND. La quantité correspond au stock disponible." wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body">
+                    <GridPane styleClass="product-form-grid" hgap="20" vgap="4">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="140" prefWidth="200" />
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="140" prefWidth="200" />
+                        </columnConstraints>
+                        <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Prix (TND) *" />
+                            <TextField fx:id="prixField" promptText="0.00" styleClass="form-input" />
+                        </VBox>
+                        <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Quantité en stock *" />
+                            <TextField fx:id="quantiteField" promptText="0" styleClass="form-input" />
+                        </VBox>
+                    </GridPane>
+                </VBox>
+            </VBox>
+
+            <!-- Section 3 : Image -->
+            <VBox styleClass="product-form-section">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="MÉDIA" />
+                    <Label styleClass="product-form-section-title" text="Photo du produit" />
+                    <Label styleClass="product-form-hint" text="Formats recommandés : PNG ou JPG. Sans image, la valeur « default.jpg » sera utilisée si le fichier existe dans les ressources /images." wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body">
+                    <HBox alignment="TOP_LEFT" spacing="20" styleClass="product-form-image-actions">
+                        <VBox alignment="CENTER" styleClass="product-form-image-frame">
+                            <ImageView fx:id="imagePreview" fitHeight="112" fitWidth="112" pickOnBounds="true" preserveRatio="true" />
+                        </VBox>
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Button onAction="#handleChooseImage" styleClass="ghost-toolbar-btn" text="Choisir une image sur l’ordinateur…" />
+                            <Label fx:id="imageFileLabel" styleClass="product-form-hint" text="Aucun fichier sélectionné." wrapText="true" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Section 4 : Statut & métadonnées -->
+            <VBox styleClass="product-form-section">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="STATUT" />
+                    <Label styleClass="product-form-section-title" text="Publication et traçabilité" />
+                    <Label styleClass="product-form-hint" text="Le statut permet d’indiquer si le produit est disponible ou non. La date est fixée automatiquement à la création." wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body">
+                    <GridPane styleClass="product-form-grid" hgap="20" vgap="4">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="140" prefWidth="200" />
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="140" prefWidth="200" />
+                        </columnConstraints>
+                        <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Statut *" />
+                            <TextField fx:id="statutField" promptText="Disponible" styleClass="form-input" />
+                        </VBox>
+                        <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Date de création" />
+                            <TextField fx:id="dateField" disable="true" promptText="Auto" styleClass="form-input" />
+                        </VBox>
+                    </GridPane>
+                </VBox>
+            </VBox>
+
+        </VBox>
+    </VBox>
+</ScrollPane>
