@@ -17,10 +17,20 @@ public class SessionService implements ICrud<Session> {
     private static final int COACH_USER_ID = 7;
 
     private static Connection fresh() throws SQLException {
-        Connection c = DriverManager.getConnection(
-            MyDataBase.getURL(), MyDataBase.getUSERNAME(), MyDataBase.getPASSWORD());
-        c.setAutoCommit(true);
-        return c;
+        // Retry once if connection fails (handles MySQL restart/timeout)
+        try {
+            Connection c = DriverManager.getConnection(
+                MyDataBase.getURL(), MyDataBase.getUSERNAME(), MyDataBase.getPASSWORD());
+            c.setAutoCommit(true);
+            return c;
+        } catch (SQLException e) {
+            // Wait 1s and retry once
+            try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+            Connection c = DriverManager.getConnection(
+                MyDataBase.getURL(), MyDataBase.getUSERNAME(), MyDataBase.getPASSWORD());
+            c.setAutoCommit(true);
+            return c;
+        }
     }
 
     @Override

@@ -57,7 +57,7 @@
                     <!-- Drop zone (visible quand pas d'image) -->
                     <VBox fx:id="dropZone" styleClass="salle-drop-zone" prefHeight="100" alignment="CENTER" spacing="6"
                           onMouseClicked="#handlePickImage">
-                        <Label styleClass="salle-drop-icon" text="📁" />
+                        <Label styleClass="salle-drop-icon" text="Fichier" />
                         <Label styleClass="salle-drop-text" text="Cliquez ou glissez une image ici" />
                         <Label styleClass="salle-drop-hint" text="JPG, PNG, GIF — max 5 Mo" />
                     </VBox>

@@ -13,7 +13,7 @@
             <!-- Back button -->
             <HBox>
                 <Button fx:id="btnBack" onAction="#handleBack"
-                        styleClass="cl-btn-back" text="← Retour aux salles" />
+                        styleClass="cl-btn-back" text="<- Retour aux salles" />
             </HBox>
 
             <!-- ── Section 1 : Infos salle ── -->
@@ -32,7 +32,7 @@
                     <VBox spacing="10" HBox.hgrow="ALWAYS">
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label fx:id="salleName" styleClass="cl-detail-title" text="—" />
-                            <Label styleClass="cl-badge-active" text="● Actif" />
+                            <Label styleClass="cl-badge-active" text="o Actif" />
                         </HBox>
                         <Label fx:id="salleDesc" styleClass="cl-detail-desc" text="—" wrapText="true" />
                     </VBox>
@@ -40,14 +40,14 @@
                         <Label fx:id="salleAddr"  styleClass="cl-detail-info" text="📍  —" />
                         <Label fx:id="sallePhone" styleClass="cl-detail-info" text="📞  —" />
                         <Label fx:id="salleEmail" styleClass="cl-detail-info" text="✉  —" />
-                        <Label fx:id="salleRating" styleClass="cl-detail-rating" text="★  —" />
+                        <Label fx:id="salleRating" styleClass="cl-detail-rating" text="*  —" />
                     </VBox>
                 </HBox>
             </VBox>
 
             <!-- ── Section 2 : Abonnements ── -->
             <VBox spacing="14">
-                <Label styleClass="cl-section-title" text="💳  Abonnements disponibles" />
+                <Label styleClass="cl-section-title" text="Abonnements  Abonnements disponibles" />
                 <Label fx:id="noOffres" styleClass="cl-empty-label"
                        text="Aucun abonnement disponible pour cette salle." visible="false" managed="false" />
                 <FlowPane fx:id="offresGrid" hgap="20" vgap="20" prefWrapLength="1100" />
@@ -55,7 +55,7 @@
 
             <!-- ── Section 3 : Sessions ── -->
             <VBox spacing="14">
-                <Label styleClass="cl-section-title" text="🏋  Sessions a venir" />
+                <Label styleClass="cl-section-title" text="Equipements  Sessions a venir" />
                 <Label fx:id="noSessions" styleClass="cl-empty-label"
                        text="Aucune session planifiee pour cette salle." visible="false" managed="false" />
                 <FlowPane fx:id="sessionsGrid" hgap="20" vgap="20" prefWrapLength="1100">

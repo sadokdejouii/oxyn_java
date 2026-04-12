@@ -12,7 +12,7 @@
 
             <!-- Header -->
             <VBox spacing="4">
-                <Label styleClass="page-hero-title" text="🏢  Nos Salles de Sport" />
+                <Label styleClass="page-hero-title" text="Salles  Nos Salles de Sport" />
                 <Label styleClass="page-hero-sub"
                        text="Decouvrez nos salles, consultez les abonnements et reservez vos sessions."
                        wrapText="true" />
@@ -42,7 +42,7 @@
                 <TextField fx:id="searchField" promptText="Rechercher une salle..."
                            styleClass="sess-field" HBox.hgrow="ALWAYS" />
                 <ComboBox fx:id="sortCombo" styleClass="sess-field" promptText="Trier par..." />
-                <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="🔄 Actualiser" />
+                <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser Actualiser" />
             </HBox>
 
             <Label fx:id="countLabel" styleClass="saas-stat-label" text="0 salle(s)" />
