@@ -21,6 +21,10 @@ public class MyDataBase {
     private static MyDataBase instance;
 
     private MyDataBase() {
+        connect();
+    }
+
+    private void connect() {
         try {
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             System.out.println("Connexion à la base « " + DB_NAME + " » établie.");
