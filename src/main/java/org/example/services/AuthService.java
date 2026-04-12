@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 /**
- * Authentification : voie {@code main} (DAO polymorphe + inscription) et voie Symfony / JDBC directe (optionnelle).
+ * Authentification : voie DAO polymorphe + inscription ; option lecture table {@code users} (Symfony).
  */
 public final class AuthService {
 
@@ -60,6 +60,11 @@ public final class AuthService {
         }
     }
 
+    /**
+     * Inscription d'un client (rôle imposé côté entité {@link Client}).
+     *
+     * @return {@code true} si l'insertion a réussi
+     */
     public boolean registerClient(String nom, String prenom, String email, String telephone,
                                   String plainPassword, String confirmPassword) throws SQLException {
         String err = AuthValidation.validateRegistrationForm(nom, prenom, email, telephone, plainPassword, confirmPassword);

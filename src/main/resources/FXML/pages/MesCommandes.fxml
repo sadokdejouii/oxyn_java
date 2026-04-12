@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MesCommandesController">
+    <VBox alignment="TOP_CENTER" styleClass="page-root product-form-page product-form-outer">
+        <VBox spacing="20" styleClass="product-form-shell">
+            <padding>
+                <Insets bottom="8" left="4" right="4" top="8" />
+            </padding>
+
+            <VBox spacing="8" styleClass="product-form-hero">
+                <Label styleClass="page-hero-title" text="Mes commandes" />
+                <Label styleClass="page-hero-sub" text="Historique de vos achats. Vous pouvez annuler une commande validée dans les 24 heures suivant la validation." wrapText="true" />
+            </VBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="toolbar-card product-form-toolbar">
+                <Button onAction="#handleRetourBoutique" styleClass="ghost-toolbar-btn" text="← Retour à la boutique" />
+                <Label styleClass="product-form-field-label" text="Recherche" />
+                <TextField fx:id="rechercheMesCommandes" onAction="#handleRechercheOuTriMesCommandes" prefWidth="200" promptText="Statut, adresse, paiement…" styleClass="topbar-search" HBox.hgrow="SOMETIMES" />
+                <Label styleClass="product-form-field-label" text="Trier" />
+                <ComboBox fx:id="triMesCommandes" onAction="#handleRechercheOuTriMesCommandes" prefWidth="200" />
+                <HBox HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleRefresh" styleClass="primary-toolbar-btn" text="Actualiser" />
+            </HBox>
+
+            <VBox fx:id="editAdressePanel" managed="false" spacing="0" styleClass="product-form-section mes-commandes-edit-panel" visible="false">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="MODIFICATION" />
+                    <Label styleClass="product-form-section-title" text="Adresse de livraison" />
+                    <Label styleClass="product-form-hint" text="Même format que lors de la commande : quartier, ville, pays (trois parties séparées par des virgules). Exemple : cité Ibn Khaldoun, Tunis, Tunisie" wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator" />
+                <VBox styleClass="product-form-section-body" spacing="14">
+                    <VBox spacing="6">
+                        <Label styleClass="product-form-field-label" text="Nouvelle adresse *" />
+                        <TextArea fx:id="editAdresseArea" prefRowCount="4" styleClass="form-input" wrapText="true" />
+                    </VBox>
+                    <HBox alignment="CENTER_RIGHT" spacing="10">
+                        <Button onAction="#handleCancelEditAdresse" styleClass="ghost-toolbar-btn" text="Fermer" />
+                        <Button onAction="#handleSaveAdresse" styleClass="primary-toolbar-btn" text="Enregistrer les modifications" />
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <VBox fx:id="ordersContainer" spacing="14" />
+        </VBox>
+    </VBox>
+</ScrollPane>

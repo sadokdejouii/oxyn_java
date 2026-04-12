@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.EventManagementController">
+    <VBox spacing="20" styleClass="page-root">
+        <!-- Header Section -->
+        <VBox spacing="8" styleClass="event-dashboard-hero">
+            <Label styleClass="event-dashboard-title" text="Dashboard des Événements" />
+            <Label styleClass="event-dashboard-sub" text="Consultez, triez et pilotez vos événements, inscriptions et avis depuis un espace central moderne." wrapText="true" />
+        </VBox>
+
+        <HBox alignment="CENTER" spacing="10" styleClass="toolbar-card">
+            <Button fx:id="ajouterEvenementBtn" mnemonicParsing="false" onAction="#openAddEventForm" styleClass="event-add-btn" text="➕ Ajouter un Événement" />
+        </HBox>
+
+        <!-- Main Content Container -->
+        <VBox spacing="8" styleClass="saas-chart-card" VBox.vgrow="ALWAYS">
+            <!-- Events Grid Section -->
+            <VBox fx:id="eventsMainSection" spacing="12" VBox.vgrow="ALWAYS" managed="true" visible="true">
+                <VBox spacing="6" styleClass="event-section-header">
+                    <Label styleClass="event-section-title" text="Tableau des Événements" />
+                    <Label styleClass="event-section-sub" text="Vue rapide de vos activités, capacités et statut de publication." wrapText="true" />
+                </VBox>
+
+                <!-- Search and Sort Bar for Events -->
+                <HBox alignment="CENTER" spacing="16" styleClass="search-sort-bar" style="-fx-padding: 16;">
+                    <TextField fx:id="eventsSearchField" promptText="🔍 Rechercher par titre, lieu, ville, statut..." styleClass="search-field" />
+                    <HBox alignment="CENTER" spacing="8">
+                        <Label text="Trier par:" styleClass="sort-label" />
+                        <ComboBox fx:id="eventsSortByCombo" styleClass="sort-combo" />
+                        <ComboBox fx:id="eventsSortOrderCombo" styleClass="sort-order-combo" promptText="Ordre" />
+                    </HBox>
+                </HBox>
+                
+                <TilePane fx:id="eventsGridPane" prefColumns="3" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
+                <HBox fx:id="eventsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
+            </VBox>
+
+            <!-- Add/Modify Form Section (Embedded) -->
+            <VBox fx:id="eventFormSection" spacing="12" VBox.vgrow="ALWAYS" managed="false" visible="false">
+                <VBox spacing="6" styleClass="event-section-header">
+                    <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308">
+                        <Button fx:id="backFromFormBtn" onAction="#handleBackToEvents" styleClass="ghost-toolbar-btn" text="← Retour aux Événements" />
+                    </HBox>
+                    <Label styleClass="event-section-title" text="Formulaire Événement" />
+                    <Label styleClass="event-section-sub" text="Ajoutez ou modifiez un événement sans quitter la page." wrapText="true" />
+                </VBox>
+                <VBox fx:id="eventFormContainer" spacing="0" VBox.vgrow="ALWAYS" />
+            </VBox>
+
+            <!-- Inscriptions for Selected Event (Hidden by default) -->
+            <VBox fx:id="inscriptionsDetailSection" spacing="12" VBox.vgrow="ALWAYS" managed="false" visible="false">
+                <VBox spacing="6" styleClass="event-section-header">
+                    <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308">
+                        <Button fx:id="backFromInscriptionsBtn" onAction="#handleBackToEvents" styleClass="ghost-toolbar-btn" text="← Retour aux Événements" />
+                    </HBox>
+                    <Label styleClass="event-section-title" text="Tableau des Inscriptions" />
+                    <Label styleClass="event-section-sub" text="Suivez les participants, leurs dates d'inscription et leurs statuts." wrapText="true" />
+                </VBox>
+                
+                <!-- Search and Sort Bar for Inscriptions -->
+                <HBox alignment="CENTER" spacing="16" styleClass="search-sort-bar" style="-fx-padding: 16;">
+                    <TextField fx:id="inscriptionsSearchField" promptText="🔍 Rechercher par statut inscription..." styleClass="search-field" />
+                    <HBox alignment="CENTER" spacing="8">
+                        <Label text="Trier par:" styleClass="sort-label" />
+                        <ComboBox fx:id="inscriptionsSortByCombo" styleClass="sort-combo" />
+                        <ComboBox fx:id="inscriptionsSortOrderCombo" styleClass="sort-order-combo" promptText="Ordre" />
+                    </HBox>
+                </HBox>
+                
+                <TilePane fx:id="inscriptionsGridPane" prefColumns="3" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
+                <HBox fx:id="inscriptionsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
+            </VBox>
+
+            <!-- Reviews for Selected Event (Hidden by default) -->
+            <VBox fx:id="reviewsDetailSection" spacing="12" VBox.vgrow="ALWAYS" managed="false" visible="false">
+                <VBox spacing="6" styleClass="event-section-header">
+                    <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308">
+                        <Button fx:id="backFromReviewsBtn" onAction="#handleBackToEvents" styleClass="ghost-toolbar-btn" text="← Retour aux Événements" />
+                    </HBox>
+                    <Label styleClass="event-section-title" text="Tableau des Avis" />
+                    <Label styleClass="event-section-sub" text="Visualisez rapidement les notes et commentaires reçus pour chaque événement." wrapText="true" />
+                </VBox>
+                
+                <!-- Search and Sort Bar for Reviews/Avis -->
+                <HBox alignment="CENTER" spacing="16" styleClass="search-sort-bar" style="-fx-padding: 16;">
+                    <TextField fx:id="avisSearchField" promptText="🔍 Rechercher par note..." styleClass="search-field" />
+                    <HBox alignment="CENTER" spacing="8">
+                        <Label text="Trier par:" styleClass="sort-label" />
+                        <ComboBox fx:id="avisSortByCombo" styleClass="sort-combo" />
+                        <ComboBox fx:id="avisSortOrderCombo" styleClass="sort-order-combo" promptText="Ordre" />
+                    </HBox>
+                </HBox>
+                
+                <TilePane fx:id="reviewsGridPane" prefColumns="3" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
+                <HBox fx:id="reviewsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
+            </VBox>
+        </VBox>
+    </VBox>
+</ScrollPane>

@@ -1,7 +1,6 @@
 package org.example.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -11,11 +10,12 @@ import org.example.services.AuthValidation;
 import org.example.services.UserService;
 import org.example.utils.AuthNavigation;
 import org.example.utils.FormFieldFeedback;
+import org.example.utils.UserDialogHelper;
 
 import java.sql.SQLException;
 
 /**
- * Inscription client (même flux que {@code main}) ; messages via {@link Alert} pour limiter les dépendances FXML.
+ * Inscription client (même flux que {@code main}).
  */
 public class RegisterController {
 
@@ -122,13 +122,15 @@ public class RegisterController {
         }
 
         String em = email.trim().toLowerCase();
+        Stage owner = dialogOwner();
         try {
             if (userService.findByEmail(em) != null) {
                 FormFieldFeedback.setInputError(emailField, emailErrorLabel, "Cette adresse e-mail est déjà utilisée.", LOGIN_THEME);
                 return;
             }
         } catch (SQLException e) {
-            showMessage("Inscription", e.getMessage() != null ? e.getMessage() : e.toString(), true);
+            UserDialogHelper.showMessage(owner, "Inscription",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
             return;
         }
 
@@ -138,12 +140,12 @@ public class RegisterController {
                 FormFieldFeedback.setInputError(emailField, emailErrorLabel, "Cette adresse e-mail est déjà utilisée.", LOGIN_THEME);
                 return;
             }
-            showMessage("Inscription", "Compte créé. Vous pouvez vous connecter.", false);
+            UserDialogHelper.showMessage(owner, "Inscription", "Compte créé. Vous pouvez vous connecter.", false);
             navigateToLogin();
         } catch (IllegalArgumentException e) {
-            showMessage("Inscription", e.getMessage(), false);
+            UserDialogHelper.showMessage(owner, "Inscription", e.getMessage(), false);
         } catch (SQLException e) {
-            showMessage("Erreur base de données",
+            UserDialogHelper.showMessage(owner, "Erreur base de données",
                     e.getMessage() != null ? e.getMessage() : e.toString(), true);
         }
     }
@@ -158,16 +160,16 @@ public class RegisterController {
             Stage stage = (Stage) emailField.getScene().getWindow();
             AuthNavigation.showLogin(stage);
         } catch (Exception e) {
-            showMessage("Navigation", e.getMessage() != null ? e.getMessage() : e.toString(), true);
+            UserDialogHelper.showMessage(dialogOwner(), "Navigation",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
         }
     }
 
-    private static void showMessage(String title, String message, boolean error) {
-        Alert a = new Alert(error ? Alert.AlertType.ERROR : Alert.AlertType.INFORMATION);
-        a.setTitle(title);
-        a.setHeaderText(null);
-        a.setContentText(message);
-        a.showAndWait();
+    private Stage dialogOwner() {
+        if (emailField == null || emailField.getScene() == null) {
+            return null;
+        }
+        return (Stage) emailField.getScene().getWindow();
     }
 
     private void clearAllFieldErrors() {
