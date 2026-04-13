@@ -138,3 +138,38 @@
     -fx-background-color: rgba(198, 40, 40, 0.58);
     -fx-text-fill: #ffebee;
 }
+
+/* Hub admin Planning / boutique — même fond liste que produits */
+.boutique-admin-root .list-view.admin-orders-list {
+    -fx-background-color: #121f36;
+    -fx-control-inner-background: #121f36;
+    -fx-border-color: rgba(56, 189, 248, 0.14);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.boutique-admin-root .list-view.admin-orders-list .virtual-flow,
+.boutique-admin-root .list-view.admin-orders-list .list-cell,
+.boutique-admin-root .list-view.admin-orders-list .list-cell:empty,
+.boutique-admin-root .list-view.admin-orders-list .virtual-flow .clipped-container .sheet,
+.boutique-admin-root .list-view.admin-orders-list .virtual-flow .corner {
+    -fx-background-color: #121f36;
+}
+
+.boutique-admin-root .list-view.admin-orders-list .list-cell:filled:selected,
+.boutique-admin-root .list-view.admin-orders-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.14);
+}
+
+.boutique-admin-root .list-view.admin-orders-list .list-cell:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.06);
+}
+
+.boutique-admin-root .list-view.admin-orders-list .scroll-bar .thumb {
+    -fx-background-color: rgba(56, 189, 248, 0.35);
+}
+
+.boutique-admin-root .list-view.admin-orders-list .list-cell,
+.boutique-admin-root .list-view.admin-orders-list .list-cell:empty {
+    -fx-padding: 6 4 6 4;
+}

@@ -1,6 +1,5 @@
 package org.example.controllers;
 
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -10,7 +9,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -103,17 +101,16 @@ public class PanierController {
     private HBox creerCarteLigne(LignePanier ligne) {
         HBox card = new HBox(16);
         card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(0));
-        card.getStyleClass().add("panier-ligne-card");
+        card.getStyleClass().add("shop-client-panier-row");
 
         VBox thumbWrap = new VBox();
         thumbWrap.setAlignment(Pos.CENTER);
-        thumbWrap.getStyleClass().add("panier-ligne-thumb-wrap");
+        thumbWrap.getStyleClass().add("shop-client-thumb-wrap");
 
         ImageView thumb = new ImageView();
-        thumb.getStyleClass().add("panier-ligne-thumb");
-        thumb.setFitWidth(60);
-        thumb.setFitHeight(60);
+        thumb.getStyleClass().add("shop-client-thumb");
+        thumb.setFitWidth(62);
+        thumb.setFitHeight(62);
         thumb.setPreserveRatio(true);
         thumb.setSmooth(true);
         if (ligne.getProduit() != null) {
@@ -125,17 +122,18 @@ public class PanierController {
         HBox.setHgrow(infos, Priority.ALWAYS);
 
         Label nom = new Label(ligne.getNomProduit());
-        nom.getStyleClass().add("panier-ligne-nom");
+        nom.getStyleClass().add("shop-client-line-nom");
         nom.setWrapText(true);
 
         HBox meta = new HBox(10);
         meta.setAlignment(Pos.CENTER_LEFT);
+        meta.getStyleClass().add("shop-client-line-meta");
 
         Label qteBadge = new Label("Qté " + ligne.getQuantite());
-        qteBadge.getStyleClass().add("panier-ligne-qte-badge");
+        qteBadge.getStyleClass().add("shop-client-qte");
 
         Label detail = new Label(String.format("×  %.2f TND  l’unité", ligne.getPrixUnitaire()));
-        detail.getStyleClass().add("panier-ligne-detail");
+        detail.getStyleClass().add("shop-client-unit-price");
 
         meta.getChildren().addAll(qteBadge, detail);
         infos.getChildren().addAll(nom, meta);
@@ -143,9 +141,9 @@ public class PanierController {
         VBox prixCol = new VBox(2);
         prixCol.setAlignment(Pos.CENTER_RIGHT);
         Label sous = new Label(String.format("%.2f TND", ligne.getSousTotal()));
-        sous.getStyleClass().add("panier-ligne-sous-total");
+        sous.getStyleClass().add("shop-client-sous-total");
         Label hint = new Label("Sous-total");
-        hint.getStyleClass().add("panier-ligne-sous-total-hint");
+        hint.getStyleClass().add("shop-client-sous-hint");
         prixCol.getChildren().addAll(sous, hint);
 
         card.getChildren().addAll(thumbWrap, infos, prixCol);

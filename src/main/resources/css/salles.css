@@ -350,3 +350,48 @@
 .hub-tab-active:hover {
     -fx-background-color: #0284c7;
 }
+
+/* Cartes salles dans le hub admin — alignement visuel type Planning (apd-user-card) */
+.apd-root .sh-hub-content .salle-card {
+    -fx-background-color: #121f36;
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(56, 189, 248, 0.12);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 16, 0.22, 0, 4);
+}
+
+.apd-root .sh-hub-content .salle-card:hover {
+    -fx-border-color: rgba(56, 189, 248, 0.35);
+    -fx-background-color: #162a45;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.12), 20, 0.28, 0, 4);
+}
+
+.apd-root .sh-hub-content .salle-card-photo-wrap {
+    -fx-background-radius: 14px 14px 0 0;
+}
+
+.apd-root .sh-hub-content .salle-card-placeholder {
+    -fx-background-radius: 14px 14px 0 0;
+}
+
+/* Formulaire salle — même enveloppe que les modales Planning */
+.salle-dialog-card--apd {
+    -fx-background-color:
+        linear-gradient(from 0% 0% to 0% 40%, rgba(255, 255, 255, 0.06) 0%, transparent 100%),
+        #121c33;
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(56, 189, 248, 0.28);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 40, 0.28, 0, 12);
+}
+
+.apd-root .salle-field-label {
+    -fx-text-fill: #8ba3c4;
+}
+
+.apd-root .salle-drop-zone {
+    -fx-border-color: rgba(56, 189, 248, 0.2);
+    -fx-background-color: rgba(15, 26, 46, 0.65);
+}

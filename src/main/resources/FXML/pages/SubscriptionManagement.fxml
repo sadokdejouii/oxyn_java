@@ -4,92 +4,95 @@
 <?import javafx.scene.layout.*?>
 
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="org.example.controllers.SubscriptionController">
+           fx:controller="org.example.controllers.SubscriptionController"
+           maxWidth="Infinity" maxHeight="Infinity">
 
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
-        <VBox spacing="20" styleClass="page-root">
-
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="18" styleClass="apd-page-inner salle-mgmt-inner" maxWidth="Infinity">
             <VBox spacing="4">
-                <Label styleClass="page-hero-title" text="Abonnements" />
-                <Label styleClass="page-hero-sub" text="Gerez les offres d'abonnement par salle." wrapText="true"/>
+                <Label styleClass="apd-section-title" text="Abonnements" />
+                <Label styleClass="apd-section-sub" text="Gérez les offres d'abonnement par salle." wrapText="true"/>
             </VBox>
 
-            <HBox spacing="14" styleClass="saas-stat-row">
-                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
-                    <Label styleClass="saas-stat-label" text="TOTAL OFFRES" />
-                    <Label fx:id="statTotal" styleClass="saas-stat-value" text="—" />
-                    <Label styleClass="saas-stat-hint" text="Toutes offres" />
+            <GridPane styleClass="apd-kpi-grid" hgap="14" vgap="14" maxWidth="Infinity">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.34" />
+                </columnConstraints>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--users" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="TOTAL OFFRES" />
+                    <Label fx:id="statTotal" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Toutes offres" wrapText="true" />
                 </VBox>
-                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
-                    <Label styleClass="saas-stat-label" text="ACTIVES" />
-                    <Label fx:id="statActives" styleClass="saas-stat-value" text="—" />
-                    <Label styleClass="saas-stat-hint" text="Disponibles" />
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--prog" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="ACTIVES" />
+                    <Label fx:id="statActives" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Disponibles" wrapText="true" />
                 </VBox>
-                <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
-                    <Label styleClass="saas-stat-label" text="PRIX MOYEN" />
-                    <Label fx:id="statPrix" styleClass="saas-stat-value" text="—" />
-                    <Label styleClass="saas-stat-hint" text="TND / offre" />
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--tasks" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="PRIX MOYEN" />
+                    <Label fx:id="statPrix" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="TND / offre" wrapText="true" />
                 </VBox>
-            </HBox>
+            </GridPane>
 
-            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-card">
-                <Button onAction="#handleAjouter" styleClass="primary-toolbar-btn" text="+ Nouvel offre" />
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="apd-filter-panel" maxWidth="Infinity">
+                <Button onAction="#handleAjouter" styleClass="apd-btn" text="+ Nouvelle offre" />
                 <Region HBox.hgrow="ALWAYS"/>
                 <ToggleButton fx:id="filterAll"      onAction="#handleFilter" styleClass="sess-filter-btn" text="Toutes"    userData="ALL"      selected="true"/>
                 <ToggleButton fx:id="filterActive"   onAction="#handleFilter" styleClass="sess-filter-btn" text="Actives"   userData="ACTIVE"/>
                 <ToggleButton fx:id="filterInactive" onAction="#handleFilter" styleClass="sess-filter-btn" text="Inactives" userData="INACTIVE"/>
-                <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser"/>
+                <Button onAction="#handleRefresh" styleClass="apd-btn-ghost" text="Actualiser"/>
             </HBox>
 
-            <Label fx:id="countLabel" styleClass="saas-stat-label" text="0 offre(s)"/>
+            <Label fx:id="countLabel" styleClass="apd-match-hint" text="0 offre(s)"/>
 
-            <FlowPane fx:id="offersGrid" hgap="18" vgap="18" prefWrapLength="1000">
-                <padding><Insets bottom="24" left="2" right="2" top="4"/></padding>
+            <FlowPane fx:id="offersGrid" hgap="16" vgap="16" prefWrapLength="1100" styleClass="apd-user-cards-flow" maxWidth="Infinity">
+                <padding><Insets bottom="8" left="2" right="2" top="4"/></padding>
             </FlowPane>
         </VBox>
     </ScrollPane>
 
-    <!-- DIALOG -->
-    <StackPane fx:id="dialogOverlay" visible="false" managed="false" styleClass="sess-overlay">
-        <VBox maxWidth="480" spacing="14" styleClass="sess-dialog-card" alignment="TOP_LEFT">
+    <StackPane fx:id="dialogOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox maxWidth="500" spacing="14" styleClass="sess-dialog-card sess-dialog-card--apd" alignment="TOP_LEFT">
             <padding><Insets bottom="28" left="28" right="28" top="24"/></padding>
             <Label fx:id="dialogTitle" styleClass="sess-dialog-title" text="Nouvelle offre"/>
             <VBox spacing="5">
                 <Label styleClass="sess-lbl" text="Nom de l'offre *"/>
-                <TextField fx:id="fieldName" promptText="ex: Abonnement mensuel" styleClass="sess-field" maxWidth="Infinity"/>
+                <TextField fx:id="fieldName" promptText="ex: Abonnement mensuel" styleClass="apd-field" maxWidth="Infinity"/>
             </VBox>
             <HBox spacing="12">
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label styleClass="sess-lbl" text="Duree (mois) *"/>
-                    <TextField fx:id="fieldDuration" promptText="ex: 1" styleClass="sess-field" maxWidth="Infinity"/>
+                    <Label styleClass="sess-lbl" text="Durée (mois) *"/>
+                    <TextField fx:id="fieldDuration" promptText="ex: 1" styleClass="apd-field" maxWidth="Infinity"/>
                 </VBox>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
                     <Label styleClass="sess-lbl" text="Prix (TND) *"/>
-                    <TextField fx:id="fieldPrice" promptText="0.00" styleClass="sess-field" maxWidth="Infinity"/>
+                    <TextField fx:id="fieldPrice" promptText="0.00" styleClass="apd-field" maxWidth="Infinity"/>
                 </VBox>
             </HBox>
             <VBox spacing="5">
                 <Label styleClass="sess-lbl" text="Salle"/>
-                <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="sess-field" promptText="Aucune salle"/>
+                <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="apd-select" promptText="Aucune salle"/>
             </VBox>
             <VBox spacing="5">
                 <Label styleClass="sess-lbl" text="Description"/>
-                <TextArea fx:id="fieldDesc" promptText="Description de l'offre..." styleClass="sess-field" prefRowCount="3" maxWidth="Infinity" wrapText="true"/>
+                <TextArea fx:id="fieldDesc" promptText="Description de l'offre…" styleClass="apd-field" prefRowCount="3" maxWidth="Infinity" wrapText="true"/>
             </VBox>
             <Label fx:id="dialogError" styleClass="sess-error" text="" wrapText="true"/>
             <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button onAction="#handleCancel" styleClass="sess-btn-cancel" text="Annuler"/>
-                <Button onAction="#handleSave"   styleClass="sess-btn-save"   text="Enregistrer"/>
+                <Button onAction="#handleCancel" styleClass="apd-btn-ghost" text="Annuler"/>
+                <Button onAction="#handleSave"   styleClass="apd-btn"   text="Enregistrer"/>
             </HBox>
         </VBox>
     </StackPane>
 
-    <!-- ORDERS PANEL -->
-    <StackPane fx:id="ordersOverlay" visible="false" managed="false" styleClass="sess-overlay">
-        <VBox maxWidth="620" spacing="14" styleClass="sess-dialog-card" alignment="TOP_LEFT">
+    <StackPane fx:id="ordersOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox maxWidth="640" spacing="14" styleClass="sess-dialog-card sess-dialog-card--apd" alignment="TOP_LEFT">
             <padding><Insets bottom="28" left="28" right="28" top="24"/></padding>
-            <Label styleClass="sess-dialog-title" text="Commandes liees"/>
-            <TableView fx:id="ordersTable" prefHeight="320" styleClass="data-table">
+            <Label styleClass="sess-dialog-title" text="Commandes liées"/>
+            <TableView fx:id="ordersTable" prefHeight="320" styleClass="data-table salle-admin-table">
                 <columns>
                     <TableColumn fx:id="colOrderId"   prefWidth="60"  text="ID"/>
                     <TableColumn fx:id="colUserId"    prefWidth="80"  text="User"/>
@@ -101,23 +104,21 @@
                 </columns>
             </TableView>
             <HBox alignment="CENTER_RIGHT">
-                <Button onAction="#handleCloseOrders" styleClass="sess-btn-cancel" text="Fermer"/>
+                <Button onAction="#handleCloseOrders" styleClass="apd-btn-ghost" text="Fermer"/>
             </HBox>
         </VBox>
     </StackPane>
 
-    <!-- CONFIRM DELETE -->
-    <StackPane fx:id="confirmOverlay" visible="false" managed="false" styleClass="sess-overlay">
-        <VBox maxWidth="360" spacing="16" styleClass="sess-confirm-card" alignment="CENTER">
+    <StackPane fx:id="confirmOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox maxWidth="380" spacing="16" styleClass="sess-confirm-card sess-confirm-card--apd" alignment="CENTER">
             <padding><Insets bottom="24" left="24" right="24" top="20"/></padding>
             <Label styleClass="sess-confirm-icon" text="!"/>
             <Label styleClass="sess-confirm-title" text="Supprimer l'offre ?"/>
-            <Label fx:id="confirmMsg" styleClass="page-hero-sub" text="" wrapText="true"/>
+            <Label fx:id="confirmMsg" styleClass="apd-section-sub" text="" wrapText="true"/>
             <HBox spacing="12" alignment="CENTER">
-                <Button onAction="#handleConfirmCancel" styleClass="sess-btn-cancel" text="Annuler"/>
-                <Button onAction="#handleConfirmDelete" styleClass="sess-btn-danger"  text="Supprimer"/>
+                <Button onAction="#handleConfirmCancel" styleClass="apd-btn-ghost" text="Annuler"/>
+                <Button onAction="#handleConfirmDelete" styleClass="sess-btn-danger" text="Supprimer"/>
             </HBox>
         </VBox>
     </StackPane>
-
 </StackPane>

@@ -2,6 +2,7 @@ package org.example.services;
 
 import org.example.entities.Evenement;
 import org.example.utils.MyDataBase;
+import org.example.utils.SqlDateReaders;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -62,13 +63,13 @@ public class EvenementServices implements ICrud<Evenement> {
             e.setId(rs.getInt("id_evenement"));
             e.setTitre(rs.getString("titre_evenement"));
             e.setDescription(rs.getString("description_evenement"));
-            e.setDateDebut(rs.getTimestamp("date_debut_evenement"));
-            e.setDateFin(rs.getTimestamp("date_fin_evenement"));
+            e.setDateDebut(SqlDateReaders.readTimestampOrNull(rs, "date_debut_evenement"));
+            e.setDateFin(SqlDateReaders.readTimestampOrNull(rs, "date_fin_evenement"));
             e.setLieu(rs.getString("lieu_evenement"));
             e.setVille(rs.getString("ville_evenement"));
             e.setPlacesMax(rs.getInt("places_max_evenement"));
             e.setStatut(rs.getString("statut_evenement"));
-            e.setCreatedAt(rs.getTimestamp("created_at_evenement"));
+            e.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_evenement"));
             e.setCreatedBy(rs.getInt("created_by_evenement"));
 
             evenements.add(e);
@@ -121,13 +122,13 @@ public class EvenementServices implements ICrud<Evenement> {
             e.setId(rs.getInt("id_evenement"));
             e.setTitre(rs.getString("titre_evenement"));
             e.setDescription(rs.getString("description_evenement"));
-            e.setDateDebut(rs.getTimestamp("date_debut_evenement"));
-            e.setDateFin(rs.getTimestamp("date_fin_evenement"));
+            e.setDateDebut(SqlDateReaders.readTimestampOrNull(rs, "date_debut_evenement"));
+            e.setDateFin(SqlDateReaders.readTimestampOrNull(rs, "date_fin_evenement"));
             e.setLieu(rs.getString("lieu_evenement"));
             e.setVille(rs.getString("ville_evenement"));
             e.setPlacesMax(rs.getInt("places_max_evenement"));
             e.setStatut(rs.getString("statut_evenement"));
-            e.setCreatedAt(rs.getTimestamp("created_at_evenement"));
+            e.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_evenement"));
             e.setCreatedBy(rs.getInt("created_by_evenement"));
 
             return e;

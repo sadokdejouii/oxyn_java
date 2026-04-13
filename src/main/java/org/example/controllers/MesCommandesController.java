@@ -1,7 +1,6 @@
 package org.example.controllers;
 
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -174,7 +173,7 @@ public class MesCommandesController {
         if (session.getRole() != UserRole.CLIENT) {
             ordersContainer.getChildren().clear();
             Label msg = new Label("Cette page est réservée aux comptes client.");
-            msg.getStyleClass().add("page-hero-sub");
+            msg.getStyleClass().addAll("front-banner-text", "client-shop-muted");
             msg.setWrapText(true);
             ordersContainer.getChildren().add(msg);
             return;
@@ -183,7 +182,7 @@ public class MesCommandesController {
         if (clientId <= 0) {
             ordersContainer.getChildren().clear();
             Label msg = new Label("Session client invalide. Déconnectez-vous puis reconnectez-vous.");
-            msg.setStyle("-fx-text-fill: #c62828;");
+            msg.getStyleClass().add("client-shop-error");
             msg.setWrapText(true);
             ordersContainer.getChildren().add(msg);
             return;
@@ -199,7 +198,7 @@ public class MesCommandesController {
             ordersContainer.getChildren().clear();
             Label err = new Label("Impossible de charger les commandes : " + e.getMessage());
             err.setWrapText(true);
-            err.setStyle("-fx-text-fill: #c62828;");
+            err.getStyleClass().add("client-shop-error");
             ordersContainer.getChildren().add(err);
         }
     }
@@ -208,7 +207,7 @@ public class MesCommandesController {
         ordersContainer.getChildren().clear();
         if (toutesMesCommandes.isEmpty()) {
             Label empty = new Label("Vous n’avez pas encore passé de commande.");
-            empty.getStyleClass().add("page-hero-sub");
+            empty.getStyleClass().addAll("front-banner-text", "client-shop-muted");
             empty.setWrapText(true);
             ordersContainer.getChildren().add(empty);
             return;
@@ -229,7 +228,7 @@ public class MesCommandesController {
 
         if (vue.isEmpty()) {
             Label rien = new Label("Aucune commande ne correspond à votre recherche.");
-            rien.getStyleClass().add("page-hero-sub");
+            rien.getStyleClass().addAll("front-banner-text", "client-shop-muted");
             rien.setWrapText(true);
             ordersContainer.getChildren().add(rien);
             return;
@@ -305,25 +304,26 @@ public class MesCommandesController {
 
     private VBox buildOrderCard(commandes c) throws SQLException {
         VBox card = new VBox(12);
-        card.getStyleClass().add("saas-chart-card");
-        card.setPadding(new Insets(16, 18, 18, 18));
+        card.getStyleClass().add("client-order-card");
 
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
 
         Label idLbl = new Label("Commande du " + formaterDatePourTitre(c));
-        idLbl.getStyleClass().add("saas-card-title");
+        idLbl.getStyleClass().add("client-order-card-title");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Label statutLbl = new Label(c.getStatut_commande() != null ? c.getStatut_commande() : "—");
-        if (c.getStatut_commande() != null && c.getStatut_commande().toLowerCase().contains("valid")) {
-            statutLbl.setStyle("-fx-background-color: rgba(46, 125, 50, 0.35); -fx-text-fill: #c8e6c9; -fx-padding: 4 12; -fx-background-radius: 8px;");
-        } else if (c.getStatut_commande() != null && c.getStatut_commande().toLowerCase().contains("annul")) {
-            statutLbl.setStyle("-fx-background-color: rgba(198, 40, 40, 0.35); -fx-text-fill: #ffcdd2; -fx-padding: 4 12; -fx-background-radius: 8px;");
+        statutLbl.getStyleClass().add("client-order-status");
+        String st = c.getStatut_commande() != null ? c.getStatut_commande().toLowerCase(Locale.ROOT) : "";
+        if (st.contains("valid")) {
+            statutLbl.getStyleClass().add("client-order-status--ok");
+        } else if (st.contains("annul")) {
+            statutLbl.getStyleClass().add("client-order-status--bad");
         } else {
-            statutLbl.setStyle("-fx-background-color: rgba(0, 191, 255, 0.15); -fx-text-fill: #b3e5fc; -fx-padding: 4 12; -fx-background-radius: 8px;");
+            statutLbl.getStyleClass().add("client-order-status--neutral");
         }
 
         header.getChildren().addAll(idLbl, spacer, statutLbl);
@@ -331,32 +331,34 @@ public class MesCommandesController {
         Label meta = new Label(String.format("Date : %s  ·  Paiement : %s",
                 c.getDate_commande() != null ? c.getDate_commande() : "—",
                 c.getMode_paiement_commande() != null ? c.getMode_paiement_commande() : "—"));
-        meta.getStyleClass().add("saas-stat-hint");
+        meta.getStyleClass().add("client-order-meta");
         meta.setWrapText(true);
 
         Label total = new Label(String.format("Total : %.2f TND", c.getTotal_commande()));
-        total.getStyleClass().add("saas-stat-value");
+        total.getStyleClass().add("client-order-total");
 
         Label addrTitle = new Label("Adresse de livraison");
-        addrTitle.getStyleClass().add("product-form-field-label");
+        addrTitle.getStyleClass().add("client-order-addr-title");
         Label addr = new Label(c.getAdresse_commande() != null ? c.getAdresse_commande() : "—");
-        addr.getStyleClass().add("product-form-hint");
+        addr.getStyleClass().add("client-order-addr-text");
         addr.setWrapText(true);
 
         Separator sep = new Separator();
 
         Label lignesTitle = new Label("Détail des articles");
-        lignesTitle.getStyleClass().add("saas-stat-label");
+        lignesTitle.getStyleClass().add("client-order-lignes-title");
 
         VBox lignesBox = new VBox(6);
         List<LigneCommandeAffichage> lignes = commandesService.getLignesPourCommande(c.getId_commande());
         if (lignes.isEmpty()) {
-            lignesBox.getChildren().add(new Label("(Aucune ligne enregistrée)"));
+            Label vide = new Label("(Aucune ligne enregistrée)");
+            vide.getStyleClass().add("client-order-line");
+            lignesBox.getChildren().add(vide);
         } else {
             for (LigneCommandeAffichage l : lignes) {
                 Label line = new Label(String.format("· %s  × %d  →  %.2f TND",
                         l.getNomProduit(), l.getQuantite(), l.getSousTotal()));
-                line.getStyleClass().add("saas-stat-hint");
+                line.getStyleClass().add("client-order-line");
                 line.setWrapText(true);
                 lignesBox.getChildren().add(line);
             }
@@ -366,7 +368,7 @@ public class MesCommandesController {
 
         if (commandesService.peutModifierAdresse(c)) {
             Button modifierAdresse = new Button("Modifier l’adresse");
-            modifierAdresse.getStyleClass().add("ghost-toolbar-btn");
+            modifierAdresse.getStyleClass().add("client-shop-outline-btn");
             modifierAdresse.setOnAction(e -> ouvrirEditionAdresse(c));
 
             Button annuler = new Button("Annuler la commande");

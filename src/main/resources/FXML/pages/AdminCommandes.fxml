@@ -6,43 +6,62 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/admin-commandes.css,@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AdminCommandesController">
-    <VBox spacing="22" styleClass="page-root admin-commandes-root product-form-page">
-        <padding>
-            <Insets bottom="24" left="8" right="8" top="8" />
-        </padding>
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.AdminCommandesController"
+           styleClass="apd-root apd-root--premium boutique-admin-root"
+           maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../../css/admin-planning-dashboard.css,@../../css/dashboard-saas.css,@../../css/product-form.css,@../../css/admin-commandes.css">
 
-        <HBox alignment="TOP_LEFT" spacing="20" styleClass="saas-stat-row">
-            <VBox spacing="6" styleClass="saas-stat-card">
-                <Label styleClass="saas-stat-label" text="Commandes listées" />
-                <Label fx:id="countLabel" styleClass="saas-stat-value" text="0" />
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="20" styleClass="apd-page-inner product-form-page admin-commandes-root" maxWidth="Infinity">
+            <padding>
+                <Insets bottom="24" left="4" right="4" top="4" />
+            </padding>
+
+            <VBox styleClass="apd-hero" spacing="8">
+                <Label styleClass="apd-eyebrow" text="ADMINISTRATION · BOUTIQUE" />
+                <Label styleClass="apd-title" text="Commandes clients" />
+                <Label styleClass="apd-sub" text="Vue consolidée de toutes les commandes. Aucun identifiant interne n'est affiché. Les commandes annulées depuis au moins 7 jours sont retirées automatiquement de la base ; vous pouvez aussi supprimer manuellement une commande annulée récente." wrapText="true" />
+                <Separator styleClass="apd-sep-hero" />
             </VBox>
-            <VBox spacing="8" HBox.hgrow="ALWAYS">
-                <Label styleClass="page-hero-title" text="Commandes clients" />
-                <Label styleClass="page-hero-sub" text="Vue consolidée de toutes les commandes. Aucun identifiant interne n’est affiché. Les commandes annulées depuis au moins 7 jours sont retirées automatiquement de la base ; vous pouvez aussi supprimer manuellement une commande annulée récente." wrapText="true" />
+
+            <GridPane styleClass="apd-kpi-grid" hgap="14" vgap="14" maxWidth="Infinity">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="100" />
+                </columnConstraints>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--users" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="COMMANDES LISTÉES" />
+                    <Label fx:id="countLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Après filtre et recherche" wrapText="true" />
+                </VBox>
+            </GridPane>
+
+            <Label fx:id="purgeInfoLabel" managed="false" styleClass="apd-match-hint" visible="false" wrapText="true" />
+
+            <VBox spacing="12" styleClass="apd-filter-panel" maxWidth="Infinity">
+                <HBox alignment="CENTER_LEFT" spacing="12" maxWidth="Infinity">
+                    <Button onAction="#handleRefresh" styleClass="apd-btn-ghost" text="Actualiser" />
+                    <Region prefWidth="8" />
+                    <Label styleClass="apd-filter-label" text="RECHERCHE" />
+                    <TextField fx:id="rechercheCommandes" onAction="#handleRechercheOuTri" promptText="Client, statut, adresse…" styleClass="apd-field" HBox.hgrow="ALWAYS" />
+                    <Label styleClass="apd-filter-label" text="TRIER PAR" />
+                    <ComboBox fx:id="triCommandes" onAction="#handleRechercheOuTri" prefWidth="220" styleClass="apd-select" />
+                </HBox>
             </VBox>
-        </HBox>
 
-        <Label fx:id="purgeInfoLabel" managed="false" styleClass="saas-stat-hint" visible="false" wrapText="true" />
-
-        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="toolbar-card product-form-toolbar">
-            <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser" />
-            <Region prefWidth="12" />
-            <Label styleClass="product-form-field-label" text="Recherche" />
-            <TextField fx:id="rechercheCommandes" onAction="#handleRechercheOuTri" prefWidth="220" promptText="Client, statut, adresse…" styleClass="topbar-search" HBox.hgrow="SOMETIMES" />
-            <Label styleClass="product-form-field-label" text="Trier par" />
-            <ComboBox fx:id="triCommandes" onAction="#handleRechercheOuTri" prefWidth="220" />
-            <Region HBox.hgrow="ALWAYS" />
-        </HBox>
-
-        <VBox spacing="12" styleClass="saas-chart-card admin-orders-detail-card">
-            <Label styleClass="saas-card-title" text="Détail des commandes" />
-            <ListView fx:id="listCommandes" minHeight="420" prefHeight="560" styleClass="list-view admin-orders-list" VBox.vgrow="ALWAYS" />
+            <VBox spacing="12" styleClass="apd-content-block admin-orders-detail-card" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                <Label styleClass="apd-section-title" text="Détail des commandes" />
+                <ListView fx:id="listCommandes" minHeight="420" prefHeight="560" styleClass="list-view admin-orders-list" VBox.vgrow="ALWAYS" />
+            </VBox>
         </VBox>
-    </VBox>
-</ScrollPane>
+    </ScrollPane>
+</StackPane>

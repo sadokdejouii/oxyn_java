@@ -1225,3 +1225,81 @@
     -fx-font-size: 12px;
     -fx-text-fill: #64748B;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   FORUM ADMIN — même enveloppe sombre que Planning admin (apd-root)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.apd-root .forum-admin-chart {
+    -fx-padding: 4 4 8 4;
+}
+
+.apd-root .forum-admin-chart .chart-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1f5f9;
+}
+
+.apd-root .forum-admin-chart .chart-content {
+    -fx-background-color: rgba(11, 20, 38, 0.55);
+}
+
+.apd-root .forum-admin-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.apd-root .forum-admin-chart .axis {
+    -fx-tick-label-fill: #94a3b8;
+}
+
+.apd-root .forum-admin-chart .axis-label {
+    -fx-text-fill: #94a3b8;
+}
+
+.apd-root .forum-admin-chart .chart-horizontal-grid-lines,
+.apd-root .forum-admin-chart .chart-vertical-grid-lines {
+    -fx-stroke: rgba(148, 163, 184, 0.12);
+}
+
+.apd-root .forum-admin-chart .chart-legend {
+    -fx-background-color: transparent;
+}
+
+.apd-root .forum-admin-chart .chart-pie-label {
+    -fx-fill: #e2e8f0;
+}
+
+.apd-root .forum-admin-edit {
+    -fx-background-color: #0f1a2e;
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(56, 189, 248, 0.16);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px 20px 22px 20px;
+}
+
+.apd-root .forum-admin-edit .edit-panel-title,
+.apd-root .forum-admin-edit .apd-section-title {
+    -fx-text-fill: #f1f5f9;
+}
+
+.apd-root .forum-admin-textarea {
+    -fx-control-inner-background: #0b1426;
+    -fx-background-color: #0b1426;
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(56, 189, 248, 0.2);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-font-size: 13px;
+}
+
+.apd-root .forum-admin-textarea:focused {
+    -fx-border-color: rgba(56, 189, 248, 0.45);
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.2), 12, 0.25, 0, 2);
+}
+
+.apd-root .forum-admin-file-hint {
+    -fx-text-fill: #8ba3c4;
+}
