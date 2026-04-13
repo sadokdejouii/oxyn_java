@@ -32,8 +32,7 @@ public class ForumController implements Initializable {
 
     // FXML Elements
     @FXML private TextField searchField;
-    @FXML private VBox categoriesContainer;
-    @FXML private VBox recentPostsContainer;
+    @FXML private ComboBox<String> categoriesFilterCombo;
     @FXML private ComboBox<String> sortComboBox;
     @FXML private ComboBox<String> categoryComboBox;
     @FXML private Button gridViewBtn;
@@ -135,39 +134,13 @@ public class ForumController implements Initializable {
     }
 
     private void setupCategories() {
-        for (String category : categories) {
-            Button categoryBtn = new Button(category);
-            categoryBtn.setStyle("-fx-padding: 10 12; -fx-font-size: 12px; -fx-text-alignment: left;");
-            categoryBtn.setMaxWidth(Double.MAX_VALUE);
-            categoryBtn.setUserData(category);
+        categoriesFilterCombo.getItems().addAll(categories);
+        categoriesFilterCombo.setValue("Tous les posts");
 
-            if (category.equals("Tous les posts")) {
-                categoryBtn.setStyle(categoryBtn.getStyle() + "; -fx-background-color: #e8ecf0; -fx-border-color: #1142c1; -fx-border-width: 0 0 0 3;");
-            } else {
-                categoryBtn.setStyle(categoryBtn.getStyle() + "; -fx-background-color: #f5f7fa;");
-            }
-
-            categoryBtn.setOnAction(e -> {
-                selectedCategory = category;
-                updateCategoryButtons(categoryBtn);
-                filterAndDisplayPosts();
-            });
-
-            categoriesContainer.getChildren().add(categoryBtn);
-        }
-    }
-
-    private void updateCategoryButtons(Button selectedBtn) {
-        for (Node node : categoriesContainer.getChildren()) {
-            if (node instanceof Button) {
-                Button btn = (Button) node;
-                if (btn == selectedBtn) {
-                    btn.setStyle(btn.getStyle().replaceAll("-fx-background-color: [^;]+;", "") + "-fx-background-color: #e8ecf0; -fx-border-color: #1142c1; -fx-border-width: 0 0 0 3;");
-                } else {
-                    btn.setStyle(btn.getStyle().replaceAll("-fx-background-color: [^;]+;", "") + "-fx-background-color: #f5f7fa;");
-                }
-            }
-        }
+        categoriesFilterCombo.setOnAction(e -> {
+            selectedCategory = categoriesFilterCombo.getValue();
+            filterAndDisplayPosts();
+        });
     }
 
     private void setupSortCombo() {
@@ -192,20 +165,19 @@ public class ForumController implements Initializable {
     }
 
     private void setupViewToggle() {
-        gridViewBtn.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 2 0; -fx-text-fill: #1142c1;");
-        listViewBtn.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-text-fill: #666;");
+        gridViewBtn.getStyleClass().add("selected");
 
         gridViewBtn.setOnAction(e -> {
             isGridView = true;
-            gridViewBtn.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 2 0; -fx-text-fill: #1142c1;");
-            listViewBtn.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-text-fill: #666;");
+            gridViewBtn.getStyleClass().add("selected");
+            listViewBtn.getStyleClass().remove("selected");
             displayPosts();
         });
 
         listViewBtn.setOnAction(e -> {
             isGridView = false;
-            listViewBtn.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 2 0; -fx-text-fill: #1142c1;");
-            gridViewBtn.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-text-fill: #666;");
+            listViewBtn.getStyleClass().add("selected");
+            gridViewBtn.getStyleClass().remove("selected");
             displayPosts();
         });
     }
@@ -213,44 +185,10 @@ public class ForumController implements Initializable {
     private void loadAllPosts() {
         try {
             allPosts = postService.afficher();
-            updateRecentPosts();
             filterAndDisplayPosts();
         } catch (SQLException e) {
             showError("Error loading posts: " + e.getMessage());
         }
-    }
-
-    private void updateRecentPosts() {
-        recentPostsContainer.getChildren().clear();
-        List<Post> recent = allPosts.stream()
-                .limit(5)
-                .collect(Collectors.toList());
-
-        for (Post post : recent) {
-            VBox recentItem = createRecentPostItem(post);
-            recentPostsContainer.getChildren().add(recentItem);
-        }
-    }
-
-    private VBox createRecentPostItem(Post post) {
-        VBox item = new VBox(4);
-        item.getStyleClass().add("recent-post-item");
-
-        Label usernameLabel = new Label("👤 Author ID: " + post.getId_author_post());
-        usernameLabel.getStyleClass().add("recent-post-author");
-
-        Label dateLabel = new Label(post.getCreated_at_post());
-        dateLabel.getStyleClass().add("recent-post-date");
-
-        item.getChildren().addAll(usernameLabel, dateLabel);
-        item.setOnMouseClicked(e -> scrollToPost(post.getId_post()));
-
-        return item;
-    }
-
-    private void scrollToPost(int postId) {
-        // Simple implementation - could be enhanced
-        filterAndDisplayPosts();
     }
 
     private void filterAndDisplayPosts() {
@@ -278,7 +216,7 @@ public class ForumController implements Initializable {
 
         if (posts.isEmpty()) {
             Label emptyLabel = new Label("Aucun post trouvé");
-            emptyLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #999;");
+            emptyLabel.getStyleClass().add("empty-state-label");
             postsContainer.getChildren().add(emptyLabel);
             return;
         }
@@ -311,7 +249,7 @@ public class ForumController implements Initializable {
 
         if (filtered.isEmpty()) {
             Label emptyLabel = new Label("Aucun post trouvé");
-            emptyLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #999; -fx-padding: 32;");
+            emptyLabel.getStyleClass().add("empty-state-label");
             postsContainer.getChildren().add(emptyLabel);
             return;
         }
