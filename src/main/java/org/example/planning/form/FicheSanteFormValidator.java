@@ -15,13 +15,15 @@ public final class FicheSanteFormValidator {
     private static final Set<String> OBJECTIFS = Set.of("perte_poids", "gain_poids", "devenir_muscle", "maintien");
     private static final Set<String> NIVEAUX = Set.of("sedentaire", "peu_actif", "moderement_actif", "tres_actif");
 
-    /** 7 &lt; âge &lt; 100 → entiers 8 … 99 */
-    private static final int AGE_MIN = 8;
-    private static final int AGE_MAX = 99;
+    /** 7 &lt; âge &lt; 100 → entiers 8 … 99 (même bornes que la validation champ UI). */
+    public static final int AGE_MIN = 8;
+    public static final int AGE_MAX = 99;
     /** 80 &lt; taille &lt; 210 (cm) → 81 … 209 */
-    private static final int TAILLE_MIN_CM = 81;
-    private static final int TAILLE_MAX_CM = 209;
-    private static final double POIDS_MAX_KG = 220.0;
+    public static final int TAILLE_MIN_CM = 81;
+    public static final int TAILLE_MAX_CM = 209;
+    public static final double POIDS_MAX_KG = 220.0;
+    /** Poids strictement supérieur à cette valeur (kg). */
+    public static final double POIDS_MIN_STRICTLY_ABOVE_KG = 30.0;
 
     public record Result(boolean ok, List<String> errors, FicheSanteFormData data) {
         public static Result success(FicheSanteFormData d) {
@@ -59,7 +61,7 @@ public final class FicheSanteFormValidator {
 
         if (draft.poidsKg() == null) {
             err.add("Le poids est obligatoire.");
-        } else if (draft.poidsKg() <= 30.0 || draft.poidsKg() > POIDS_MAX_KG) {
+        } else if (draft.poidsKg() <= POIDS_MIN_STRICTLY_ABOVE_KG || draft.poidsKg() > POIDS_MAX_KG) {
             err.add("Le poids doit être strictement supérieur à 30 kg et au plus égal à " + (int) POIDS_MAX_KG + " kg.");
         }
 

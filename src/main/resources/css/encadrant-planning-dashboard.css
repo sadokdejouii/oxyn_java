@@ -724,6 +724,522 @@
 
 
 
+/* --- Command center : scroll, kicker, mosaïque --- */
+
+.epd-page-scroll {
+
+    -fx-background-color: #f5f7fb;
+
+    -fx-background-insets: 0;
+
+    -fx-padding: 0;
+
+}
+
+
+
+.epd-page-scroll > .viewport {
+
+    -fx-background-color: #f5f7fb;
+
+}
+
+
+
+.epd-page-inner {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+.epd-page-kicker {
+
+    -fx-padding: 4px 4px 0 4px;
+
+}
+
+
+
+.epd-page-kicker-icon {
+
+    -fx-icon-color: #0ea5e9;
+
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.35), 8, 0.35, 0, 0);
+
+}
+
+
+
+.epd-page-kicker-title {
+
+    -fx-font-size: 20px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #0f172a;
+
+}
+
+
+
+.epd-page-kicker-sub {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-mosaic {
+
+    -fx-padding: 0;
+
+}
+
+
+
+/* Hero client */
+
+.epd-hero-card {
+
+    -fx-background-radius: 18px;
+
+    -fx-border-radius: 18px;
+
+    -fx-border-color: rgba(14, 165, 233, 0.12);
+
+    -fx-border-width: 1px;
+
+    -fx-background-color: linear-gradient(to bottom right, #ffffff 0%, #f8fafc 55%, #f0f9ff 100%);
+
+}
+
+
+
+.epd-hero-avatar {
+
+    -fx-min-width: 52px;
+
+    -fx-min-height: 52px;
+
+    -fx-max-width: 52px;
+
+    -fx-max-height: 52px;
+
+    -fx-background-radius: 14px;
+
+    -fx-background-color: linear-gradient(to bottom, #0ea5e9 0%, #0284c7 100%);
+
+    -fx-effect: dropshadow(gaussian, rgba(2, 132, 199, 0.35), 12, 0.35, 0, 2);
+
+}
+
+
+
+.epd-hero-avatar-icon {
+
+    -fx-icon-color: #f0f9ff;
+
+}
+
+
+
+.epd-hero-metrics {
+
+    -fx-padding: 14px 18px;
+
+    -fx-background-color: rgba(255, 255, 255, 0.65);
+
+    -fx-background-radius: 14px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.08);
+
+    -fx-border-radius: 14px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+.epd-hero-metric__k {
+
+    -fx-font-size: 11px;
+
+    -fx-text-fill: #64748b;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+.epd-hero-metric__v {
+
+    -fx-font-size: 14px;
+
+    -fx-text-fill: #0f172a;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+.epd-hero-metric-sep {
+
+    -fx-background-color: rgba(148, 163, 184, 0.35);
+
+}
+
+
+
+.epd-icon-glow {
+
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.22), 10, 0.3, 0, 1);
+
+}
+
+
+
+/* Rail droit + fiche compacte */
+
+.epd-rail {
+
+    -fx-padding: 0;
+
+}
+
+
+
+.epd-rail-card {
+
+    -fx-background-radius: 14px;
+
+}
+
+
+
+.epd-fiche-body-compact {
+
+    -fx-padding: 12px 14px 14px 14px;
+
+}
+
+
+
+.epd-fiche-mini-grid {
+
+    -fx-padding: 0;
+
+}
+
+
+
+.epd-mini-tile {
+
+    -fx-padding: 8px 10px;
+
+    -fx-background-color: #f8fafc;
+
+    -fx-background-radius: 10px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+
+    -fx-border-radius: 10px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+.epd-mini-tile--wide {
+
+    -fx-padding: 10px 12px;
+
+}
+
+
+
+.epd-mini-tile__k {
+
+    -fx-font-size: 10px;
+
+    -fx-text-fill: #64748b;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+.epd-mini-tile__v {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #0f172a;
+
+}
+
+
+
+/* Programme — carte mise en avant */
+
+.epd-programme-card--elevated {
+
+    -fx-background-radius: 16px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.08);
+
+}
+
+
+
+.epd-card-header-accent {
+
+    -fx-background-color: linear-gradient(to right, rgba(240, 249, 255, 0.95) 0%, #ffffff 55%);
+
+    -fx-border-color: rgba(14, 165, 233, 0.12);
+
+    -fx-border-width: 0 0 1px 0;
+
+}
+
+
+
+.epd-programme-body {
+
+    -fx-padding: 14px 16px 16px 16px;
+
+}
+
+
+
+.epd-scroll--programme {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+.epd-scroll--programme > .viewport {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+/* Progression — bandeau « spotlight » */
+
+.epd-progress-card--spotlight {
+
+    -fx-background-radius: 16px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.09);
+
+}
+
+
+
+.epd-progress-header {
+
+    -fx-background-color: linear-gradient(to right, #ffffff 0%, #f8fafc 100%);
+
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+
+    -fx-border-width: 0 0 1px 0;
+
+}
+
+
+
+.epd-progress-legend {
+
+    -fx-padding: 0 0 4px 0;
+
+}
+
+
+
+.epd-legend-dot {
+
+    -fx-min-width: 10px;
+
+    -fx-min-height: 10px;
+
+    -fx-max-width: 10px;
+
+    -fx-max-height: 10px;
+
+    -fx-background-radius: 5px;
+
+    -fx-padding: 0;
+
+    -fx-text-fill: transparent;
+
+}
+
+
+
+.epd-legend-dot--good {
+
+    -fx-background-color: #16a34a;
+
+}
+
+
+
+.epd-legend-dot--warn {
+
+    -fx-background-color: #ea580c;
+
+}
+
+
+
+.epd-legend-dot--bad {
+
+    -fx-background-color: #dc2626;
+
+}
+
+
+
+.epd-legend-txt {
+
+    -fx-font-size: 11px;
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-progress-main {
+
+    -fx-padding: 4px 0 0 0;
+
+}
+
+
+
+.epd-progress-ring-wrap {
+
+    -fx-min-width: 88px;
+
+    -fx-pref-width: 88px;
+
+    -fx-max-width: 88px;
+
+    -fx-padding: 8px;
+
+    -fx-background-color: #ffffff;
+
+    -fx-background-radius: 999px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.08);
+
+    -fx-border-radius: 999px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+/* Insights : IA + intervention côte à côte */
+
+.epd-insight-deck {
+
+    -fx-padding: 4px 0 0 0;
+
+}
+
+
+
+.epd-insight-panel {
+
+    -fx-min-height: 320px;
+
+    -fx-background-radius: 16px;
+
+}
+
+
+
+.epd-ia-header {
+
+    -fx-background-color: linear-gradient(to right, rgba(241, 245, 249, 0.9) 0%, #ffffff 100%);
+
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+
+    -fx-border-width: 0 0 1px 0;
+
+}
+
+
+
+.epd-obs-header {
+
+    -fx-background-color: linear-gradient(to right, rgba(224, 242, 254, 0.55) 0%, #ffffff 100%);
+
+    -fx-border-color: rgba(14, 165, 233, 0.15);
+
+    -fx-border-width: 0 0 1px 0;
+
+}
+
+
+
+.epd-obs-card--featured {
+
+    -fx-border-color: rgba(14, 165, 233, 0.22);
+
+    -fx-border-width: 1px;
+
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.12), 20, 0.25, 0, 4);
+
+}
+
+
+
+.epd-obs-inline-error {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #b91c1c;
+
+    -fx-padding: 8px 10px;
+
+    -fx-background-color: rgba(254, 226, 226, 0.85);
+
+    -fx-background-radius: 8px;
+
+    -fx-border-color: rgba(220, 38, 38, 0.25);
+
+    -fx-border-radius: 8px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+.epd-obs-actions {
+
+    -fx-padding: 4px 0 0 0;
+
+}
+
+
+
 /* Tâches — lignes sobres */
 
 .epd-task-row {

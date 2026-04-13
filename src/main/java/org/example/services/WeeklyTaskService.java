@@ -66,6 +66,18 @@ public final class WeeklyTaskService {
         return tacheRepo.findForUserBetween(userId, currentWeekMonday(), currentWeekSunday());
     }
 
+    /**
+     * Crée la ligne {@code objectifs_hebdomadaires} pour la semaine ISO courante si absente,
+     * puis aligne tâches_prevues / tâches_realisees / taux sur les tâches déjà en base (0 si aucune).
+     * <p>
+     * Utilisé côté encadrant pour permettre l’enregistrement d’une intervention même lorsque le client
+     * n’a pas encore ouvert son planning (sinon la ligne n’existe qu’après {@link #ensureTasksForCurrentWeek}).
+     */
+    public void ensureCurrentWeekObjectifForUser(int userId) throws SQLException {
+        ensureObjectifRowExists(userId);
+        syncObjectifMetricsFromTasks(userId);
+    }
+
     public WeeklyTaskSummary summarize(List<TacheQuotidienne> taches) {
         return WeeklyTaskSummary.from(taches);
     }

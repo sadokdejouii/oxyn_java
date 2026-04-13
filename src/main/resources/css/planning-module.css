@@ -674,6 +674,52 @@
     -fx-padding: 4 0 0 0;
 }
 
+/* —— Fiche santé : validation champ (âge / taille / poids) —— */
+.fs-field-control-wrap {
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-border-color: rgba(30, 41, 59, 0.12);
+    -fx-background-color: transparent;
+}
+
+.fs-field-control-wrap--error {
+    -fx-border-color: #FF4D4F;
+    -fx-background-color: rgba(255, 77, 79, 0.07);
+}
+
+.fs-field-control-wrap--success {
+    -fx-border-color: #22C55E;
+    -fx-background-color: rgba(34, 197, 94, 0.05);
+}
+
+.fs-field-message-row {
+    -fx-spacing: 6;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.fs-field-message {
+    -fx-font-size: 12px;
+    -fx-wrap-text: true;
+}
+
+.fs-field-message--error {
+    -fx-text-fill: #FF4D4F;
+}
+
+.fs-field-status-icon {
+    -fx-min-width: 14px;
+    -fx-min-height: 14px;
+}
+
+.fs-field-status-icon--error {
+    -fx-icon-color: #FF4D4F;
+}
+
+.fs-field-status-icon--ok {
+    -fx-icon-color: #22C55E;
+}
+
 /* FAB discussion */
 .planning-discussion-fab {
     -fx-background-radius: 999px;

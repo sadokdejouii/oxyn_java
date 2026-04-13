@@ -65,6 +65,8 @@ public final class EncadrantPlanningDashboardController {
     @FXML
     private Label lblObsHint;
     @FXML
+    private Label lblObsValidation;
+    @FXML
     private TextArea txtObservation;
     @FXML
     private CheckBox chkEfforts;
@@ -83,6 +85,7 @@ public final class EncadrantPlanningDashboardController {
         lblClientStatut.setText("—");
         btnRefresh.setOnAction(e -> loadAll());
         btnSaveObs.setOnAction(e -> saveObservation());
+        txtObservation.textProperty().addListener((o, a, b) -> clearObsValidation());
         loadAll();
     }
 
@@ -96,6 +99,7 @@ public final class EncadrantPlanningDashboardController {
     }
 
     private void apply(EncadrantClientPlanningSnapshot s) {
+        clearObsValidation();
         applyClientHeader(s);
 
         if (s.fiche().isEmpty()) {
@@ -269,15 +273,33 @@ public final class EncadrantPlanningDashboardController {
     private void saveObservation() {
         String msg = txtObservation.getText() == null ? "" : txtObservation.getText().trim();
         if (msg.isEmpty()) {
-            alert(Alert.AlertType.WARNING, "Observation", "Saisissez un message avant d’enregistrer.");
+            showObsValidation("Saisissez un message avant d’enregistrer.");
             return;
         }
+        clearObsValidation();
         try {
             service.saveObservation(clientUserId, msg, chkEfforts.isSelected());
             loadAll();
         } catch (SQLException ex) {
             alert(Alert.AlertType.ERROR, "Enregistrement", ex.getMessage() != null ? ex.getMessage() : ex.toString());
         }
+    }
+
+    private void clearObsValidation() {
+        if (lblObsValidation != null) {
+            lblObsValidation.setText("");
+            lblObsValidation.setVisible(false);
+            lblObsValidation.setManaged(false);
+        }
+    }
+
+    private void showObsValidation(String message) {
+        if (lblObsValidation == null) {
+            return;
+        }
+        lblObsValidation.setText(message);
+        lblObsValidation.setVisible(true);
+        lblObsValidation.setManaged(true);
     }
 
     private static void alert(Alert.AlertType type, String title, String msg) {
