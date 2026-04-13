@@ -201,8 +201,8 @@ public class MainLayoutController implements Initializable {
                 ctx.displayNameProperty()));
 
         mainNavButtons.clear();
-        mainNavButtons.add(adminUsersBtn);
         mainNavButtons.add(adminDashboardBtn);
+        mainNavButtons.add(adminUsersBtn);
         mainNavButtons.add(adminEvenementsBtn);
         mainNavButtons.add(adminSalleBtn);
         mainNavButtons.add(adminPlanningBtn);
@@ -233,7 +233,7 @@ public class MainLayoutController implements Initializable {
         } else if (ctx.isEncadrant()) {
             navigate(PAGE_PLANNING, "Planning", encPlanningBtn);
         } else {
-            navigate(PAGE_PLANNING, "Planning", planningBtn);
+            navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
         }
     }
 
@@ -356,7 +356,7 @@ public class MainLayoutController implements Initializable {
         } else if (ctx.isEncadrant()) {
             navigate(PAGE_PLANNING, "Planning", encPlanningBtn);
         } else {
-            navigate(PAGE_PLANNING, "Planning", planningBtn);
+            navigate(PAGE_CLIENT_HOME, "Home", homeBtn);
         }
     }
 

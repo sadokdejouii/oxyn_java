@@ -17,6 +17,12 @@ public final class AuthValidation {
     private static final Pattern PASSWORD_COMPLEX = Pattern.compile(
             "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9\\s]).{8,}$");
 
+    /**
+     * Téléphone strict : chiffres uniquement, au plus un {@code +} et uniquement en tête, 8 à 15 chiffres au total après le {@code +}.
+     * (Même règle pour profil Admin/Client/Encadrant et formulaire admin création/édition utilisateur.)
+     */
+    private static final Pattern TELEPHONE_LINE = Pattern.compile("^\\+?[0-9]{8,15}$");
+
     private AuthValidation() {
     }
 
@@ -139,14 +145,59 @@ public final class AuthValidation {
         if (err != null) {
             return err;
         }
-        if (isBlank(telephone)) {
-            return "Le téléphone est obligatoire.";
+        err = validateTelephone(telephone, false);
+        if (err != null) {
+            return err;
         }
         err = validatePasswordCreate(password, nom.trim(), prenom.trim());
         if (err != null) {
             return err;
         }
         return validateConfirmPassword(password, confirmPassword);
+    }
+
+    /**
+     * Valide un numéro de téléphone saisi tel quel (détection des espaces en début/fin).
+     * Profil (tous rôles), formulaire admin utilisateur et inscription utilisent {@code optional == false}.
+     *
+     * @param telephoneRaw texte brut du champ (peut être {@code null})
+     * @param optional       si {@code true}, chaîne vide après trim = valide (réservé aux cas exceptionnels)
+     * @return message d'erreur ou {@code null}
+     */
+    public static String validateTelephone(String telephoneRaw, boolean optional) {
+        if (telephoneRaw == null) {
+            return optional ? null : "Le téléphone est obligatoire.";
+        }
+        if (!telephoneRaw.equals(telephoneRaw.trim())) {
+            return "Le téléphone : pas d'espaces en début ou en fin.";
+        }
+        String t = telephoneRaw.trim();
+        if (t.isEmpty()) {
+            return optional ? null : "Le téléphone est obligatoire.";
+        }
+        if (containsWhitespace(telephoneRaw)) {
+            return "Le téléphone ne doit pas contenir d'espaces.";
+        }
+        if (t.indexOf('+') > 0) {
+            return "Le symbole « + » n’est autorisé qu’en tout début du numéro.";
+        }
+        if (countChar(t, '+') > 1) {
+            return "Un seul « + » est autorisé (en début de numéro).";
+        }
+        if (!TELEPHONE_LINE.matcher(t).matches()) {
+            return "Format invalide : chiffres uniquement, « + » optionnel en tête, entre 8 et 15 chiffres.";
+        }
+        return null;
+    }
+
+    private static int countChar(String s, char c) {
+        int n = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == c) {
+                n++;
+            }
+        }
+        return n;
     }
 
     private static boolean containsWhitespace(String s) {

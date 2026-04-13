@@ -178,10 +178,6 @@ public class UserFormDialogController {
         String pwd = passwordField.getText() != null ? passwordField.getText() : "";
         String nomRaw = raw(nomField);
         String prenomRaw = raw(prenomField);
-        String tel = text(telephoneField);
-        if (tel.isEmpty()) {
-            tel = null;
-        }
 
         boolean ok = true;
 
@@ -217,6 +213,12 @@ public class UserFormDialogController {
             ok = false;
         }
 
+        String telErr = AuthValidation.validateTelephone(raw(telephoneField), false);
+        if (telErr != null) {
+            FormFieldFeedback.setInputError(telephoneField, telephoneErrorLabel, telErr, loginTheme);
+            ok = false;
+        }
+
         String n = nomRaw.trim();
         String p = prenomRaw.trim();
         String pwdErr;
@@ -238,6 +240,11 @@ public class UserFormDialogController {
 
         if (!ok) {
             return;
+        }
+
+        String tel = text(telephoneField);
+        if (tel.isEmpty()) {
+            tel = null;
         }
 
         String em = emailRaw.trim().toLowerCase();

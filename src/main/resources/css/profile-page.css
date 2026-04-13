@@ -240,8 +240,255 @@
     -fx-background-radius: 11px;
 }
 
+/*
+ * Bouton Enregistrer : styles forcés par id (priorité sur Modena / ordre des feuilles).
+ * Le profil client/encadrant ajoute pp-page--light sur le ScrollPane et pp-root--light sur la VBox.
+ */
+#profileSaveButton {
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 191, 255, 0.42) 0%, rgba(0, 153, 204, 0.58) 100%);
+    -fx-background-radius: 11px;
+    -fx-border-color: rgba(79, 195, 247, 0.55);
+    -fx-border-radius: 11px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 11 22;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.28), 12, 0, 0, 2);
+}
+
+#profileSaveButton:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(79, 195, 247, 0.5) 0%, rgba(0, 191, 255, 0.55) 100%);
+    -fx-border-color: rgba(0, 229, 255, 0.65);
+}
+
+#profileSaveButton:pressed {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 153, 204, 0.65) 0%, rgba(0, 119, 160, 0.75) 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 8, 0, 0, 1);
+}
+
+#profileSaveButton:default {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 191, 255, 0.42) 0%, rgba(0, 153, 204, 0.58) 100%);
+    -fx-border-color: rgba(79, 195, 247, 0.55);
+}
+
 .pp-hint-muted {
     -fx-font-size: 11px;
     -fx-text-fill: rgba(160, 180, 204, 0.55);
     -fx-padding: 0 8 0 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Variante claire — client & encadrant (admin conserve le bloc sombre ci-dessus)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.pp-page.pp-page--light {
+    -fx-background: #ffffff;
+    -fx-background-color: #ffffff;
+}
+
+.pp-page.pp-page--light > .viewport {
+    -fx-background-color: #ffffff;
+}
+
+.pp-root.pp-root--light {
+    -fx-background-color: #ffffff;
+}
+
+.pp-root--light .pp-title.page-hero-title,
+.pp-root--light .page-hero-title {
+    -fx-text-fill: #0f172a;
+    -fx-effect: null;
+}
+
+.pp-root--light .pp-hero-sub.page-hero-sub,
+.pp-root--light .page-hero-sub {
+    -fx-text-fill: #475569;
+}
+
+.pp-root--light .pp-kicker {
+    -fx-text-fill: #0284c7;
+    -fx-background-color: rgba(14, 165, 233, 0.1);
+    -fx-border-color: rgba(14, 165, 233, 0.28);
+}
+
+.pp-root--light .pp-avatar-wrap {
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 100% 100%, rgba(14, 165, 233, 0.35) 0%, rgba(56, 189, 248, 0.15) 100%),
+            #f0f9ff;
+    -fx-border-color: rgba(14, 165, 233, 0.45);
+}
+
+.pp-root--light .pp-avatar-text {
+    -fx-text-fill: #0369a1;
+}
+
+.pp-root--light .pp-card.saas-chart-card,
+.pp-root--light .saas-chart-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 16, 0, 0, 2);
+}
+
+.pp-root--light .pp-card-head {
+    -fx-text-fill: #64748b;
+}
+
+.pp-root--light .pp-card-sub {
+    -fx-text-fill: #64748b;
+}
+
+.pp-root--light .pp-kv-row {
+    -fx-border-color: #e2e8f0;
+}
+
+.pp-root--light .pp-kv-key {
+    -fx-text-fill: #64748b;
+}
+
+.pp-root--light .pp-kv-val {
+    -fx-text-fill: #0f172a;
+}
+
+.pp-root--light .pp-section-title {
+    -fx-text-fill: #475569;
+}
+
+.pp-root--light .pp-section-hint {
+    -fx-text-fill: #94a3b8;
+}
+
+.pp-root--light .field-label {
+    -fx-text-fill: #475569;
+}
+
+.pp-root--light .login-field {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+}
+
+.pp-root--light .login-field:focused {
+    -fx-border-color: #0ea5e9;
+    -fx-background-color: #ffffff;
+}
+
+.pp-root--light .login-field-error {
+    -fx-background-color: #fef2f2;
+    -fx-border-color: rgba(220, 38, 38, 0.75);
+}
+
+.pp-root--light .field-error-msg {
+    -fx-text-fill: #b91c1c;
+}
+
+.pp-root--light .pp-hint-muted {
+    -fx-text-fill: #64748b;
+}
+
+.pp-root--light .pp-footer {
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 0 16 0;
+}
+
+/* Badges statut / rôle — contraste fort sur fond blanc (client & encadrant) */
+.pp-root--light .pp-badge-status-on {
+    -fx-background-color: #d1fae5;
+    -fx-text-fill: #065f46;
+    -fx-border-color: #34d399;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.pp-root--light .pp-badge-status-off {
+    -fx-background-color: #ffedd5;
+    -fx-text-fill: #9a3412;
+    -fx-border-color: #fb923c;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.pp-root--light .pp-badge-role-admin {
+    -fx-background-color: #f3e8ff;
+    -fx-text-fill: #6b21a8;
+    -fx-border-color: #c084fc;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.pp-root--light .pp-badge-role-coach {
+    -fx-background-color: #ffedd5;
+    -fx-text-fill: #9a3412;
+    -fx-border-color: #f97316;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.pp-root--light .pp-badge-role-client {
+    -fx-background-color: #e0f2fe;
+    -fx-text-fill: #075985;
+    -fx-border-color: #0ea5e9;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+.pp-root--light .pp-badge-role-unknown {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #334155;
+    -fx-border-color: #94a3b8;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+
+/* Bouton Enregistrer — variante lisible sur fond blanc (client / encadrant) */
+.pp-page--light #profileSaveButton,
+.pp-root--light #profileSaveButton {
+    -fx-background-color: linear-gradient(to bottom, #0284c7 0%, #0369a1 100%);
+    -fx-border-color: #0369a1;
+    -fx-border-radius: 11px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(2, 132, 199, 0.45), 12, 0, 0, 2);
+}
+
+.pp-page--light #profileSaveButton:hover,
+.pp-root--light #profileSaveButton:hover {
+    -fx-background-color: linear-gradient(to bottom, #0ea5e9 0%, #0284c7 100%);
+    -fx-border-color: #0284c7;
+}
+
+.pp-page--light #profileSaveButton:pressed,
+.pp-root--light #profileSaveButton:pressed {
+    -fx-background-color: #0369a1;
+    -fx-border-color: #075985;
+}
+
+.pp-page--light #profileSaveButton:default,
+.pp-root--light #profileSaveButton:default {
+    -fx-background-color: linear-gradient(to bottom, #0284c7 0%, #0369a1 100%);
+    -fx-border-color: #0369a1;
+    -fx-text-fill: #ffffff;
+}
+
+/* Garde les classes utilitaires alignées sur l’id (si cascade réapplique .primary-toolbar-btn) */
+.pp-root--light .pp-save-btn.primary-toolbar-btn,
+.pp-root--light .pp-profile-save-btn {
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-background-color: linear-gradient(to bottom, #0284c7 0%, #0369a1 100%);
+    -fx-border-color: #0369a1;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(2, 132, 199, 0.45), 12, 0, 0, 2);
+}
+
+.pp-root--light .pp-save-btn.primary-toolbar-btn:hover,
+.pp-root--light .pp-profile-save-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #0ea5e9 0%, #0284c7 100%);
+    -fx-border-color: #0284c7;
 }

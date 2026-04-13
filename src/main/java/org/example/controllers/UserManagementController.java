@@ -1,5 +1,10 @@
 package org.example.controllers;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -7,13 +12,10 @@ import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.entities.Admin;
@@ -25,10 +27,15 @@ import org.example.utils.UserDialogHelper;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class UserManagementController implements Initializable {
+
+    private enum SortColumn {
+        EMAIL, NAME, ROLE, STATUS
+    }
 
     public static final class UserRow {
         private final User user;
@@ -89,19 +96,19 @@ public class UserManagementController implements Initializable {
     private TextField searchField;
 
     @FXML
-    private TableView<UserRow> usersTable;
+    private ListView<UserRow> usersList;
 
     @FXML
-    private TableColumn<UserRow, String> emailColumn;
+    private Button sortEmailBtn;
 
     @FXML
-    private TableColumn<UserRow, String> nameColumn;
+    private Button sortNameBtn;
 
     @FXML
-    private TableColumn<UserRow, String> roleColumn;
+    private Button sortRoleBtn;
 
     @FXML
-    private TableColumn<UserRow, String> statusColumn;
+    private Button sortStatusBtn;
 
     @FXML
     private Label statTotalValue;
@@ -116,42 +123,46 @@ public class UserManagementController implements Initializable {
     private Label statAdminValue;
 
     @FXML
+    private Label statCoachValue;
+
+    @FXML
+    private Label statClientValue;
+
+    @FXML
     private Label tableHintLabel;
 
     private final ObservableList<UserRow> masterData = FXCollections.observableArrayList();
     private FilteredList<UserRow> filteredData;
+    private SortedList<UserRow> sortedData;
+
+    private final ObjectProperty<SortColumn> sortColumn = new SimpleObjectProperty<>(SortColumn.EMAIL);
+    private final BooleanProperty sortAscending = new SimpleBooleanProperty(true);
 
     private final UserService userService = new UserService();
 
     private Stage dialogOwner() {
-        if (usersTable == null || usersTable.getScene() == null) {
+        if (usersList == null || usersList.getScene() == null) {
             return null;
         }
-        return (Stage) usersTable.getScene().getWindow();
+        return (Stage) usersList.getScene().getWindow();
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         filteredData = new FilteredList<>(masterData, row -> true);
-        SortedList<UserRow> sortedData = new SortedList<>(filteredData);
-        sortedData.comparatorProperty().bind(usersTable.comparatorProperty());
-        usersTable.setItems(sortedData);
+        sortedData = new SortedList<>(filteredData);
+        sortedData.comparatorProperty().bind(Bindings.createObjectBinding(
+                () -> comparatorFor(sortColumn.get(), sortAscending.get()),
+                sortColumn, sortAscending));
+        usersList.setItems(sortedData);
 
-        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-        configureRoleAndStatusCells();
-        usersTable.setRowFactory(tv -> {
-            TableRow<UserRow> row = new TableRow<>();
-            row.setOnMouseClicked(ev -> {
-                if (ev.getClickCount() == 2 && !row.isEmpty()) {
-                    usersTable.getSelectionModel().select(row.getItem());
-                    handleEdit();
-                }
-            });
-            return row;
+        usersList.setCellFactory(lv -> new UserManagementListCell());
+        usersList.setOnMouseClicked(ev -> {
+            if (ev.getClickCount() == 2) {
+                handleEdit();
+            }
         });
+
         Label emptyTitle = new Label("Aucun utilisateur");
         emptyTitle.getStyleClass().add("um-empty-title");
         Label emptySub = new Label("Les comptes apparaîtront ici après chargement depuis la base.");
@@ -159,75 +170,86 @@ public class UserManagementController implements Initializable {
         VBox emptyBox = new VBox(8, emptyTitle, emptySub);
         emptyBox.setAlignment(Pos.CENTER);
         emptyBox.getStyleClass().add("um-empty-box");
-        usersTable.setPlaceholder(emptyBox);
+        usersList.setPlaceholder(emptyBox);
+
+        updateSortButtonLabels();
 
         if (searchField != null) {
-            searchField.textProperty().addListener((obs, oldVal, newVal) -> applySearchFilter(newVal));
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+                applySearchFilter(newVal);
+                refreshSummaryLabels();
+            });
         }
 
         loadFromDatabase();
     }
 
-    private void configureRoleAndStatusCells() {
-        roleColumn.setCellFactory(col -> new TableCell<>() {
-            private final Label badge = new Label();
+    private static Comparator<UserRow> comparatorFor(SortColumn col, boolean asc) {
+        Comparator<UserRow> c = switch (col) {
+            case EMAIL -> Comparator.comparing(UserRow::getEmail, String.CASE_INSENSITIVE_ORDER);
+            case NAME -> Comparator.comparing(r -> r.getName().trim(), String.CASE_INSENSITIVE_ORDER);
+            case ROLE -> Comparator.comparing(UserRow::getRole, String.CASE_INSENSITIVE_ORDER);
+            case STATUS -> Comparator.comparing(UserRow::getStatus, String.CASE_INSENSITIVE_ORDER);
+        };
+        return asc ? c : c.reversed();
+    }
 
-            {
-                badge.getStyleClass().add("um-table-badge");
-            }
+    private void applySort(SortColumn col) {
+        if (sortColumn.get() == col) {
+            sortAscending.set(!sortAscending.get());
+        } else {
+            sortColumn.set(col);
+            sortAscending.set(true);
+        }
+        updateSortButtonLabels();
+    }
 
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    return;
-                }
-                badge.setText(item);
-                badge.getStyleClass().removeIf(s ->
-                        "um-role-admin".equals(s) || "um-role-coach".equals(s) || "um-role-client".equals(s));
-                if ("Admin".equals(item)) {
-                    badge.getStyleClass().add("um-role-admin");
-                } else if ("Encadrant".equals(item)) {
-                    badge.getStyleClass().add("um-role-coach");
-                } else if ("Client".equals(item)) {
-                    badge.getStyleClass().add("um-role-client");
-                }
-                setAlignment(Pos.CENTER_LEFT);
-                setGraphic(badge);
-            }
-        });
-        statusColumn.setCellFactory(col -> new TableCell<>() {
-            private final Label badge = new Label();
+    private void updateSortButtonLabels() {
+        SortColumn active = sortColumn.get();
+        boolean asc = sortAscending.get();
+        setSortBtn(sortEmailBtn, "E-mail", SortColumn.EMAIL, active, asc);
+        setSortBtn(sortNameBtn, "Nom complet", SortColumn.NAME, active, asc);
+        setSortBtn(sortRoleBtn, "Rôle", SortColumn.ROLE, active, asc);
+        setSortBtn(sortStatusBtn, "Statut", SortColumn.STATUS, active, asc);
+    }
 
-            {
-                badge.getStyleClass().add("um-table-badge");
-            }
+    private static void setSortBtn(Button btn, String title, SortColumn col, SortColumn active, boolean asc) {
+        if (btn == null) {
+            return;
+        }
+        if (active != col) {
+            btn.setText(title + "  ↕");
+        } else {
+            btn.setText(title + "  " + (asc ? "↑" : "↓"));
+        }
+    }
 
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    return;
-                }
-                badge.setText(item);
-                badge.getStyleClass().removeIf(s -> "um-status-on".equals(s) || "um-status-off".equals(s));
-                if ("Actif".equals(item)) {
-                    badge.getStyleClass().add("um-status-on");
-                } else {
-                    badge.getStyleClass().add("um-status-off");
-                }
-                setAlignment(Pos.CENTER_LEFT);
-                setGraphic(badge);
-            }
-        });
+    @FXML
+    private void handleSortEmail() {
+        applySort(SortColumn.EMAIL);
+    }
+
+    @FXML
+    private void handleSortName() {
+        applySort(SortColumn.NAME);
+    }
+
+    @FXML
+    private void handleSortRole() {
+        applySort(SortColumn.ROLE);
+    }
+
+    @FXML
+    private void handleSortStatus() {
+        applySort(SortColumn.STATUS);
     }
 
     private void refreshSummaryLabels() {
         int total = masterData.size();
         long active = masterData.stream().filter(r -> r.getUser().isActive()).count();
         long admins = masterData.stream().filter(r -> r.getUser() instanceof Admin).count();
+        long coaches = masterData.stream().filter(r -> r.getUser() instanceof Coach).count();
+        long clients = masterData.stream().filter(r -> r.getUser() instanceof Client).count();
         if (statTotalValue != null) {
             statTotalValue.setText(String.valueOf(total));
         }
@@ -240,11 +262,22 @@ public class UserManagementController implements Initializable {
         if (statAdminValue != null) {
             statAdminValue.setText(String.valueOf(admins));
         }
+        if (statCoachValue != null) {
+            statCoachValue.setText(String.valueOf(coaches));
+        }
+        if (statClientValue != null) {
+            statClientValue.setText(String.valueOf(clients));
+        }
         if (tableHintLabel != null) {
             if (total == 0) {
                 tableHintLabel.setText("");
             } else {
-                tableHintLabel.setText(total + " compte" + (total > 1 ? "s" : ""));
+                int shown = filteredData != null ? filteredData.size() : total;
+                if (shown == total) {
+                    tableHintLabel.setText(total + " compte" + (total > 1 ? "s" : ""));
+                } else {
+                    tableHintLabel.setText(shown + " affiché" + (shown > 1 ? "s" : "") + " sur " + total);
+                }
             }
         }
     }
@@ -275,6 +308,7 @@ public class UserManagementController implements Initializable {
             searchField.clear();
         }
         applySearchFilter("");
+        refreshSummaryLabels();
     }
 
     private void loadFromDatabase() {
@@ -283,6 +317,7 @@ public class UserManagementController implements Initializable {
             refreshSummaryLabels();
             if (searchField != null) {
                 applySearchFilter(searchField.getText());
+                refreshSummaryLabels();
             }
         } catch (SQLException e) {
             UserDialogHelper.showMessage(dialogOwner(), "Chargement des utilisateurs",
@@ -306,10 +341,10 @@ public class UserManagementController implements Initializable {
 
     @FXML
     private void handleEdit() {
-        UserRow row = usersTable.getSelectionModel().getSelectedItem();
+        UserRow row = usersList.getSelectionModel().getSelectedItem();
         if (row == null) {
             UserDialogHelper.showMessage(dialogOwner(), "Modifier",
-                    "Sélectionnez un utilisateur dans le tableau.", false);
+                    "Sélectionnez un utilisateur dans la liste.", false);
             return;
         }
         Optional<User> draft = UserDialogHelper.showUserForm(dialogOwner(), row.getUser());
@@ -326,10 +361,10 @@ public class UserManagementController implements Initializable {
 
     @FXML
     private void handleDelete() {
-        UserRow row = usersTable.getSelectionModel().getSelectedItem();
+        UserRow row = usersList.getSelectionModel().getSelectedItem();
         if (row == null) {
             UserDialogHelper.showMessage(dialogOwner(), "Suppression",
-                    "Sélectionnez un utilisateur dans le tableau.", false);
+                    "Sélectionnez un utilisateur dans la liste.", false);
             return;
         }
         boolean ok = UserDialogHelper.showConfirm(dialogOwner(), "Supprimer l'utilisateur",
@@ -349,10 +384,10 @@ public class UserManagementController implements Initializable {
 
     @FXML
     private void handleToggleActive() {
-        UserRow row = usersTable.getSelectionModel().getSelectedItem();
+        UserRow row = usersList.getSelectionModel().getSelectedItem();
         if (row == null) {
             UserDialogHelper.showMessage(dialogOwner(), "Activer / désactiver",
-                    "Sélectionnez un utilisateur dans le tableau.", false);
+                    "Sélectionnez un utilisateur dans la liste.", false);
             return;
         }
         User u = row.getUser();

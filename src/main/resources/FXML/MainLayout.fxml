@@ -75,6 +75,15 @@
                             </graphic>
                         </Button>
 
+                        <Button fx:id="adminUsersBtn" onAction="#handleAdminUsers" styleClass="nav-link">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Region styleClass="ikonli-slot,fas-users,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                    <Label styleClass="nav-label" text="Utilisateurs" />
+                                </HBox>
+                            </graphic>
+                        </Button>
+
                         <Button fx:id="adminEvenementsBtn" onAction="#handleAdminEvenements" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
@@ -109,16 +118,6 @@
                                     <Label styleClass="nav-label" text="Boutique" />
                                 </HBox>
                             </graphic>
-                        </Button>
-
-                        <Button fx:id="adminUsersBtn" onAction="#handleAdminUsers" styleClass="nav-link">
-                         <graphic>
-                             <HBox alignment="CENTER_LEFT" spacing="12">
-                              <Region styleClass="ikonli-slot,fas-users,sz-18,nav-icon-fa" 
-                               minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                              <Label styleClass="nav-label" text="Utilisateurs" />
-                             </HBox>
-                         </graphic>
                         </Button>
 
                         <Button fx:id="adminForumBtn" onAction="#handleAdminForum" styleClass="nav-link">
@@ -258,7 +257,7 @@
                 </VBox>
             </ScrollPane>
 
-            <VBox fx:id="sidebarActionsBox" spacing="6" styleClass="sidebar-actions">
+            <VBox fx:id="sidebarActionsBox" spacing="10" styleClass="sidebar-actions">
                 <Button fx:id="profileBtn" onAction="#handleProfile" styleClass="nav-link">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="12">
@@ -268,11 +267,16 @@
                     </graphic>
                 </Button>
 
-                <Button fx:id="logoutBtn" onAction="#handleLogout" styleClass="nav-link logout-btn">
+                <Button fx:id="logoutBtn" onAction="#handleLogout" styleClass="nav-link logout-btn" text="">
                     <graphic>
-                        <HBox alignment="CENTER_LEFT" spacing="12">
-                            <Region styleClass="ikonli-slot,fas-sign-out-alt,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                            <Label styleClass="nav-label" text="Logout" />
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="logout-btn-inner">
+                            <StackPane styleClass="logout-icon-wrap" minHeight="34.0" minWidth="34.0" prefHeight="34.0" prefWidth="34.0">
+                                <Region styleClass="ikonli-slot,fas-sign-out-alt,sz-16,nav-icon-fa,logout-icon-fa" minHeight="16.0" minWidth="16.0" prefHeight="16.0" prefWidth="16.0" />
+                            </StackPane>
+                            <VBox spacing="2" alignment="CENTER_LEFT">
+                                <Label styleClass="nav-label logout-title" text="Logout" />
+                                <Label styleClass="logout-sub" text="End session" />
+                            </VBox>
                         </HBox>
                     </graphic>
                 </Button>

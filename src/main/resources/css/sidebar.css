@@ -310,27 +310,89 @@
 
 /* ── Sidebar actions (profile / logout) ─────────────────────────── */
 .sidebar-actions {
-    -fx-padding: 12 16 8 16;
+    -fx-padding: 14 16 10 16;
     -fx-border-color: rgba(255, 255, 255, 0.06);
     -fx-border-width: 1 0 0 0;
 }
 
-/* ── Logout ─────────────────────────────────────────────────────── */
-.logout-btn {
-    -fx-background-color: rgba(244, 67, 54, 0.08);
-    -fx-background-radius: 12px;
-    -fx-border-color: rgba(244, 67, 54, 0.15);
+/* ── Logout — bouton d’action (lisible, dégradé, icône encadrée) ─── */
+.nav-link.logout-btn {
+    -fx-padding: 12 14 12 12;
+    -fx-background-color:
+            linear-gradient(to bottom, rgba(239, 83, 80, 0.55) 0%, rgba(183, 28, 28, 0.5) 100%),
+            rgba(0, 0, 0, 0.12);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(255, 183, 177, 0.55);
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(229, 57, 53, 0.42), 12, 0.35, 0, 2);
 }
 
-.logout-btn:hover {
-    -fx-background-color: rgba(244, 67, 54, 0.16);
-    -fx-border-color: rgba(244, 67, 54, 0.28);
+.nav-link.logout-btn .logout-btn-inner {
+    -fx-alignment: center-left;
 }
 
-.logout-btn .nav-label {
-    -fx-text-fill: #f8a8a8;
+.nav-link.logout-btn .logout-icon-wrap {
+    -fx-alignment: center;
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+.nav-link.logout-btn .logout-icon-fa {
+    -fx-icon-color: #ffffff;
+}
+
+.nav-link.logout-btn .logout-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 0.03em;
+}
+
+.nav-link.logout-btn .logout-sub {
+    -fx-text-fill: rgba(255, 255, 255, 0.82);
+    -fx-font-size: 11px;
+    -fx-font-weight: normal;
+}
+
+.nav-link.logout-btn:hover {
+    -fx-background-color:
+            linear-gradient(to bottom, rgba(244, 97, 88, 0.78) 0%, rgba(211, 47, 47, 0.72) 100%),
+            rgba(0, 0, 0, 0.08);
+    -fx-border-color: rgba(255, 224, 220, 0.9);
+    -fx-effect: dropshadow(gaussian, rgba(255, 112, 99, 0.55), 16, 0.4, 0, 2);
+}
+
+.nav-link.logout-btn:hover .logout-icon-wrap {
+    -fx-background-color: rgba(255, 255, 255, 0.14);
+    -fx-border-color: rgba(255, 255, 255, 0.35);
+}
+
+.nav-link.logout-btn:hover .logout-icon-fa {
+    -fx-icon-color: #ffffff;
+}
+
+.nav-link.logout-btn:hover .logout-title {
+    -fx-text-fill: #ffffff;
+}
+
+.nav-link.logout-btn:hover .logout-sub {
+    -fx-text-fill: rgba(255, 255, 255, 0.95);
+}
+
+.nav-link.logout-btn:pressed {
+    -fx-background-color:
+            linear-gradient(to bottom, rgba(127, 17, 17, 0.88) 0%, rgba(93, 12, 12, 0.92) 100%);
+    -fx-border-color: rgba(255, 183, 177, 0.45);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 1);
+    -fx-translate-y: 1px;
+}
+
+.nav-link.logout-btn:focused {
+    -fx-border-color: rgba(255, 224, 220, 0.95);
 }
 
 /* ── Sidebar footer ─────────────────────────────────────────────── */
