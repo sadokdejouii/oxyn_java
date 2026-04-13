@@ -33,6 +33,7 @@
             </HBox>
 
             <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-card">
+                <Button onAction="#handleAjouter" styleClass="primary-toolbar-btn" text="+ Nouvel offre" />
                 <Region HBox.hgrow="ALWAYS"/>
                 <ToggleButton fx:id="filterAll"      onAction="#handleFilter" styleClass="sess-filter-btn" text="Toutes"    userData="ALL"      selected="true"/>
                 <ToggleButton fx:id="filterActive"   onAction="#handleFilter" styleClass="sess-filter-btn" text="Actives"   userData="ACTIVE"/>

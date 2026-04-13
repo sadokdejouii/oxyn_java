@@ -145,78 +145,124 @@ public class SalleManagementController implements Initializable {
 
     private VBox buildCard(Salle s) {
         VBox card = new VBox(0);
-        card.setPrefWidth(280);
+        card.setPrefWidth(290);
+        card.setMaxWidth(290);
         card.getStyleClass().add("salle-card");
 
-        // ── Photo en haut ──
+        // ── Zone photo avec badge statut en overlay ──
         StackPane photoPane = new StackPane();
         photoPane.setPrefHeight(160);
+        photoPane.setMinHeight(160);
+        photoPane.setMaxHeight(160);
         photoPane.getStyleClass().add("salle-card-photo-wrap");
 
         String imgUrl = s.getImageUrl();
         if (imgUrl != null && !imgUrl.isBlank() && new File(imgUrl).exists()) {
-            ImageView iv = new ImageView(new Image("file:///" + imgUrl.replace("\\", "/"), 280, 160, false, true));
-            iv.setFitWidth(280);
+            ImageView iv = new ImageView(new Image("file:///" + imgUrl.replace("\\", "/"), 290, 160, false, true));
+            iv.setFitWidth(290);
             iv.setFitHeight(160);
             iv.setPreserveRatio(false);
             iv.getStyleClass().add("salle-card-photo");
             photoPane.getChildren().add(iv);
         } else {
-            Label placeholder = new Label("Aucune photo");
-            placeholder.getStyleClass().add("salle-card-no-photo");
+            // Placeholder stylisé avec icône caméra
+            VBox placeholder = new VBox(6);
+            placeholder.setAlignment(Pos.CENTER);
+            placeholder.getStyleClass().add("salle-card-placeholder");
+            Label camIcon = new Label("📷");
+            camIcon.getStyleClass().add("salle-card-placeholder-icon");
+            Label camText = new Label("Aucune photo");
+            camText.getStyleClass().add("salle-card-placeholder-text");
+            placeholder.getChildren().addAll(camIcon, camText);
             photoPane.getChildren().add(placeholder);
         }
 
+        // Badge statut en overlay top-right
+        boolean actif = s.isActive();
+        Label badge = new Label(actif ? "Actif" : "Inactif");
+        badge.getStyleClass().add(actif ? "salle-badge-active" : "salle-badge-inactive");
+        StackPane.setAlignment(badge, Pos.TOP_RIGHT);
+        StackPane.setMargin(badge, new Insets(10, 10, 0, 0));
+        photoPane.getChildren().add(badge);
+
         // ── Contenu ──
-        VBox content = new VBox(8);
-        content.setPadding(new Insets(14, 16, 14, 16));
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(14, 16, 16, 16));
+        content.getStyleClass().add("salle-card-body");
 
-        Label badge = new Label("● Actif");
-        badge.getStyleClass().add("salle-badge-active");
-
+        // Nom
         Label nom = new Label(s.getName());
         nom.getStyleClass().add("salle-card-title");
         nom.setWrapText(true);
+        nom.setMaxWidth(Double.MAX_VALUE);
 
-        Label desc = new Label(s.getDescription() != null && !s.getDescription().isBlank() ? s.getDescription() : "—");
-        desc.getStyleClass().add("salle-card-desc");
-        desc.setWrapText(true);
+        // Description
+        if (s.getDescription() != null && !s.getDescription().isBlank()) {
+            Label desc = new Label(s.getDescription());
+            desc.getStyleClass().add("salle-card-desc");
+            desc.setWrapText(true);
+            desc.setMaxWidth(Double.MAX_VALUE);
+            content.getChildren().addAll(nom, desc);
+        } else {
+            content.getChildren().add(nom);
+        }
 
-        VBox infos = new VBox(4);
+        // Infos compactes
+        VBox infos = new VBox(5);
         infos.getChildren().addAll(
             infoRow("📍", s.getAddress()),
             infoRow("📞", s.getPhone()),
             infoRow("✉", s.getEmail())
         );
 
-        Label rating = new Label("★ " + String.format("%.1f", s.getRating()) + "  (" + s.getRatingCount() + " avis)");
-        rating.getStyleClass().add("salle-card-rating");
+        // Rating avec étoiles dorées
+        HBox ratingBox = new HBox(6);
+        ratingBox.setAlignment(Pos.CENTER_LEFT);
+        double rating = s.getRating();
+        int fullStars = (int) rating;
+        StringBuilder stars = new StringBuilder();
+        for (int i = 0; i < 5; i++) stars.append(i < fullStars ? "★" : "☆");
+        Label starsLbl = new Label(stars.toString());
+        starsLbl.getStyleClass().add("salle-card-stars");
+        Label avisLbl = new Label(String.format("%.1f  (%d avis)", rating, s.getRatingCount()));
+        avisLbl.getStyleClass().add("salle-card-avis");
+        ratingBox.getChildren().addAll(starsLbl, avisLbl);
 
-        Separator sep = new Separator();
+        // Séparateur fin
+        Region divider = new Region();
+        divider.setPrefHeight(1);
+        divider.setMaxWidth(Double.MAX_VALUE);
+        divider.getStyleClass().add("salle-card-divider");
+
+        // Boutons pleine largeur
+        Button btnEdit = new Button("✏  Modifier");
+        btnEdit.getStyleClass().add("salle-btn-edit");
+        btnEdit.setMaxWidth(Double.MAX_VALUE);
+        btnEdit.setOnAction(e -> openEditDialog(s));
+        HBox.setHgrow(btnEdit, Priority.ALWAYS);
+
+        Button btnDel = new Button("🗑  Supprimer");
+        btnDel.getStyleClass().add("salle-btn-delete");
+        btnDel.setMaxWidth(Double.MAX_VALUE);
+        btnDel.setOnAction(e -> handleSupprimer(s));
+        HBox.setHgrow(btnDel, Priority.ALWAYS);
 
         HBox actions = new HBox(8);
-        Button btnEdit = new Button("Modifier");
-        btnEdit.getStyleClass().add("salle-btn-edit");
-        btnEdit.setOnAction(e -> openEditDialog(s));
-
-        Button btnDel = new Button("Supprimer");
-        btnDel.getStyleClass().add("salle-btn-delete");
-        btnDel.setOnAction(e -> handleSupprimer(s));
-
         actions.getChildren().addAll(btnEdit, btnDel);
-        content.getChildren().addAll(badge, nom, desc, infos, rating, sep, actions);
+
+        content.getChildren().addAll(infos, ratingBox, divider, actions);
         card.getChildren().addAll(photoPane, content);
         return card;
     }
 
     private HBox infoRow(String icon, String value) {
-        HBox row = new HBox(6);
+        HBox row = new HBox(8);
         row.setAlignment(Pos.CENTER_LEFT);
         Label ico = new Label(icon);
-        ico.setStyle("-fx-font-size: 12px;");
+        ico.getStyleClass().add("salle-card-info-icon");
         Label val = new Label(value != null && !value.isBlank() ? value : "—");
         val.getStyleClass().add("salle-card-info");
-        val.setWrapText(true);
+        val.setWrapText(false);
         row.getChildren().addAll(ico, val);
         return row;
     }
