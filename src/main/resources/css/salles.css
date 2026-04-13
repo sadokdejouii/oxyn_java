@@ -4,110 +4,164 @@
 
 /* ── CARD ─────────────────────────────────────────────────── */
 .salle-card {
-    -fx-background-color:
-        linear-gradient(from 0% 0% to 0% 40%, rgba(255,255,255,0.06) 0%, transparent 100%),
-        rgba(13,27,62,0.75);
-    -fx-background-radius: 14px;
-    -fx-border-radius: 14px;
-    -fx-border-color: rgba(79,195,247,0.22);
+    -fx-background-color: #0d1b2e;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(255,255,255,0.08);
     -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 14, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 18, 0, 0, 6);
 }
 
 .salle-card:hover {
-    -fx-border-color: rgba(0,191,255,0.45);
-    -fx-effect: dropshadow(gaussian, rgba(0,191,255,0.18), 20, 0, 0, 6);
+    -fx-border-color: rgba(56,189,248,0.35);
+    -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.15), 24, 0, 0, 8);
 }
 
 /* ── PHOTO ZONE ───────────────────────────────────────────── */
 .salle-card-photo-wrap {
-    -fx-background-color: rgba(0,0,0,0.35);
-    -fx-background-radius: 14px 14px 0px 0px;
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0a1628, #0d2040);
+    -fx-background-radius: 12px 12px 0px 0px;
+    -fx-min-height: 160px;
+    -fx-pref-height: 160px;
+    -fx-max-height: 160px;
 }
 
-.salle-card-no-photo {
-    -fx-text-fill: rgba(160,180,204,0.45);
-    -fx-font-size: 13px;
+.salle-card-photo {
+    -fx-background-radius: 12px 12px 0px 0px;
+}
+
+/* Placeholder caméra */
+.salle-card-placeholder {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0a1628, #0d2040);
+    -fx-background-radius: 12px 12px 0px 0px;
+    -fx-alignment: center;
+    -fx-min-height: 160px;
+    -fx-pref-height: 160px;
+}
+
+.salle-card-placeholder-icon {
+    -fx-font-size: 32px;
+    -fx-opacity: 0.35;
+}
+
+.salle-card-placeholder-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(160,180,204,0.35);
     -fx-font-style: italic;
 }
 
-/* ── BADGE ────────────────────────────────────────────────── */
+/* ── BADGE STATUT (overlay) ───────────────────────────────── */
 .salle-badge-active {
-    -fx-background-color: rgba(35,134,54,0.25);
-    -fx-text-fill: #3fb950;
+    -fx-background-color: rgba(22,101,52,0.85);
+    -fx-text-fill: #4ade80;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
-    -fx-background-radius: 20px;
-    -fx-border-radius: 20px;
-    -fx-border-color: rgba(63,185,80,0.5);
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-color: rgba(74,222,128,0.45);
     -fx-border-width: 1px;
-    -fx-padding: 3px 10px;
+    -fx-padding: 4px 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 6, 0, 0, 2);
+}
+
+.salle-badge-inactive {
+    -fx-background-color: rgba(127,29,29,0.85);
+    -fx-text-fill: #f87171;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-color: rgba(248,113,113,0.45);
+    -fx-border-width: 1px;
+    -fx-padding: 4px 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 6, 0, 0, 2);
+}
+
+/* ── CARD BODY ────────────────────────────────────────────── */
+.salle-card-body {
+    -fx-background-color: transparent;
 }
 
 /* ── TEXTES ───────────────────────────────────────────────── */
 .salle-card-title {
-    -fx-font-size: 15px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-text-fill: #e6edf3;
+    -fx-text-fill: #f1f5f9;
 }
 
 .salle-card-desc {
     -fx-font-size: 12px;
-    -fx-text-fill: rgba(160,180,204,0.65);
+    -fx-text-fill: rgba(148,163,184,0.7);
     -fx-font-style: italic;
+}
+
+/* ── INFOS ────────────────────────────────────────────────── */
+.salle-card-info-icon {
+    -fx-font-size: 12px;
+    -fx-min-width: 18px;
 }
 
 .salle-card-info {
     -fx-font-size: 12px;
-    -fx-text-fill: rgba(200,214,230,0.9);
+    -fx-text-fill: rgba(148,163,184,0.85);
 }
 
-.salle-card-rating {
-    -fx-font-size: 12px;
+/* ── RATING ───────────────────────────────────────────────── */
+.salle-card-stars {
+    -fx-font-size: 14px;
     -fx-text-fill: #f59e0b;
-    -fx-font-weight: bold;
 }
 
-/* ── SEPARATOR ────────────────────────────────────────────── */
-.salle-card .separator {
-    -fx-background-color: rgba(79,195,247,0.12);
+.salle-card-avis {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(148,163,184,0.6);
+}
+
+/* ── DIVIDER ──────────────────────────────────────────────── */
+.salle-card-divider {
+    -fx-background-color: rgba(255,255,255,0.07);
+    -fx-pref-height: 1px;
 }
 
 /* ── BOUTONS CARD ─────────────────────────────────────────── */
 .salle-btn-edit {
-    -fx-background-color: rgba(0,191,255,0.12);
-    -fx-text-fill: #4FC3F7;
+    -fx-background-color: transparent;
+    -fx-text-fill: #38bdf8;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-background-radius: 7px;
-    -fx-border-radius: 7px;
-    -fx-border-color: rgba(79,195,247,0.35);
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(56,189,248,0.4);
     -fx-border-width: 1px;
-    -fx-padding: 5px 14px;
+    -fx-padding: 8px 14px;
     -fx-cursor: hand;
 }
 
 .salle-btn-edit:hover {
-    -fx-background-color: rgba(0,191,255,0.25);
+    -fx-background-color: rgba(56,189,248,0.12);
+    -fx-border-color: rgba(56,189,248,0.75);
     -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.2), 8, 0, 0, 0);
 }
 
 .salle-btn-delete {
-    -fx-background-color: rgba(218,54,51,0.12);
-    -fx-text-fill: #f85149;
+    -fx-background-color: transparent;
+    -fx-text-fill: #f87171;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-background-radius: 7px;
-    -fx-border-radius: 7px;
-    -fx-border-color: rgba(248,81,73,0.35);
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(248,113,113,0.4);
     -fx-border-width: 1px;
-    -fx-padding: 5px 14px;
+    -fx-padding: 8px 14px;
     -fx-cursor: hand;
 }
 
 .salle-btn-delete:hover {
-    -fx-background-color: rgba(218,54,51,0.3);
+    -fx-background-color: rgba(248,113,113,0.12);
+    -fx-border-color: rgba(248,113,113,0.75);
     -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(248,113,113,0.2), 8, 0, 0, 0);
 }
 
 /* ── DIALOG OVERLAY ───────────────────────────────────────── */

@@ -130,7 +130,7 @@
     -fx-text-fill: #FFFFFF;
     -fx-alignment: CENTER;
     -fx-text-alignment: CENTER;
-    -fx-max-width: 1.7976931348623157E308;
+    -fx-max-width: 9999999;
 }
 
 .event-status-pie-chart {
