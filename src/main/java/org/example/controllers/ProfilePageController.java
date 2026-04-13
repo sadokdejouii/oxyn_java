@@ -5,8 +5,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.entities.Admin;
 import org.example.entities.Client;
@@ -91,6 +93,12 @@ public class ProfilePageController implements Initializable {
     @FXML
     private Label formHintLabel;
 
+    @FXML
+    private ScrollPane profileScroll;
+
+    @FXML
+    private VBox profileRoot;
+
     private final UserService userService = new UserService();
 
     @Override
@@ -109,6 +117,27 @@ public class ProfilePageController implements Initializable {
         reloadFromDatabase();
     }
 
+    /**
+     * Client & encadrant : fond clair (dashboard « front »). Admin : conserve le thème sombre actuel.
+     */
+    private void applyProfileTheme(User u) {
+        if (profileScroll == null || profileRoot == null) {
+            return;
+        }
+        SessionContext ctx = SessionContext.getInstance();
+        boolean admin = u != null
+                ? u instanceof Admin
+                : ctx.getRole() == UserRole.ADMIN;
+
+        profileScroll.getStyleClass().remove("pp-page--light");
+        profileRoot.getStyleClass().remove("pp-root--light");
+
+        if (!admin) {
+            profileScroll.getStyleClass().add("pp-page--light");
+            profileRoot.getStyleClass().add("pp-root--light");
+        }
+    }
+
     private void wireClear(TextInputControl input, Label err) {
         input.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(input, err, LOGIN_THEME));
     }
@@ -119,6 +148,7 @@ public class ProfilePageController implements Initializable {
         if (sessionUser == null) {
             subtitleLabel.setText("Aucune session utilisateur.");
             applyRolePresentation(null);
+            applyProfileTheme(null);
             return;
         }
         try {
@@ -146,6 +176,7 @@ public class ProfilePageController implements Initializable {
         telephoneField.setText(u.getTelephone() != null ? u.getTelephone() : "");
         clearPasswordFields();
         clearFieldErrors();
+        applyProfileTheme(u);
     }
 
     private void clearPasswordFields() {
@@ -263,15 +294,17 @@ public class ProfilePageController implements Initializable {
             ok = false;
         }
 
-        String tel = text(telephoneField);
-        if (!tel.isEmpty() && containsWhitespace(tel)) {
-            FormFieldFeedback.setInputError(telephoneField, telephoneErrorLabel,
-                    "Le téléphone ne doit pas contenir d’espaces.", LOGIN_THEME);
+        /* Téléphone obligatoire + format strict (Admin, Client et Encadrant — même écran profil). */
+        String telRaw = raw(telephoneField);
+        String telErr = AuthValidation.validateTelephone(telRaw, false);
+        if (telErr != null) {
+            FormFieldFeedback.setInputError(telephoneField, telephoneErrorLabel, telErr, LOGIN_THEME);
             ok = false;
         }
 
         String n = text(nomField);
         String p = text(prenomField);
+        String tel = text(telephoneField);
         String telNorm = tel.isEmpty() ? null : tel;
 
         String currentPwd = passwordText(currentPasswordField);
@@ -386,15 +419,6 @@ public class ProfilePageController implements Initializable {
             return new Client(db.getId(), email, passwordHash, nom, prenom, telephone, active);
         }
         throw new IllegalStateException("Type utilisateur non géré");
-    }
-
-    private static boolean containsWhitespace(String s) {
-        for (int i = 0; i < s.length(); i++) {
-            if (Character.isWhitespace(s.charAt(i))) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static String raw(TextField f) {

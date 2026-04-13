@@ -10,8 +10,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll,pp-page" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ProfilePageController">
-    <VBox spacing="24" styleClass="page-root,pp-root">
+<ScrollPane fx:id="profileScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll,pp-page" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ProfilePageController">
+    <VBox fx:id="profileRoot" spacing="24" styleClass="page-root,pp-root">
         <padding>
             <Insets bottom="12" left="8" right="8" top="8" />
         </padding>
@@ -71,8 +71,8 @@
                         </VBox>
                     </HBox>
                     <VBox spacing="6" styleClass="pp-field-stack">
-                        <Label styleClass="field-label" text="Téléphone" />
-                        <TextField fx:id="telephoneField" promptText="Optionnel" styleClass="login-field" />
+                        <Label styleClass="field-label" text="Téléphone *" />
+                        <TextField fx:id="telephoneField" promptText="Obligatoire — 8 à 15 chiffres, + pays autorisé en tête" styleClass="login-field" />
                         <Label fx:id="telephoneErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
                     </VBox>
 
@@ -100,8 +100,8 @@
         </HBox>
 
         <HBox alignment="CENTER_RIGHT" styleClass="pp-footer">
-            <Label styleClass="pp-hint-muted" text="E-mail, nom et prénom obligatoires. Mot de passe : laisser vide pour ne pas changer." />
-            <Button fx:id="saveButton" onAction="#handleSave" styleClass="primary-toolbar-btn,pp-save-btn" text="Enregistrer les modifications" />
+            <Label styleClass="pp-hint-muted" text="E-mail, nom, prénom et téléphone obligatoires. Mot de passe : laisser vide pour ne pas changer." />
+            <Button id="profileSaveButton" fx:id="saveButton" onAction="#handleSave" styleClass="primary-toolbar-btn pp-save-btn pp-profile-save-btn" text="Enregistrer les modifications" />
         </HBox>
     </VBox>
 </ScrollPane>

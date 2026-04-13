@@ -53,9 +53,9 @@
                         <Label fx:id="prenomErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
                     </VBox>
 
-                    <Label styleClass="dialog-field-label" text="Téléphone" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                    <Label styleClass="dialog-field-label" text="Téléphone *" GridPane.columnIndex="0" GridPane.rowIndex="4" />
                     <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                        <TextField fx:id="telephoneField" styleClass="dialog-input" />
+                        <TextField fx:id="telephoneField" promptText="Obligatoire — 8 à 15 chiffres, + pays autorisé en tête" styleClass="dialog-input" />
                         <Label fx:id="telephoneErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
                     </VBox>
 

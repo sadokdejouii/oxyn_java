@@ -83,6 +83,14 @@
     -fx-text-fill: rgba(160, 180, 204, 0.75);
 }
 
+.um-stat-coach-stat {
+    -fx-text-fill: #64B5F6;
+}
+
+.um-stat-client-stat {
+    -fx-text-fill: #4FC3F7;
+}
+
 /* ── Unified control panel ──────────────────────────────────────── */
 .um-panel {
     -fx-spacing: 14;
@@ -202,49 +210,131 @@
     -fx-min-height: 320;
 }
 
-.um-data-table {
-    -fx-table-cell-border-color: rgba(255, 255, 255, 0.04);
+/* ── Grille manuelle + tri ─────────────────────────────────────── */
+.um-grid-header {
+    -fx-padding: 0 4 8 4;
+    -fx-background-color: rgba(0, 191, 255, 0.08);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(79, 195, 247, 0.18);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
 }
 
-.um-data-table .column-header,
-.um-data-table .column-header .label {
+/* Tous les en-têtes de tri : même apparence « texte sur fond sombre » (évite le fond Modena par défaut sur certains boutons). */
+.um-grid-header .button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-insets: 0;
+    -fx-cursor: hand;
+    -fx-underline: false;
+}
+
+.um-grid-header .button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-text-fill: #7AE7FF;
+}
+
+.um-grid-header .button:armed {
+    -fx-background-color: rgba(255, 255, 255, 0.09);
+}
+
+.um-grid-header .button:focused {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-faint-focus-color: transparent;
+    -fx-focus-color: transparent;
+}
+
+.um-sort-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(160, 180, 204, 0.95);
     -fx-font-size: 11px;
     -fx-font-weight: bold;
-    -fx-text-fill: rgba(160, 180, 204, 0.95);
     -fx-letter-spacing: 0.04em;
+    -fx-padding: 6 8;
+    -fx-cursor: hand;
+    -fx-underline: false;
 }
 
-.um-data-table .column-header-background {
-    -fx-background-color: rgba(0, 191, 255, 0.14);
+.um-sort-btn:hover {
+    -fx-text-fill: #7AE7FF;
+}
+
+/* Second libellé (nom) : même composant / même fond ; seule la typo diffère */
+.um-sort-btn.um-sort-sub {
+    -fx-background-color: transparent;
+    -fx-font-size: 10px;
+    -fx-font-weight: normal;
+    -fx-text-fill: rgba(160, 180, 204, 0.75);
+    -fx-padding: 2 8 4 8;
+}
+
+.um-sort-btn.um-sort-sub:hover {
+    -fx-text-fill: #7AE7FF;
+}
+
+/* Liste (remplace TableView) */
+.um-user-list {
+    -fx-background-color: rgba(13, 27, 62, 0.35);
     -fx-border-color: rgba(79, 195, 247, 0.15);
-    -fx-border-width: 0 0 1 0;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 4 0 4 0;
 }
 
-.um-data-table .table-row-cell {
-    -fx-background-color: rgba(13, 27, 62, 0.28);
-    -fx-border-color: rgba(255, 255, 255, 0.03);
-    -fx-border-width: 0 0 1 0;
+.um-user-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0 8 0 8;
 }
 
-.um-data-table .table-row-cell:hover {
-    -fx-background-color: rgba(26, 47, 94, 0.55);
+.um-user-list .list-cell:filled:selected,
+.um-user-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.18);
 }
 
-.um-data-table .table-row-cell:selected {
-    -fx-background-color: rgba(0, 191, 255, 0.2);
+.um-user-list .list-cell:filled:hover {
+    -fx-background-color: rgba(26, 47, 94, 0.4);
 }
 
-.um-data-table .table-row-cell:selected:hover {
-    -fx-background-color: rgba(0, 191, 255, 0.26);
-}
-
-.um-data-table .scroll-bar:vertical .thumb {
+.um-user-list .scroll-bar:vertical .thumb {
     -fx-background-color: rgba(0, 191, 255, 0.35);
     -fx-background-radius: 4px;
 }
 
-.um-data-table .scroll-bar:vertical .track {
+.um-user-list .scroll-bar:vertical .track {
     -fx-background-color: rgba(0, 0, 0, 0.2);
+}
+
+.um-list-row {
+    -fx-padding: 8 12 8 12;
+    -fx-background-color: rgba(13, 27, 62, 0.28);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(255, 255, 255, 0.04);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+.um-list-mono {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E8EEF7;
+    -fx-background-color: rgba(0, 191, 255, 0.16);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(79, 195, 247, 0.28);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+.um-list-email {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E8EEF7;
+}
+
+.um-list-name {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: rgba(160, 180, 204, 0.85);
 }
 
 /* Badges in table cells */
@@ -263,11 +353,13 @@
     -fx-border-width: 1px;
 }
 
+/* Encadrant — ambre / orange (distinct du cyan Client et du violet Admin) */
 .um-role-coach {
-    -fx-background-color: rgba(33, 150, 243, 0.28);
-    -fx-border-color: rgba(100, 181, 246, 0.4);
+    -fx-background-color: rgba(255, 152, 0, 0.32);
+    -fx-border-color: rgba(255, 183, 77, 0.55);
     -fx-border-radius: 20px;
     -fx-border-width: 1px;
+    -fx-text-fill: #FFF3E0;
 }
 
 .um-role-client {

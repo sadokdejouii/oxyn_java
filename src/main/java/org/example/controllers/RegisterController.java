@@ -100,8 +100,10 @@ public class RegisterController {
             ok = false;
         }
 
-        if (tel.isEmpty()) {
-            FormFieldFeedback.setInputError(telephoneField, telephoneErrorLabel, "Le téléphone est obligatoire.", LOGIN_THEME);
+        String telErr = AuthValidation.validateTelephone(
+                telephoneField.getText() != null ? telephoneField.getText() : "", false);
+        if (telErr != null) {
+            FormFieldFeedback.setInputError(telephoneField, telephoneErrorLabel, telErr, LOGIN_THEME);
             ok = false;
         }
 
