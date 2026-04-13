@@ -34,6 +34,7 @@ import org.example.services.InscriptionEvenementServices;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -193,6 +194,8 @@ public class EventManagementController implements Initializable {
     private static final int ITEMS_PER_PAGE = 6;
     
     private final ObservableList<EventItem> eventsList = FXCollections.observableArrayList();
+    /** Snapshot used by the grid + pagination (search/sort apply on top of {@link #eventsList}). */
+    private List<EventItem> eventsForGrid = new ArrayList<>();
     private final ObservableList<InscriptionItem> inscriptionsList = FXCollections.observableArrayList();
     private final ObservableList<AvisItem> reviewsList = FXCollections.observableArrayList();
 
@@ -658,7 +661,7 @@ public class EventManagementController implements Initializable {
 
     private void loadEventsData() {
         eventsList.clear();
-        
+
         try {
             List<Evenement> list = evenementServices.afficher();
             for (Evenement e : list) {
@@ -680,11 +683,15 @@ public class EventManagementController implements Initializable {
                 eventsList.add(eventItem);
             }
         } catch (SQLException ex) {
-            // Silent fail
+            ex.printStackTrace();
+            showStyledError(
+                    "Impossible de charger les événements",
+                    ex.getMessage() != null ? ex.getMessage() : "Vérifiez la base de données et la table evenements."
+            );
         }
-        
+
         eventsPage = 0;
-        displayEventsPaginated();
+        filterAndSortEvents();
     }
 
     private void loadInscriptionsData() {
@@ -718,7 +725,11 @@ public class EventManagementController implements Initializable {
                 ));
             }
         } catch (SQLException ex) {
-            // Silent fail
+            ex.printStackTrace();
+            showStyledError(
+                    "Inscriptions",
+                    ex.getMessage() != null ? ex.getMessage() : "Impossible de charger les inscriptions."
+            );
         }
 
         inscriptionsPage = 0;
@@ -747,7 +758,11 @@ public class EventManagementController implements Initializable {
                 ));
             }
         } catch (SQLException ex) {
-            // Silent fail
+            ex.printStackTrace();
+            showStyledError(
+                    "Avis",
+                    ex.getMessage() != null ? ex.getMessage() : "Impossible de charger les avis."
+            );
         }
 
         reviewsPage = 0;
@@ -760,7 +775,7 @@ public class EventManagementController implements Initializable {
         eventsGridPane.getChildren().clear();
         eventsPaginationBox.getChildren().clear();
 
-        if (eventsList.isEmpty()) {
+        if (eventsForGrid == null || eventsForGrid.isEmpty()) {
             Label emptyLabel = new Label("Aucun événement disponible. Créez des événements pour les voir ici.");
             emptyLabel.getStyleClass().add("empty-state-label");
             emptyLabel.setStyle("-fx-text-alignment: center; -fx-padding: 40;");
@@ -768,12 +783,12 @@ public class EventManagementController implements Initializable {
             return;
         }
 
-        int totalPages = (int) Math.ceil((double) eventsList.size() / ITEMS_PER_PAGE);
+        int totalPages = (int) Math.ceil((double) eventsForGrid.size() / ITEMS_PER_PAGE);
         int startIndex = eventsPage * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, eventsList.size());
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, eventsForGrid.size());
 
         for (int i = startIndex; i < endIndex; i++) {
-            eventsGridPane.getChildren().add(buildEventCard(eventsList.get(i)));
+            eventsGridPane.getChildren().add(buildEventCard(eventsForGrid.get(i)));
         }
 
         buildPaginationControls(eventsPaginationBox, eventsPage, totalPages, this::handleEventsPrevPage, this::handleEventsNextPage);
@@ -860,7 +875,7 @@ public class EventManagementController implements Initializable {
     }
 
     private void handleEventsNextPage() {
-        int totalPages = (int) Math.ceil((double) eventsList.size() / ITEMS_PER_PAGE);
+        int totalPages = (int) Math.ceil((double) eventsForGrid.size() / ITEMS_PER_PAGE);
         if (eventsPage < totalPages - 1) {
             eventsPage++;
             displayEventsPaginated();
@@ -1141,30 +1156,36 @@ public class EventManagementController implements Initializable {
     // ==================== SEARCH & SORT METHODS ====================
 
     private void filterAndSortEvents() {
-        String searchText = eventsSearchField.getText().toLowerCase();
-        String sortBy = eventsSortByCombo.getValue();
-        boolean ascending = !eventsSortOrderCombo.getValue().contains("Décroissant");
+        String rawSearch = eventsSearchField.getText();
+        String searchText = rawSearch == null ? "" : rawSearch.toLowerCase();
+        String sortByRaw = eventsSortByCombo.getValue();
+        final String sortKey = sortByRaw == null ? "Titre" : sortByRaw;
+        String orderVal = eventsSortOrderCombo.getValue();
+        boolean ascending = orderVal == null || !orderVal.contains("Décroissant");
 
         List<EventItem> filtered = eventsList.stream()
-            .filter(item -> searchText.isEmpty() || 
+            .filter(item -> searchText.isEmpty() ||
                 item.getTitre().toLowerCase().contains(searchText) ||
                 item.getLieu().toLowerCase().contains(searchText) ||
                 item.getVille().toLowerCase().contains(searchText) ||
                 item.getStatut().toLowerCase().contains(searchText))
             .sorted((a, b) -> {
                 int result = 0;
-                switch(sortBy) {
+                switch (sortKey) {
                     case "Titre": result = a.getTitre().compareTo(b.getTitre()); break;
                     case "Lieu": result = a.getLieu().compareTo(b.getLieu()); break;
                     case "Ville": result = a.getVille().compareTo(b.getVille()); break;
                     case "Statut": result = a.getStatut().compareTo(b.getStatut()); break;
                     case "Date Début": result = a.getDebut().compareTo(b.getDebut()); break;
+                    default: result = a.getTitre().compareTo(b.getTitre()); break;
                 }
                 return ascending ? result : -result;
             })
             .collect(Collectors.toList());
 
-        displayEventCards(filtered);
+        eventsForGrid = new ArrayList<>(filtered);
+        eventsPage = 0;
+        displayEventsPaginated();
     }
 
     private void filterAndSortInscriptions() {
@@ -1206,13 +1227,6 @@ public class EventManagementController implements Initializable {
             .collect(Collectors.toList());
 
         displayAvisCards(filtered);
-    }
-
-    private void displayEventCards(List<EventItem> items) {
-        eventsGridPane.getChildren().clear();
-        for (EventItem item : items) {
-            eventsGridPane.getChildren().add(buildEventCard(item));
-        }
     }
 
     private void displayInscriptionCards(List<InscriptionItem> items) {

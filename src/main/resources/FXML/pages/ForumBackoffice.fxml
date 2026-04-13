@@ -8,162 +8,143 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ForumBackofficeController">
-    <VBox spacing="24" styleClass="page-root">
-        <padding>
-            <Insets bottom="24" left="24" right="24" top="24" />
-        </padding>
-        
-        <!-- Header -->
-        <VBox spacing="6">
-            <Label styleClass="page-hero-title" text="Forum Management" />
-            <Label styleClass="page-hero-sub" text="Manage posts, view analytics, and moderate content." wrapText="true" />
-        </VBox>
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.ForumBackofficeController"
+           styleClass="apd-root apd-root--premium" maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../../css/admin-planning-dashboard.css,@../../css/forum.css">
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="20" styleClass="apd-page-inner" maxWidth="Infinity">
+            <VBox styleClass="apd-hero" spacing="8">
+                <Label styleClass="apd-eyebrow" text="ADMINISTRATION · FORUM" />
+                <Label styleClass="apd-title" text="Gestion du forum" />
+                <Label styleClass="apd-sub" text="Modération des publications et commentaires — vue en cartes (sans identifiants techniques)." wrapText="true" />
+            </VBox>
+            <Separator styleClass="apd-sep-hero" />
 
-        <!-- Stats Cards -->
-        <HBox spacing="16" styleClass="stats-row">
-            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="stat-label" text="TOTAL POSTS" />
-                <Label fx:id="totalPostsLabel" styleClass="stat-value" text="0" />
-                <Label styleClass="stat-hint" text="All published posts" />
-            </VBox>
-            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="stat-label" text="TOTAL LIKES" />
-                <Label fx:id="totalLikesLabel" styleClass="stat-value" text="0" />
-                <Label styleClass="stat-hint" text="Across all posts" />
-            </VBox>
-            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="stat-label" text="CATEGORIES" />
-                <Label fx:id="categoriesCountLabel" styleClass="stat-value" text="0" />
-                <Label styleClass="stat-hint" text="Active categories" />
-            </VBox>
-            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="stat-label" text="TODAY'S POSTS" />
-                <Label fx:id="todayPostsLabel" styleClass="stat-value" text="0" />
-                <Label styleClass="stat-hint" text="New posts today" />
-            </VBox>
-        </HBox>
+            <GridPane styleClass="apd-kpi-grid" hgap="14" vgap="14" maxWidth="Infinity">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="25" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="25" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="25" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="25" />
+                </columnConstraints>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--users" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="PUBLICATIONS" />
+                    <Label fx:id="totalPostsLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Total en base" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--prog" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="J'AIME" />
+                    <Label fx:id="totalLikesLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Sur toutes les publications" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--tasks" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="CATÉGORIES" />
+                    <Label fx:id="categoriesCountLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Catégories distinctes" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--fiche" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="POSTS AUJOURD'HUI" />
+                    <Label fx:id="todayPostsLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Nouveaux aujourd'hui" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--conv" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <Label styleClass="apd-kpi-label" text="COMMENTAIRES" />
+                    <Label fx:id="totalCommentsLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Total en base" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--msg" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <Label styleClass="apd-kpi-label" text="COMMENTAIRES AUJOURD'HUI" />
+                    <Label fx:id="todayCommentsLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Nouveaux aujourd'hui" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--users" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <Label styleClass="apd-kpi-label" text="PLUS COMMENTÉ" />
+                    <Label fx:id="topCommentedPostLabel" styleClass="apd-kpi-value" text="—" wrapText="true" maxWidth="280" />
+                    <Label styleClass="apd-kpi-hint" text="Aperçu du fil le plus actif" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--prog" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                    <Label styleClass="apd-kpi-label" text="MOYENNE / POST" />
+                    <Label fx:id="avgCommentsLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Commentaires par publication" wrapText="true" />
+                </VBox>
+            </GridPane>
 
-        <!-- Charts Section -->
-        <HBox spacing="16" alignment="TOP_LEFT">
-            <VBox spacing="12" styleClass="chart-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="chart-title" text="Posts by Category" />
-                <PieChart fx:id="categoryPieChart" labelsVisible="true" legendVisible="true" prefHeight="280" styleClass="modern-chart" />
-            </VBox>
-            <VBox spacing="12" styleClass="chart-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="chart-title" text="Posts Activity (Last 7 Days)" />
-                <BarChart fx:id="activityBarChart" animated="false" legendVisible="false" prefHeight="280" styleClass="modern-chart" VBox.vgrow="ALWAYS">
-                    <xAxis>
-                        <CategoryAxis label="Date" />
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis label="Posts" autoRanging="true" />
-                    </yAxis>
-                </BarChart>
-            </VBox>
-        </HBox>
-
-        <!-- Toolbar -->
-        <HBox spacing="12" styleClass="toolbar-card" alignment="CENTER_LEFT">
-            <Button onAction="#handleRefresh" styleClass="primary-toolbar-btn" text="🔄 Refresh" />
-            <Button onAction="#handleExport" styleClass="ghost-toolbar-btn" text="📊 Export" />
-            <HBox HBox.hgrow="ALWAYS" />
-            <TextField fx:id="searchField" promptText="Search posts..." styleClass="search-input" prefWidth="250" />
-            <Button onAction="#handleSearch" styleClass="ghost-toolbar-btn" text="🔍 Search" />
-        </HBox>
-
-        <!-- Posts Table -->
-        <VBox spacing="12" styleClass="table-card">
-            <Label styleClass="section-title" text="All Posts" />
-            <TableView fx:id="postsTable" prefHeight="350" styleClass="modern-table">
-                <columns>
-                    <TableColumn fx:id="idColumn" prefWidth="60" text="ID" />
-                    <TableColumn fx:id="contentColumn" prefWidth="280" text="Content" />
-                    <TableColumn fx:id="categoryColumn" prefWidth="120" text="Category" />
-                    <TableColumn fx:id="authorColumn" prefWidth="100" text="Author" />
-                    <TableColumn fx:id="likesColumn" prefWidth="70" text="Likes" />
-                    <TableColumn fx:id="dateColumn" prefWidth="120" text="Date" />
-                    <TableColumn fx:id="actionsColumn" prefWidth="140" text="Actions" />
-                </columns>
-            </TableView>
-        </VBox>
-
-        <!-- Inline Post Edit Panel (Hidden by default) -->
-        <VBox fx:id="postEditPanel" spacing="12" styleClass="edit-panel" visible="false" managed="false">
-            <padding>
-                <Insets bottom="16" left="16" right="16" top="16" />
-            </padding>
-            <Label styleClass="edit-panel-title" text="Edit Post" />
-            <TextArea fx:id="postEditContent" wrapText="true" prefRowCount="4" promptText="Post content..." styleClass="edit-textarea" />
-            <HBox spacing="12" alignment="CENTER_LEFT">
-                <Button fx:id="postEditFileBtn" text="📎 Attach/Replace File" styleClass="primary-toolbar-btn" onAction="#handlePostEditFile" />
-                <Label fx:id="postEditFileLabel" text="No file selected" styleClass="file-label" />
+            <HBox spacing="16" alignment="TOP_LEFT" maxWidth="Infinity">
+                <VBox spacing="12" styleClass="apd-content-block" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                    <Label styleClass="apd-section-title" text="Publications par catégorie" />
+                    <PieChart fx:id="categoryPieChart" labelsVisible="true" legendVisible="true" prefHeight="280" styleClass="forum-admin-chart" />
+                </VBox>
+                <VBox spacing="12" styleClass="apd-content-block" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                    <Label styleClass="apd-section-title" text="Activité (7 derniers jours)" />
+                    <BarChart fx:id="activityBarChart" animated="false" legendVisible="false" prefHeight="280" styleClass="forum-admin-chart" VBox.vgrow="ALWAYS">
+                        <xAxis>
+                            <CategoryAxis label="Date" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Posts" autoRanging="true" />
+                        </yAxis>
+                    </BarChart>
+                </VBox>
             </HBox>
-            <HBox spacing="12" alignment="CENTER_RIGHT">
-                <Button text="Cancel" styleClass="ghost-toolbar-btn" onAction="#handlePostEditCancel" />
-                <Button text="Save Changes" styleClass="primary-toolbar-btn" onAction="#handlePostEditSave" />
-            </HBox>
-        </VBox>
 
-        <!-- Comments Stats Row -->
-        <HBox spacing="16" styleClass="stats-row">
-            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="stat-label" text="TOTAL COMMENTS" />
-                <Label fx:id="totalCommentsLabel" styleClass="stat-value" text="0" />
-                <Label styleClass="stat-hint" text="All comments" />
+            <VBox styleClass="apd-filter-panel" spacing="12" maxWidth="Infinity">
+                <HBox spacing="12" alignment="CENTER_LEFT" maxWidth="Infinity">
+                    <Button onAction="#handleRefresh" styleClass="apd-btn" text="Actualiser" />
+                    <Button onAction="#handleExport" styleClass="apd-btn-ghost" text="Exporter" />
+                    <HBox HBox.hgrow="ALWAYS" />
+                    <TextField fx:id="searchField" promptText="Rechercher dans le contenu ou la catégorie…" styleClass="apd-field" prefWidth="300" />
+                    <Button onAction="#handleSearch" styleClass="apd-btn" text="Rechercher" />
+                </HBox>
             </VBox>
-            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="stat-label" text="COMMENTS TODAY" />
-                <Label fx:id="todayCommentsLabel" styleClass="stat-value" text="0" />
-                <Label styleClass="stat-hint" text="New comments today" />
-            </VBox>
-            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="stat-label" text="TOP POST" />
-                <Label fx:id="topCommentedPostLabel" styleClass="stat-value" text="-" />
-                <Label styleClass="stat-hint" text="Most commented" />
-            </VBox>
-            <VBox spacing="4" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="stat-label" text="AVG PER POST" />
-                <Label fx:id="avgCommentsLabel" styleClass="stat-value" text="0" />
-                <Label styleClass="stat-hint" text="Comments per post" />
-            </VBox>
-        </HBox>
 
-        <!-- Comments Table -->
-        <VBox spacing="12" styleClass="table-card">
-            <Label styleClass="section-title" text="Recent Comments" />
-            <TableView fx:id="commentsTable" prefHeight="300" styleClass="modern-table">
-                <columns>
-                    <TableColumn fx:id="commentIdColumn" prefWidth="60" text="ID" />
-                    <TableColumn fx:id="commentContentColumn" prefWidth="300" text="Comment" />
-                    <TableColumn fx:id="commentPostColumn" prefWidth="80" text="Post ID" />
-                    <TableColumn fx:id="commentAuthorColumn" prefWidth="100" text="Author" />
-                    <TableColumn fx:id="commentLikesColumn" prefWidth="70" text="Likes" />
-                    <TableColumn fx:id="commentDateColumn" prefWidth="150" text="Date" />
-                    <TableColumn fx:id="commentActionsColumn" prefWidth="120" text="Actions" />
-                </columns>
-            </TableView>
-        </VBox>
+            <VBox spacing="12" styleClass="apd-content-block" maxWidth="Infinity">
+                <VBox spacing="4">
+                    <Label styleClass="apd-section-title" text="Publications" />
+                    <Label styleClass="apd-section-sub" text="Cartes — modifier ou supprimer sans afficher d'identifiants." wrapText="true" />
+                </VBox>
+                <FlowPane fx:id="postsCardsFlow" hgap="16" vgap="16" prefWrapLength="1320" styleClass="apd-user-cards-flow" maxWidth="Infinity" />
+            </VBox>
 
-        <!-- Inline Comment Edit Panel (Hidden by default) -->
-        <VBox fx:id="commentEditPanel" spacing="12" styleClass="edit-panel" visible="false" managed="false">
-            <padding>
-                <Insets bottom="16" left="16" right="16" top="16" />
-            </padding>
-            <Label styleClass="edit-panel-title" text="Edit Comment" />
-            <TextArea fx:id="commentEditContent" wrapText="true" prefRowCount="3" promptText="Comment content..." styleClass="edit-textarea" />
-            <HBox spacing="12" alignment="CENTER_RIGHT">
-                <Button text="Cancel" styleClass="ghost-toolbar-btn" onAction="#handleCommentEditCancel" />
-                <Button text="Save Changes" styleClass="primary-toolbar-btn" onAction="#handleCommentEditSave" />
-            </HBox>
+            <VBox fx:id="postEditPanel" spacing="12" styleClass="apd-content-block edit-panel forum-admin-edit" visible="false" managed="false" maxWidth="Infinity">
+                <Label styleClass="apd-section-title edit-panel-title" text="Modifier la publication" />
+                <TextArea fx:id="postEditContent" wrapText="true" prefRowCount="4" promptText="Contenu…" styleClass="edit-textarea forum-admin-textarea" />
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Button fx:id="postEditFileBtn" text="Joindre / remplacer un fichier" styleClass="apd-btn" onAction="#handlePostEditFile" />
+                    <Label fx:id="postEditFileLabel" text="Aucun fichier" styleClass="file-label forum-admin-file-hint" />
+                </HBox>
+                <HBox spacing="12" alignment="CENTER_RIGHT">
+                    <Button text="Annuler" styleClass="apd-btn-ghost" onAction="#handlePostEditCancel" />
+                    <Button text="Enregistrer" styleClass="apd-btn" onAction="#handlePostEditSave" />
+                </HBox>
+            </VBox>
+
+            <VBox spacing="12" styleClass="apd-content-block" maxWidth="Infinity">
+                <VBox spacing="4">
+                    <Label styleClass="apd-section-title" text="Commentaires récents" />
+                    <Label styleClass="apd-section-sub" text="50 derniers — publication liée par aperçu." wrapText="true" />
+                </VBox>
+                <FlowPane fx:id="commentsCardsFlow" hgap="16" vgap="16" prefWrapLength="1320" styleClass="apd-user-cards-flow" maxWidth="Infinity" />
+            </VBox>
+
+            <VBox fx:id="commentEditPanel" spacing="12" styleClass="apd-content-block edit-panel forum-admin-edit" visible="false" managed="false" maxWidth="Infinity">
+                <Label styleClass="apd-section-title edit-panel-title" text="Modifier le commentaire" />
+                <TextArea fx:id="commentEditContent" wrapText="true" prefRowCount="3" promptText="Contenu…" styleClass="edit-textarea forum-admin-textarea" />
+                <HBox spacing="12" alignment="CENTER_RIGHT">
+                    <Button text="Annuler" styleClass="apd-btn-ghost" onAction="#handleCommentEditCancel" />
+                    <Button text="Enregistrer" styleClass="apd-btn" onAction="#handleCommentEditSave" />
+                </HBox>
+            </VBox>
         </VBox>
-    </VBox>
-</ScrollPane>
+    </ScrollPane>
+</StackPane>

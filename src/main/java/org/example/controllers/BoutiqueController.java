@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 public class BoutiqueController {
 
@@ -44,9 +43,6 @@ public class BoutiqueController {
 
     @FXML
     public void initialize() {
-        if (produitsListView != null) {
-            produitsListView.setStyle("-fx-background-color: #0D1B3E; -fx-control-inner-background: #0D1B3E;");
-        }
         if (triProduits != null) {
             triProduits.getItems().setAll(
                     "Nom (A → Z)",
@@ -72,37 +68,35 @@ public class BoutiqueController {
                 if (empty || produit == null) {
                     setGraphic(null);
                 } else {
-                    VBox content = new VBox(5);
-                    content.setStyle("-fx-padding: 10;");
+                    VBox content = new VBox(8);
+                    content.getStyleClass().add("boutique-pro-list-row");
 
-                    Label nomLabel = new Label("Nom: " + produit.getNom_produit());
-                    nomLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #FFFFFF;");
+                    Label nomLabel = new Label("Nom : " + produit.getNom_produit());
+                    nomLabel.getStyleClass().add("boutique-pro-name");
 
-                    Label descriptionLabel = new Label("Description: " + produit.getDescription_produit());
-                    descriptionLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #E0E0E0; -fx-wrap-text: true;");
+                    Label descriptionLabel = new Label("Description : " + produit.getDescription_produit());
+                    descriptionLabel.getStyleClass().add("boutique-pro-desc");
+                    descriptionLabel.setWrapText(true);
 
-                    Label prixLabel = new Label("Prix: " + produit.getPrix_produit() + " TND");
-                    prixLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #4FC3F7; -fx-font-weight: bold;");
+                    Label prixLabel = new Label("Prix : " + produit.getPrix_produit() + " TND");
+                    prixLabel.getStyleClass().add("boutique-pro-price");
 
-                    Label stockLabel = new Label("Stock: " + produit.getQuantite_stock_produit());
-                    stockLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: "
-                            + (produit.getQuantite_stock_produit() > 5 ? "#81C784" : "#FF8A80")
-                            + "; -fx-font-weight: bold;");
+                    Label stockLabel = new Label("Stock : " + produit.getQuantite_stock_produit());
+                    stockLabel.getStyleClass().add(
+                            produit.getQuantite_stock_produit() > 5 ? "boutique-pro-stock-ok" : "boutique-pro-stock-low");
 
-                    Label statutLabel = new Label("Statut: " + produit.getStatut_produit());
-                    statutLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #B0BEC5;");
+                    Label statutLabel = new Label("Statut : " + produit.getStatut_produit());
+                    statutLabel.getStyleClass().add("boutique-pro-statut");
 
                     HBox buttonsBox = new HBox(10);
-                    buttonsBox.setStyle("-fx-alignment: center-left;");
+                    buttonsBox.getStyleClass().add("boutique-pro-actions");
 
                     Button modifierBtn = new Button("Modifier");
-                    modifierBtn.getStyleClass().add("modifier-btn");
-                    modifierBtn.setStyle("-fx-pref-width: 80; -fx-pref-height: 30;");
+                    modifierBtn.getStyleClass().add("boutique-pro-btn-edit");
                     modifierBtn.setOnAction(e -> handleModifier(produit));
 
                     Button supprimerBtn = new Button("Supprimer");
-                    supprimerBtn.getStyleClass().add("supprimer-btn");
-                    supprimerBtn.setStyle("-fx-pref-width: 80; -fx-pref-height: 30;");
+                    supprimerBtn.getStyleClass().add("boutique-pro-btn-del");
                     supprimerBtn.setOnAction(e -> handleSupprimer(produit));
 
                     buttonsBox.getChildren().addAll(modifierBtn, supprimerBtn);

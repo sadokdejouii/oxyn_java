@@ -17,7 +17,8 @@ public final class MyDataBase {
     private static final String PASSWORD = "";
 
     private static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME
-            + "?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8";
+            + "?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8"
+            + "&zeroDateTimeBehavior=CONVERT_TO_NULL";
 
     private static MyDataBase instance;
 

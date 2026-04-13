@@ -230,3 +230,128 @@
     -fx-background-radius: 2px 2px 0px 0px;
     -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.5), 6, 0.5, 0, 0);
 }
+
+/* ── Contenu onglets (pages chargées dans le hub) ───────────────── */
+.apd-content-block > .sh-hub-content {
+    -fx-padding: 16px 18px 22px 18px;
+    -fx-background-color: transparent;
+}
+
+.salle-mgmt-inner {
+    -fx-padding: 0 0 8 0;
+}
+
+.apd-content-block > .sh-tab-bar {
+    -fx-background-color: rgba(11, 20, 38, 0.72);
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent rgba(56, 189, 248, 0.12) transparent;
+}
+
+/* Cartes équipement / abonnement — même lecture que les cartes Planning */
+.apd-root .sh-hub-content .sess-card {
+    -fx-background-color: #121f36;
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(56, 189, 248, 0.12);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 16, 0.22, 0, 4);
+}
+
+.apd-root .sh-hub-content .sess-card:hover {
+    -fx-border-color: rgba(56, 189, 248, 0.35);
+    -fx-background-color: #162a45;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.12), 20, 0.28, 0, 4);
+}
+
+.apd-root .sh-hub-content .sess-card-header {
+    -fx-background-color: rgba(0, 0, 0, 0.22);
+    -fx-background-radius: 14px 14px 0 0;
+    -fx-border-color: transparent transparent rgba(56, 189, 248, 0.1) transparent;
+}
+
+.apd-root .sh-hub-content .sess-card-type {
+    -fx-text-fill: #f1f5f9;
+}
+
+.apd-root .sh-hub-content .sess-card-info {
+    -fx-text-fill: #cbd5e1;
+}
+
+.apd-root .sh-hub-content .sess-card-notes {
+    -fx-text-fill: #94a3b8;
+}
+
+.apd-root .sh-hub-content .sess-card-actions {
+    -fx-border-color: rgba(56, 189, 248, 0.1) transparent transparent transparent;
+}
+
+/* Filtres onglets — teinte alignée sur apd */
+.apd-root .sh-hub-content .sess-filter-btn {
+    -fx-border-color: rgba(56, 189, 248, 0.18);
+}
+
+.apd-root .sh-hub-content .sess-filter-btn:selected {
+    -fx-background-color: rgba(56, 189, 248, 0.16);
+    -fx-text-fill: #38bdf8;
+    -fx-border-color: rgba(56, 189, 248, 0.45);
+}
+
+/* Modales formulaires (équipement / abonnement) */
+.sess-dialog-card--apd,
+.sess-confirm-card--apd {
+    -fx-background-color:
+        linear-gradient(from 0% 0% to 0% 40%, rgba(255, 255, 255, 0.06) 0%, transparent 100%),
+        #121c33;
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(56, 189, 248, 0.28);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 40, 0.28, 0, 12);
+}
+
+.sess-confirm-card--apd {
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+}
+
+/* Table commandes abonnements */
+.apd-root .salle-admin-table .column-header-background,
+.apd-root .salle-admin-table .column-header,
+.apd-root .salle-admin-table .column-header .label {
+    -fx-background-color: #0f1a2e;
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.apd-root .salle-admin-table .table-row-cell {
+    -fx-background-color: #121f36;
+    -fx-text-fill: #e2e8f0;
+    -fx-border-color: transparent transparent rgba(56, 189, 248, 0.06) transparent;
+}
+
+.apd-root .salle-admin-table .table-row-cell:selected {
+    -fx-background-color: rgba(56, 189, 248, 0.12);
+}
+
+.apd-root .salle-admin-table .table-row-cell:hover:empty,
+.apd-root .salle-admin-table .table-row-cell:selected:empty {
+    -fx-background-color: #121f36;
+}
+
+/* TextArea avec classe apd-field (champs formulaires) */
+.apd-root .text-area.apd-field {
+    -fx-control-inner-background: #0f1a2e;
+}
+
+.apd-root .text-area.apd-field .content {
+    -fx-background-color: #0f1a2e;
+}
+
+.apd-root .sess-lbl {
+    -fx-text-fill: #8ba3c4;
+}
+
+.salle-dialog-card--apd .salle-dialog-title {
+    -fx-text-fill: #f1f5f9;
+}

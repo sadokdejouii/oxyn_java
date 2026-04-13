@@ -2,6 +2,7 @@ package org.example.services;
 
 import org.example.entities.AvisEvenement;
 import org.example.utils.MyDataBase;
+import org.example.utils.SqlDateReaders;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -21,8 +22,8 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
                 "note_avis_evenement, " +
                 "commentaire_avis_evenement, " +
                 "created_at_avis_evenement, " +
-                "id_evenement_avis_evenement_id, " +
-                "id_user_avis_evenement_id) " +
+                "id_evenement_avis_evenement, " +
+                "id_user_avis_evenement) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         PreparedStatement ps = con.prepareStatement(sql);
@@ -59,9 +60,9 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
             a.setId(rs.getInt("id_note_avis_evenement"));
             a.setNote(rs.getInt("note_avis_evenement"));
             a.setCommentaire(rs.getString("commentaire_avis_evenement"));
-            a.setCreatedAt(rs.getTimestamp("created_at_avis_evenement"));
-            a.setIdEvenement(rs.getInt("id_evenement_avis_evenement_id"));
-            a.setIdUser(rs.getInt("id_user_avis_evenement_id"));
+            a.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_avis_evenement"));
+            a.setIdEvenement(rs.getInt("id_evenement_avis_evenement"));
+            a.setIdUser(rs.getInt("id_user_avis_evenement"));
 
             avisList.add(a);
         }
@@ -79,8 +80,8 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
                 "note_avis_evenement = ?, " +
                 "commentaire_avis_evenement = ?, " +
                 "created_at_avis_evenement = ?, " +
-                "id_evenement_avis_evenement_id = ?, " +
-                "id_user_avis_evenement_id = ? " +
+                "id_evenement_avis_evenement = ?, " +
+                "id_user_avis_evenement = ? " +
                 "WHERE id_note_avis_evenement = ?";
 
         PreparedStatement ps = con.prepareStatement(sql);

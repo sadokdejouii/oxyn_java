@@ -145,8 +145,8 @@ public class SalleManagementController implements Initializable {
 
     private VBox buildCard(Salle s) {
         VBox card = new VBox(0);
-        card.setPrefWidth(290);
-        card.setMaxWidth(290);
+        card.setPrefWidth(320);
+        card.setMaxWidth(380);
         card.getStyleClass().add("salle-card");
 
         // ── Zone photo avec badge statut en overlay ──
@@ -158,8 +158,8 @@ public class SalleManagementController implements Initializable {
 
         String imgUrl = s.getImageUrl();
         if (imgUrl != null && !imgUrl.isBlank() && new File(imgUrl).exists()) {
-            ImageView iv = new ImageView(new Image("file:///" + imgUrl.replace("\\", "/"), 290, 160, false, true));
-            iv.setFitWidth(290);
+            ImageView iv = new ImageView(new Image("file:///" + imgUrl.replace("\\", "/"), 320, 160, false, true));
+            iv.setFitWidth(320);
             iv.setFitHeight(160);
             iv.setPreserveRatio(false);
             iv.getStyleClass().add("salle-card-photo");

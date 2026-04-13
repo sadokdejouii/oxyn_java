@@ -94,7 +94,7 @@ public class SubscriptionController implements Initializable {
     @FXML private void handleRefresh() { load(); }
 
     private VBox buildCard(SubscriptionOffer o) {
-        VBox card = new VBox(0); card.setPrefWidth(360); card.getStyleClass().add("sess-card");
+        VBox card = new VBox(0); card.setPrefWidth(320); card.setMaxWidth(400); card.getStyleClass().add("sess-card");
         HBox header = new HBox(10); header.getStyleClass().add("sess-card-header"); header.setAlignment(Pos.CENTER_LEFT);
         Label title = new Label("💳  " + o.getName()); title.getStyleClass().add("sess-card-type"); title.setWrapText(true); HBox.setHgrow(title, Priority.ALWAYS);
         Label badge = new Label(o.isActive() ? "Active" : "Inactive"); badge.getStyleClass().add(o.isActive() ? "sess-badge-planifiee" : "sess-badge-inactive");

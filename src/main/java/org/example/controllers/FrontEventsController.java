@@ -419,11 +419,13 @@ public class FrontEventsController implements Initializable {
                     false
             );
         } catch (SQLException exception) {
+            exception.printStackTrace();
+            String detail = exception.getMessage() != null ? exception.getMessage() : "Erreur inconnue.";
             showDataPopup(
                     "Inscriptions",
                     "Inscriptions pour : " + fallback(event.getTitre(), "cet événement"),
                     List.of(),
-                    "Impossible de charger les inscriptions pour le moment.",
+                    "Impossible de charger les inscriptions pour le moment.\n" + detail,
                     null,
                     null,
                     false,
@@ -468,11 +470,13 @@ public class FrontEventsController implements Initializable {
                     false
             );
         } catch (SQLException exception) {
+            exception.printStackTrace();
+            String detail = exception.getMessage() != null ? exception.getMessage() : "Erreur inconnue.";
             showDataPopup(
                     "Avis",
                     "Avis pour : " + fallback(event.getTitre(), "cet événement"),
                     List.of(),
-                    "Impossible de charger les avis pour le moment.",
+                    "Impossible de charger les avis pour le moment.\n" + detail,
                     null,
                     null,
                     false,

@@ -6,38 +6,47 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MesCommandesController">
-    <VBox alignment="TOP_CENTER" styleClass="page-root product-form-page product-form-outer">
-        <VBox spacing="20" styleClass="product-form-shell">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="front-events-scroll client-shop-surface-root"
+            stylesheets="@../../css/front-events.css,@../../css/product-form.css,@../../css/client-shop-light.css"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controllers.MesCommandesController">
+    <VBox alignment="TOP_CENTER" styleClass="front-page client-shop-page product-form-page" maxWidth="Infinity">
+        <VBox spacing="22" styleClass="product-form-shell" maxWidth="Infinity">
             <padding>
-                <Insets bottom="8" left="4" right="4" top="8" />
+                <Insets bottom="28" left="8" right="8" top="12" />
             </padding>
 
-            <VBox spacing="8" styleClass="product-form-hero">
-                <Label styleClass="page-hero-title" text="Mes commandes" />
-                <Label styleClass="page-hero-sub" text="Historique de vos achats. Vous pouvez annuler une commande validée dans les 24 heures suivant la validation." wrapText="true" />
-            </VBox>
+            <StackPane styleClass="front-hero-banner client-shop-hero-accent">
+                <VBox alignment="CENTER" spacing="8">
+                    <Label styleClass="front-overline" text="MES ACHATS" />
+                    <Label styleClass="front-banner-title" text="Mes commandes" />
+                    <Label styleClass="front-banner-text"
+                           text="Historique de vos achats. Vous pouvez annuler une commande validée dans les 24 heures suivant la validation, ou modifier l'adresse si le délai le permet."
+                           wrapText="true" />
+                </VBox>
+            </StackPane>
 
-            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="toolbar-card product-form-toolbar">
-                <Button onAction="#handleRetourBoutique" styleClass="ghost-toolbar-btn" text="← Retour à la boutique" />
-                <Label styleClass="product-form-field-label" text="Recherche" />
-                <TextField fx:id="rechercheMesCommandes" onAction="#handleRechercheOuTriMesCommandes" prefWidth="200" promptText="Statut, adresse, paiement…" styleClass="topbar-search" HBox.hgrow="SOMETIMES" />
-                <Label styleClass="product-form-field-label" text="Trier" />
-                <ComboBox fx:id="triMesCommandes" onAction="#handleRechercheOuTriMesCommandes" prefWidth="200" />
-                <HBox HBox.hgrow="ALWAYS" />
-                <Button onAction="#handleRefresh" styleClass="primary-toolbar-btn" text="Actualiser" />
+            <HBox alignment="CENTER" spacing="12" styleClass="front-toolbar client-shop-toolbar-wide">
+                <Button onAction="#handleRetourBoutique" styleClass="client-shop-outline-btn" text="← Boutique" />
+                <TextField fx:id="rechercheMesCommandes" onAction="#handleRechercheOuTriMesCommandes"
+                           promptText="Statut, adresse, paiement…" styleClass="front-search" HBox.hgrow="ALWAYS" />
+                <ComboBox fx:id="triMesCommandes" onAction="#handleRechercheOuTriMesCommandes" promptText="Trier" styleClass="front-sort" prefWidth="240" />
+                <Button onAction="#handleRefresh" styleClass="front-refresh-btn" text="Actualiser" />
             </HBox>
 
             <VBox fx:id="editAdressePanel" managed="false" spacing="0" styleClass="product-form-section mes-commandes-edit-panel" visible="false">
                 <VBox styleClass="product-form-section-head">
                     <Label styleClass="product-form-section-kicker" text="MODIFICATION" />
                     <Label styleClass="product-form-section-title" text="Adresse de livraison" />
-                    <Label styleClass="product-form-hint" text="Même format que lors de la commande : quartier, ville, pays (trois parties séparées par des virgules). Exemple : cité Ibn Khaldoun, Tunis, Tunisie" wrapText="true" />
+                    <Label styleClass="product-form-hint"
+                           text="Même format qu'à la commande : quartier, ville, pays (trois parties séparées par des virgules). Ex. : cité Ibn Khaldoun, Tunis, Tunisie"
+                           wrapText="true" />
                 </VBox>
                 <Separator styleClass="product-form-separator" />
                 <VBox styleClass="product-form-section-body" spacing="14">
@@ -46,13 +55,13 @@
                         <TextArea fx:id="editAdresseArea" prefRowCount="4" styleClass="form-input" wrapText="true" />
                     </VBox>
                     <HBox alignment="CENTER_RIGHT" spacing="10">
-                        <Button onAction="#handleCancelEditAdresse" styleClass="ghost-toolbar-btn" text="Fermer" />
-                        <Button onAction="#handleSaveAdresse" styleClass="primary-toolbar-btn" text="Enregistrer les modifications" />
+                        <Button onAction="#handleCancelEditAdresse" styleClass="client-shop-outline-btn" text="Fermer" />
+                        <Button onAction="#handleSaveAdresse" styleClass="front-refresh-btn" text="Enregistrer" />
                     </HBox>
                 </VBox>
             </VBox>
 
-            <VBox fx:id="ordersContainer" spacing="14" />
+            <VBox fx:id="ordersContainer" spacing="16" maxWidth="Infinity" />
         </VBox>
     </VBox>
 </ScrollPane>

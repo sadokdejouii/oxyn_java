@@ -1,68 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.controllers.AdminSalleHubController"
-      styleClass="sh-root" spacing="0"
-      stylesheets="@../../css/salle-hub.css">
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.AdminSalleHubController"
+           styleClass="apd-root apd-root--premium"
+           maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../../css/admin-planning-dashboard.css,@../../css/dashboard-saas.css,@../../css/sessions.css,@../../css/salles.css,@../../css/salle-hub.css">
 
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="sh-page-scroll" VBox.vgrow="ALWAYS">
-        <VBox spacing="20" styleClass="sh-page-inner">
-
-            <!-- ── HERO ── -->
-            <VBox styleClass="sh-hero" spacing="8">
-                <Label styleClass="sh-eyebrow" text="ADMINISTRATION · SALLE DE SPORT" />
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll"
+                maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="20" styleClass="apd-page-inner" maxWidth="Infinity">
+            <VBox styleClass="apd-hero" spacing="8">
+                <Label styleClass="apd-eyebrow" text="ADMINISTRATION · SALLE DE SPORT" />
                 <HBox alignment="CENTER_LEFT" spacing="16">
                     <VBox spacing="4" HBox.hgrow="ALWAYS">
-                        <Label styleClass="sh-title" text="Gestion de la Salle" />
-                        <Label styleClass="sh-sub" wrapText="true"
+                        <Label styleClass="apd-title" text="Gestion de la salle" />
+                        <Label styleClass="apd-sub" wrapText="true"
                                text="Pilotez vos salles, équipements et offres d'abonnement depuis un seul tableau de bord." />
                     </VBox>
-                    <Button onAction="#handleRefresh" styleClass="sh-btn-refresh" text="Actualiser">
+                    <Button onAction="#handleRefresh" styleClass="apd-btn" text="Actualiser">
                         <tooltip><Tooltip text="Recharger les données" /></tooltip>
                     </Button>
                 </HBox>
-                <Region styleClass="sh-sep-hero" prefHeight="1" maxWidth="Infinity" />
+                <Separator styleClass="apd-sep-hero" />
             </VBox>
 
-            <!-- ── KPI ROW ── -->
-            <HBox spacing="14" styleClass="sh-kpi-row">
-                <VBox spacing="4" styleClass="sh-kpi-card sh-kpi-card--salles" HBox.hgrow="ALWAYS">
-                    <Label styleClass="sh-kpi-label" text="SALLES" />
-                    <Label fx:id="badgeSalles" styleClass="sh-kpi-value" text="—" />
-                    <Label styleClass="sh-kpi-hint" text="Salles enregistrées" wrapText="true" />
+            <GridPane styleClass="apd-kpi-grid" hgap="14" vgap="14" maxWidth="Infinity">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.34" />
+                </columnConstraints>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--users"
+                      GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="SALLES" />
+                    <Label fx:id="badgeSalles" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Salles enregistrées" wrapText="true" />
                 </VBox>
-                <VBox spacing="4" styleClass="sh-kpi-card sh-kpi-card--equip" HBox.hgrow="ALWAYS">
-                    <Label styleClass="sh-kpi-label" text="ÉQUIPEMENTS" />
-                    <Label fx:id="badgeEquip" styleClass="sh-kpi-value" text="—" />
-                    <Label styleClass="sh-kpi-hint" text="Matériels en service" wrapText="true" />
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--prog"
+                      GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="ÉQUIPEMENTS" />
+                    <Label fx:id="badgeEquip" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Matériels en service" wrapText="true" />
                 </VBox>
-                <VBox spacing="4" styleClass="sh-kpi-card sh-kpi-card--subs" HBox.hgrow="ALWAYS">
-                    <Label styleClass="sh-kpi-label" text="ABONNEMENTS" />
-                    <Label fx:id="badgeSubs" styleClass="sh-kpi-value" text="—" />
-                    <Label styleClass="sh-kpi-hint" text="Offres disponibles" wrapText="true" />
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--tasks"
+                      GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="ABONNEMENTS" />
+                    <Label fx:id="badgeSubs" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Offres disponibles" wrapText="true" />
                 </VBox>
-            </HBox>
+            </GridPane>
 
-            <!-- ── CONTENT BLOCK ── -->
-            <VBox styleClass="sh-content-block" spacing="0" VBox.vgrow="ALWAYS">
-
-                <!-- Tab bar -->
+            <VBox styleClass="apd-content-block" spacing="0" maxWidth="Infinity" VBox.vgrow="ALWAYS">
                 <HBox styleClass="sh-tab-bar" spacing="0" alignment="BOTTOM_LEFT">
-
                     <VBox fx:id="tabSalles" onMouseClicked="#handleTab"
-                          styleClass="sh-tab,sh-tab-active" spacing="0" minWidth="160">
+                          styleClass="sh-tab,sh-tab-active,hub-tab-active" spacing="0" minWidth="160">
                         <HBox alignment="CENTER" spacing="10" styleClass="sh-tab-inner">
                             <Label styleClass="sh-tab-icon" text="🏢" />
                             <Label styleClass="sh-tab-label" text="Salles" />
                         </HBox>
                         <Region fx:id="indSalles" styleClass="sh-tab-indicator-active" prefHeight="3" maxWidth="Infinity" />
                     </VBox>
-
                     <VBox fx:id="tabEquip" onMouseClicked="#handleTab"
                           styleClass="sh-tab" spacing="0" minWidth="180">
                         <HBox alignment="CENTER" spacing="10" styleClass="sh-tab-inner">
@@ -71,7 +81,6 @@
                         </HBox>
                         <Region fx:id="indEquip" styleClass="sh-tab-indicator" prefHeight="3" maxWidth="Infinity" />
                     </VBox>
-
                     <VBox fx:id="tabSubs" onMouseClicked="#handleTab"
                           styleClass="sh-tab" spacing="0" minWidth="180">
                         <HBox alignment="CENTER" spacing="10" styleClass="sh-tab-inner">
@@ -80,16 +89,10 @@
                         </HBox>
                         <Region fx:id="indSubs" styleClass="sh-tab-indicator" prefHeight="3" maxWidth="Infinity" />
                     </VBox>
-
                     <Region HBox.hgrow="ALWAYS" />
                 </HBox>
-
-                <!-- Tab content -->
-                <StackPane fx:id="hubContent" styleClass="sh-hub-content" VBox.vgrow="ALWAYS" />
-
+                <StackPane fx:id="hubContent" styleClass="sh-hub-content" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
             </VBox>
-
         </VBox>
     </ScrollPane>
-
-</VBox>
+</StackPane>

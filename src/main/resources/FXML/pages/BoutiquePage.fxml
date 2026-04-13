@@ -1,36 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.BoutiqueController">
-    <VBox spacing="18" styleClass="page-root">
-        <VBox spacing="6">
-            <Label styleClass="page-hero-title" text="Boutique" />
-            <Label styleClass="page-hero-sub" text="Gestion des produits et commandes. Ajoutez, modifiez ou supprimez des produits." wrapText="true" />
-        </VBox>
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.BoutiqueController"
+           styleClass="apd-root apd-root--premium boutique-admin-root"
+           maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../../css/admin-planning-dashboard.css,@../../css/dashboard-saas.css,@../../css/product-form.css">
 
-        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="toolbar-card">
-            <Button onAction="#handleAjouterProduit" styleClass="primary-toolbar-btn" text="Ajouter un produit" />
-            <Button onAction="#handleVoirCommandes" styleClass="ghost-toolbar-btn" text="Commandes clients" />
-            <Label styleClass="product-form-field-label" text="Recherche" />
-            <TextField fx:id="rechercheProduits" onAction="#handleRechercheOuTriProduits" prefWidth="180" promptText="Nom, description, statut…" styleClass="topbar-search" HBox.hgrow="SOMETIMES" />
-            <Label styleClass="product-form-field-label" text="Trier" />
-            <ComboBox fx:id="triProduits" onAction="#handleRechercheOuTriProduits" prefWidth="200" />
-            <HBox HBox.hgrow="ALWAYS" />
-            <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn" text="Actualiser" />
-        </HBox>
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="20" styleClass="apd-page-inner product-form-page" maxWidth="Infinity">
+            <VBox styleClass="apd-hero" spacing="8">
+                <Label styleClass="apd-eyebrow" text="ADMINISTRATION · BOUTIQUE" />
+                <Label styleClass="apd-title" text="Boutique" />
+                <Label styleClass="apd-sub" text="Gestion des produits et commandes. Ajoutez, modifiez ou supprimez des produits." wrapText="true" />
+                <Separator styleClass="apd-sep-hero" />
+            </VBox>
 
-        <VBox spacing="8" styleClass="saas-chart-card">
-            <Label styleClass="saas-card-title" text="Liste des produits" />
-            <ListView fx:id="produitsListView" prefHeight="420" styleClass="list-view data-list boutique-admin-pro-list" />
+            <VBox spacing="12" styleClass="apd-filter-panel" maxWidth="Infinity">
+                <HBox alignment="CENTER_LEFT" spacing="12" maxWidth="Infinity">
+                    <Button onAction="#handleAjouterProduit" styleClass="apd-btn" text="Ajouter un produit" />
+                    <Button onAction="#handleVoirCommandes" styleClass="apd-btn-ghost" text="Commandes clients" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#handleRefresh" styleClass="apd-btn-ghost" text="Actualiser" />
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="14" maxWidth="Infinity">
+                    <Label styleClass="apd-filter-label" text="RECHERCHE" />
+                    <TextField fx:id="rechercheProduits" onAction="#handleRechercheOuTriProduits"
+                               promptText="Nom, description, statut…" styleClass="apd-field" HBox.hgrow="ALWAYS" />
+                    <Label styleClass="apd-filter-label" text="TRIER" />
+                    <ComboBox fx:id="triProduits" onAction="#handleRechercheOuTriProduits" prefWidth="220" styleClass="apd-select" />
+                </HBox>
+            </VBox>
+
+            <VBox spacing="12" styleClass="apd-content-block" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                <Label styleClass="apd-section-title" text="Liste des produits" />
+                <ListView fx:id="produitsListView" prefHeight="420" minHeight="320" maxHeight="640"
+                          styleClass="list-view data-list boutique-admin-pro-list" VBox.vgrow="ALWAYS" />
+            </VBox>
         </VBox>
-    </VBox>
-</ScrollPane>
+    </ScrollPane>
+</StackPane>

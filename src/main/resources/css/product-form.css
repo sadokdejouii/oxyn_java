@@ -278,3 +278,185 @@
     -fx-border-width: 1px;
     -fx-padding: 16 18 18 18;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Admin boutique — aligné Planning / Gestion salle (apd-root)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.boutique-admin-root .product-form-required-legend {
+    -fx-text-fill: #8ba3c4;
+}
+
+.boutique-admin-root .product-form-section.boutique-apd-section {
+    -fx-background-color: #162238;
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(56, 189, 248, 0.12);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.28), 22, 0.22, 0, 5);
+}
+
+.boutique-admin-root .product-form-section-head {
+    -fx-background-color: rgba(11, 20, 38, 0.55);
+    -fx-background-radius: 14px 14px 0 0;
+    -fx-border-color: transparent transparent rgba(56, 189, 248, 0.1) transparent;
+}
+
+.boutique-admin-root .product-form-section-kicker {
+    -fx-text-fill: #6b8cae;
+    -fx-letter-spacing: 0.14em;
+}
+
+.boutique-admin-root .product-form-section-title {
+    -fx-text-fill: #f1f5f9;
+}
+
+.boutique-admin-root .product-form-field-label {
+    -fx-text-fill: #8ba3c4;
+}
+
+.boutique-admin-root .product-form-hint {
+    -fx-text-fill: #64748b;
+}
+
+.boutique-admin-root .product-form-image-frame {
+    -fx-background-color: rgba(15, 26, 46, 0.85);
+    -fx-border-color: rgba(56, 189, 248, 0.18);
+}
+
+.boutique-admin-root .text-area.apd-field {
+    -fx-control-inner-background: #0f1a2e;
+}
+
+.boutique-admin-root .text-area.apd-field .content {
+    -fx-background-color: #0f1a2e;
+}
+
+/* Liste produits admin */
+.boutique-admin-root .list-view.boutique-admin-pro-list {
+    -fx-background-color: #121f36;
+    -fx-control-inner-background: #121f36;
+    -fx-border-color: rgba(56, 189, 248, 0.14);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.boutique-admin-root .list-view.boutique-admin-pro-list .virtual-flow,
+.boutique-admin-root .list-view.boutique-admin-pro-list .list-cell,
+.boutique-admin-root .list-view.boutique-admin-pro-list .list-cell:empty,
+.boutique-admin-root .list-view.boutique-admin-pro-list .virtual-flow .clipped-container .sheet,
+.boutique-admin-root .list-view.boutique-admin-pro-list .virtual-flow .corner {
+    -fx-background-color: #121f36;
+}
+
+.boutique-admin-root .list-view.boutique-admin-pro-list .list-cell,
+.boutique-admin-root .list-view.boutique-admin-pro-list .list-cell:empty {
+    -fx-padding: 6 4 6 4;
+}
+
+.boutique-admin-root .list-view.boutique-admin-pro-list .list-cell:filled:selected,
+.boutique-admin-root .list-view.boutique-admin-pro-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.14);
+}
+
+.boutique-admin-root .list-view.boutique-admin-pro-list .list-cell:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.06);
+}
+
+.boutique-admin-root .list-view.boutique-admin-pro-list .scroll-bar {
+    -fx-background-color: rgba(11, 20, 38, 0.5);
+}
+
+.boutique-admin-root .list-view.boutique-admin-pro-list .scroll-bar .thumb {
+    -fx-background-color: rgba(56, 189, 248, 0.35);
+    -fx-background-radius: 4px;
+}
+
+/* Ligne produit (cellule ListView) */
+.boutique-pro-list-row {
+    -fx-padding: 12 14;
+    -fx-spacing: 8;
+    -fx-background-color: #0f1a2e;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(56, 189, 248, 0.12);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+.boutique-pro-name {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: #f1f5f9;
+}
+
+.boutique-pro-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+    -fx-wrap-text: true;
+}
+
+.boutique-pro-price {
+    -fx-font-size: 12px;
+    -fx-text-fill: #38bdf8;
+    -fx-font-weight: bold;
+}
+
+.boutique-pro-stock-ok {
+    -fx-font-size: 12px;
+    -fx-text-fill: #4ade80;
+    -fx-font-weight: bold;
+}
+
+.boutique-pro-stock-low {
+    -fx-font-size: 12px;
+    -fx-text-fill: #fb923c;
+    -fx-font-weight: bold;
+}
+
+.boutique-pro-statut {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+}
+
+.boutique-pro-actions {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 10;
+    -fx-padding: 6 0 0 0;
+}
+
+.boutique-pro-actions .boutique-pro-btn-edit {
+    -fx-background-color: linear-gradient(to bottom, #0ea5e9, #0284c7);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(56, 189, 248, 0.35);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+    -fx-min-width: 96px;
+}
+
+.boutique-pro-actions .boutique-pro-btn-edit:hover {
+    -fx-background-color: linear-gradient(to bottom, #38bdf8, #0ea5e9);
+}
+
+.boutique-pro-actions .boutique-pro-btn-del {
+    -fx-background-color: rgba(248, 113, 113, 0.12);
+    -fx-text-fill: #f87171;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(248, 113, 113, 0.35);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+    -fx-min-width: 96px;
+}
+
+.boutique-pro-actions .boutique-pro-btn-del:hover {
+    -fx-background-color: rgba(248, 113, 113, 0.22);
+    -fx-text-fill: #ffffff;
+}

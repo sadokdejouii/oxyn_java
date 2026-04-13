@@ -87,7 +87,7 @@ public class EquipmentController implements Initializable {
     @FXML private void handleRefresh() { load(); }
 
     private VBox buildCard(Equipment e) {
-        VBox card = new VBox(0); card.setPrefWidth(290); card.getStyleClass().add("sess-card");
+        VBox card = new VBox(0); card.setPrefWidth(320); card.setMaxWidth(380); card.getStyleClass().add("sess-card");
         HBox header = new HBox(10); header.getStyleClass().add("sess-card-header"); header.setAlignment(Pos.CENTER_LEFT);
         Label title = new Label("🔧  " + e.getName()); title.getStyleClass().add("sess-card-type"); title.setWrapText(true); HBox.setHgrow(title, Priority.ALWAYS);
         Label badge = new Label(e.isActive() ? "Actif" : "Inactif");
