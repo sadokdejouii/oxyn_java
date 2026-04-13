@@ -20,7 +20,10 @@ import javafx.scene.layout.VBox;
 import org.example.model.planning.FicheSanteFormData;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -42,6 +45,23 @@ public final class FicheSanteFormView {
     private final Label bmiValue = new Label("—");
     private final Label bmiHint = new Label("Indice calculé à partir de votre taille et poids.");
     private Consumer<FicheSanteFormData> onSubmit;
+
+    private HBox ageControlWrap;
+    private final HBox ageMessageRow = new HBox(8);
+    private final FontIcon ageFieldIcon = new FontIcon();
+    private final Label ageFieldMessage = new Label();
+
+    private HBox tailleControlWrap;
+    private final HBox tailleMessageRow = new HBox(8);
+    private final FontIcon tailleFieldIcon = new FontIcon();
+    private final Label tailleFieldMessage = new Label();
+
+    private HBox poidsControlWrap;
+    private final HBox poidsMessageRow = new HBox(8);
+    private final FontIcon poidsFieldIcon = new FontIcon();
+    private final Label poidsFieldMessage = new Label();
+
+    private Button submitButton;
 
     public FicheSanteFormView(FicheSanteFormMode mode, FicheSanteFormData initial) {
         this(mode, initial, null);
@@ -82,23 +102,23 @@ public final class FicheSanteFormView {
         errorTitle.setVisible(false);
         errorTitle.setManaged(false);
 
-        Button submit = new Button(mode == FicheSanteFormMode.CREATION ? "Enregistrer et générer mon programme" : "Mettre à jour et régénérer");
-        submit.getStyleClass().addAll("planning-primary-btn", "planning-fiche-submit", "fs-form-submit");
-        submit.setMaxWidth(Double.MAX_VALUE);
-        submit.setOnAction(e -> handleSubmit());
+        submitButton = new Button(mode == FicheSanteFormMode.CREATION ? "Enregistrer et générer mon programme" : "Mettre à jour et régénérer");
+        submitButton.getStyleClass().addAll("planning-primary-btn", "planning-fiche-submit", "fs-form-submit");
+        submitButton.setMaxWidth(Double.MAX_VALUE);
+        submitButton.setOnAction(e -> handleSubmit());
 
         HBox actions = new HBox(12);
         actions.setAlignment(Pos.CENTER_LEFT);
         actions.setPadding(new Insets(8, 0, 0, 0));
         actions.getStyleClass().add("fs-form-actions");
-        actions.getChildren().add(submit);
+        actions.getChildren().add(submitButton);
         if (onCancel != null) {
             Button cancel = new Button("Annuler");
             cancel.getStyleClass().add("planning-fiche-cancel");
             cancel.setOnAction(e -> onCancel.run());
             actions.getChildren().add(cancel);
         }
-        HBox.setHgrow(submit, Priority.ALWAYS);
+        HBox.setHgrow(submitButton, Priority.ALWAYS);
 
         VBox bodyStack = new VBox(20);
         bodyStack.setPadding(new Insets(0, 0, 8, 0));
@@ -106,6 +126,9 @@ public final class FicheSanteFormView {
         bodyStack.getChildren().addAll(steps, bmiStrip, topRow, goalsCard, errorBox, actions);
 
         root.getChildren().addAll(hero, bodyStack);
+
+        wireMetricValidationListeners();
+        refreshMetricsValidation();
     }
 
     private VBox buildHero(FicheSanteFormMode mode) {
@@ -251,8 +274,23 @@ public final class FicheSanteFormView {
 
         Label aLab = fieldCaption("Âge");
         styleSpinner(ageSpinner);
+        ageSpinner.setMaxWidth(Double.MAX_VALUE);
 
-        card.getChildren().addAll(gLab, seg, aLab, wrapFull(ageSpinner));
+        ageControlWrap = new HBox();
+        ageControlWrap.setAlignment(Pos.CENTER_LEFT);
+        ageControlWrap.getStyleClass().add("fs-field-control-wrap");
+        HBox.setHgrow(ageSpinner, Priority.ALWAYS);
+        ageControlWrap.getChildren().add(ageSpinner);
+
+        ageFieldIcon.setIconSize(12);
+        ageFieldMessage.getStyleClass().add("fs-field-message");
+        ageMessageRow.setAlignment(Pos.CENTER_LEFT);
+        ageMessageRow.getChildren().addAll(ageFieldIcon, ageFieldMessage);
+        ageMessageRow.getStyleClass().add("fs-field-message-row");
+        ageMessageRow.setVisible(false);
+        ageMessageRow.setManaged(false);
+
+        card.getChildren().addAll(gLab, seg, aLab, ageControlWrap, ageMessageRow);
         return card;
     }
 
@@ -271,8 +309,8 @@ public final class FicheSanteFormView {
         half.setHgrow(Priority.ALWAYS);
         g.getColumnConstraints().addAll(half, half);
 
-        VBox c0 = metricBlock("Taille", "cm", tailleSpinner);
-        VBox c1 = metricBlock("Poids", "kg", poidsSpinner);
+        VBox c0 = buildMetricColumn("Taille", "cm", tailleSpinner, tailleMessageRow, tailleFieldIcon, tailleFieldMessage);
+        VBox c1 = buildMetricColumn("Poids", "kg", poidsSpinner, poidsMessageRow, poidsFieldIcon, poidsFieldMessage);
         g.add(c0, 0, 0);
         g.add(c1, 1, 0);
 
@@ -280,7 +318,8 @@ public final class FicheSanteFormView {
         return card;
     }
 
-    private VBox metricBlock(String title, String unit, Region control) {
+    private VBox buildMetricColumn(String title, String unit, Spinner<?> spinner,
+                                   HBox messageRow, FontIcon icon, Label messageLabel) {
         VBox v = new VBox(6);
         HBox cap = new HBox(6);
         cap.setAlignment(Pos.CENTER_LEFT);
@@ -289,8 +328,29 @@ public final class FicheSanteFormView {
         Label u = new Label(unit);
         u.getStyleClass().add("fs-form-field-unit");
         cap.getChildren().addAll(t, u);
-        styleSpinner((Spinner<?>) control);
-        v.getChildren().addAll(cap, wrapFull(control));
+
+        HBox wrap = new HBox();
+        wrap.setAlignment(Pos.CENTER_LEFT);
+        wrap.getStyleClass().add("fs-field-control-wrap");
+        styleSpinner(spinner);
+        spinner.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(spinner, Priority.ALWAYS);
+        wrap.getChildren().add(spinner);
+        if ("Taille".equalsIgnoreCase(title)) {
+            tailleControlWrap = wrap;
+        } else {
+            poidsControlWrap = wrap;
+        }
+
+        icon.setIconSize(12);
+        messageLabel.getStyleClass().add("fs-field-message");
+        messageRow.setAlignment(Pos.CENTER_LEFT);
+        messageRow.getChildren().setAll(icon, messageLabel);
+        messageRow.getStyleClass().add("fs-field-message-row");
+        messageRow.setVisible(false);
+        messageRow.setManaged(false);
+
+        v.getChildren().addAll(cap, wrap, messageRow);
         return v;
     }
 
@@ -369,11 +429,35 @@ public final class FicheSanteFormView {
     }
 
     private void handleSubmit() {
+        commitQuiet(ageSpinner);
+        commitQuiet(tailleSpinner);
+        commitQuiet(poidsSpinner);
+        refreshMetricsValidation();
+
+        Optional<String> ageErr = FormValidator.validateAge(ageSpinner);
+        Optional<String> tailleErr = FormValidator.validateHeight(tailleSpinner);
+        Optional<String> poidsErr = FormValidator.validateWeight(poidsSpinner);
+        if (ageErr.isPresent()) {
+            ageSpinner.requestFocus();
+            return;
+        }
+        if (tailleErr.isPresent()) {
+            tailleSpinner.requestFocus();
+            return;
+        }
+        if (poidsErr.isPresent()) {
+            poidsSpinner.requestFocus();
+            return;
+        }
+
         clearErrors();
         FicheSanteFormData draft = readFromControls();
         FicheSanteFormValidator.Result res = FicheSanteFormValidator.validate(draft);
         if (!res.ok()) {
-            showErrors(res.errors());
+            List<String> filtered = filterBackendPhysiqueErrors(res.errors());
+            if (!filtered.isEmpty()) {
+                showErrors(filtered);
+            }
             return;
         }
         if (onSubmit != null) {
@@ -382,6 +466,9 @@ public final class FicheSanteFormView {
     }
 
     private FicheSanteFormData readFromControls() {
+        commitQuiet(ageSpinner);
+        commitQuiet(tailleSpinner);
+        commitQuiet(poidsSpinner);
         String g = genreMale.isSelected() ? "M" : "F";
         return new FicheSanteFormData(
                 g,
@@ -391,6 +478,103 @@ public final class FicheSanteFormView {
                 objectifCombo.getValue(),
                 niveauCombo.getValue()
         );
+    }
+
+    private static void commitQuiet(Spinner<?> spinner) {
+        if (!spinner.isEditable()) {
+            return;
+        }
+        try {
+            spinner.commitValue();
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    private void wireMetricValidationListeners() {
+        Runnable r = this::refreshMetricsValidation;
+        Runnable onBlur = () -> {
+            commitQuiet(ageSpinner);
+            commitQuiet(tailleSpinner);
+            commitQuiet(poidsSpinner);
+            r.run();
+        };
+        ageSpinner.valueProperty().addListener((o, a, b) -> r.run());
+        ageSpinner.getEditor().textProperty().addListener((o, a, b) -> r.run());
+        ageSpinner.focusedProperty().addListener((o, ov, nv) -> {
+            if (!nv) {
+                onBlur.run();
+            }
+        });
+        tailleSpinner.valueProperty().addListener((o, a, b) -> r.run());
+        tailleSpinner.getEditor().textProperty().addListener((o, a, b) -> r.run());
+        tailleSpinner.focusedProperty().addListener((o, ov, nv) -> {
+            if (!nv) {
+                onBlur.run();
+            }
+        });
+        poidsSpinner.valueProperty().addListener((o, a, b) -> r.run());
+        poidsSpinner.getEditor().textProperty().addListener((o, a, b) -> r.run());
+        poidsSpinner.focusedProperty().addListener((o, ov, nv) -> {
+            if (!nv) {
+                onBlur.run();
+            }
+        });
+    }
+
+    private void refreshMetricsValidation() {
+        Optional<String> ageErr = FormValidator.validateAge(ageSpinner);
+        Optional<String> tailleErr = FormValidator.validateHeight(tailleSpinner);
+        Optional<String> poidsErr = FormValidator.validateWeight(poidsSpinner);
+        applyFieldState(ageControlWrap, ageMessageRow, ageFieldIcon, ageFieldMessage, ageErr);
+        applyFieldState(tailleControlWrap, tailleMessageRow, tailleFieldIcon, tailleFieldMessage, tailleErr);
+        applyFieldState(poidsControlWrap, poidsMessageRow, poidsFieldIcon, poidsFieldMessage, poidsErr);
+        boolean metricsOk = ageErr.isEmpty() && tailleErr.isEmpty() && poidsErr.isEmpty();
+        submitButton.setDisable(!metricsOk);
+    }
+
+    private static void applyFieldState(HBox wrap, HBox messageRow, FontIcon icon, Label message,
+                                        Optional<String> err) {
+        if (wrap == null || messageRow == null) {
+            return;
+        }
+        message.getStyleClass().remove("fs-field-message--error");
+        wrap.getStyleClass().removeAll("fs-field-control-wrap--error", "fs-field-control-wrap--success");
+        icon.getStyleClass().removeAll("fs-field-status-icon", "fs-field-status-icon--error", "fs-field-status-icon--ok");
+        if (err.isPresent()) {
+            wrap.getStyleClass().add("fs-field-control-wrap--error");
+            icon.setIconLiteral("fas-exclamation-triangle");
+            icon.getStyleClass().addAll("fs-field-status-icon", "fs-field-status-icon--error");
+            message.getStyleClass().add("fs-field-message--error");
+            message.setText(err.get());
+            messageRow.setVisible(true);
+            messageRow.setManaged(true);
+        } else {
+            wrap.getStyleClass().add("fs-field-control-wrap--success");
+            icon.setIconLiteral("fas-check");
+            icon.getStyleClass().addAll("fs-field-status-icon", "fs-field-status-icon--ok");
+            message.setText("");
+            messageRow.setVisible(true);
+            messageRow.setManaged(true);
+        }
+    }
+
+    private static List<String> filterBackendPhysiqueErrors(List<String> errors) {
+        List<String> out = new ArrayList<>();
+        for (String line : errors) {
+            if (line == null) {
+                continue;
+            }
+            if (isPhysiqueBackendLine(line)) {
+                continue;
+            }
+            out.add(line);
+        }
+        return out;
+    }
+
+    private static boolean isPhysiqueBackendLine(String s) {
+        String x = s.toLowerCase(Locale.FRENCH);
+        return x.contains("âge") || x.contains("taille") || x.contains("poids");
     }
 
     private void showErrors(List<String> errors) {
@@ -427,22 +611,23 @@ public final class FicheSanteFormView {
 
     private void setupAge(Integer initialAge) {
         int v = initialAge != null ? initialAge : 30;
-        v = Math.max(8, Math.min(99, v));
-        ageSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(8, 99, v, 1));
+        v = Math.max(FicheSanteFormValidator.AGE_MIN, Math.min(FicheSanteFormValidator.AGE_MAX, v));
+        ageSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 200, v, 1));
         ageSpinner.setEditable(true);
     }
 
     private void setupTaille(Integer initialCm) {
         int v = initialCm != null ? initialCm : 170;
-        v = Math.max(81, Math.min(209, v));
-        tailleSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(81, 209, v, 1));
+        v = Math.max(FicheSanteFormValidator.TAILLE_MIN_CM, Math.min(FicheSanteFormValidator.TAILLE_MAX_CM, v));
+        tailleSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(50, 300, v, 1));
         tailleSpinner.setEditable(true);
     }
 
     private void setupPoids(Double initialKg) {
         double v = initialKg != null ? initialKg : 70.0;
-        v = Math.max(30.5, Math.min(220.0, v));
-        poidsSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(30.5, 220.0, v, 0.5));
+        double minInit = FicheSanteFormValidator.POIDS_MIN_STRICTLY_ABOVE_KG + 0.5;
+        v = Math.max(minInit, Math.min(FicheSanteFormValidator.POIDS_MAX_KG, v));
+        poidsSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(1.0, 300.0, v, 0.5));
         poidsSpinner.setEditable(true);
     }
 
@@ -546,13 +731,14 @@ public final class FicheSanteFormView {
             }
         }
         if (data.age() != null) {
-            ageSpinner.getValueFactory().setValue(clamp(data.age(), 8, 99));
+            ageSpinner.getValueFactory().setValue(clamp(data.age(), FicheSanteFormValidator.AGE_MIN, FicheSanteFormValidator.AGE_MAX));
         }
         if (data.tailleCm() != null) {
-            tailleSpinner.getValueFactory().setValue(clamp(data.tailleCm(), 81, 209));
+            tailleSpinner.getValueFactory().setValue(clamp(data.tailleCm(), FicheSanteFormValidator.TAILLE_MIN_CM, FicheSanteFormValidator.TAILLE_MAX_CM));
         }
         if (data.poidsKg() != null) {
-            double p = Math.max(30.5, Math.min(220, data.poidsKg()));
+            double minInit = FicheSanteFormValidator.POIDS_MIN_STRICTLY_ABOVE_KG + 0.5;
+            double p = Math.max(minInit, Math.min(FicheSanteFormValidator.POIDS_MAX_KG, data.poidsKg()));
             poidsSpinner.getValueFactory().setValue(p);
         }
         if (data.objectif() != null && objectifCombo.getItems().contains(data.objectif())) {
@@ -566,6 +752,7 @@ public final class FicheSanteFormView {
         }
         clearErrors();
         refreshBmi();
+        refreshMetricsValidation();
     }
 
     private static int clamp(int v, int min, int max) {

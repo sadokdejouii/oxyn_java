@@ -92,6 +92,7 @@ public final class EncadrantClientPlanningService {
     }
 
     public EncadrantClientPlanningSnapshot loadSnapshot(int clientUserId) throws SQLException {
+        weeklyTaskService.ensureCurrentWeekObjectifForUser(clientUserId);
         String label = resolveClientLabel(clientUserId);
         Optional<FicheSanteRow> fiche = ficheDao.findByUserId(clientUserId);
         Optional<ProgrammeGenereRow> programme = planning.findProgrammeByUserId(clientUserId);
@@ -115,6 +116,7 @@ public final class EncadrantClientPlanningService {
     }
 
     public void saveObservation(int clientUserId, String messageEncadrant, boolean effortsValides) throws SQLException {
+        weeklyTaskService.ensureCurrentWeekObjectifForUser(clientUserId);
         Optional<ObjectifRow> o = planning.findCurrentWeekObjectif(clientUserId);
         if (o.isEmpty()) {
             throw new SQLException("Aucune ligne objectif pour la semaine courante — "
