@@ -5,52 +5,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.collections.FXCollections?>
 
-<BorderPane styleClass="forum-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ForumController">
-
-    <!-- LEFT SIDEBAR -->
-    <left>
-        <VBox spacing="20" styleClass="forum-sidebar" prefWidth="280">
-            <padding>
-                <Insets bottom="20" left="16" right="16" top="20" />
-            </padding>
-
-            <!-- Search Section -->
-            <VBox spacing="8">
-                <Label text="Rechercher" styleClass="sidebar-label" />
-                <HBox spacing="8">
-                    <TextField fx:id="searchField" promptText="Rechercher dans..." prefHeight="36" HBox.hgrow="ALWAYS" styleClass="search-field" />
-                    <Button text="🔍" styleClass="search-button" prefWidth="36" prefHeight="36" />
-                </HBox>
-            </VBox>
-
-            <!-- Categories Section -->
-            <VBox spacing="8">
-                <Label text="Catégories" styleClass="sidebar-label" />
-                <VBox fx:id="categoriesContainer" spacing="6" />
-            </VBox>
-
-            <!-- Recent Posts Section -->
-            <VBox spacing="8">
-                <Label text="Posts récents" styleClass="sidebar-label" />
-                <VBox fx:id="recentPostsContainer" spacing="8" styleClass="recent-posts-box" />
-            </VBox>
-
-            <Separator />
-        </VBox>
-    </left>
+<BorderPane styleClass="forum-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ForumController"
+            stylesheets="@../../css/forum.css">
 
     <!-- MAIN CONTENT -->
     <center>
         <VBox spacing="10" styleClass="forum-main-content" VBox.vgrow="ALWAYS">
             <padding>
-                <Insets bottom="12" left="16" right="16" top="8" />
+                <Insets bottom="12" left="20" right="20" top="8" />
             </padding>
 
             <!-- CREATE POST SECTION -->
             <VBox styleClass="create-post-section" spacing="10">
-                <padding>
-                    <Insets bottom="12" left="14" right="14" top="12" />
-                </padding>
+
 
                 <!-- Header -->
                 <HBox alignment="CENTER_LEFT">
@@ -81,16 +48,38 @@
             </VBox>
 
             <!-- Filter & Controls Section -->
-            <HBox spacing="8" alignment="CENTER_LEFT">
-                <Label text="Trier par:" styleClass="filter-label" />
-                <ComboBox fx:id="sortComboBox" prefWidth="180" styleClass="sort-combo" />
+            <HBox alignment="CENTER">
 
-                <Region HBox.hgrow="ALWAYS" />
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <!-- Search -->
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="searchField" promptText="Rechercher..." prefHeight="36" prefWidth="200" styleClass="search-field" />
+                        <Button text="🔍" styleClass="search-button" prefWidth="36" prefHeight="36" />
+                    </HBox>
 
-                <!-- Grid/List Toggle -->
-                <HBox spacing="4" styleClass="view-toggle-box">
-                    <Button fx:id="gridViewBtn" text="⊞" styleClass="view-button,grid-view-btn" prefWidth="40" prefHeight="40" />
-                    <Button fx:id="listViewBtn" text="☰" styleClass="view-button,list-view-btn" prefWidth="40" prefHeight="40" />
+                    <Separator orientation="VERTICAL" prefHeight="32" />
+
+                    <!-- Categories -->
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Catégorie:" styleClass="filter-label" />
+                        <ComboBox fx:id="categoriesFilterCombo" prefWidth="160" styleClass="sort-combo" />
+                    </HBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="32" />
+
+                    <!-- Sort -->
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Trier par:" styleClass="filter-label" />
+                        <ComboBox fx:id="sortComboBox" prefWidth="160" styleClass="sort-combo" />
+                    </HBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="32" />
+
+                    <!-- Grid/List Toggle -->
+                    <HBox spacing="4" styleClass="view-toggle-box">
+                        <Button fx:id="gridViewBtn" text="⊞" styleClass="view-button,grid-view-btn" prefWidth="40" prefHeight="40" />
+                        <Button fx:id="listViewBtn" text="☰" styleClass="view-button,list-view-btn" prefWidth="40" prefHeight="40" />
+                    </HBox>
                 </HBox>
             </HBox>
 
