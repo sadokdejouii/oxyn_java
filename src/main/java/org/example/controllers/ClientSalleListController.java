@@ -113,7 +113,8 @@ public class ClientSalleListController implements Initializable {
 
         HBox topRow = new HBox(8); topRow.setAlignment(Pos.CENTER_LEFT);
         Label name = new Label(s.getName()); name.getStyleClass().add("cl-card-title"); name.setWrapText(true); HBox.setHgrow(name, Priority.ALWAYS);
-        Label badge = new Label("● Actif"); badge.getStyleClass().add("cl-badge-active");
+        Label badge = new Label("Active");
+        badge.getStyleClass().addAll("front-status-chip", "front-status-active");
         topRow.getChildren().addAll(name, badge);
 
         Label rating = new Label("★ " + String.format("%.1f", s.getRating()) + "  (" + s.getRatingCount() + " avis)");
@@ -127,9 +128,10 @@ public class ClientSalleListController implements Initializable {
         );
 
         Separator sep = new Separator();
+        sep.getStyleClass().add("client-salle-card-sep");
 
-        Button btnVoir = new Button("Voir cette salle");
-        btnVoir.getStyleClass().add("cl-btn-voir");
+        Button btnVoir = new Button("Voir la fiche");
+        btnVoir.getStyleClass().addAll("front-card-button", "client-salle-primary-btn");
         btnVoir.setMaxWidth(Double.MAX_VALUE);
         btnVoir.setOnAction(e -> openDetail(s));
 
@@ -139,11 +141,17 @@ public class ClientSalleListController implements Initializable {
     }
 
     private HBox infoRow(String icon, String value) {
-        HBox row = new HBox(8); row.setAlignment(Pos.CENTER_LEFT);
-        Label ico = new Label(icon); ico.setStyle("-fx-font-size:12px;");
+        HBox row = new HBox(8);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("client-salle-meta-row");
+        Label ico = new Label(icon);
+        ico.getStyleClass().add("front-meta-icon");
         Label val = new Label(value != null && !value.isBlank() ? value : "—");
-        val.getStyleClass().add("cl-card-info"); val.setWrapText(true); HBox.setHgrow(val, Priority.ALWAYS);
-        row.getChildren().addAll(ico, val); return row;
+        val.getStyleClass().addAll("cl-card-info", "front-meta-text");
+        val.setWrapText(true);
+        HBox.setHgrow(val, Priority.ALWAYS);
+        row.getChildren().addAll(ico, val);
+        return row;
     }
 
     private void openDetail(Salle salle) {

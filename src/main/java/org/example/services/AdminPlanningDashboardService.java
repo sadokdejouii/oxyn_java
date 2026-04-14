@@ -114,4 +114,52 @@ public final class AdminPlanningDashboardService {
         }
         return c;
     }
+
+    /**
+     * Supprime la fiche santé d’un utilisateur ainsi que programme généré, tâches et objectifs hebdomadaires associés.
+     * Le client ne voit plus de fiche : il doit la saisir à nouveau depuis son planning.
+     */
+    public void deleteFicheSanteAndPlanningDataForUser(int userId) throws SQLException {
+        Connection c = conn();
+        if (c == null) {
+            throw new SQLException("Pas de connexion MySQL");
+        }
+        boolean prevAuto = c.getAutoCommit();
+        try {
+            c.setAutoCommit(false);
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM programmes_generes WHERE user_id = ?")) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM taches_quotidiennes WHERE user_id = ?")) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM objectifs_hebdomadaires WHERE user_id = ?")) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            int removedFiche;
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM fiche_sante WHERE user_id = ?")) {
+                ps.setInt(1, userId);
+                removedFiche = ps.executeUpdate();
+            }
+            if (removedFiche == 0) {
+                c.rollback();
+                throw new SQLException("Aucune fiche santé à supprimer pour cet utilisateur.");
+            }
+            c.commit();
+        } catch (SQLException e) {
+            try {
+                c.rollback();
+            } catch (SQLException ignored) {
+            }
+            throw e;
+        } finally {
+            try {
+                c.setAutoCommit(prevAuto);
+            } catch (SQLException ignored) {
+            }
+        }
+    }
 }

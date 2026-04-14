@@ -171,6 +171,13 @@
                             </VBox>
                         </VBox>
                     </VBox>
+                    <VBox spacing="12" styleClass="apd-detail-panel apd-detail-panel--danger">
+                        <Label styleClass="apd-detail-section-title" text="Réinitialisation fiche client" />
+                        <Label wrapText="true" styleClass="apd-detail-stat-hint"
+                               text="Supprime définitivement la fiche santé, le programme généré, les tâches et les objectifs hebdomadaires. Le client devra remplir à nouveau sa fiche depuis son espace Planning." />
+                        <Button fx:id="btnDeleteFiche" mnemonicParsing="false" text="Supprimer la fiche santé"
+                                styleClass="apd-btn-danger" maxWidth="Infinity" />
+                    </VBox>
                 </VBox>
             </ScrollPane>
         </VBox>

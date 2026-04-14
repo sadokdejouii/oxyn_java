@@ -11,6 +11,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import org.example.entities.Salle;
+import org.example.services.AdminFormValidation;
 import org.example.services.SalleService;
 
 import java.io.File;
@@ -303,11 +304,17 @@ public class SalleManagementController implements Initializable {
 
     @FXML
     private void handleDialogSave() {
-        String nom = fieldNom.getText().trim();
-        if (nom.isEmpty()) {
-            dialogError.setText("Le nom de la salle est obligatoire.");
+        String err = AdminFormValidation.validateSalleAdminForm(
+                fieldNom.getText(),
+                fieldDescription.getText(),
+                fieldAdresse.getText(),
+                fieldTelephone.getText(),
+                fieldEmail.getText());
+        if (err != null) {
+            dialogError.setText(err);
             return;
         }
+        String nom = fieldNom.getText().trim();
         try {
             // Copier l'image si c'est un nouveau fichier (pas déjà dans UPLOAD_DIR)
             String finalImagePath = null;

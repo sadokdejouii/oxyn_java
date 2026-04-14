@@ -69,17 +69,18 @@
                 </VBox>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
                     <Label styleClass="sess-lbl" text="Prix (TND) *"/>
-                    <TextField fx:id="fieldPrice" promptText="0.00" styleClass="apd-field" maxWidth="Infinity"/>
+                    <TextField fx:id="fieldPrice" promptText="49,90 ou 0 pour offre gratuite" styleClass="apd-field" maxWidth="Infinity"/>
                 </VBox>
             </HBox>
             <VBox spacing="5">
-                <Label styleClass="sess-lbl" text="Salle"/>
-                <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="apd-select" promptText="Aucune salle"/>
+                <Label styleClass="sess-lbl" text="Salle *"/>
+                <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="apd-select" promptText="Choisir une salle"/>
             </VBox>
             <VBox spacing="5">
                 <Label styleClass="sess-lbl" text="Description"/>
-                <TextArea fx:id="fieldDesc" promptText="Description de l'offre…" styleClass="apd-field" prefRowCount="3" maxWidth="Infinity" wrapText="true"/>
+                <TextArea fx:id="fieldDesc" promptText="Description… (2000 caractères max.)" styleClass="apd-field" prefRowCount="3" maxWidth="Infinity" wrapText="true"/>
             </VBox>
+            <Label styleClass="apd-section-sub" text="Durée : 1 à 120 mois. Prix : jusqu'à 2 décimales (ex. 29,90). Une salle est obligatoire." wrapText="true"/>
             <Label fx:id="dialogError" styleClass="sess-error" text="" wrapText="true"/>
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button onAction="#handleCancel" styleClass="apd-btn-ghost" text="Annuler"/>

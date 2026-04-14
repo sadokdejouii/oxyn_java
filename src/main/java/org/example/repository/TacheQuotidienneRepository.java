@@ -152,6 +152,18 @@ public final class TacheQuotidienneRepository {
         }
     }
 
+    /** Supprime toutes les tâches quotidiennes du compte (ex. reset après suppression fiche admin). */
+    public int deleteAllByUserId(int userId) throws SQLException {
+        Connection c = conn();
+        if (c == null) {
+            throw new SQLException("Pas de connexion MySQL");
+        }
+        try (PreparedStatement ps = c.prepareStatement("DELETE FROM taches_quotidiennes WHERE user_id = ?")) {
+            ps.setInt(1, userId);
+            return ps.executeUpdate();
+        }
+    }
+
     public void updateEtat(int id, int userId, TacheEtat etat) throws SQLException {
         Connection c = conn();
         if (c == null) {

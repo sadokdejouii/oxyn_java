@@ -1,78 +1,148 @@
-/* ================================================================
-   CLIENT-SALLE.CSS — OXYN  |  Front Office Client  |  Light theme
-   ================================================================ */
+/*
+ * Salles — espace client (aligné Événements / front-events)
+ * Charger après front-events.css sur un ScrollPane avec :
+ *   styleClass="front-events-scroll client-salle-surface-root"
+ */
 
-/* ── ROOT ──────────────────────────────────────────────────── */
-.cl-root {
-    -fx-background-color: #f4f6f9;
+.client-salle-surface-root {
+    -fx-background-color: transparent;
 }
 
-/* ── SALLE CARD ────────────────────────────────────────────── */
+.client-salle-surface-root > .viewport {
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #f3f9ff 55%, #eef6fc 100%);
+}
+
+.client-salle-page {
+    -fx-max-width: 1080px;
+}
+
+/* Hero : textes plus lisibles que le défaut front-events */
+.client-salle-surface-root .client-salle-hero .front-banner-subtitle {
+    -fx-text-fill: #1e4970;
+    -fx-font-size: 15px;
+}
+
+.client-salle-surface-root .client-salle-hero .front-banner-text {
+    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 2px;
+}
+
+.client-salle-surface-root .client-salle-hero .front-overline {
+    -fx-text-fill: #5b21b6;
+    -fx-font-size: 11px;
+}
+
+/* Statistiques */
+.client-salle-surface-root .client-salle-stats {
+    -fx-max-width: 1040px;
+}
+
+.client-salle-stat-kicker {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748b;
+    -fx-letter-spacing: 0.08em;
+}
+
+.client-salle-stat-hint {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+}
+
+.client-salle-surface-root .client-salle-stats .front-stat-number {
+    -fx-text-fill: #0c4a6e;
+}
+
+/* Toolbar pleine largeur comme le contenu */
+.client-salle-toolbar {
+    -fx-max-width: 1040px;
+    -fx-pref-width: 1040px;
+}
+
+.client-salle-surface-root .front-search {
+    -fx-pref-width: 420px;
+}
+
+.client-salle-count {
+    -fx-text-fill: #1e3a5f;
+    -fx-font-size: 14px;
+}
+
+/* Grille cartes */
+.client-salle-grid {
+    -fx-max-width: 1040px;
+}
+
+/* ── Carte liste salle ───────────────────────────────────── */
 .cl-salle-card {
+    -fx-spacing: 0;
+    -fx-alignment: TOP_CENTER;
     -fx-background-color: #ffffff;
-    -fx-background-radius: 14px;
-    -fx-border-radius: 14px;
-    -fx-border-color: #e2e8f0;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: rgba(102, 195, 255, 0.26);
     -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(80, 170, 230, 0.12), 18, 0, 0, 4);
 }
 
 .cl-salle-card:hover {
-    -fx-border-color: #0ea5e9;
-    -fx-effect: dropshadow(gaussian, rgba(14,165,233,0.15), 18, 0, 0, 5);
+    -fx-border-color: rgba(76, 182, 245, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(76, 182, 245, 0.22), 22, 0, 0, 6);
 }
 
-/* ── OFFER CARD ────────────────────────────────────────────── */
-.cl-offer-card {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
-    -fx-border-color: #d1fae5;
-    -fx-border-width: 1.5px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0, 0, 3);
-}
-
-.cl-offer-card:hover {
-    -fx-border-color: #10b981;
-    -fx-effect: dropshadow(gaussian, rgba(16,185,129,0.15), 14, 0, 0, 4);
-}
-
-/* ── SESSION CARD ──────────────────────────────────────────── */
-.cl-session-card {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
-    -fx-border-color: #bae6fd;
-    -fx-border-width: 1.5px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0, 0, 3);
-}
-
-.cl-session-card:hover {
-    -fx-border-color: #0ea5e9;
-    -fx-effect: dropshadow(gaussian, rgba(14,165,233,0.15), 14, 0, 0, 4);
-}
-
-/* ── PHOTO ─────────────────────────────────────────────────── */
 .cl-card-photo-wrap {
-    -fx-background-color: #f1f5f9;
-    -fx-background-radius: 14px 14px 0px 0px;
-}
-
-.cl-detail-photo-wrap {
-    -fx-background-color: #f1f5f9;
-    -fx-background-radius: 10px;
+    -fx-background-color: linear-gradient(to bottom, #f0f9ff 0%, #e8f4fc 100%);
+    -fx-background-radius: 20px 20px 0 0;
 }
 
 .cl-no-photo {
-    -fx-text-fill: #94a3b8;
-    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+    -fx-font-size: 14px;
     -fx-font-style: italic;
 }
 
-/* ── BADGE ─────────────────────────────────────────────────── */
+.cl-card-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f2744;
+}
+
+.cl-card-info {
+    -fx-font-size: 13px;
+    -fx-text-fill: #334155;
+}
+
+.cl-card-desc {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #475569;
+    -fx-font-style: italic;
+}
+
+.cl-card-rating {
+    -fx-font-size: 13px;
+    -fx-text-fill: #b45309;
+    -fx-font-weight: bold;
+}
+
+.client-salle-meta-row {
+    -fx-padding: 0 0 2 0;
+}
+
+.client-salle-surface-root .front-meta-text {
+    -fx-text-fill: #334155;
+    -fx-font-size: 13px;
+}
+
+.client-salle-card-sep {
+    -fx-padding: 4 0 6 0;
+    -fx-opacity: 0.65;
+}
+
+/* Ancien badge — conservé si encore utilisé ailleurs */
 .cl-badge-active {
     -fx-background-color: #dcfce7;
-    -fx-text-fill: #16a34a;
+    -fx-text-fill: #15803d;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
     -fx-background-radius: 20px;
@@ -82,144 +152,185 @@
     -fx-padding: 3px 10px;
 }
 
-/* ── TEXT ──────────────────────────────────────────────────── */
-.cl-card-title {
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
+/* Bouton principal (liste) : même esprit que front-card-button */
+.client-salle-primary-btn {
+    -fx-font-size: 12.5px;
+    -fx-padding: 10 16;
 }
 
-.cl-card-info {
-    -fx-font-size: 12px;
-    -fx-text-fill: #475569;
+.client-salle-btn-success {
+    -fx-background-color: linear-gradient(to bottom, #5eead4 0%, #14b8a6 100%);
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12.5px;
+    -fx-padding: 10 16;
 }
 
-.cl-card-desc {
-    -fx-font-size: 12px;
-    -fx-text-fill: #64748b;
-    -fx-font-style: italic;
+.client-salle-btn-success:hover {
+    -fx-background-color: linear-gradient(to bottom, #6ff7e8 0%, #0d9488 100%);
 }
 
-.cl-card-rating {
-    -fx-font-size: 12px;
-    -fx-text-fill: #d97706;
-    -fx-font-weight: bold;
-}
-
-/* ── DETAIL PAGE ───────────────────────────────────────────── */
-.cl-detail-card {
+/* ── Offres / sessions (cartes détail) ───────────────────── */
+.cl-offer-card {
+    -fx-spacing: 10;
     -fx-background-color: #ffffff;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: rgba(20, 184, 166, 0.28);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.12), 16, 0, 0, 4);
+}
+
+.cl-offer-card:hover {
+    -fx-border-color: rgba(13, 148, 136, 0.45);
+}
+
+.cl-session-card {
+    -fx-spacing: 10;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: rgba(102, 195, 255, 0.28);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(80, 170, 230, 0.12), 16, 0, 0, 4);
+}
+
+.cl-session-card:hover {
+    -fx-border-color: rgba(56, 163, 240, 0.45);
+}
+
+.client-salle-price-tag {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0c4a6e;
+}
+
+/* ── Détail salle ─────────────────────────────────────────── */
+.client-salle-back-row {
+    -fx-max-width: 1040px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.client-salle-back-btn {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0369a1;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
     -fx-background-radius: 14px;
     -fx-border-radius: 14px;
-    -fx-border-color: #e2e8f0;
+    -fx-border-color: rgba(102, 195, 255, 0.35);
+    -fx-border-width: 1.5px;
+    -fx-padding: 10 18;
+    -fx-cursor: hand;
+}
+
+.client-salle-back-btn:hover {
+    -fx-background-color: #f0f9ff;
+    -fx-border-color: #38bdf8;
+}
+
+.cl-detail-card {
+    -fx-spacing: 16;
+    -fx-max-width: 1040px;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 22px;
+    -fx-border-radius: 22px;
+    -fx-border-color: rgba(102, 195, 255, 0.22);
     -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(101, 181, 255, 0.10), 18, 0, 0, 4);
+}
+
+.client-salle-photo-frame {
+    -fx-background-color: linear-gradient(to bottom, #f8fafc 0%, #eff6ff 100%);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(148, 196, 232, 0.35);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+}
+
+.cl-detail-photo-wrap {
+    -fx-background-radius: 16px;
 }
 
 .cl-detail-title {
-    -fx-font-size: 22px;
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: #0f172a;
+    -fx-text-fill: #0a1628;
 }
 
 .cl-detail-desc {
-    -fx-font-size: 13px;
-    -fx-text-fill: #475569;
+    -fx-font-size: 14px;
+    -fx-text-fill: #334155;
+    -fx-line-spacing: 2px;
 }
 
 .cl-detail-info {
-    -fx-font-size: 13px;
-    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+    -fx-text-fill: #1e293b;
 }
 
 .cl-detail-rating {
-    -fx-font-size: 13px;
-    -fx-text-fill: #d97706;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
+    -fx-text-fill: #b45309;
+}
+
+.client-salle-contact-block {
+    -fx-padding: 14 16;
+    -fx-background-color: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(148, 163, 184, 0.25);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+}
+
+.client-salle-sep {
+    -fx-padding: 6 0;
 }
 
 .cl-section-title {
-    -fx-font-size: 18px;
+    -fx-font-size: 19px;
     -fx-font-weight: bold;
-    -fx-text-fill: #0f172a;
-    -fx-padding: 0 0 4px 0;
+    -fx-text-fill: #0a1628;
+    -fx-padding: 8 0 4 0;
+}
+
+.client-salle-section {
+    -fx-max-width: 1040px;
+    -fx-spacing: 12;
 }
 
 .cl-empty-label {
-    -fx-font-size: 13px;
-    -fx-text-fill: #94a3b8;
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b;
     -fx-font-style: italic;
-    -fx-padding: 8px 0;
+    -fx-padding: 6 0 10 0;
 }
 
-/* ── BUTTONS ───────────────────────────────────────────────── */
-.cl-btn-voir {
-    -fx-background-color: #0ea5e9;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-padding: 9px 0;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(14,165,233,0.3), 8, 0, 0, 2);
-}
-
-.cl-btn-voir:hover {
-    -fx-background-color: #0284c7;
-}
-
-.cl-btn-abonner {
-    -fx-background-color: #10b981;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-padding: 9px 0;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(16,185,129,0.3), 8, 0, 0, 2);
-}
-
-.cl-btn-abonner:hover {
-    -fx-background-color: #059669;
-}
-
+/* Anciens boutons (si référencés ailleurs) */
+.cl-btn-voir,
+.cl-btn-abonner,
 .cl-btn-reserver {
-    -fx-background-color: #0ea5e9;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-padding: 9px 0;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(14,165,233,0.3), 8, 0, 0, 2);
-}
-
-.cl-btn-reserver:hover {
-    -fx-background-color: #0284c7;
 }
 
 .cl-btn-back {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #0ea5e9;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0369a1;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-border-color: #bae6fd;
-    -fx-border-width: 1px;
-    -fx-padding: 8px 16px;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: rgba(102, 195, 255, 0.35);
+    -fx-border-width: 1.5px;
+    -fx-padding: 10 18;
     -fx-cursor: hand;
 }
 
-.cl-btn-back:hover {
-    -fx-background-color: #e0f2fe;
-    -fx-text-fill: #0284c7;
+/* ═══ ClientHome.fxml (accueil) — garde cl-root + page-scroll lisibles ═══ */
+.cl-root {
+    -fx-background-color: #f4f6f9;
 }
 
-/* ── OVERRIDE dark page-root/scroll inside client pages ───── */
 .cl-root .page-scroll {
     -fx-background-color: #f4f6f9;
 }
@@ -239,10 +350,12 @@
 .cl-root .saas-stat-card {
     -fx-background-color: #ffffff;
     -fx-border-color: #e2e8f0;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
 }
 
 .cl-root .saas-stat-label {
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #475569;
 }
 
 .cl-root .saas-stat-value {
@@ -250,41 +363,19 @@
 }
 
 .cl-root .saas-stat-hint {
-    -fx-text-fill: #94a3b8;
+    -fx-text-fill: #64748b;
 }
 
-.cl-root .toolbar-card {
+.cl-root .saas-chart-card {
     -fx-background-color: #ffffff;
     -fx-border-color: #e2e8f0;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 18 20;
 }
 
-.cl-root .ghost-toolbar-btn {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #334155;
-    -fx-border-color: #cbd5e1;
-}
-
-.cl-root .ghost-toolbar-btn:hover {
-    -fx-background-color: #e2e8f0;
-}
-
-.cl-root .saas-stat-label {
-    -fx-text-fill: #475569;
-}
-
-/* Search field light */
-.cl-root .sess-field {
-    -fx-background-color: #f8fafc;
-    -fx-border-color: #cbd5e1;
-    -fx-text-fill: #1e293b;
-    -fx-prompt-text-fill: #94a3b8;
-}
-
-.cl-root .sess-field .text {
-    -fx-fill: #1e293b;
-}
-
-.cl-root .sess-field:focused {
-    -fx-border-color: #0ea5e9;
-    -fx-background-color: #ffffff;
+.cl-root .saas-card-title {
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: bold;
 }

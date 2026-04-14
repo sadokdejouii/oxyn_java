@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- Ikonli FontIcon is swapped in at runtime (see MainLayoutController). Placeholders: Region + ikonli-slot, fas-*, sz-*. -->
-<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css,@../css/login.css,@../css/user-management.css,@../css/profile-page.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
+<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css,@../css/login.css,@../css/user-management.css,@../css/profile-page.css,@../css/client-shell-premium.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
 
     <left>
         <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="272" spacing="0" styleClass="sidebar">
@@ -61,7 +61,7 @@
                         <Insets bottom="12" left="14" right="14" top="12" />
                     </padding>
 
-                    <Label fx:id="shellModeLabel" styleClass="nav-title" text="MODE" />
+                    <Label fx:id="shellModeLabel" styleClass="nav-title shell-mode-chip" text="MODE" />
 
                     <VBox fx:id="adminNavGroup" spacing="6">
                         <Label styleClass="nav-title" text="BACK OFFICE" />
@@ -197,14 +197,14 @@
                         </Button>
                     </VBox>
 
-                    <VBox fx:id="clientNavGroup" spacing="6">
-                        <Label styleClass="nav-title" text="FRONT OFFICE" />
+                    <VBox fx:id="clientNavGroup" spacing="6" styleClass="client-rail">
+                        <Label styleClass="nav-title client-nav-rail-title" text="NAVIGATION" />
 
                         <Button fx:id="homeBtn" onAction="#handleHome" styleClass="nav-link">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
                                     <Region styleClass="ikonli-slot,fas-home,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                                    <Label styleClass="nav-label" text="Home" />
+                                    <Label styleClass="nav-label" text="Accueil" />
                                 </HBox>
                             </graphic>
                         </Button>
@@ -213,7 +213,7 @@
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
                                     <Region styleClass="ikonli-slot,fas-calendar-alt,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                                    <Label styleClass="nav-label" text="Evenements" />
+                                    <Label styleClass="nav-label" text="Événements" />
                                 </HBox>
                             </graphic>
                         </Button>
@@ -222,7 +222,7 @@
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
                                     <Region styleClass="ikonli-slot,fas-building,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                                    <Label styleClass="nav-label" text="Salle" />
+                                    <Label styleClass="nav-label" text="Salles &amp; sessions" />
                                 </HBox>
                             </graphic>
                         </Button>
@@ -231,7 +231,7 @@
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
                                     <Region styleClass="ikonli-slot,fas-calendar,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                                    <Label styleClass="nav-label" text="Planning" />
+                                    <Label styleClass="nav-label" text="Mon planning" />
                                 </HBox>
                             </graphic>
                         </Button>
@@ -240,7 +240,7 @@
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
                                     <Region styleClass="ikonli-slot,fas-shopping-cart,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                                    <Label styleClass="nav-label" text="Boutique" />
+                                    <Label styleClass="nav-label" text="Boutique OXYN" />
                                 </HBox>
                             </graphic>
                         </Button>
@@ -249,7 +249,7 @@
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" spacing="12">
                                     <Region styleClass="ikonli-slot,fas-comments,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                                    <Label styleClass="nav-label" text="Forum" />
+                                    <Label styleClass="nav-label" text="Forum &amp; avis" />
                                 </HBox>
                             </graphic>
                         </Button>
@@ -262,7 +262,7 @@
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="12">
                             <Region styleClass="ikonli-slot,fas-user,sz-18,nav-icon-fa" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
-                            <Label styleClass="nav-label" text="Profile" />
+                            <Label styleClass="nav-label" text="Mon profil" />
                         </HBox>
                     </graphic>
                 </Button>
@@ -274,8 +274,8 @@
                                 <Region styleClass="ikonli-slot,fas-sign-out-alt,sz-16,nav-icon-fa,logout-icon-fa" minHeight="16.0" minWidth="16.0" prefHeight="16.0" prefWidth="16.0" />
                             </StackPane>
                             <VBox spacing="2" alignment="CENTER_LEFT">
-                                <Label styleClass="nav-label logout-title" text="Logout" />
-                                <Label styleClass="logout-sub" text="End session" />
+                                <Label styleClass="nav-label logout-title" text="Quitter l’espace" />
+                                <Label styleClass="logout-sub" text="Déconnexion sécurisée" />
                             </VBox>
                         </HBox>
                     </graphic>
@@ -296,7 +296,7 @@
     <center>
         <BorderPane styleClass="main-shell-center">
             <top>
-                <HBox alignment="CENTER_LEFT" spacing="16" styleClass="topbar">
+                <HBox alignment="CENTER_LEFT" spacing="16" styleClass="topbar client-topbar-root">
                     <padding>
                         <Insets bottom="0" left="0" right="24" top="0" />
                     </padding>

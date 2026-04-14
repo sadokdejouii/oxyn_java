@@ -8,6 +8,7 @@ import javafx.scene.layout.*;
 import org.example.entities.Salle;
 import org.example.entities.Session;
 import org.example.services.SalleService;
+import org.example.services.SessionContext;
 import org.example.services.SessionService;
 
 import java.net.URL;
@@ -65,22 +66,6 @@ public class SessionManagementController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         fieldActivite.getItems().addAll(ACTIVITES);
-        // Dark cell factory so dropdown text is visible on dark background
-        javafx.util.Callback<javafx.scene.control.ListView<String>, javafx.scene.control.ListCell<String>> cellFactory =
-            lv -> new javafx.scene.control.ListCell<>() {
-                @Override protected void updateItem(String item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
-                        setStyle("-fx-background-color: #0d1b3e;");
-                    } else {
-                        setText(item);
-                        setStyle("-fx-text-fill: #e6edf3; -fx-background-color: #0d1b3e; -fx-font-size: 13px; -fx-padding: 8px 12px;");
-                    }
-                }
-            };
-        fieldActivite.setCellFactory(cellFactory);
-        fieldActivite.setButtonCell(cellFactory.call(null));
         // Block past dates — only today and future selectable
         fieldDate.setDayCellFactory(picker -> new javafx.scene.control.DateCell() {
             @Override public void updateItem(LocalDate date, boolean empty) {
@@ -89,37 +74,8 @@ public class SessionManagementController implements Initializable {
             }
         });
         fieldDate.setValue(LocalDate.now());
-        // Inject dark CSS into the DatePicker popup (popup has its own scene)
-        applyDarkDatePicker(fieldDate);
         loadSallesCombo();
         loadSessions();
-    }
-
-    private void applyDarkDatePicker(DatePicker dp) {
-        String css = getClass().getResource("/css/datepicker-dark.css").toExternalForm();
-        dp.skinProperty().addListener((obs, oldSkin, newSkin) -> {
-            if (newSkin != null) {
-                javafx.application.Platform.runLater(() -> {
-                    javafx.scene.Node popupContent = dp.lookup(".date-picker-popup");
-                    if (popupContent != null && popupContent.getScene() != null) {
-                        popupContent.getScene().getStylesheets().add(css);
-                    }
-                });
-            }
-        });
-        // Also hook on showing
-        dp.showingProperty().addListener((obs, wasShowing, isShowing) -> {
-            if (isShowing) {
-                javafx.application.Platform.runLater(() -> {
-                    javafx.scene.Node popupContent = dp.lookup(".date-picker-popup");
-                    if (popupContent != null && popupContent.getScene() != null) {
-                        if (!popupContent.getScene().getStylesheets().contains(css)) {
-                            popupContent.getScene().getStylesheets().add(css);
-                        }
-                    }
-                });
-            }
-        });
     }
 
     private void loadSallesCombo() {
@@ -139,7 +95,11 @@ public class SessionManagementController implements Initializable {
 
     private void loadSessions() {
         try {
-            allSessions = sessionService.afficher();
+            if (SessionContext.getInstance().hasDbUser()) {
+                allSessions = sessionService.afficher();
+            } else {
+                allSessions = List.of();
+            }
         } catch (SQLException e) {
             allSessions = List.of();
             countLabel.setText("Erreur de chargement");
@@ -160,6 +120,11 @@ public class SessionManagementController implements Initializable {
     }
 
     private void applyFilter() {
+        if (!SessionContext.getInstance().hasDbUser()) {
+            sessionsGrid.getChildren().clear();
+            countLabel.setText("Connectez-vous pour gérer vos sessions");
+            return;
+        }
         List<Session> filtered;
         switch (currentFilter) {
             case "ACTIVE":   filtered = allSessions.stream().filter(Session::isActive).collect(Collectors.toList()); break;
@@ -194,30 +159,28 @@ public class SessionManagementController implements Initializable {
     private VBox buildCard(Session s) {
         VBox card = new VBox(0);
         card.setPrefWidth(310);
-        card.getStyleClass().add("sess-card");
+        card.getStyleClass().add("cl-session-card");
 
-        // Header
         HBox header = new HBox(10);
-        header.getStyleClass().add("sess-card-header");
+        header.getStyleClass().add("enc-sess-card-header");
         header.setAlignment(Pos.CENTER_LEFT);
         Label typeLabel = new Label(s.getTitle());
-        typeLabel.getStyleClass().add("sess-card-type");
+        typeLabel.getStyleClass().add("cl-card-title");
         typeLabel.setWrapText(true);
         HBox.setHgrow(typeLabel, Priority.ALWAYS);
 
-        // Activity badge (small, distinct style)
         Label actBadge = new Label(typeEmoji(s.getTitle()));
-        actBadge.setStyle("-fx-font-size: 11px; -fx-background-color: rgba(79,195,247,0.15); " +
-                          "-fx-text-fill: #4FC3F7; -fx-background-radius: 12px; -fx-padding: 2px 8px;");
+        actBadge.getStyleClass().add("enc-sess-emoji-badge");
 
         header.getChildren().addAll(typeLabel, actBadge, buildBadge(s));
 
-        // Body
         VBox body = new VBox(7);
-        body.getStyleClass().add("sess-card-body");
+        body.getStyleClass().add("enc-sess-card-body");
 
-        // Coach (coach_user_id fixe = 7)
-        String coachLabel = "Coach #" + (s.getCoachUserId() != null ? s.getCoachUserId() : "—");
+        int me = SessionContext.getInstance().getUserId();
+        String coachLabel = (s.getCoachUserId() != null && s.getCoachUserId() == me && me > 0)
+            ? "Vous"
+            : ("Coach #" + (s.getCoachUserId() != null ? s.getCoachUserId() : "—"));
         body.getChildren().add(infoRow("👤", coachLabel));
 
         // Salle
@@ -240,20 +203,20 @@ public class SessionManagementController implements Initializable {
         // Notes (description)
         if (s.getDescription() != null && !s.getDescription().isBlank()) {
             Label notes = new Label(s.getDescription());
-            notes.getStyleClass().add("sess-card-notes");
+            notes.getStyleClass().add("enc-sess-card-notes");
             notes.setWrapText(true);
             body.getChildren().add(notes);
         }
 
         // Actions
         HBox actions = new HBox(8);
-        actions.getStyleClass().add("sess-card-actions");
+        actions.getStyleClass().add("enc-sess-card-actions");
         actions.setAlignment(Pos.CENTER_LEFT);
         Button btnEdit = new Button("Modifier");
-        btnEdit.getStyleClass().add("sess-btn-edit");
+        btnEdit.getStyleClass().add("enc-sess-btn-edit");
         btnEdit.setOnAction(e -> openEditDialog(s));
         Button btnDel = new Button("Supprimer");
-        btnDel.getStyleClass().add("sess-btn-delete");
+        btnDel.getStyleClass().add("enc-sess-btn-delete");
         btnDel.setOnAction(e -> openConfirm(s));
         actions.getChildren().addAll(btnEdit, btnDel);
 
@@ -265,13 +228,13 @@ public class SessionManagementController implements Initializable {
         Label badge;
         if (!s.isActive()) {
             badge = new Label("Inactive");
-            badge.getStyleClass().add("sess-badge-inactive");
+            badge.getStyleClass().add("enc-sess-badge-off");
         } else if (s.getStartAt() != null && s.getStartAt().isAfter(LocalDateTime.now())) {
-            badge = new Label("Planifiee");
-            badge.getStyleClass().add("sess-badge-planifiee");
+            badge = new Label("Planifiée");
+            badge.getStyleClass().add("enc-sess-badge-plan");
         } else {
-            badge = new Label("Terminee");
-            badge.getStyleClass().add("sess-badge-terminee");
+            badge = new Label("Terminée");
+            badge.getStyleClass().add("enc-sess-badge-done");
         }
         return badge;
     }
@@ -282,7 +245,7 @@ public class SessionManagementController implements Initializable {
         Label ico = new Label(icon);
         ico.setStyle("-fx-font-size: 13px;");
         Label val = new Label(value != null && !value.isBlank() ? value : "—");
-        val.getStyleClass().add("sess-card-info");
+        val.getStyleClass().add("cl-card-info");
         val.setWrapText(true);
         HBox.setHgrow(val, Priority.ALWAYS);
         row.getChildren().addAll(ico, val);
@@ -319,8 +282,13 @@ public class SessionManagementController implements Initializable {
     private void openEditDialog(Session s) {
         sessionEnEdition = s;
         dialogTitle.setText("Modifier la session");
-        fieldTitle.setText(s.getTitle());
-        if (ACTIVITES.contains(s.getTitle())) fieldActivite.setValue(s.getTitle());
+        if (ACTIVITES.contains(s.getTitle())) {
+            fieldActivite.setValue(s.getTitle());
+            fieldTitle.clear();
+        } else {
+            fieldActivite.setValue(null);
+            fieldTitle.setText(s.getTitle() != null ? s.getTitle() : "");
+        }
         if (s.getStartAt() != null) {
             fieldDate.setValue(s.getStartAt().toLocalDate());
             fieldHeureDebut.setText(s.getStartAt().format(FMT));
@@ -343,24 +311,28 @@ public class SessionManagementController implements Initializable {
     @FXML
     private void handleDialogSave() {
         if (!validateForm()) return;
+        int coachUserId = SessionContext.getInstance().getUserId();
+        if (coachUserId <= 0) {
+            dialogError.setText("Vous devez être connecté pour enregistrer une session.");
+            return;
+        }
         try {
-            String title = fieldActivite.getValue() != null
-                ? fieldActivite.getValue() : fieldTitle.getText().trim();
+            String title = resolveSessionTitle();
             LocalDate date   = fieldDate.getValue();
             LocalTime tDebut = LocalTime.parse(fieldHeureDebut.getText().trim(), FMT);
             LocalDateTime startAt = LocalDateTime.of(date, tDebut);
             LocalDateTime endAt   = null;
             String hFin = fieldHeureFin.getText().trim();
-            if (!hFin.isEmpty() && hFin.matches("^([01]\\d|2[0-3]):[0-5]\\d$"))
+            if (!hFin.isEmpty())
                 endAt = LocalDateTime.of(date, LocalTime.parse(hFin, FMT));
             int    capacity = Integer.parseInt(fieldCapacite.getText().trim());
-            double price    = parsePrice(fieldPrice.getText().trim());
+            double price    = parsePriceRequired(fieldPrice.getText().trim());
             String desc     = fieldDescription.getText().trim();
             Salle  salle    = fieldSalle.getValue();
             Integer gymId   = (salle != null && salle.getId() > 0) ? salle.getId() : null;
 
             if (sessionEnEdition == null) {
-                Session s = new Session(title, desc, startAt, endAt, capacity, price, gymId, null);
+                Session s = new Session(title, desc, startAt, endAt, capacity, price, gymId, coachUserId);
                 sessionService.ajouter(s);
             } else {
                 sessionEnEdition.setTitle(title);
@@ -376,7 +348,11 @@ public class SessionManagementController implements Initializable {
             loadSessions();
         } catch (Exception e) {
             e.printStackTrace();
-            dialogError.setText("Erreur : " + e.getMessage());
+            String msg = e.getMessage();
+            if (msg == null || msg.isBlank()) {
+                msg = e.getClass().getSimpleName();
+            }
+            dialogError.setText("Erreur : " + msg);
         }
     }
 
@@ -396,6 +372,11 @@ public class SessionManagementController implements Initializable {
                     loadSessions();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Alert err = new Alert(Alert.AlertType.ERROR);
+                    err.setTitle("Suppression");
+                    err.setHeaderText("Impossible de désactiver la session");
+                    err.setContentText(e.getMessage() != null ? e.getMessage() : e.toString());
+                    err.showAndWait();
                 }
             }
         });
@@ -404,25 +385,67 @@ public class SessionManagementController implements Initializable {
     // ── Validation ───────────────────────────────────────────────────────────
 
     private boolean validateForm() {
-        String title = fieldActivite.getValue() != null
-            ? fieldActivite.getValue() : fieldTitle.getText().trim();
+        String title = resolveSessionTitle();
         if (title.isBlank()) {
-            dialogError.setText("Le titre est obligatoire."); return false;
+            dialogError.setText("Choisissez un type d'activité ou saisissez un titre affiché.");
+            return false;
         }
         if (fieldDate.getValue() == null) {
             dialogError.setText("La date est obligatoire."); return false;
         }
         if (!fieldHeureDebut.getText().trim().matches("^([01]\\d|2[0-3]):[0-5]\\d$")) {
-            dialogError.setText("Heure debut invalide (HH:mm)."); return false;
+            dialogError.setText("Heure début invalide (format HH:mm, ex. 09:00)."); return false;
+        }
+        String hFinRaw = fieldHeureFin.getText().trim();
+        if (!hFinRaw.isEmpty() && !hFinRaw.matches("^([01]\\d|2[0-3]):[0-5]\\d$")) {
+            dialogError.setText("Heure fin invalide (format HH:mm) ou laissez vide.");
+            return false;
+        }
+        try {
+            LocalDate d = fieldDate.getValue();
+            LocalTime t0 = LocalTime.parse(fieldHeureDebut.getText().trim(), FMT);
+            LocalDateTime startAt = LocalDateTime.of(d, t0);
+            if (!hFinRaw.isEmpty()) {
+                LocalTime t1 = LocalTime.parse(hFinRaw, FMT);
+                LocalDateTime endAt = LocalDateTime.of(d, t1);
+                if (!endAt.isAfter(startAt)) {
+                    dialogError.setText("L'heure de fin doit être après l'heure de début.");
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            dialogError.setText("Vérifiez la date et les heures.");
+            return false;
         }
         try {
             if (Integer.parseInt(fieldCapacite.getText().trim()) <= 0)
                 throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            dialogError.setText("Capacite invalide (entier > 0)."); return false;
+            dialogError.setText("Capacité invalide (entier > 0)."); return false;
+        }
+        String priceStr = fieldPrice.getText().trim();
+        if (priceStr.isBlank()) {
+            dialogError.setText("Indiquez un prix (0 si gratuit)."); return false;
+        }
+        try {
+            double p = parsePriceRequired(priceStr);
+            if (p < 0 || Double.isNaN(p) || Double.isInfinite(p)) {
+                dialogError.setText("Le prix doit être un nombre ≥ 0."); return false;
+            }
+        } catch (NumberFormatException e) {
+            dialogError.setText("Prix invalide (ex. 15 ou 15,50)."); return false;
         }
         dialogError.setText("");
         return true;
+    }
+
+    /** Titre persisté : type d'activité si choisi, sinon titre libre. */
+    private String resolveSessionTitle() {
+        String act = fieldActivite.getValue();
+        if (act != null && !act.isBlank()) {
+            return act.trim();
+        }
+        return fieldTitle.getText().trim();
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -445,9 +468,8 @@ public class SessionManagementController implements Initializable {
         dialogError.setText("");
     }
 
-    private double parsePrice(String s) {
-        try { return Double.parseDouble(s.replace(",", ".")); }
-        catch (NumberFormatException e) { return 0.0; }
+    private double parsePriceRequired(String s) {
+        return Double.parseDouble(s.replace(",", ".").replace(" ", ""));
     }
 
 }

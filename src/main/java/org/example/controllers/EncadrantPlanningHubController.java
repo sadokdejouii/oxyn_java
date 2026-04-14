@@ -4,12 +4,14 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -19,6 +21,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.example.model.planning.encadrant.EncadrantClientCardRow;
 import org.example.services.EncadrantClientPlanningService;
+import org.example.services.SessionContext;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.sql.SQLException;
@@ -55,6 +58,12 @@ public final class EncadrantPlanningHubController {
 
     private final EncadrantClientPlanningService service = new EncadrantClientPlanningService();
     private final List<EncadrantClientCardRow> loadedRows = new ArrayList<>();
+
+    private MainLayoutController mainLayoutController;
+
+    public void setMainLayoutController(MainLayoutController mainLayoutController) {
+        this.mainLayoutController = mainLayoutController;
+    }
 
     public void setup() {
         btnRefresh.setOnAction(e -> loadGrid());
@@ -224,7 +233,6 @@ public final class EncadrantPlanningHubController {
     private VBox buildClientCard(EncadrantClientCardRow row) {
         VBox card = new VBox(14);
         card.getStyleClass().add("eph-client-card");
-        card.setOnMouseClicked(e -> openDetail(row));
 
         HBox head = new HBox(14);
         head.setAlignment(Pos.CENTER_LEFT);
@@ -271,6 +279,28 @@ public final class EncadrantPlanningHubController {
         Label pct = new Label(p < 0 ? "Progression : —" : String.format("Progression : %.0f %%", p));
         pct.getStyleClass().add("eph-card-pct");
 
+        Button discussBtn = new Button("Ouvrir la discussion");
+        discussBtn.setMnemonicParsing(false);
+        discussBtn.getStyleClass().add("eph-btn-discussion");
+        discussBtn.setMaxWidth(Double.MAX_VALUE);
+        FontIcon discussIcon = new FontIcon();
+        discussIcon.setIconLiteral("fas-comments");
+        discussIcon.setIconSize(14);
+        discussIcon.getStyleClass().add("eph-btn-discussion-icon");
+        discussBtn.setGraphic(discussIcon);
+        discussBtn.setOnAction(ev -> {
+            ev.consume();
+            openDiscussionForClient(row);
+        });
+
+        card.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            Node t = e.getPickResult().getIntersectedNode();
+            if (t != null && isUnderNode(discussBtn, t)) {
+                return;
+            }
+            openDetail(row);
+        });
+
         HBox foot = new HBox(8);
         foot.setAlignment(Pos.CENTER_RIGHT);
         Region grow = new Region();
@@ -281,8 +311,31 @@ public final class EncadrantPlanningHubController {
         chev.getStyleClass().add("eph-card-chevron");
         foot.getChildren().addAll(grow, chev);
 
-        card.getChildren().addAll(head, badge, obj, act, pct, bar, foot);
+        card.getChildren().addAll(head, badge, obj, act, pct, bar, discussBtn, foot);
         return card;
+    }
+
+    private void openDiscussionForClient(EncadrantClientCardRow row) {
+        int uid = row.userId();
+        if (uid <= 0) {
+            return;
+        }
+        if (mainLayoutController != null) {
+            mainLayoutController.openDiscussionForClientUser(uid);
+            return;
+        }
+        SessionContext ctx = SessionContext.getInstance();
+        ctx.setPendingDiscussionClientUserId(uid);
+        ctx.openDiscussionFromPlanning();
+    }
+
+    private static boolean isUnderNode(Node ancestor, Node node) {
+        for (Node n = node; n != null; n = n.getParent()) {
+            if (n == ancestor) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void openDetail(EncadrantClientCardRow row) {

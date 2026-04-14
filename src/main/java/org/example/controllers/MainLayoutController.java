@@ -24,6 +24,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.stage.Stage;
 import org.example.services.SessionContext;
 import org.example.utils.PageLoader;
+import org.example.utils.PrimaryStageLayout;
 
 import java.net.URL;
 import java.util.ArrayDeque;
@@ -35,6 +36,9 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 public class MainLayoutController implements Initializable {
+
+    /** Appliqué sur {@code shellRoot} pour activer le thème shell « client premium » (CSS). */
+    private static final String STYLE_SHELL_CLIENT = "shell--client";
 
     private static final String PAGE_ADMIN_DASH = "/FXML/pages/AdminDashboard.fxml";
     private static final String PAGE_PLACEHOLDER = "/FXML/pages/PlaceholderPage.fxml";
@@ -249,17 +253,31 @@ public class MainLayoutController implements Initializable {
         clientNavGroup.setVisible(client);
         clientNavGroup.setManaged(client);
 
-        String modeLabel = admin ? "ADMINISTRATOR" : encadrant ? "ENCADRANT" : "CLIENT";
+        String modeLabel = admin ? "ADMINISTRATOR" : encadrant ? "ENCADRANT" : "MEMBRE";
         shellModeLabel.setText(modeLabel);
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        footerText.setText(admin ? "Back office session" : encadrant ? "Encadrant — planning" : "Front office session");
+        footerText.setText(admin ? "Back office session"
+            : encadrant ? "Encadrant — planning"
+            : "Session active · accès sécurisé");
+        if (topbarSearchField != null) {
+            topbarSearchField.setPromptText(client
+                ? "Rechercher une page, un module OXYN…"
+                : "Search modules, events, stock…");
+        }
+
+        if (shellRoot != null) {
+            shellRoot.getStyleClass().remove(STYLE_SHELL_CLIENT);
+            if (client) {
+                shellRoot.getStyleClass().add(STYLE_SHELL_CLIENT);
+            }
+        }
     }
 
     private void registerDiscussionFromPlanningHook(SessionContext ctx) {
         ctx.setOpenDiscussionFromPlanningAction(() -> {
             try {
                 Button nav = ctx.isAdmin() ? adminPlanningBtn
-                        : ctx.isEncadrant() ? encPlanningBtn : planningBtn;
+                        : ctx.isEncadrant() ? encDiscussionBtn : planningBtn;
                 PageLoader.show(contentArea, PAGE_DISCUSSION, this);
                 topbarPageTitle.setText("Discussion");
                 setActiveNav(nav);
@@ -310,6 +328,19 @@ public class MainLayoutController implements Initializable {
             }
             info("Navigation error", e.getMessage() != null ? e.getMessage() : e.toString());
         }
+    }
+
+    /**
+     * Ouvre la messagerie et positionne la sélection sur la conversation du client (Planning encadrant).
+     */
+    public void openDiscussionForClientUser(int clientUserId) {
+        if (clientUserId <= 0) {
+            return;
+        }
+        SessionContext.getInstance().setPendingDiscussionClientUserId(clientUserId);
+        SessionContext ctx = SessionContext.getInstance();
+        Button nav = ctx.isEncadrant() ? encDiscussionBtn : planningBtn;
+        navigate(PAGE_DISCUSSION, "Discussion", nav);
     }
 
     private void setActiveNav(Button button) {
@@ -530,6 +561,7 @@ public class MainLayoutController implements Initializable {
             Parent root = loader.load();
             stage.setScene(new Scene(root, 1080, 720));
             stage.setTitle("OXYN — Connexion");
+            PrimaryStageLayout.applyFullScreen(stage);
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();

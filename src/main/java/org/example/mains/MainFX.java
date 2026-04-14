@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.example.utils.PrimaryStageLayout;
 
 public class MainFX extends Application {
 
@@ -17,6 +18,7 @@ public class MainFX extends Application {
 
         primaryStage.setTitle("OXYN — Connexion");
         primaryStage.setScene(scene);
+        PrimaryStageLayout.applyFullScreen(primaryStage);
         primaryStage.show();
     }
 

@@ -1,0 +1,812 @@
+/*
+ * Planning client — aligné sur ClientHome (.cl-root) : fond #f4f6f9, cartes blanches, textes contrastés.
+ * Les ScrollPane « page-scroll » héritent de dashboard-saas (viewport transparent) : on opacifie ici
+ * pour que le dégradé sombre de .content-area (MainLayout) ne crée pas de gris sale à travers.
+ * Classes : planning-page-stack--client-zen, planning-page-root--client-zen, planning-main-shell--client-zen
+ *           + pcd-client-zen-* sur le dashboard.
+ */
+
+/* ── Fond page = même teinte que l’accueil client (.cl-root #f4f6f9) ── */
+.planning-page-stack.planning-page-stack--client-zen {
+    -fx-background-color: #f4f6f9;
+}
+
+.planning-page-root--client-zen {
+    -fx-background-color: #f4f6f9;
+    -fx-padding: 20px 24px 40px 24px;
+}
+
+.planning-page-stack.planning-page-stack--client-zen > .page-scroll,
+.planning-page-stack.planning-page-stack--client-zen > .page-scroll > .viewport,
+.planning-page-root--client-zen .page-scroll,
+.planning-page-root--client-zen .page-scroll .viewport {
+    -fx-background-color: #f4f6f9;
+    -fx-background: #f4f6f9;
+}
+
+/* Ascenseur discret (page Planning) */
+.planning-page-stack.planning-page-stack--client-zen .scroll-bar:vertical,
+.planning-page-stack.planning-page-stack--client-zen .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.planning-page-stack.planning-page-stack--client-zen .scroll-bar .track {
+    -fx-background-color: rgba(148, 163, 184, 0.22);
+    -fx-background-radius: 8px;
+}
+
+.planning-page-stack.planning-page-stack--client-zen .scroll-bar .thumb {
+    -fx-background-color: rgba(100, 116, 139, 0.38);
+    -fx-background-radius: 8px;
+}
+
+.planning-page-stack.planning-page-stack--client-zen .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(71, 85, 105, 0.5);
+}
+
+/* Carte principale : blanc opaque, bordure discrète (plus de « voile » gris) */
+.planning-main-shell--client-zen {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 22px;
+    -fx-border-color: rgba(102, 195, 255, 0.28);
+    -fx-border-radius: 22px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(101, 181, 255, 0.12), 24, 0.22, 0, 8);
+    -fx-padding: 24px 28px 32px 28px;
+}
+
+.planning-page-root--client-zen .planning-top-header {
+    -fx-padding: 0 0 18 0;
+    -fx-border-color: transparent transparent rgba(226, 232, 240, 0.95) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.planning-page-root--client-zen .planning-hero-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0a1628;
+}
+
+.planning-page-root--client-zen .planning-hero-sub {
+    -fx-font-size: 14px;
+    -fx-text-fill: #334155;
+    -fx-line-spacing: 2px;
+}
+
+.planning-page-root--client-zen .planning-hero-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+    -fx-font-weight: normal;
+}
+
+.planning-page-root--client-zen .planning-dynamic {
+    -fx-spacing: 0;
+    -fx-background-color: #ffffff;
+}
+
+/* ── Dashboard : fond blanc dans la carte ── */
+.pcd-client-zen-root {
+    -fx-background-color: #ffffff;
+}
+
+.pcd-client-zen-scroll {
+    -fx-background-color: #ffffff;
+    -fx-padding: 0;
+}
+
+.pcd-client-zen-scroll .viewport {
+    -fx-background-color: #ffffff;
+}
+
+.pcd-client-zen-scroll .scroll-bar:vertical,
+.pcd-client-zen-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.pcd-client-zen-scroll .scroll-bar .track {
+    -fx-background-color: rgba(148, 163, 184, 0.18);
+    -fx-background-radius: 8px;
+}
+
+.pcd-client-zen-scroll .scroll-bar .thumb {
+    -fx-background-color: rgba(100, 116, 139, 0.32);
+    -fx-background-radius: 8px;
+}
+
+.pcd-client-zen-scroll .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(71, 85, 105, 0.45);
+}
+
+.pcd-client-zen-flow {
+    -fx-spacing: 24;
+    -fx-padding: 4 0 28 0;
+    -fx-max-width: 1160px;
+    -fx-background-color: #ffffff;
+}
+
+/* Héro : titres très lisibles */
+.pcd-zen-hero {
+    -fx-padding: 4 4 8 4;
+    -fx-spacing: 8;
+}
+
+.pcd-zen-hero-overline {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0369a1;
+    -fx-letter-spacing: 0.12em;
+}
+
+.pcd-zen-hero-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0a1628;
+}
+
+.pcd-zen-hero-lead {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1e293b;
+    -fx-line-spacing: 3px;
+    -fx-max-width: 760px;
+}
+
+.pcd-client-zen-flow .pcd-main-grid {
+    -fx-hgap: 20;
+    -fx-vgap: 20;
+}
+
+/* KPI : ombre légère sur couleurs saturées (texte déjà blanc sur les tuiles) */
+.pcd-client-zen-flow .saas-stat-card {
+    -fx-background-radius: 18px;
+    -fx-padding: 16px 18px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0.2, 0, 4);
+    -fx-min-height: 104px;
+}
+
+.pcd-client-zen-flow .saas-stat-v {
+    -fx-font-size: 22px;
+}
+
+/* Sections : blanc pur, filet bleu clair (type front-events) */
+.pcd-client-zen-flow .saas-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 18px;
+    -fx-padding: 20px 22px;
+    -fx-border-color: rgba(102, 195, 255, 0.28);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(101, 181, 255, 0.08), 20, 0.2, 0, 4);
+}
+
+.pcd-client-zen-flow .saas-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0a1628;
+}
+
+.pcd-client-zen-flow .saas-card-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+}
+
+.pcd-client-zen-flow .saas-card-title-icon {
+    -fx-icon-color: #0284c7;
+}
+
+/* Progression + graphique : fond blanc, axes lisibles */
+.pcd-zen-progress-panel {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(102, 195, 255, 0.22);
+}
+
+.pcd-client-zen-flow .pcd-week-chart {
+    -fx-background-color: #ffffff;
+    -fx-padding: 0;
+}
+
+.pcd-client-zen-flow .pcd-week-chart .chart-content {
+    -fx-background-color: #f8fbff;
+    -fx-background-radius: 14px;
+}
+
+.pcd-client-zen-flow .pcd-week-chart .chart-plot-background {
+    -fx-background-color: #f8fbff;
+}
+
+.pcd-client-zen-flow .pcd-week-chart .axis {
+    -fx-tick-label-fill: #334155;
+    -fx-font-size: 11px;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-pct {
+    -fx-text-fill: #0a1628;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-pct--good {
+    -fx-text-fill: #15803d;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-pct--warn {
+    -fx-text-fill: #c2410c;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-pct--bad {
+    -fx-text-fill: #b91c1c;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-pct--na {
+    -fx-text-fill: #64748b;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-detail {
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-quote {
+    -fx-font-size: 13px;
+    -fx-text-fill: #0f766e;
+    -fx-font-style: italic;
+}
+
+/* Message « pas encore d’objectif » : lisible sans orange agressif */
+.pcd-client-zen-flow .w-empty-hint {
+    -fx-text-fill: #334155;
+    -fx-font-size: 13px;
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 14px;
+    -fx-border-color: rgba(148, 163, 184, 0.35);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+/* Programme */
+.pcd-programme-body {
+    -fx-background-color: #f8fbff;
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(186, 230, 253, 0.65);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 2 0 6 0;
+}
+
+.pcd-programme-body .pcd-programme-scroll-inner {
+    -fx-padding: 16px 18px 22px 18px;
+}
+
+.pcd-client-zen-flow .w-section-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0c4a6e;
+    -fx-letter-spacing: 0.06em;
+}
+
+/* Tuiles fiche santé */
+.pcd-client-zen-flow .w-kv-tile {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 14px;
+    -fx-border-color: rgba(226, 232, 240, 0.95);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+.pcd-client-zen-flow .w-kv-tile__label {
+    -fx-text-fill: #475569;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.pcd-client-zen-flow .w-kv-tile__value {
+    -fx-text-fill: #0a1628;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* IA & conseils */
+.pcd-client-zen-flow .w-ai-text,
+.pcd-client-zen-flow .w-conseils-text {
+    -fx-control-inner-background: #ffffff;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: rgba(125, 211, 252, 0.55);
+    -fx-border-width: 1px;
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 13px;
+    -fx-padding: 12;
+}
+
+.pcd-client-zen-flow .w-ai-text .content,
+.pcd-client-zen-flow .w-conseils-text .content {
+    -fx-background-color: #ffffff;
+}
+
+.pcd-client-zen-flow .w-ai-disclaimer {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+}
+
+.pcd-client-zen-flow .pcd-ai-motto-inline {
+    -fx-text-fill: #0369a1;
+    -fx-font-size: 13px;
+}
+
+/* Tâches */
+.pcd-client-zen-flow .pcd-task-card-premium {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(102, 195, 255, 0.22);
+}
+
+.pcd-client-zen-flow .pcd-task-when {
+    -fx-text-fill: #0369a1;
+}
+
+.pcd-client-zen-flow .pcd-task-desc {
+    -fx-text-fill: #1e293b;
+}
+
+/* Boutons */
+.pcd-client-zen-flow .w-btn-primary {
+    -fx-background-color: linear-gradient(to bottom, #38bdf8 0%, #0284c7 100%);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 18px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.pcd-client-zen-flow .w-btn-ghost {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0369a1;
+    -fx-border-color: rgba(56, 189, 248, 0.45);
+}
+
+.pcd-client-zen-flow .w-btn-ghost:hover {
+    -fx-background-color: #f0f9ff;
+}
+
+/* Bandeau kcal programme */
+.pcd-client-zen-flow .pcd-programme-kcal-hero {
+    -fx-background-color: linear-gradient(to right, #f0f9ff 0%, #ecfeff 100%);
+    -fx-border-color: rgba(56, 189, 248, 0.25);
+}
+
+.pcd-client-zen-flow .pcd-programme-kcal-hero__value {
+    -fx-text-fill: #0369a1;
+}
+
+/* Modal fiche */
+.pcd-fiche-modal {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 20px;
+    -fx-padding: 22px 26px 20px 26px;
+    -fx-border-color: rgba(102, 195, 255, 0.3);
+}
+
+.pcd-fiche-modal-title {
+    -fx-text-fill: #0a1628;
+}
+
+.pcd-fiche-modal-sub {
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+}
+
+.pcd-fiche-modal-scroll {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(226, 232, 240, 0.9);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+.pcd-fiche-modal-scroll .viewport {
+    -fx-background-color: #f8fafc;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Hub encadrant — scroll interne lisible sur fond blanc
+   ═══════════════════════════════════════════════════════════════════ */
+
+.planning-main-shell--client-zen .eph-root .eph-scroll,
+.planning-main-shell--client-zen .eph-root .eph-scroll > .viewport {
+    -fx-background-color: #ffffff;
+    -fx-background: #ffffff;
+}
+
+.planning-main-shell--client-zen .eph-root .eph-scroll .scroll-bar:vertical,
+.planning-main-shell--client-zen .eph-root .eph-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.planning-main-shell--client-zen .eph-root .eph-scroll .scroll-bar .track {
+    -fx-background-color: rgba(148, 163, 184, 0.18);
+    -fx-background-radius: 8px;
+}
+
+.planning-main-shell--client-zen .eph-root .eph-scroll .scroll-bar .thumb {
+    -fx-background-color: rgba(100, 116, 139, 0.32);
+    -fx-background-radius: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Admin Planning — thème clair (même enveloppe que le client)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.planning-main-shell--client-zen .apd-root .apd-page-scroll,
+.planning-main-shell--client-zen .apd-root .apd-page-scroll > .viewport {
+    -fx-background-color: #ffffff;
+    -fx-background: #ffffff;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-page-inner {
+    -fx-background-color: #ffffff;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-hero {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(102, 195, 255, 0.28);
+    -fx-effect: dropshadow(gaussian, rgba(101, 181, 255, 0.1), 20, 0.2, 0, 4);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-eyebrow {
+    -fx-text-fill: #0369a1;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-title {
+    -fx-text-fill: #0a1628;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-sub {
+    -fx-text-fill: #475569;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-sep-hero {
+    -fx-background-color: linear-gradient(to right, rgba(56, 189, 248, 0.35), rgba(226, 232, 240, 0.9), transparent);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-card {
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0.2, 0, 4);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-card--users {
+    -fx-background-color: #3a7afe;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-card--prog {
+    -fx-background-color: #00c9a7;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-card--tasks {
+    -fx-background-color: #ff8a65;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-card--fiche {
+    -fx-background-color: #7c6cf2;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-card--conv {
+    -fx-background-color: #0ea5e9;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-card--msg {
+    -fx-background-color: #8b5cf6;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-label {
+    -fx-text-fill: rgba(255, 255, 255, 0.92);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-value {
+    -fx-text-fill: #ffffff;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-hint {
+    -fx-text-fill: rgba(255, 255, 255, 0.88);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-icon-wrap {
+    -fx-background-color: rgba(255, 255, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-icon {
+    -fx-icon-color: #ffffff;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-kpi-card:hover {
+    -fx-border-color: rgba(255, 255, 255, 0.42);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.14), 22, 0.28, 0, 5);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-content-block {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(102, 195, 255, 0.28);
+    -fx-effect: dropshadow(gaussian, rgba(101, 181, 255, 0.08), 20, 0.2, 0, 4);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-section-title {
+    -fx-text-fill: #0a1628;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-section-sub {
+    -fx-text-fill: #475569;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-badge {
+    -fx-text-fill: #0369a1;
+    -fx-background-color: rgba(14, 165, 233, 0.12);
+    -fx-border-color: rgba(14, 165, 233, 0.28);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-filter-panel {
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+    -fx-border-color: rgba(30, 41, 59, 0.1);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-filter-label {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-field {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: rgba(30, 41, 59, 0.12);
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-field:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(58, 122, 254, 0.55);
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.14), 16, 0.35, 0, 0);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-select {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f8fafc);
+    -fx-border-color: rgba(30, 41, 59, 0.1);
+    -fx-text-fill: #0f172a;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-select > .arrow-button {
+    -fx-background-color: linear-gradient(to bottom, rgba(58, 122, 254, 0.12), rgba(58, 122, 254, 0.04));
+    -fx-border-color: transparent transparent transparent rgba(30, 41, 59, 0.08);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-select > .list-cell {
+    -fx-text-fill: #0f172a;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-match-hint {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-empty-filter {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(102, 195, 255, 0.22);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 20, 0.25, 0, 4);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card:hover {
+    -fx-background-color: #f8fbff;
+    -fx-border-color: rgba(58, 122, 254, 0.35);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card-avatar {
+    -fx-background-color: rgba(58, 122, 254, 0.12);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card-avatar-text {
+    -fx-text-fill: #0284c7;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card-name {
+    -fx-text-fill: #0f172a;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card-email {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card-badge {
+    -fx-text-fill: #0369a1;
+    -fx-background-color: rgba(14, 165, 233, 0.1);
+    -fx-border-color: rgba(14, 165, 233, 0.25);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card-stats {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-card-chevron {
+    -fx-icon-color: #94a3b8;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-dim {
+    -fx-background-color: rgba(15, 23, 42, 0.45);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-modal {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(102, 195, 255, 0.35);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.2), 32, 0.22, 0, 10);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-eyebrow {
+    -fx-text-fill: #0369a1;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-name,
+.planning-main-shell--client-zen .apd-root .apd-detail-name--xl {
+    -fx-text-fill: #0a1628;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-email,
+.planning-main-shell--client-zen .apd-root .apd-detail-email--lg {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-role-chip {
+    -fx-text-fill: #0369a1;
+    -fx-background-color: rgba(14, 165, 233, 0.1);
+    -fx-border-color: rgba(14, 165, 233, 0.28);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-avatar-ring {
+    -fx-fill: rgba(14, 165, 233, 0.18);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-avatar-letter,
+.planning-main-shell--client-zen .apd-root .apd-detail-avatar-letter--xl {
+    -fx-text-fill: #0284c7;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-close {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: rgba(148, 163, 184, 0.45);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-close:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-border-color: rgba(58, 122, 254, 0.4);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-close-icon {
+    -fx-icon-color: #475569;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-section-title {
+    -fx-text-fill: #475569;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-metric {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: rgba(226, 232, 240, 0.95);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-metric-k {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-metric-v {
+    -fx-text-fill: #0a1628;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-stat-card {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: rgba(226, 232, 240, 0.95);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-stat-k {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-stat-v {
+    -fx-text-fill: #0284c7;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-stat-hint {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-narrative {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: rgba(226, 232, 240, 0.95);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-narrative-k {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-narrative-v {
+    -fx-text-fill: #1e293b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-user-badge {
+    -fx-text-fill: #475569;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-btn-ghost {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0369a1;
+    -fx-border-color: rgba(56, 189, 248, 0.4);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-btn-ghost:hover {
+    -fx-background-color: #f0f9ff;
+    -fx-text-fill: #0284c7;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-banner {
+    -fx-background-color: #f0f9ff;
+    -fx-border-color: rgba(56, 189, 248, 0.25);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-banner-text {
+    -fx-text-fill: #475569;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-table-shell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(102, 195, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-table .column-header-background {
+    -fx-background-color: #f1f5f9;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-table .column-header .label {
+    -fx-text-fill: #475569;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-table .table-cell {
+    -fx-text-fill: #1e293b;
+    -fx-border-color: rgba(226, 232, 240, 0.9);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-stat-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(102, 195, 255, 0.22);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-stat-label {
+    -fx-text-fill: #64748b;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-stat-value {
+    -fx-text-fill: #0284c7;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-stat-hint {
+    -fx-text-fill: #94a3b8;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-detail-panel--danger {
+    -fx-background-color: rgba(254, 226, 226, 0.85);
+    -fx-border-color: rgba(248, 113, 113, 0.4);
+}
+
+.planning-main-shell--client-zen .apd-root .apd-page-scroll .scroll-bar:vertical,
+.planning-main-shell--client-zen .apd-root .apd-page-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-page-scroll .scroll-bar .track {
+    -fx-background-color: rgba(148, 163, 184, 0.2);
+    -fx-background-radius: 8px;
+}
+
+.planning-main-shell--client-zen .apd-root .apd-page-scroll .scroll-bar .thumb {
+    -fx-background-color: rgba(100, 116, 139, 0.35);
+    -fx-background-radius: 8px;
+}

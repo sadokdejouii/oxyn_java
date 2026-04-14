@@ -104,6 +104,20 @@ public final class FicheSanteRepository {
     }
 
     /**
+     * Suppression admin : toutes les fiches liées à l’utilisateur (une seule en pratique).
+     *
+     * @return nombre de lignes supprimées
+     */
+    public int deleteByUserId(int userId) throws SQLException {
+        Connection c = JdbcPlanningSupport.requireConnection();
+        String sql = "DELETE FROM fiche_sante WHERE user_id = ?";
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            return ps.executeUpdate();
+        }
+    }
+
+    /**
      * Si une fiche existe pour {@code userId} : {@link #update}, sinon {@link #insert}.
      */
     public FicheSanteRow upsertByUserId(int userId, FicheSanteFormData d) throws SQLException {
