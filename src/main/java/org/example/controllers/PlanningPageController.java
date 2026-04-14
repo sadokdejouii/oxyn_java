@@ -20,6 +20,11 @@ import java.util.ResourceBundle;
 
 public class PlanningPageController implements Initializable {
 
+    private MainLayoutController mainLayoutController;
+
+    /** Référence pour réinjecter le layout après {@code setMainLayoutController} (appelé après {@code initialize}). */
+    private EncadrantPlanningHubController encadrantHubController;
+
     @FXML
     private VBox dynamicContainer;
 
@@ -46,6 +51,13 @@ public class PlanningPageController implements Initializable {
 
     private final PlanningViewModel viewModel = new PlanningViewModel();
 
+    public void setMainLayoutController(MainLayoutController mainLayoutController) {
+        this.mainLayoutController = mainLayoutController;
+        if (encadrantHubController != null) {
+            encadrantHubController.setMainLayoutController(mainLayoutController);
+        }
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         heroSub.textProperty().bind(viewModel.heroSubtitleProperty());
@@ -55,7 +67,9 @@ public class PlanningPageController implements Initializable {
             avatarInitials.setText(initialsFromDisplayName(CurrentSession.context().getDisplayName()));
         }
         var ctx = CurrentSession.context();
-        applyAdminPlanningDarkTheme(ctx.isAdmin());
+        applyAdminPlanningDarkTheme(false);
+        applyClientPlanningZen(false);
+        encadrantHubController = null;
         dynamicContainer.getChildren().clear();
 
         if (ctx.isEncadrant()) {
@@ -81,6 +95,7 @@ public class PlanningPageController implements Initializable {
 
     private void buildClientView() {
         applyAdminPlanningDarkTheme(false);
+        applyClientPlanningZen(true);
         var ctx = CurrentSession.context();
         if (!ctx.hasDbUser()) {
             VBox req = new VBox(PlanningUi.hintLabel(
@@ -93,14 +108,20 @@ public class PlanningPageController implements Initializable {
 
     private void buildEncadrantView() {
         applyAdminPlanningDarkTheme(false);
+        applyClientPlanningZen(true);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/pages/EncadrantPlanningHub.fxml"));
             Parent root = loader.load();
             EncadrantPlanningHubController c = loader.getController();
+            encadrantHubController = c;
+            if (mainLayoutController != null) {
+                c.setMainLayoutController(mainLayoutController);
+            }
             c.setup();
             dynamicContainer.getChildren().add(root);
             VBox.setVgrow(root, Priority.ALWAYS);
         } catch (Exception e) {
+            encadrantHubController = null;
             Throwable t = e.getCause() != null ? e.getCause() : e;
             String msg = t.getMessage() != null ? t.getMessage() : t.toString();
             VBox err = new VBox(PlanningUi.hintLabel("Impossible de charger la vue encadrant : " + msg));
@@ -109,6 +130,8 @@ public class PlanningPageController implements Initializable {
     }
 
     private void buildAdminView() {
+        applyClientPlanningZen(false);
+        applyAdminPlanningDarkTheme(true);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/pages/AdminPlanningDashboard.fxml"));
             Parent root = loader.load();
@@ -117,7 +140,8 @@ public class PlanningPageController implements Initializable {
             dynamicContainer.getChildren().add(root);
             VBox.setVgrow(root, Priority.ALWAYS);
         } catch (Exception e) {
-            applyAdminPlanningDarkTheme(false);
+            applyClientPlanningZen(false);
+            applyAdminPlanningDarkTheme(true);
             Throwable t = e.getCause() != null ? e.getCause() : e;
             String msg = t.getMessage() != null ? t.getMessage() : t.toString();
             VBox err = new VBox(PlanningUi.hintLabel("Impossible de charger la vue admin Planning : " + msg));
@@ -129,6 +153,9 @@ public class PlanningPageController implements Initializable {
     private static final String ADMIN_PAGE_STACK = "planning-page-stack--admin-dark";
     private static final String ADMIN_PAGE_ROOT = "planning-page-root--admin-dark";
     private static final String ADMIN_PAGE_SCROLL = "planning-scroll--admin-dark";
+    private static final String CLIENT_ZEN_ROOT = "planning-page-root--client-zen";
+    private static final String CLIENT_ZEN_SHELL = "planning-main-shell--client-zen";
+    private static final String CLIENT_ZEN_STACK = "planning-page-stack--client-zen";
 
     /** Aligne toute la vue Planning admin sur le shell sombre du Dashboard (.content-area). */
     private void applyAdminPlanningDarkTheme(boolean on) {
@@ -136,6 +163,13 @@ public class PlanningPageController implements Initializable {
         toggleStyle(planningPageStack, ADMIN_PAGE_STACK, on);
         toggleStyle(planningRoot, ADMIN_PAGE_ROOT, on);
         toggleStyle(planningPageScroll, ADMIN_PAGE_SCROLL, on);
+    }
+
+    /** Fond et coque clairs (#f4f6f9 + carte blanche), alignés sur le planning client — tous rôles. */
+    private void applyClientPlanningZen(boolean on) {
+        toggleStyle(planningPageStack, CLIENT_ZEN_STACK, on);
+        toggleStyle(planningRoot, CLIENT_ZEN_ROOT, on);
+        toggleStyle(planningMainShell, CLIENT_ZEN_SHELL, on);
     }
 
     private static void toggleStyle(Node node, String styleClass, boolean on) {

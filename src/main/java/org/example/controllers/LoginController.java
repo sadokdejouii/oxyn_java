@@ -18,6 +18,7 @@ import org.example.services.AuthValidation;
 import org.example.services.SessionContext;
 import org.example.utils.AuthNavigation;
 import org.example.utils.FormFieldFeedback;
+import org.example.utils.PrimaryStageLayout;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -125,6 +126,7 @@ public class LoginController implements Initializable {
             SessionContext ctx = SessionContext.getInstance();
             stage.setScene(scene);
             stage.setTitle("OXYN — " + ctx.getRole().displayLabel());
+            PrimaryStageLayout.applyFullScreen(stage);
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();

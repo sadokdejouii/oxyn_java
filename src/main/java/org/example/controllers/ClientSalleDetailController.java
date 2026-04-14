@@ -49,10 +49,14 @@ public class ClientSalleDetailController implements Initializable {
         salleName.setText(salle.getName());
         salleDesc.setText(salle.getDescription() != null && !salle.getDescription().isBlank()
             ? salle.getDescription() : "Aucune description disponible.");
-        salleAddr.setText("📍  " + (salle.getAddress() != null ? salle.getAddress() : "—"));
-        sallePhone.setText("📞  " + (salle.getPhone() != null ? salle.getPhone() : "—"));
-        salleEmail.setText("✉  " + (salle.getEmail() != null ? salle.getEmail() : "—"));
-        salleRating.setText("★  " + String.format("%.1f", salle.getRating()) + "  (" + salle.getRatingCount() + " avis)");
+        salleAddr.setText(salle.getAddress() != null && !salle.getAddress().isBlank()
+                ? salle.getAddress() : "Adresse non renseignée");
+        sallePhone.setText(salle.getPhone() != null && !salle.getPhone().isBlank()
+                ? salle.getPhone() : "Téléphone non renseigné");
+        salleEmail.setText(salle.getEmail() != null && !salle.getEmail().isBlank()
+                ? salle.getEmail() : "E-mail non renseigné");
+        salleRating.setText(String.format("Note %.1f / 5", salle.getRating())
+                + " · " + salle.getRatingCount() + " avis");
 
         String imgUrl = salle.getImageUrl();
         if (imgUrl != null && !imgUrl.isBlank() && new File(imgUrl).exists()) {
@@ -100,9 +104,13 @@ public class ClientSalleDetailController implements Initializable {
         card.getStyleClass().add("cl-offer-card");
         card.setPadding(new Insets(18));
 
-        Label name = new Label("💳  " + o.getName()); name.getStyleClass().add("cl-card-title"); name.setWrapText(true);
-        Label dur  = new Label("📅  " + o.getDurationMonths() + " mois"); dur.getStyleClass().add("cl-card-info");
-        Label prix = new Label("💰  " + String.format("%.2f TND", o.getPrice())); prix.getStyleClass().add("cl-card-info");
+        Label name = new Label(o.getName());
+        name.getStyleClass().add("cl-card-title");
+        name.setWrapText(true);
+        Label dur = new Label("Durée : " + o.getDurationMonths() + " mois");
+        dur.getStyleClass().add("cl-card-info");
+        Label prix = new Label(String.format("%.2f TND", o.getPrice()));
+        prix.getStyleClass().add("client-salle-price-tag");
 
         if (o.getDescription() != null && !o.getDescription().isBlank()) {
             Label desc = new Label(o.getDescription()); desc.getStyleClass().add("cl-card-desc"); desc.setWrapText(true);
@@ -111,7 +119,9 @@ public class ClientSalleDetailController implements Initializable {
             card.getChildren().addAll(name, dur, prix);
         }
 
-        Button btn = new Button("S'abonner"); btn.getStyleClass().add("cl-btn-abonner"); btn.setMaxWidth(Double.MAX_VALUE);
+        Button btn = new Button("S'abonner");
+        btn.getStyleClass().addAll("front-card-button", "client-salle-btn-success");
+        btn.setMaxWidth(Double.MAX_VALUE);
         btn.setOnAction(e -> showInfo("Abonnement", "Fonctionnalite a connecter au module paiement."));
         card.getChildren().add(btn);
         return card;
@@ -123,16 +133,25 @@ public class ClientSalleDetailController implements Initializable {
         card.getStyleClass().add("cl-session-card");
         card.setPadding(new Insets(18));
 
-        Label title = new Label("🏋  " + s.getTitle()); title.getStyleClass().add("cl-card-title"); title.setWrapText(true);
+        Label title = new Label(s.getTitle());
+        title.getStyleClass().add("cl-card-title");
+        title.setWrapText(true);
         String horaire = s.getStartAt() != null ? s.getStartAt().format(FMT) : "—";
-        if (s.getEndAt() != null) horaire += " → " + s.getEndAt().format(DateTimeFormatter.ofPattern("HH:mm"));
-        Label date  = new Label("🕐  " + horaire); date.getStyleClass().add("cl-card-info");
-        Label places = new Label("👥  " + s.getCapacity() + " places"); places.getStyleClass().add("cl-card-info");
-        Label prix  = new Label("💰  " + String.format("%.2f TND", s.getPrice())); prix.getStyleClass().add("cl-card-info");
+        if (s.getEndAt() != null) {
+            horaire += " → " + s.getEndAt().format(DateTimeFormatter.ofPattern("HH:mm"));
+        }
+        Label date = new Label(horaire);
+        date.getStyleClass().add("cl-card-info");
+        Label places = new Label(s.getCapacity() + " places");
+        places.getStyleClass().add("cl-card-info");
+        Label prix = new Label(String.format("%.2f TND", s.getPrice()));
+        prix.getStyleClass().add("client-salle-price-tag");
 
         card.getChildren().addAll(title, date, places, prix);
 
-        Button btn = new Button("Reserver"); btn.getStyleClass().add("cl-btn-reserver"); btn.setMaxWidth(Double.MAX_VALUE);
+        Button btn = new Button("Réserver");
+        btn.getStyleClass().addAll("front-card-button", "client-salle-primary-btn");
+        btn.setMaxWidth(Double.MAX_VALUE);
         btn.setOnAction(e -> showInfo("Reservation", "Fonctionnalite a connecter au module inscriptions."));
         card.getChildren().add(btn);
         return card;

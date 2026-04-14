@@ -9,9 +9,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import org.example.entities.Salle;
 import org.example.entities.SubscriptionOffer;
+import org.example.services.AdminFormValidation;
 import org.example.services.SalleService;
 import org.example.services.SubscriptionOfferService;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
@@ -130,14 +132,33 @@ public class SubscriptionController implements Initializable {
     }
 
     @FXML private void handleSave() {
-        String name = fieldName.getText().trim(); if (name.isBlank()) { dialogError.setText("Nom obligatoire."); return; }
-        int dur; double price;
-        try { dur = Integer.parseInt(fieldDuration.getText().trim()); if (dur <= 0) throw new NumberFormatException(); } catch (NumberFormatException e) { dialogError.setText("Duree invalide."); return; }
-        try { price = Double.parseDouble(fieldPrice.getText().trim().replace(",", ".")); } catch (NumberFormatException e) { dialogError.setText("Prix invalide."); return; }
-        Salle s = fieldSalle.getValue(); Integer gymId = (s != null && s.getId() > 0) ? s.getId() : null;
+        Salle s = fieldSalle.getValue();
+        Integer gymId = (s != null && s.getId() > 0) ? s.getId() : null;
+        String err = AdminFormValidation.validateSubscriptionOfferForm(
+                fieldName.getText(),
+                fieldDuration.getText(),
+                fieldPrice.getText(),
+                fieldDesc.getText(),
+                gymId);
+        if (err != null) {
+            dialogError.setText(err);
+            return;
+        }
+        String name = fieldName.getText().trim();
+        int dur = Integer.parseInt(fieldDuration.getText().trim());
+        BigDecimal priceBd = AdminFormValidation.parsePriceTnd(fieldPrice.getText());
+        double price = priceBd.doubleValue();
         try {
-            if (editing == null) service.ajouter(new SubscriptionOffer(gymId, name, dur, price, fieldDesc.getText().trim()));
-            else { editing.setName(name); editing.setDurationMonths(dur); editing.setPrice(price); editing.setDescription(fieldDesc.getText().trim()); editing.setGymnasiumId(gymId); service.modifier(editing); }
+            if (editing == null) {
+                service.ajouter(new SubscriptionOffer(gymId, name, dur, price, fieldDesc.getText().trim()));
+            } else {
+                editing.setName(name);
+                editing.setDurationMonths(dur);
+                editing.setPrice(price);
+                editing.setDescription(fieldDesc.getText().trim());
+                editing.setGymnasiumId(gymId);
+                service.modifier(editing);
+            }
             showDialog(false); load();
         } catch (SQLException e) { dialogError.setText("Erreur : " + e.getMessage()); }
     }

@@ -6,7 +6,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
@@ -74,7 +73,7 @@ public final class PlanningClientDashboardController {
     @FXML
     private Label lblProgrammeDailyKcal;
     @FXML
-    private ScrollPane programmeScroll;
+    private VBox programmeBody;
     @FXML
     private VBox trainingTimeline;
     @FXML
@@ -276,13 +275,13 @@ public final class PlanningClientDashboardController {
     }
 
     private void hideProgrammeSections() {
-        programmeScroll.setVisible(false);
-        programmeScroll.setManaged(false);
+        programmeBody.setVisible(false);
+        programmeBody.setManaged(false);
     }
 
     private void showProgrammeSections() {
-        programmeScroll.setVisible(true);
-        programmeScroll.setManaged(true);
+        programmeBody.setVisible(true);
+        programmeBody.setManaged(true);
     }
 
     private void hideProgrammeKcalHero() {

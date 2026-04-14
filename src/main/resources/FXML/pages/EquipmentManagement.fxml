@@ -74,14 +74,15 @@
                     <TextField fx:id="fieldQty" promptText="ex: 10" styleClass="apd-field" maxWidth="Infinity"/>
                 </VBox>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label styleClass="sess-lbl" text="Salle"/>
-                    <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="apd-select" promptText="Aucune"/>
+                    <Label styleClass="sess-lbl" text="Salle *"/>
+                    <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="apd-select" promptText="Choisir une salle"/>
                 </VBox>
             </HBox>
             <VBox spacing="5">
                 <Label styleClass="sess-lbl" text="Description"/>
-                <TextArea fx:id="fieldDesc" promptText="Description…" styleClass="apd-field" prefRowCount="3" maxWidth="Infinity" wrapText="true"/>
+                <TextArea fx:id="fieldDesc" promptText="Description… (2000 caractères max.)" styleClass="apd-field" prefRowCount="3" maxWidth="Infinity" wrapText="true"/>
             </VBox>
+            <Label styleClass="apd-section-sub" text="Quantité : entier entre 0 et 999999. Une salle doit être sélectionnée." wrapText="true"/>
             <Label fx:id="dialogError" styleClass="sess-error" text="" wrapText="true"/>
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button onAction="#handleCancel"  styleClass="apd-btn-ghost"  text="Annuler"/>

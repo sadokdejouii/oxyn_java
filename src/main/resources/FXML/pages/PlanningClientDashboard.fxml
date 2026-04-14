@@ -20,10 +20,17 @@
 
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="org.example.controllers.PlanningClientDashboardController"
-           styleClass="pcd-dashboard-stack" maxWidth="Infinity"
-           stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-widgets.css,@../../css/planning-client-dashboard.css">
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="pcd-dashboard-scroll" maxWidth="Infinity" maxHeight="Infinity">
-        <VBox spacing="20" styleClass="pcd-dashboard-inner" maxWidth="Infinity">
+           styleClass="pcd-dashboard-stack pcd-client-zen-root" maxWidth="Infinity"
+           stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-widgets.css,@../../css/planning-client-dashboard.css,@../../css/planning-client-zen.css">
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="pcd-dashboard-scroll pcd-client-zen-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="24" styleClass="pcd-dashboard-inner pcd-client-zen-flow" maxWidth="Infinity">
+            <VBox spacing="8" styleClass="pcd-zen-hero" maxWidth="Infinity">
+                <Label styleClass="pcd-zen-hero-overline" text="ESPACE CLIENT" />
+                <Label styleClass="pcd-zen-hero-title" text="Votre planning personnalisé" />
+                <Label styleClass="pcd-zen-hero-lead"
+                       text="Indicateurs clairs, progression de la semaine, fiche santé, assistant local, programme et tâches — tout suit un parcours simple et lisible."
+                       wrapText="true" />
+            </VBox>
             <GridPane styleClass="pcd-main-grid" hgap="20" vgap="20" maxWidth="Infinity" VBox.vgrow="ALWAYS">
                 <columnConstraints>
                     <ColumnConstraints hgrow="SOMETIMES" minWidth="100" prefWidth="160" percentWidth="25" />
@@ -71,7 +78,7 @@
                 </VBox>
 
                 <!-- Ligne 2 : progression pleine largeur -->
-                <VBox spacing="14" styleClass="saas-card" maxWidth="Infinity"
+                <VBox spacing="14" styleClass="saas-card pcd-zen-progress-panel" maxWidth="Infinity"
                        GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="4">
                     <Label styleClass="saas-card-title" text="Progression &amp; semaine" />
                     <Label styleClass="saas-card-sub" text="Graphique des tâches et suivi d’objectif" wrapText="true" />
@@ -176,8 +183,8 @@
                         </VBox>
                     </HBox>
                     <Label fx:id="lblNoProgram" managed="false" visible="false" styleClass="w-empty-message" wrapText="true" maxWidth="Infinity" />
-                    <ScrollPane fx:id="programmeScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="w-scroll pcd-scroll-flat" maxHeight="720" minViewportHeight="280" VBox.vgrow="ALWAYS">
-                        <VBox spacing="22" styleClass="w-programme-inner pcd-programme-scroll-inner">
+                    <VBox fx:id="programmeBody" spacing="0" styleClass="pcd-programme-body" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                        <VBox spacing="22" styleClass="w-programme-inner pcd-programme-scroll-inner" maxWidth="Infinity">
                             <VBox spacing="8">
                                 <Label styleClass="w-section-title" text="Entraînement" />
                                 <VBox fx:id="trainingTimeline" spacing="0" styleClass="pcd-training-timeline-host" />
@@ -187,7 +194,7 @@
                                 <VBox fx:id="nutritionStack" spacing="12" styleClass="pcd-nutrition-stack" />
                             </VBox>
                         </VBox>
-                    </ScrollPane>
+                    </VBox>
                 </VBox>
 
                 <VBox spacing="12" styleClass="saas-card" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="3" GridPane.columnSpan="2" GridPane.vgrow="ALWAYS">

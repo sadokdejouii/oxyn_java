@@ -2,10 +2,12 @@ package org.example.controllers;
 
 import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -83,6 +85,8 @@ public final class AdminPlanningDashboardController {
     @FXML
     private Button btnDetailClose;
     @FXML
+    private Button btnDeleteFiche;
+    @FXML
     private TextField searchField;
     @FXML
     private ComboBox<AdminPlanningSort> sortCombo;
@@ -92,6 +96,8 @@ public final class AdminPlanningDashboardController {
     private final AdminPlanningDashboardService service = new AdminPlanningDashboardService();
     private final List<AdminPlanningUserRow> loadedRows = new ArrayList<>();
     private boolean overlayWired;
+    /** Ligne affichée dans l’overlay détail (pour suppression fiche). */
+    private AdminPlanningUserRow detailSelection;
 
     public void setup() {
         wireDetailOverlay();
@@ -126,9 +132,45 @@ public final class AdminPlanningDashboardController {
         btnDetailClose.setOnAction(e -> hideDetail());
         detailDim.setOnMouseClicked(e -> hideDetail());
         btnDetailClose.setTooltip(new Tooltip("Fermer"));
+        if (btnDeleteFiche != null) {
+            btnDeleteFiche.setOnAction(this::handleDeleteFicheSante);
+        }
+    }
+
+    @FXML
+    private void handleDeleteFicheSante(ActionEvent event) {
+        if (detailSelection == null) {
+            return;
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Planning — suppression fiche santé");
+        confirm.setHeaderText("Supprimer la fiche santé de « "
+                + (detailSelection.displayName() != null ? detailSelection.displayName() : "ce compte") + " » ?");
+        confirm.setContentText(
+                "Le programme personnalisé, les tâches quotidiennes et les objectifs hebdomadaires "
+                        + "seront supprimés pour ce compte.\n\n"
+                        + "Le client ne verra plus son tableau de bord planning : il devra "
+                        + "ressaisir une nouvelle fiche santé pour regénérer un programme.");
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn != ButtonType.OK) {
+                return;
+            }
+            try {
+                service.deleteFicheSanteAndPlanningDataForUser(detailSelection.userId());
+                hideDetail();
+                loadAll();
+            } catch (SQLException ex) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Planning admin");
+                a.setHeaderText("Suppression impossible");
+                a.setContentText(ex.getMessage() != null ? ex.getMessage() : ex.toString());
+                a.showAndWait();
+            }
+        });
     }
 
     private void showDetail(AdminPlanningUserRow row) {
+        detailSelection = row;
         if (detailEyebrow != null) {
             detailEyebrow.setText("Planning · compte n° " + row.userId());
         }
@@ -158,6 +200,7 @@ public final class AdminPlanningDashboardController {
     }
 
     private void hideDetail() {
+        detailSelection = null;
         FadeTransition ft = new FadeTransition(Duration.millis(140), detailOverlay);
         ft.setFromValue(detailOverlay.getOpacity());
         ft.setToValue(0);

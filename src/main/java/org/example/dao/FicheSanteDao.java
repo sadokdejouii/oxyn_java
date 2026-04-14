@@ -52,5 +52,10 @@ public final class FicheSanteDao {
 
     }
 
+    /** Suppression par utilisateur (ex. action admin). */
+    public int deleteByUserId(int userId) throws SQLException {
+        return repository.deleteByUserId(userId);
+    }
+
 }
 

@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import org.example.entities.Equipment;
 import org.example.entities.Salle;
+import org.example.services.AdminFormValidation;
 import org.example.services.EquipmentService;
 import org.example.services.SalleService;
 
@@ -123,10 +124,16 @@ public class EquipmentController implements Initializable {
     }
 
     @FXML private void handleSave() {
+        Salle s = fieldSalle.getValue();
+        Integer gymId = (s != null && s.getId() > 0) ? s.getId() : null;
+        String err = AdminFormValidation.validateEquipmentAdminForm(
+                fieldName.getText(), fieldDesc.getText(), fieldQty.getText(), gymId);
+        if (err != null) {
+            dialogError.setText(err);
+            return;
+        }
+        int qty = Integer.parseInt(fieldQty.getText().trim());
         String name = fieldName.getText().trim();
-        if (name.isBlank()) { dialogError.setText("Nom obligatoire."); return; }
-        int qty; try { qty = Integer.parseInt(fieldQty.getText().trim()); if (qty < 0) throw new NumberFormatException(); } catch (NumberFormatException e) { dialogError.setText("Quantite invalide."); return; }
-        Salle s = fieldSalle.getValue(); Integer gymId = (s != null && s.getId() > 0) ? s.getId() : null;
         try {
             if (editing == null) service.ajouter(new Equipment(name, fieldDesc.getText().trim(), qty, gymId));
             else { editing.setName(name); editing.setDescription(fieldDesc.getText().trim()); editing.setQuantity(qty); editing.setGymnasiumId(gymId); service.modifier(editing); }

@@ -302,10 +302,70 @@ public class DiscussionPageController implements Initializable {
             inboxSource.setAll(items);
             applyInboxFilter();
             applyInboxSort();
-            Platform.runLater(() -> restoreInboxSelection(prev));
+            Platform.runLater(() -> restoreInboxSelectionAfterLoad(prev));
         } catch (Exception e) {
             statusLabel.setText("Impossible de charger la liste des discussions.");
         }
+    }
+
+    private void restoreInboxSelectionAfterLoad(int previousConversationId) {
+        SessionContext ctx = SessionContext.getInstance();
+        if (ctx.isEncadrant() && ctx.getPendingDiscussionClientUserId() > 0) {
+            if (!trySelectPendingClientConversation()) {
+                restoreInboxSelection(previousConversationId);
+            }
+            return;
+        }
+        restoreInboxSelection(previousConversationId);
+    }
+
+    /**
+     * Sélectionne la conversation correspondant au client demandé (navigation depuis Planning encadrant).
+     *
+     * @return true si une conversation a été sélectionnée
+     */
+    private boolean trySelectPendingClientConversation() {
+        SessionContext ctx = SessionContext.getInstance();
+        int clientId = ctx.getPendingDiscussionClientUserId();
+        if (clientId <= 0 || !ctx.isEncadrant() || inboxSorted == null || conversationList == null) {
+            return false;
+        }
+        if (selectInboxByClientUserId(clientId)) {
+            ctx.clearPendingDiscussionClientUserId();
+            return true;
+        }
+        try {
+            int cid = discussionService.ensureConversationForClient(clientId, ctx.getUserId());
+            if (cid > 0) {
+                discussionService.assignEncadrantToConversation(cid, ctx.getUserId());
+            }
+            List<ConversationInboxItem> items = discussionService.listConversationInbox();
+            inboxSource.setAll(items);
+            applyInboxFilter();
+            applyInboxSort();
+            if (selectInboxByClientUserId(clientId)) {
+                ctx.clearPendingDiscussionClientUserId();
+                return true;
+            }
+            ctx.clearPendingDiscussionClientUserId();
+            statusLabel.setText("Actualisez la liste si la conversation n’apparaît pas.");
+            return false;
+        } catch (Exception e) {
+            ctx.clearPendingDiscussionClientUserId();
+            statusLabel.setText("Impossible d’ouvrir la discussion avec ce client.");
+            return false;
+        }
+    }
+
+    private boolean selectInboxByClientUserId(int clientUserId) {
+        for (ConversationInboxItem it : inboxSorted) {
+            if (it.clientId() == clientUserId) {
+                conversationList.getSelectionModel().select(it);
+                conversationList.scrollTo(it);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void restoreInboxSelection(int previousConversationId) {

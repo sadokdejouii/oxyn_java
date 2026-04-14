@@ -25,6 +25,9 @@ public final class SessionContext {
 
     private Runnable openDiscussionFromPlanningAction;
 
+    /** Client ciblé à l’ouverture de la messagerie (ex. depuis Planning encadrant), ou -1. */
+    private int pendingDiscussionClientUserId = -1;
+
     private SessionContext() {
     }
 
@@ -97,6 +100,18 @@ public final class SessionContext {
         }
     }
 
+    public void setPendingDiscussionClientUserId(int clientUserId) {
+        this.pendingDiscussionClientUserId = clientUserId > 0 ? clientUserId : -1;
+    }
+
+    public int getPendingDiscussionClientUserId() {
+        return pendingDiscussionClientUserId;
+    }
+
+    public void clearPendingDiscussionClientUserId() {
+        this.pendingDiscussionClientUserId = -1;
+    }
+
     public void logout() {
         this.currentUser = null;
         pushDisplayName("Guest");
@@ -104,6 +119,7 @@ public final class SessionContext {
         this.legacyUserId = -1;
         this.legacyEmail = "";
         this.openDiscussionFromPlanningAction = null;
+        this.pendingDiscussionClientUserId = -1;
     }
 
     public User getCurrentUser() {

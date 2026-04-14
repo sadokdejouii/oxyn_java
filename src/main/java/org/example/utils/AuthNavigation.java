@@ -21,6 +21,7 @@ public final class AuthNavigation {
         Parent root = FXMLLoader.load(AuthNavigation.class.getResource("/FXML/Login.fxml"));
         stage.setScene(new Scene(root, 1080, 720));
         stage.setTitle("OXYN — Connexion");
+        PrimaryStageLayout.applyFullScreen(stage);
     }
 
     public static void showRegister(Stage stage) throws IOException {
@@ -28,5 +29,6 @@ public final class AuthNavigation {
         Parent root = FXMLLoader.load(AuthNavigation.class.getResource("/FXML/Register.fxml"));
         stage.setScene(new Scene(root, 1080, 780));
         stage.setTitle("OXYN — Inscription");
+        PrimaryStageLayout.applyFullScreen(stage);
     }
 }
