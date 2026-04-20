@@ -65,8 +65,8 @@
                 </VBox>
                 <VBox spacing="6">
                     <Label styleClass="salle-field-label" text="Adresse *" />
-                    <TextField fx:id="fieldAdresse" promptText="Rue et n°, ville, pays (séparés par des virgules)" styleClass="apd-field" maxWidth="Infinity" />
-                    <Label styleClass="salle-drop-hint" text="Ex. : 12 av. Habib Bourguiba, Sousse, Tunisie — trois parties minimum." wrapText="true" />
+                    <TextField fx:id="fieldAdresse" promptText="Ex : Sousse, Tunisie" styleClass="apd-field" maxWidth="Infinity" />
+                    <Label styleClass="salle-drop-hint" text="Format : Ville, Pays — ex : Sousse, Tunisie" wrapText="true" />
                 </VBox>
                 <HBox spacing="12">
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
@@ -87,5 +87,83 @@
                 </HBox>
             </VBox>
         </ScrollPane>
+    </StackPane>
+
+    <!-- Modal Équipements (par salle) -->
+    <StackPane fx:id="equipOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity"
+               onMouseClicked="#handleOverlayClick">
+        <VBox fx:id="equipCard" maxWidth="820" spacing="14" styleClass="salle-dialog-card salle-dialog-card--apd" alignment="TOP_LEFT">
+            <padding><Insets bottom="22" left="24" right="24" top="20"/></padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label fx:id="equipTitle" styleClass="salle-dialog-title" text="Équipements — Salle" HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleEquipCancel" styleClass="salle-remove-img-btn" text="✕" />
+            </HBox>
+
+            <Separator />
+
+            <TableView fx:id="equipementsTable" prefHeight="200" styleClass="equip-table">
+                <columns>
+                    <TableColumn fx:id="colNomEquipement" text="Nom" prefWidth="200" />
+                    <TableColumn fx:id="colQuantiteEquipement" text="Quantité" prefWidth="80" />
+                    <TableColumn fx:id="colActionsEquipement" text="Actions" prefWidth="160" />
+                </columns>
+            </TableView>
+
+            <Separator />
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="nomEquipementField" promptText="Ex: Tapis roulants" styleClass="apd-field" HBox.hgrow="ALWAYS" onAction="#handleAjouterEquipement" />
+                <TextField fx:id="quantiteEquipementField" promptText="Qté" styleClass="apd-field" prefWidth="70" onAction="#handleAjouterEquipement" />
+                <Button text="+ Ajouter" onAction="#handleAjouterEquipement" styleClass="apd-btn" />
+            </HBox>
+
+            <Label fx:id="equipError" styleClass="salle-error-label" text="" wrapText="true" />
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button onAction="#handleEquipCancel" styleClass="apd-btn-ghost" text="Annuler" />
+                <Button onAction="#handleEquipSave" styleClass="apd-btn" text="Enregistrer" />
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- Modal Abonnements (par salle) -->
+    <StackPane fx:id="subsOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity"
+               onMouseClicked="#handleOverlayClick">
+        <VBox fx:id="subsCard" maxWidth="920" spacing="14" styleClass="salle-dialog-card salle-dialog-card--apd" alignment="TOP_LEFT">
+            <padding><Insets bottom="22" left="24" right="24" top="20"/></padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label fx:id="subsTitle" styleClass="salle-dialog-title" text="Abonnements — Salle" HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleSubsCancel" styleClass="salle-remove-img-btn" text="✕" />
+            </HBox>
+
+            <Separator />
+
+            <TableView fx:id="abonnementsTable" prefHeight="200" styleClass="equip-table">
+                <columns>
+                    <TableColumn fx:id="colNomAbonnement" text="Nom de l’offre" prefWidth="200" />
+                    <TableColumn fx:id="colPrixAbonnement" text="Prix" prefWidth="80" />
+                    <TableColumn fx:id="colActionsAbonnement" text="Actions" prefWidth="160" />
+                </columns>
+            </TableView>
+
+            <Separator />
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="nomAbonnementField" promptText="Nom de l’offre…" styleClass="apd-field" HBox.hgrow="ALWAYS" onAction="#handleAjouterAbonnement" />
+                <TextField fx:id="prixAbonnementField" promptText="Prix" styleClass="apd-field" prefWidth="70" onAction="#handleAjouterAbonnement" />
+                <Button text="+ Ajouter" onAction="#handleAjouterAbonnement" styleClass="apd-btn" />
+            </HBox>
+
+            <Label fx:id="subsError" styleClass="salle-error-label" text="" wrapText="true" />
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button onAction="#handleSubsCancel" styleClass="apd-btn-ghost" text="Annuler" />
+                <Button onAction="#handleSubsSave" styleClass="apd-btn" text="Enregistrer" />
+            </HBox>
+        </VBox>
     </StackPane>
 </StackPane>

@@ -36,6 +36,31 @@ public class SubscriptionOfferService {
         return list;
     }
 
+    public List<SubscriptionOffer> afficherParSalle(int gymnasiumId) throws SQLException {
+        List<SubscriptionOffer> list = new ArrayList<>();
+        PreparedStatement ps = con.prepareStatement(
+            "SELECT o.*, g.name AS gym_name FROM gym_subscription_offers o LEFT JOIN gymnasia g ON o.gymnasium_id=g.id " +
+                "WHERE o.gymnasium_id=? AND o.is_active=1 ORDER BY o.created_at DESC");
+        ps.setInt(1, gymnasiumId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            SubscriptionOffer o = new SubscriptionOffer();
+            o.setId(rs.getInt("id")); int gid = rs.getInt("gymnasium_id"); o.setGymnasiumId(rs.wasNull() ? null : gid);
+            o.setName(rs.getString("name")); o.setDurationMonths(rs.getInt("duration_months")); o.setPrice(rs.getDouble("price"));
+            o.setDescription(rs.getString("description")); o.setActive(rs.getInt("is_active") == 1);
+            o.setCreatedAt(rs.getTimestamp("created_at")); o.setUpdatedAt(rs.getTimestamp("updated_at")); o.setGymnasiumName(rs.getString("gym_name"));
+            list.add(o);
+        }
+        return list;
+    }
+
+    public int countParSalle(int gymnasiumId) throws SQLException {
+        PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) FROM gym_subscription_offers WHERE gymnasium_id=? AND is_active=1");
+        ps.setInt(1, gymnasiumId);
+        ResultSet rs = ps.executeQuery();
+        return rs.next() ? rs.getInt(1) : 0;
+    }
+
     public void modifier(SubscriptionOffer o) throws SQLException {
         PreparedStatement ps = con.prepareStatement(
             "UPDATE gym_subscription_offers SET gymnasium_id=?, name=?, duration_months=?, price=?, description=?, updated_at=NOW() WHERE id=?");

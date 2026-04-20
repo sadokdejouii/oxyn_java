@@ -164,6 +164,167 @@
     -fx-effect: dropshadow(gaussian, rgba(248,113,113,0.2), 8, 0, 0, 0);
 }
 
+/* ── CHIPS ACTIONS (Équipements / Abonnements + badges) ───── */
+.salle-card-actions {
+    -fx-padding: 2px 0 0 0;
+}
+
+.salle-btn-chip {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255,255,255,0.10);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.salle-btn-chip:hover {
+    -fx-background-color: rgba(56,189,248,0.10);
+    -fx-border-color: rgba(56,189,248,0.30);
+}
+
+.salle-chip-inner {
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 10px;
+}
+
+.salle-chip-text {
+    -fx-text-fill: rgba(226,232,240,0.92);
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.salle-chip-badge {
+    -fx-background-color: rgba(56,189,248,0.18);
+    -fx-text-fill: #38bdf8;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 999px;
+    -fx-padding: 2px 8px;
+    -fx-border-radius: 999px;
+    -fx-border-color: rgba(56,189,248,0.28);
+    -fx-border-width: 1px;
+}
+
+/* Variantes: garder les couleurs actuelles des boutons edit/delete */
+.salle-btn-edit.salle-btn-chip {
+    -fx-border-color: rgba(56,189,248,0.35);
+}
+.salle-btn-edit.salle-btn-chip:hover {
+    -fx-background-color: rgba(56,189,248,0.12);
+    -fx-border-color: rgba(56,189,248,0.75);
+}
+
+.salle-btn-delete.salle-btn-chip {
+    -fx-border-color: rgba(248,113,113,0.35);
+}
+.salle-btn-delete.salle-btn-chip:hover {
+    -fx-background-color: rgba(248,113,113,0.12);
+    -fx-border-color: rgba(248,113,113,0.75);
+}
+
+/* ── TAGS supprimables (modals) ───────────────────────────── */
+.salle-tag-chip {
+    -fx-background-color: rgba(13,27,62,0.60);
+    -fx-border-color: rgba(255,255,255,0.10);
+    -fx-border-width: 1px;
+    -fx-border-radius: 999px;
+    -fx-background-radius: 999px;
+    -fx-padding: 6px 10px;
+}
+
+.salle-tag-label {
+    -fx-text-fill: rgba(226,232,240,0.92);
+    -fx-font-size: 12px;
+}
+
+.salle-tag-x {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(248,113,113,0.95);
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 2px 0 2px;
+    -fx-cursor: hand;
+}
+
+.salle-tag-x:hover {
+    -fx-text-fill: #ffffff;
+}
+
+/* ── TABLEVIEW ÉQUIPEMENTS (dark dashboard) ───────────────── */
+.equip-table {
+    -fx-background-color: #0a1628;
+    -fx-control-inner-background: #0a1628;
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.equip-table .column-header-background {
+    -fx-background-color: #1e3a5f;
+}
+
+.equip-table .column-header,
+.equip-table .filler {
+    -fx-background-color: #1e3a5f;
+    -fx-border-color: transparent;
+}
+
+.equip-table .column-header .label {
+    -fx-text-fill: #38bdf8;
+    -fx-font-weight: bold;
+}
+
+.equip-table .table-row-cell {
+    -fx-background-color: #0a1628;
+    -fx-border-color: transparent transparent #1e3a5f transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.equip-table .table-row-cell:hover {
+    -fx-background-color: #1e3a5f44;
+}
+
+.equip-table .table-cell {
+    -fx-text-fill: rgba(226,232,240,0.92);
+}
+
+/* Boutons Actions dans la colonne */
+.equip-action-btn {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 6px 10px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.equip-action-btn--edit {
+    -fx-background-color: rgba(56,189,248,0.12);
+    -fx-border-color: rgba(56,189,248,0.45);
+    -fx-border-width: 1px;
+    -fx-text-fill: #38bdf8;
+}
+
+.equip-action-btn--edit:hover {
+    -fx-background-color: rgba(56,189,248,0.18);
+    -fx-border-color: rgba(56,189,248,0.70);
+    -fx-text-fill: #ffffff;
+}
+
+.equip-action-btn--delete {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(248,113,113,0.55);
+    -fx-border-width: 1px;
+    -fx-text-fill: #f87171;
+}
+
+.equip-action-btn--delete:hover {
+    -fx-background-color: rgba(248,113,113,0.12);
+    -fx-border-color: rgba(248,113,113,0.80);
+    -fx-text-fill: #ffffff;
+}
+
 /* ── DIALOG OVERLAY ───────────────────────────────────────── */
 .dialog-overlay {
     -fx-background-color: rgba(1,4,9,0.72);

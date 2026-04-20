@@ -20,11 +20,7 @@ import javafx.scene.layout.StackPane;
 
 import javafx.scene.layout.VBox;
 
-import org.example.services.EquipmentService;
-
 import org.example.services.SalleService;
-
-import org.example.services.SubscriptionOfferService;
 
 
 
@@ -46,19 +42,15 @@ public class AdminSalleHubController implements Initializable {
 
     @FXML private StackPane hubContent;
 
-    @FXML private VBox      tabSalles, tabEquip, tabSubs;
+    @FXML private VBox      tabSalles;
 
-    @FXML private Label     badgeSalles, badgeEquip, badgeSubs;
+    @FXML private Label     badgeSalles;
 
-    @FXML private Region    indSalles, indEquip, indSubs;
+    @FXML private Region    indSalles;
 
 
 
     private static final String PATH_SALLES = "/FXML/pages/SalleManagement.fxml";
-
-    private static final String PATH_EQUIP  = "/FXML/pages/EquipmentManagement.fxml";
-
-    private static final String PATH_SUBS   = "/FXML/pages/SubscriptionManagement.fxml";
 
 
 
@@ -71,10 +63,6 @@ public class AdminSalleHubController implements Initializable {
 
 
     private final SalleService             salleService = new SalleService();
-
-    private final EquipmentService         equipService = new EquipmentService();
-
-    private final SubscriptionOfferService subsService  = new SubscriptionOfferService();
 
 
 
@@ -96,10 +84,6 @@ public class AdminSalleHubController implements Initializable {
 
         try { badgeSalles.setText(String.valueOf(salleService.afficher().size())); } catch (SQLException e) { badgeSalles.setText("?"); }
 
-        try { badgeEquip.setText(String.valueOf(equipService.afficher().size())); }  catch (SQLException e) { badgeEquip.setText("?"); }
-
-        try { badgeSubs.setText(String.valueOf(subsService.afficher().size())); }    catch (SQLException e) { badgeSubs.setText("?"); }
-
     }
 
 
@@ -112,11 +96,7 @@ public class AdminSalleHubController implements Initializable {
 
         String key;
 
-        if (src == tabEquip)      key = "EQUIP";
-
-        else if (src == tabSubs)  key = "SUBS";
-
-        else                      key = "SALLES";
+        key = "SALLES";
 
         activateTab(src, key);
 
@@ -148,15 +128,7 @@ public class AdminSalleHubController implements Initializable {
 
         if (!cache.containsKey(key)) {
 
-            String path = switch (key) {
-
-                case "EQUIP" -> PATH_EQUIP;
-
-                case "SUBS"  -> PATH_SUBS;
-
-                default      -> PATH_SALLES;
-
-            };
+            String path = PATH_SALLES;
 
             try {
 
@@ -194,31 +166,15 @@ public class AdminSalleHubController implements Initializable {
 
         tabSalles.getStyleClass().removeAll("hub-tab-active", "sh-tab-active");
 
-        tabEquip.getStyleClass().removeAll("hub-tab-active", "sh-tab-active");
-
-        tabSubs.getStyleClass().removeAll("hub-tab-active", "sh-tab-active");
-
 
 
         resetIndicator(indSalles);
-
-        resetIndicator(indEquip);
-
-        resetIndicator(indSubs);
 
 
 
         tab.getStyleClass().addAll("hub-tab-active", "sh-tab-active");
 
-        Region ind = switch (key) {
-
-            case "EQUIP" -> indEquip;
-
-            case "SUBS"  -> indSubs;
-
-            default      -> indSalles;
-
-        };
+        Region ind = indSalles;
 
         ind.getStyleClass().remove("sh-tab-indicator");
 
