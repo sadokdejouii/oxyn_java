@@ -39,27 +39,13 @@
 
             <GridPane styleClass="apd-kpi-grid" hgap="14" vgap="14" maxWidth="Infinity">
                 <columnConstraints>
-                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
-                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
-                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.34" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="100" />
                 </columnConstraints>
                 <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--users"
                       GridPane.columnIndex="0" GridPane.rowIndex="0">
                     <Label styleClass="apd-kpi-label" text="SALLES" />
                     <Label fx:id="badgeSalles" styleClass="apd-kpi-value" text="—" />
                     <Label styleClass="apd-kpi-hint" text="Salles enregistrées" wrapText="true" />
-                </VBox>
-                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--prog"
-                      GridPane.columnIndex="1" GridPane.rowIndex="0">
-                    <Label styleClass="apd-kpi-label" text="ÉQUIPEMENTS" />
-                    <Label fx:id="badgeEquip" styleClass="apd-kpi-value" text="—" />
-                    <Label styleClass="apd-kpi-hint" text="Matériels en service" wrapText="true" />
-                </VBox>
-                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--tasks"
-                      GridPane.columnIndex="2" GridPane.rowIndex="0">
-                    <Label styleClass="apd-kpi-label" text="ABONNEMENTS" />
-                    <Label fx:id="badgeSubs" styleClass="apd-kpi-value" text="—" />
-                    <Label styleClass="apd-kpi-hint" text="Offres disponibles" wrapText="true" />
                 </VBox>
             </GridPane>
 
@@ -72,22 +58,6 @@
                             <Label styleClass="sh-tab-label" text="Salles" />
                         </HBox>
                         <Region fx:id="indSalles" styleClass="sh-tab-indicator-active" prefHeight="3" maxWidth="Infinity" />
-                    </VBox>
-                    <VBox fx:id="tabEquip" onMouseClicked="#handleTab"
-                          styleClass="sh-tab" spacing="0" minWidth="180">
-                        <HBox alignment="CENTER" spacing="10" styleClass="sh-tab-inner">
-                            <Label styleClass="sh-tab-icon" text="🏋" />
-                            <Label styleClass="sh-tab-label" text="Équipements" />
-                        </HBox>
-                        <Region fx:id="indEquip" styleClass="sh-tab-indicator" prefHeight="3" maxWidth="Infinity" />
-                    </VBox>
-                    <VBox fx:id="tabSubs" onMouseClicked="#handleTab"
-                          styleClass="sh-tab" spacing="0" minWidth="180">
-                        <HBox alignment="CENTER" spacing="10" styleClass="sh-tab-inner">
-                            <Label styleClass="sh-tab-icon" text="💳" />
-                            <Label styleClass="sh-tab-label" text="Abonnements" />
-                        </HBox>
-                        <Region fx:id="indSubs" styleClass="sh-tab-indicator" prefHeight="3" maxWidth="Infinity" />
                     </VBox>
                     <Region HBox.hgrow="ALWAYS" />
                 </HBox>

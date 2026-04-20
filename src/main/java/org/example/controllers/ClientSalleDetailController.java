@@ -3,7 +3,6 @@ package org.example.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -39,7 +38,7 @@ public class ClientSalleDetailController implements Initializable {
         this.salle = salle;
         populateInfo();
         loadOffres();
-        loadSessions();
+        chargerSessions(salle.getId());
     }
 
     @Override
@@ -96,6 +95,15 @@ public class ClientSalleDetailController implements Initializable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void chargerSessions(int salleId) {
+        // conserve l'API demandée côté UI tout en réutilisant la logique existante
+        if (this.salle == null || this.salle.getId() != salleId) {
+            this.salle = this.salle == null ? new Salle() : this.salle;
+            this.salle.setId(salleId);
+        }
+        loadSessions();
     }
 
     private VBox buildOffreCard(SubscriptionOffer o) {
