@@ -2,6 +2,7 @@ package org.example.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,7 +15,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -30,6 +34,7 @@ import org.example.entities.InscriptionEvenement;
 import org.example.services.AvisEvenementServices;
 import org.example.services.EvenementServices;
 import org.example.services.InscriptionEvenementServices;
+import org.example.services.WeatherService;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -158,6 +163,10 @@ public class EventManagementController implements Initializable {
     @FXML private TilePane eventsGridPane;
     @FXML private TilePane inscriptionsGridPane;
     @FXML private TilePane reviewsGridPane;
+    @FXML private StackPane weatherOverlay;
+    @FXML private VBox weatherContentHost;
+    @FXML private Label weatherEventTitleLabel;
+    @FXML private Label weatherCityDateLabel;
 
     @FXML private HBox eventsPaginationBox;
     @FXML private HBox inscriptionsPaginationBox;
@@ -222,6 +231,8 @@ public class EventManagementController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupSearchAndSort();
+        weatherOverlay.setVisible(false);
+        weatherOverlay.setManaged(false);
         loadData();
         showView(View.EVENTS);
     }
@@ -433,7 +444,14 @@ public class EventManagementController implements Initializable {
         HBox actionBox2 = new HBox(10, modifierBtn, deleteBtn);
         actionBox2.setAlignment(Pos.CENTER);
 
-        card.getChildren().addAll(coverPane, titleLabel, descLabel, detailsBox, statusBox, actionBox1, actionBox2);
+        Button weatherBtn = new Button("☁ Meteo");
+        weatherBtn.getStyleClass().addAll("event-action-btn", "event-btn-weather");
+        weatherBtn.setOnAction(e -> showWeatherPopup(item.getId(), item.getVille(), item.getDebut(), item.getTitre()));
+
+        HBox actionBox3 = new HBox(weatherBtn);
+        actionBox3.setAlignment(Pos.CENTER);
+
+        card.getChildren().addAll(coverPane, titleLabel, descLabel, detailsBox, statusBox, actionBox1, actionBox2, actionBox3);
         return card;
     }
 
@@ -910,6 +928,131 @@ public class EventManagementController implements Initializable {
             reviewsPage++;
             displayReviewsPaginated();
         }
+    }
+
+    // ==================== WEATHER POPUP ====================
+
+    /**
+     * Shows a weather popup for the given event city and date
+     */
+    private void showWeatherPopup(int eventId, String ville, String dateDebut, String eventTitre) {
+        weatherEventTitleLabel.setText(eventTitre);
+        weatherCityDateLabel.setText("Ville: " + ville + "   |   Date: " + dateDebut);
+        weatherOverlay.setManaged(true);
+        weatherOverlay.setVisible(true);
+
+        ProgressIndicator spinner = new ProgressIndicator();
+        spinner.setPrefSize(36, 36);
+        Label loadingLabel = new Label("Chargement des données météo...");
+        loadingLabel.getStyleClass().add("event-popup-loading");
+        VBox loadingBox = new VBox(10, spinner, loadingLabel);
+        loadingBox.setAlignment(Pos.CENTER);
+        loadingBox.setPadding(new Insets(14, 0, 14, 0));
+        weatherContentHost.getChildren().setAll(loadingBox);
+
+        // Fetch weather in background thread
+        WeatherService weatherService = new WeatherService();
+        new Thread(() -> {
+            try {
+                WeatherService.WeatherResult result = weatherService.getWeather(ville);
+                final boolean statusChangedToCancelled = result.isRainy() && cancelEventIfRain(eventId);
+                Platform.runLater(() -> {
+                    Label emojiLabel = new Label(result.getConditionIcon());
+                    emojiLabel.getStyleClass().add("event-popup-emoji");
+
+                    Label tempBigLabel = new Label(String.format("%.1f°C", result.temperature));
+                    tempBigLabel.getStyleClass().add("event-popup-temp");
+
+                    Label descLabel = new Label(result.description);
+                    descLabel.getStyleClass().add("event-popup-desc");
+
+                    VBox topWeather = new VBox(3, emojiLabel, tempBigLabel, descLabel);
+                    topWeather.setAlignment(Pos.CENTER);
+
+                    GridPane grid = new GridPane();
+                    grid.getStyleClass().add("event-popup-grid");
+                    grid.setHgap(16);
+                    grid.setVgap(10);
+
+                    addWeatherRow(grid, 0, "Ressenti", String.format("%.1f°C", result.feelsLike));
+                    addWeatherRow(grid, 1, "Max / Min", String.format("%.1f°C / %.1f°C", result.tempMax, result.tempMin));
+                    addWeatherRow(grid, 2, "Humidite", result.humidity + "%");
+                    addWeatherRow(grid, 3, "Vent", String.format("%.1f m/s (%s)", result.windSpeed, result.getWindDirection()));
+                    addWeatherRow(grid, 4, "Nuages", result.cloudiness + "%");
+                    if (result.visibility > 0) {
+                        addWeatherRow(grid, 5, "Visibilite", (result.visibility / 1000.0) + " km");
+                    }
+
+                    Label pluieLabel = new Label(result.isRainy() ? "Pluie detectee: OUI" : "Pluie detectee: NON");
+                    pluieLabel.getStyleClass().add(result.isRainy() ? "event-popup-rain-yes" : "event-popup-rain-no");
+
+                    Label autoStatusLabel = new Label();
+                    if (result.isRainy() && statusChangedToCancelled) {
+                        autoStatusLabel.setText("Statut evenement mis a jour automatiquement: annulee");
+                        autoStatusLabel.getStyleClass().add("event-popup-rain-yes");
+                        loadData();
+                    } else if (result.isRainy()) {
+                        autoStatusLabel.setText("Pluie detectee: statut deja annulee");
+                        autoStatusLabel.getStyleClass().add("event-popup-rain-no");
+                    }
+
+                    Label noteLabel = new Label("Donnees meteo actuelles pour " + result.ville + ", " + result.pays);
+                    noteLabel.getStyleClass().add("event-popup-note");
+                    noteLabel.setMaxWidth(370);
+
+                    VBox weatherContent = new VBox(10, topWeather, pluieLabel, autoStatusLabel, new Separator(), grid, noteLabel);
+                    weatherContent.setAlignment(Pos.TOP_CENTER);
+                    weatherContentHost.getChildren().setAll(weatherContent);
+                });
+            } catch (Exception ex) {
+                Platform.runLater(() -> {
+                    Label errLabel = new Label("Erreur: " + ex.getMessage());
+                    errLabel.getStyleClass().add("event-popup-error");
+                    errLabel.setMaxWidth(370);
+                    VBox errBox = new VBox(12, errLabel);
+                    errBox.setAlignment(Pos.CENTER);
+                    errBox.setPadding(new Insets(20));
+                    weatherContentHost.getChildren().setAll(errBox);
+                });
+            }
+        }).start();
+    }
+
+    private boolean cancelEventIfRain(int eventId) {
+        try {
+            Evenement event = evenementServices.afficherById(eventId);
+            if (event == null) {
+                return false;
+            }
+
+            String currentStatus = event.getStatut() == null ? "" : event.getStatut().trim();
+            if ("annulee".equalsIgnoreCase(currentStatus)) {
+                return false;
+            }
+
+            event.setStatut("annulee");
+            evenementServices.modifier(event);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @FXML
+    private void closeWeatherPopup() {
+        weatherOverlay.setVisible(false);
+        weatherOverlay.setManaged(false);
+        weatherContentHost.getChildren().clear();
+    }
+
+    private void addWeatherRow(GridPane grid, int row, String label, String value) {
+        Label lbl = new Label(label);
+        lbl.getStyleClass().add("event-popup-k");
+        Label val = new Label(value);
+        val.getStyleClass().add("event-popup-v");
+        grid.add(lbl, 0, row);
+        grid.add(val, 1, row);
     }
 
     // ==================== DELETE METHODS ====================
