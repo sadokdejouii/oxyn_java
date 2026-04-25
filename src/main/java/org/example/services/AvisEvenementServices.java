@@ -22,8 +22,8 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
                 "note_avis_evenement, " +
                 "commentaire_avis_evenement, " +
                 "created_at_avis_evenement, " +
-                "id_evenement_avis_evenement, " +
-                "id_user_avis_evenement) " +
+                "id_evenement_avis_evenement_id, " +
+                "id_user_avis_evenement_id) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         PreparedStatement ps = con.prepareStatement(sql);
@@ -61,8 +61,8 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
             a.setNote(rs.getInt("note_avis_evenement"));
             a.setCommentaire(rs.getString("commentaire_avis_evenement"));
             a.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_avis_evenement"));
-            a.setIdEvenement(rs.getInt("id_evenement_avis_evenement"));
-            a.setIdUser(rs.getInt("id_user_avis_evenement"));
+            a.setIdEvenement(rs.getInt("id_evenement_avis_evenement_id"));
+            a.setIdUser(rs.getInt("id_user_avis_evenement_id"));
 
             avisList.add(a);
         }
@@ -80,8 +80,8 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
                 "note_avis_evenement = ?, " +
                 "commentaire_avis_evenement = ?, " +
                 "created_at_avis_evenement = ?, " +
-                "id_evenement_avis_evenement = ?, " +
-                "id_user_avis_evenement = ? " +
+                "id_evenement_avis_evenement_id = ?, " +
+                "id_user_avis_evenement_id = ? " +
                 "WHERE id_note_avis_evenement = ?";
 
         PreparedStatement ps = con.prepareStatement(sql);

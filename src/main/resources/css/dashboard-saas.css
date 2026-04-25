@@ -741,6 +741,19 @@
     -fx-background-color: linear-gradient(to bottom, rgba(64, 144, 210, 0.92) 0%, rgba(34, 101, 165, 1.0) 100%);
 }
 
+.event-btn-primary {
+    -fx-background-color: linear-gradient(to bottom, rgba(46, 125, 190, 0.9) 0%, rgba(24, 84, 140, 0.98) 100%);
+    -fx-border-color: rgba(160, 220, 255, 0.45);
+}
+
+.event-btn-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(64, 144, 210, 0.92) 0%, rgba(34, 101, 165, 1.0) 100%);
+}
+
+.event-btn-primary:pressed {
+    -fx-background-color: linear-gradient(to bottom, rgba(30, 100, 165, 0.95) 0%, rgba(15, 65, 115, 1.0) 100%);
+}
+
 /* In-page weather popup overlay */
 .event-popup-overlay {
     -fx-padding: 20;
@@ -1223,6 +1236,24 @@
     -fx-alignment: TOP_CENTER;
 }
 
+.location-picker-dialog {
+    -fx-background-color: linear-gradient(to bottom, rgba(18, 32, 62, 0.98) 0%, rgba(13, 27, 62, 0.95) 100%);
+    -fx-border-color: rgba(79, 195, 247, 0.35);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 35, 0.15, 0, 14);
+    -fx-spacing: 12;
+    -fx-padding: 15;
+}
+
+.map-webview {
+    -fx-border-color: rgba(79, 195, 247, 0.25);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-border-width: 1.5px;
+    -fx-effect: inset 0 0 8 rgba(0, 0, 0, 0.3);
+}
+
 .form-shell {
     -fx-alignment: TOP_CENTER;
     -fx-padding: 8;
@@ -1549,6 +1580,94 @@
 
 .form-btn-submit:pressed {
     -fx-background-color: linear-gradient(to right, rgba(52, 188, 246, 0.98) 0%, rgba(17, 128, 226, 0.98) 100%);
+}
+
+.form-btn-secondary {
+    -fx-background-color: linear-gradient(to right, rgba(75, 85, 99, 0.95) 0%, rgba(55, 65, 80, 0.95) 100%);
+    -fx-border-color: rgba(123, 216, 255, 0.45);
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 10 20;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+    -fx-border-width: 1px;
+}
+
+.form-btn-secondary:hover {
+    -fx-background-color: linear-gradient(to right, rgba(95, 107, 125, 0.98) 0%, rgba(75, 87, 105, 0.98) 100%);
+    -fx-border-color: rgba(123, 216, 255, 0.75);
+    -fx-effect: dropshadow(gaussian, rgba(123, 216, 255, 0.25), 12, 0.1, 0, 2);
+}
+
+.form-btn-secondary:pressed {
+    -fx-background-color: linear-gradient(to right, rgba(55, 65, 80, 0.98) 0%, rgba(35, 45, 60, 0.98) 100%);
+}
+
+.form-btn-cancel {
+    -fx-background-color: linear-gradient(to right, rgba(255, 69, 58, 0.90) 0%, rgba(230, 50, 37, 0.90) 100%);
+    -fx-border-color: rgba(255, 120, 100, 0.65);
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 12 30;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-cursor: hand;
+    -fx-border-width: 1px;
+}
+
+.form-btn-cancel:hover {
+    -fx-background-color: linear-gradient(to right, rgba(280, 90, 75, 0.98) 0%, rgba(255, 70, 55, 0.98) 100%);
+    -fx-border-color: rgba(255, 150, 130, 0.9);
+    -fx-effect: dropshadow(gaussian, rgba(255, 69, 58, 0.35), 18, 0.15, 0, 3);
+}
+
+.form-btn-cancel:pressed {
+    -fx-background-color: linear-gradient(to right, rgba(200, 40, 30, 0.98) 0%, rgba(180, 25, 15, 0.98) 100%);
+}
+
+.form-list-view {
+    -fx-background-color: rgba(11, 28, 62, 0.95);
+    -fx-border-color: rgba(79, 195, 247, 0.25);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 8;
+    -fx-effect: inset 0 0 8 rgba(0, 0, 0, 0.3);
+}
+
+.form-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ECF7FF;
+    -fx-padding: 8 10;
+    -fx-font-size: 12px;
+}
+
+.form-list-view .list-cell:filled:selected {
+    -fx-background-color: rgba(0, 191, 255, 0.25);
+    -fx-text-fill: #7BD8FF;
+    -fx-font-weight: bold;
+}
+
+.form-list-view .list-cell:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.12);
+    -fx-text-fill: #FFFFFF;
+}
+
+.form-feedback {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7BD8FF;
+    -fx-wrap-text: true;
+}
+
+.form-feedback-success {
+    -fx-text-fill: #5BEC7E;
+}
+
+.form-feedback-error {
+    -fx-text-fill: #FF6B6B;
 }
 
 /* ========== DATE PICKER CALENDAR STYLING ========== */

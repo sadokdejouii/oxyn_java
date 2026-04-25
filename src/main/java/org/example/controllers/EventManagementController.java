@@ -31,9 +31,11 @@ import javafx.stage.StageStyle;
 import org.example.entities.AvisEvenement;
 import org.example.entities.Evenement;
 import org.example.entities.InscriptionEvenement;
+import org.example.entities.User;
 import org.example.services.AvisEvenementServices;
 import org.example.services.EvenementServices;
 import org.example.services.InscriptionEvenementServices;
+import org.example.services.UserService;
 import org.example.services.WeatherService;
 
 import java.net.URL;
@@ -103,14 +105,16 @@ public class EventManagementController implements Initializable {
         private final String statut;
         private final int idEvenement;
         private final int idUser;
+        private final String eventTitre;
 
-        public InscriptionItem(int id, String userName, String dateInscription, String statut, int idEvenement, int idUser) {
+        public InscriptionItem(int id, String userName, String dateInscription, String statut, int idEvenement, int idUser, String eventTitre) {
             this.id = id;
             this.userName = userName;
             this.dateInscription = dateInscription;
             this.statut = statut;
             this.idEvenement = idEvenement;
             this.idUser = idUser;
+            this.eventTitre = eventTitre;
         }
 
         public int getId() { return id; }
@@ -119,6 +123,7 @@ public class EventManagementController implements Initializable {
         public String getStatut() { return statut; }
         public int getIdEvenement() { return idEvenement; }
         public int getIdUser() { return idUser; }
+        public String getEventTitre() { return eventTitre; }
     }
 
     /**
@@ -132,8 +137,9 @@ public class EventManagementController implements Initializable {
         private final String createdAt;
         private final int idEvenement;
         private final int idUser;
+        private final String eventTitre;
 
-        public AvisItem(int id, String userName, int note, String commentaire, String createdAt, int idEvenement, int idUser) {
+        public AvisItem(int id, String userName, int note, String commentaire, String createdAt, int idEvenement, int idUser, String eventTitre) {
             this.id = id;
             this.userName = userName;
             this.note = note;
@@ -141,6 +147,7 @@ public class EventManagementController implements Initializable {
             this.createdAt = createdAt;
             this.idEvenement = idEvenement;
             this.idUser = idUser;
+            this.eventTitre = eventTitre;
         }
 
         public int getId() { return id; }
@@ -150,6 +157,7 @@ public class EventManagementController implements Initializable {
         public String getCreatedAt() { return createdAt; }
         public int getIdEvenement() { return idEvenement; }
         public int getIdUser() { return idUser; }
+        public String getEventTitre() { return eventTitre; }
     }
 
     // ==================== FXML COMPONENTS ====================
@@ -211,6 +219,7 @@ public class EventManagementController implements Initializable {
     private final EvenementServices evenementServices = new EvenementServices();
     private final InscriptionEvenementServices inscriptionServices = new InscriptionEvenementServices();
     private final AvisEvenementServices avisServices = new AvisEvenementServices();
+    private final UserService userService = new UserService();
     private final DateFormat fmt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
     private int currentSelectedEventId = -1;
@@ -292,7 +301,14 @@ public class EventManagementController implements Initializable {
             if (loader.getLocation() == null) {
                 throw new RuntimeException("FXML file not found: /FXML/AjouterEvenements.fxml");
             }
-            VBox formRoot = loader.load();
+            StackPane formRoot = loader.load();
+            
+            // Add CSS stylesheets to embedded form
+            String dashboardCss = getClass().getResource("/css/dashboard-saas.css").toExternalForm();
+            String eventMgmtCss = getClass().getResource("/css/event-management.css").toExternalForm();
+            formRoot.getStylesheets().add(dashboardCss);
+            formRoot.getStylesheets().add(eventMgmtCss);
+            
             AjouterEvenementsController controller = loader.getController();
             controller.setEmbeddedMode(() -> {
                 loadData();
@@ -313,7 +329,13 @@ public class EventManagementController implements Initializable {
             if (loader.getLocation() == null) {
                 throw new RuntimeException("FXML file not found: /FXML/ModifierEvenements.fxml");
             }
-            VBox formRoot = loader.load();
+            StackPane formRoot = loader.load();
+            
+            // Add CSS stylesheets to embedded form
+            String dashboardCss = getClass().getResource("/css/dashboard-saas.css").toExternalForm();
+            String eventMgmtCss = getClass().getResource("/css/event-management.css").toExternalForm();
+            formRoot.getStylesheets().add(dashboardCss);
+            formRoot.getStylesheets().add(eventMgmtCss);
             
             // Set event data in the controller
             ModifierEvenementController controller = loader.getController();
@@ -422,19 +444,19 @@ public class EventManagementController implements Initializable {
         HBox statusBox = new HBox(statusLabel);
         statusBox.setAlignment(Pos.CENTER);
 
-        Button inscriptionsBtn = new Button("� Inscriptions");
-        inscriptionsBtn.getStyleClass().addAll("event-action-btn", "event-btn-inscriptions");
+        Button inscriptionsBtn = new Button("📋 Inscriptions");
+        inscriptionsBtn.getStyleClass().addAll("event-action-btn", "event-btn-primary");
         inscriptionsBtn.setOnAction(e -> showInscriptionsForEvent(item.getId()));
 
         Button reviewsBtn = new Button("💬 Avis");
-        reviewsBtn.getStyleClass().addAll("event-action-btn", "event-btn-avis");
+        reviewsBtn.getStyleClass().addAll("event-action-btn", "event-btn-primary");
         reviewsBtn.setOnAction(e -> showReviewsForEvent(item.getId()));
 
         HBox actionBox1 = new HBox(10, inscriptionsBtn, reviewsBtn);
         actionBox1.setAlignment(Pos.CENTER);
 
         Button modifierBtn = new Button("🛠 Modifier");
-        modifierBtn.getStyleClass().addAll("event-action-btn", "event-btn-edit");
+        modifierBtn.getStyleClass().addAll("event-action-btn", "event-btn-primary");
         modifierBtn.setOnAction(e -> openModifyEventForm(item.getId(), item.getTitre()));
 
         Button deleteBtn = new Button("🗑 Supprimer");
@@ -444,8 +466,8 @@ public class EventManagementController implements Initializable {
         HBox actionBox2 = new HBox(10, modifierBtn, deleteBtn);
         actionBox2.setAlignment(Pos.CENTER);
 
-        Button weatherBtn = new Button("☁ Meteo");
-        weatherBtn.getStyleClass().addAll("event-action-btn", "event-btn-weather");
+        Button weatherBtn = new Button("☁ Météo");
+        weatherBtn.getStyleClass().addAll("event-action-btn", "event-btn-primary");
         weatherBtn.setOnAction(e -> showWeatherPopup(item.getId(), item.getVille(), item.getDebut(), item.getTitre()));
 
         HBox actionBox3 = new HBox(weatherBtn);
@@ -468,8 +490,7 @@ public class EventManagementController implements Initializable {
         titleLabel.setWrapText(true);
 
         VBox detailsBox = new VBox(6,
-                createDetailLabel("🎫 Événement #" + item.getIdEvenement()),
-                createDetailLabel("🆔 Utilisateur #" + item.getIdUser()),
+                createDetailLabel("🎫 " + item.getEventTitre()),
                 createDetailLabel("📅 Inscrit le : " + item.getDateInscription())
         );
         detailsBox.setAlignment(Pos.CENTER);
@@ -513,8 +534,7 @@ public class EventManagementController implements Initializable {
         commentLabel.setMaxWidth(Double.MAX_VALUE);
 
         VBox detailsBox = new VBox(6,
-                createDetailLabel("🎫 Événement #" + item.getIdEvenement()),
-                createDetailLabel("🆔 Utilisateur #" + item.getIdUser()),
+                createDetailLabel("🎫 " + item.getEventTitre()),
                 createDetailLabel("📅 Publié le : " + item.getCreatedAt())
         );
         detailsBox.setAlignment(Pos.CENTER);
@@ -726,6 +746,14 @@ public class EventManagementController implements Initializable {
         inscriptionsList.clear();
 
         try {
+            String eventTitre = "Événement";
+            try {
+                Evenement ev = evenementServices.afficherById(eventId);
+                if (ev != null && ev.getTitre() != null && !ev.getTitre().isBlank()) {
+                    eventTitre = ev.getTitre();
+                }
+            } catch (SQLException ignored) {}
+
             List<InscriptionEvenement> allInscriptions = inscriptionServices.afficher();
             List<InscriptionEvenement> filtered = allInscriptions.stream()
                     .filter(insc -> insc.getIdEvenement() == eventId)
@@ -733,13 +761,15 @@ public class EventManagementController implements Initializable {
 
             for (InscriptionEvenement insc : filtered) {
                 Date d = insc.getDateInscription();
+                String userName = userService.getUserDisplayName(insc.getIdUser());
                 inscriptionsList.add(new InscriptionItem(
                         insc.getId(),
-                        "Utilisateur",
+                        userName,
                         d == null ? "—" : fmt.format(d),
                         safe(insc.getStatut()),
                         insc.getIdEvenement(),
-                        insc.getIdUser()
+                        insc.getIdUser(),
+                        eventTitre
                 ));
             }
         } catch (SQLException ex) {
@@ -758,6 +788,14 @@ public class EventManagementController implements Initializable {
         reviewsList.clear();
 
         try {
+            String eventTitre = "Événement";
+            try {
+                Evenement ev = evenementServices.afficherById(eventId);
+                if (ev != null && ev.getTitre() != null && !ev.getTitre().isBlank()) {
+                    eventTitre = ev.getTitre();
+                }
+            } catch (SQLException ignored) {}
+
             List<AvisEvenement> allReviews = avisServices.afficher();
             List<AvisEvenement> filtered = allReviews.stream()
                     .filter(avis -> avis.getIdEvenement() == eventId)
@@ -765,14 +803,16 @@ public class EventManagementController implements Initializable {
 
             for (AvisEvenement avis : filtered) {
                 Date d = avis.getCreatedAt();
+                String userName = userService.getUserDisplayName(avis.getIdUser());
                 reviewsList.add(new AvisItem(
                         avis.getId(),
-                        "Utilisateur",
+                        userName,
                         avis.getNote(),
                         safe(avis.getCommentaire()),
                         d == null ? "—" : fmt.format(d),
                         avis.getIdEvenement(),
-                        avis.getIdUser()
+                        avis.getIdUser(),
+                        eventTitre
                 ));
             }
         } catch (SQLException ex) {

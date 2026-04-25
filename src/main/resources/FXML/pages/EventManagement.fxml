@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.EventManagementController">
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.EventManagementController" stylesheets="@../../css/dashboard-saas.css,@../../css/event-management.css">
     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
         <VBox spacing="20" styleClass="page-root">
         <!-- Header Section -->
