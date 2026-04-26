@@ -21,6 +21,9 @@ import org.example.utils.FormFieldFeedback;
 import org.example.utils.PrimaryStageLayout;
 import org.example.facerec.FaceCaptureService;
 import org.example.facerec.FaceEmbeddingModel;
+import org.example.totp.Totp;
+import org.example.totp.TotpDAO;
+import org.example.utils.UserDialogHelper;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -47,6 +50,7 @@ public class LoginController implements Initializable {
     private Label passwordErrorLabel;
 
     private final AuthService authService = new AuthService();
+    private final TotpDAO totpDAO = new TotpDAO();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -89,6 +93,9 @@ public class LoginController implements Initializable {
                         "E-mail ou mot de passe incorrect, ou compte désactivé.", LOGIN_THEME);
                 return;
             }
+            if (!passTotpIfEnabled(user)) {
+                return;
+            }
             SessionContext.getInstance().login(user);
             openMain(event);
         } catch (SQLException e) {
@@ -116,6 +123,9 @@ public class LoginController implements Initializable {
             if (user == null) {
                 showError("Windows Hello",
                         "Connexion refusée. Vérifiez que Windows Hello est disponible, que vous l’avez activé dans votre profil, et que ce PC correspond à votre compte.");
+                return;
+            }
+            if (!passTotpIfEnabled(user)) {
                 return;
             }
             SessionContext.getInstance().login(user);
@@ -153,6 +163,9 @@ public class LoginController implements Initializable {
                                 : "Connexion refusée. Vérifiez que vous avez enregistré votre visage dans le profil et que la webcam détecte correctement votre visage.");
                 return;
             }
+            if (!passTotpIfEnabled(user)) {
+                return;
+            }
             SessionContext.getInstance().login(user);
             openMain(event);
         } catch (SQLException e) {
@@ -168,6 +181,28 @@ public class LoginController implements Initializable {
     private void clearFieldErrors() {
         FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME);
         FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME);
+    }
+
+    private boolean passTotpIfEnabled(User user) throws SQLException {
+        var recOpt = totpDAO.getByUserId(user.getId());
+        if (recOpt.isEmpty() || !recOpt.get().enabled()) {
+            return true;
+        }
+        String secret = recOpt.get().secretBase32();
+        var codeOpt = UserDialogHelper.showTotpCodeDialog(
+                (Stage) (emailField != null && emailField.getScene() != null ? emailField.getScene().getWindow() : null),
+                "2FA (TOTP)",
+                "Saisissez le code à 6 chiffres de Google Authenticator pour finaliser la connexion.",
+                null, null);
+        if (codeOpt.isEmpty()) {
+            return false;
+        }
+        boolean ok = Totp.verifyCode(secret, codeOpt.get(), System.currentTimeMillis());
+        if (!ok) {
+            showError("2FA (TOTP)", "Code invalide.");
+            return false;
+        }
+        return true;
     }
 
     @FXML

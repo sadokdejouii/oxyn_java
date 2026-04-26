@@ -111,6 +111,14 @@
                         <Button fx:id="enrollFaceButton" onAction="#handleEnrollFace" styleClass="secondary-toolbar-btn" text="Enregistrer mon visage" />
                         <Button fx:id="disableFaceButton" onAction="#handleDisableFace" styleClass="secondary-toolbar-btn" text="Désactiver" />
                     </HBox>
+
+                    <Label styleClass="pp-section-title" text="2FA (TOTP)" />
+                    <Label styleClass="pp-section-hint" text="Ajoutez un code temporaire (Google Authenticator) après la connexion. Compatible RFC 6238." wrapText="true" />
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label fx:id="totpStatusLabel" styleClass="pp-hint-muted" text="—" />
+                        <Button fx:id="enableTotpButton" onAction="#handleEnableTotp" styleClass="secondary-toolbar-btn" text="Activer" />
+                        <Button fx:id="disableTotpButton" onAction="#handleDisableTotp" styleClass="secondary-toolbar-btn" text="Désactiver" />
+                    </HBox>
                 </VBox>
             </VBox>
         </HBox>

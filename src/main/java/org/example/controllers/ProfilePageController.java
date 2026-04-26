@@ -28,6 +28,10 @@ import org.example.facerec.FaceCaptureService;
 import org.example.facerec.FaceEmbeddingCodec;
 import org.example.facerec.FaceEmbeddingDAO;
 import org.example.facerec.FaceEmbeddingModel;
+import org.example.totp.Base32;
+import org.example.totp.QrCode;
+import org.example.totp.Totp;
+import org.example.totp.TotpDAO;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -114,6 +118,15 @@ public class ProfilePageController implements Initializable {
     private Button disableFaceButton;
 
     @FXML
+    private Label totpStatusLabel;
+
+    @FXML
+    private Button enableTotpButton;
+
+    @FXML
+    private Button disableTotpButton;
+
+    @FXML
     private Label avatarLabel;
 
     @FXML
@@ -128,6 +141,7 @@ public class ProfilePageController implements Initializable {
     private final UserService userService = new UserService();
     private final WindowsHelloLinkDAO windowsHelloLinkDAO = new WindowsHelloLinkDAO();
     private final FaceEmbeddingDAO faceEmbeddingDAO = new FaceEmbeddingDAO();
+    private final TotpDAO totpDAO = new TotpDAO();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -207,6 +221,111 @@ public class ProfilePageController implements Initializable {
         applyProfileTheme(u);
         refreshWindowsHelloBlock(u);
         refreshFaceBlock(u);
+        refreshTotpBlock(u);
+    }
+
+    private void refreshTotpBlock(User u) {
+        if (totpStatusLabel == null || enableTotpButton == null || disableTotpButton == null) {
+            return;
+        }
+        if (u == null || u.getId() <= 0) {
+            totpStatusLabel.setText("2FA : indisponible (pas de session).");
+            enableTotpButton.setDisable(true);
+            disableTotpButton.setDisable(true);
+            return;
+        }
+        try {
+            var recOpt = totpDAO.getByUserId(u.getId());
+            if (recOpt.isEmpty()) {
+                totpStatusLabel.setText("2FA : non activée.");
+                enableTotpButton.setDisable(false);
+                disableTotpButton.setDisable(true);
+                return;
+            }
+            var rec = recOpt.get();
+            if (rec.enabled()) {
+                totpStatusLabel.setText("2FA : activée (TOTP).");
+                enableTotpButton.setDisable(true);
+                disableTotpButton.setDisable(false);
+            } else {
+                totpStatusLabel.setText("2FA : désactivée (réactivable).");
+                enableTotpButton.setDisable(false);
+                disableTotpButton.setDisable(true);
+            }
+        } catch (SQLException e) {
+            totpStatusLabel.setText("2FA : erreur DB.");
+            enableTotpButton.setDisable(false);
+            disableTotpButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleEnableTotp() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        String secret = Base32.randomSecret(20);
+        String issuer = "OXYN";
+        String account = cur.getEmail() != null ? cur.getEmail().trim() : ("user#" + cur.getId());
+        String uri = Totp.buildOtpAuthUri(issuer, account, secret);
+
+        javafx.scene.image.Image qr = null;
+        try {
+            qr = QrCode.toFxImage(uri, 240);
+        } catch (Exception ignored) {
+        }
+        String hint = "Clé (si QR indisponible) : " + secret;
+
+        var codeOpt = UserDialogHelper.showTotpCodeDialog(owner(),
+                "Activer 2FA (TOTP)",
+                "Scannez le QR code avec Google Authenticator, puis saisissez le code à 6 chiffres.",
+                qr, hint);
+        if (codeOpt.isEmpty()) {
+            refreshTotpBlock(cur);
+            return;
+        }
+        String code = codeOpt.get();
+        boolean ok = Totp.verifyCode(secret, code, System.currentTimeMillis());
+        if (!ok) {
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)", "Code invalide. Réessayez.", true);
+            refreshTotpBlock(cur);
+            return;
+        }
+        try {
+            totpDAO.upsert(cur.getId(), secret, true);
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)", "2FA activée. Un code sera demandé à la connexion.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshTotpBlock(cur);
+        }
+    }
+
+    @FXML
+    private void handleDisableTotp() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        boolean confirm = UserDialogHelper.showConfirm(owner(), "2FA (TOTP)",
+                "Désactiver la 2FA ? Vous pourrez vous connecter sans code temporaire.", "Désactiver", true);
+        if (!confirm) {
+            refreshTotpBlock(cur);
+            return;
+        }
+        try {
+            totpDAO.disable(cur.getId());
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)", "2FA désactivée.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshTotpBlock(cur);
+        }
     }
 
     private void refreshFaceBlock(User u) {

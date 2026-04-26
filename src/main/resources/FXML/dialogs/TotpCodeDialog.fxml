@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="dialogRoot" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controllers.dialog.TotpCodeDialogController"
+            styleClass="app-dialog-root" stylesheets="@../../css/dialogs.css">
+    <top>
+        <HBox styleClass="app-dialog-header" alignment="CENTER_LEFT" spacing="12">
+            <Label fx:id="titleLabel" styleClass="app-dialog-title" text="2FA" HBox.hgrow="ALWAYS"/>
+            <Button focusTraversable="false" onAction="#handleCancel" styleClass="app-dialog-close" text="✕"/>
+        </HBox>
+    </top>
+    <center>
+        <VBox styleClass="app-dialog-body" spacing="10">
+            <Label fx:id="subtitleLabel" styleClass="app-dialog-message" wrapText="true"
+                   text="Saisissez le code à 6 chiffres de Google Authenticator."/>
+
+            <ImageView fx:id="qrView" fitWidth="220" fitHeight="220" preserveRatio="true" visible="false" managed="false"/>
+
+            <VBox spacing="6">
+                <Label styleClass="field-label" text="Code (6 chiffres)"/>
+                <TextField fx:id="codeField" promptText="123456" styleClass="login-field"/>
+                <Label fx:id="errorLabel" styleClass="field-error-msg" managed="false" visible="false"/>
+            </VBox>
+
+            <Label fx:id="secretHintLabel" styleClass="pp-hint-muted" wrapText="true" text="" visible="false" managed="false"/>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox styleClass="app-dialog-footer" alignment="CENTER_RIGHT" spacing="10">
+            <Button onAction="#handleCancel" styleClass="dialog-btn-secondary" text="Annuler"/>
+            <Button defaultButton="true" onAction="#handleConfirm" styleClass="dialog-btn-primary" text="Confirmer"/>
+        </HBox>
+    </bottom>
+</BorderPane>
+
