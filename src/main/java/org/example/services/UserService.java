@@ -54,8 +54,8 @@ public class UserService {
      */
     public String getUserDisplayName(int id) {
         String sql = "SELECT first_name_user, last_name_user, email_user FROM users WHERE id_user = ?";
-        try (Connection con = MyDataBase.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        Connection con = MyDataBase.getInstance().getConnection();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

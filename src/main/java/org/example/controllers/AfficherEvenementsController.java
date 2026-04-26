@@ -358,8 +358,15 @@ public class AfficherEvenementsController implements Initializable {
                     addWeatherRow(grid, 2, "💧 Humidité", result.humidity + "%");
                     addWeatherRow(grid, 3, "💨 Vent", String.format("%.1f m/s (%s)", result.windSpeed, result.getWindDirection()));
                     addWeatherRow(grid, 4, "☁️ Nuages", result.cloudiness + "%");
+                    int rowIndex = 5;
+                    if (result.rainVolume > 0) {
+                        addWeatherRow(grid, rowIndex++, "🌧️ Pluie (1h)", String.format("%.1f mm", result.rainVolume));
+                    }
+                    if (result.snowVolume > 0) {
+                        addWeatherRow(grid, rowIndex++, "❄️ Neige (1h)", String.format("%.1f mm", result.snowVolume));
+                    }
                     if (result.visibility > 0) {
-                        addWeatherRow(grid, 5, "👁️ Visibilité", (result.visibility / 1000.0) + " km");
+                        addWeatherRow(grid, rowIndex, "👁️ Visibilité", (result.visibility / 1000.0) + " km");
                     }
 
                     Label noteLabel = new Label("ℹ️ Données météo actuelles pour " + result.ville + ", " + result.pays);

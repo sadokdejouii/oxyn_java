@@ -35,11 +35,13 @@ import javafx.stage.StageStyle;
 import org.example.entities.AvisEvenement;
 import org.example.entities.Evenement;
 import org.example.entities.InscriptionEvenement;
+import org.example.services.AvisModerationException;
 import org.example.services.AvisEvenementServices;
 import org.example.services.EvenementServices;
 import org.example.services.EventCoverPhotoService;
 import org.example.services.InscriptionEvenementServices;
 import org.example.services.SessionContext;
+import org.example.services.UserService;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -81,6 +83,7 @@ public class FrontEventsController implements Initializable {
     private final InscriptionEvenementServices inscriptionServices = new InscriptionEvenementServices();
     private final AvisEvenementServices avisServices = new AvisEvenementServices();
     private final EventCoverPhotoService coverPhotoService = new EventCoverPhotoService();
+    private final UserService userService = new UserService();
     private final List<Evenement> allEvents = new ArrayList<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.FRENCH);
 
@@ -499,6 +502,10 @@ public class FrontEventsController implements Initializable {
 
     private void showAvisPopup(Evenement event) {
         try {
+            List<InscriptionEvenement> inscriptions = inscriptionServices.afficher().stream()
+                    .filter(item -> item.getIdEvenement() == event.getId())
+                    .collect(Collectors.toList());
+
             List<AvisEvenement> avisList = avisServices.afficher().stream()
                     .filter(item -> item.getIdEvenement() == event.getId())
                     .collect(Collectors.toList());
@@ -514,15 +521,22 @@ public class FrontEventsController implements Initializable {
                     .findFirst()
                     .orElse(null);
 
+                boolean currentUserRegistered = inscriptions.stream()
+                    .anyMatch(item -> item.getIdUser() == requireCurrentUserId());
+
+                String primaryText = currentUserRegistered
+                    ? (currentUserAvis == null ? "Ajouter mon avis" : "Modifier mon avis")
+                    : "Inscrivez-vous pour donner un avis";
+
             showDataPopup(
                     "Avis",
                     "Avis pour : " + fallback(event.getTitre(), "cet événement"),
                     rows,
                     "Aucun avis n'a été publié pour cet événement pour le moment.",
-                    currentUserAvis == null ? "Ajouter mon avis" : "Modifier mon avis",
-                    () -> openAvisForm(event, currentUserAvis),
+                    primaryText,
+                    currentUserRegistered ? () -> openAvisForm(event, currentUserAvis) : null,
                     true,
-                    false,
+                    !currentUserRegistered,
                     "Supprimer mon avis",
                     currentUserAvis != null ? () -> deleteMyAvis(event, currentUserAvis.getId()) : null,
                     currentUserAvis != null,
@@ -693,12 +707,30 @@ public class FrontEventsController implements Initializable {
 
             loadEvents();
             Platform.runLater(() -> showAvisPopup(event));
+    } catch (AvisModerationException exception) {
+        showDataPopup(
+            "Avis",
+            "Avis pour : " + fallback(event.getTitre(), "cet événement"),
+            exception.getPopupRows(),
+            exception.getMessage(),
+            null,
+            null,
+            false,
+            false,
+            null,
+            null,
+            false,
+            false
+        );
         } catch (Exception exception) {
+            String detail = exception.getMessage() == null || exception.getMessage().isBlank()
+                ? "Impossible d'enregistrer votre avis pour le moment."
+                : exception.getMessage();
             showDataPopup(
                     "Avis",
                     "Avis pour : " + fallback(event.getTitre(), "cet événement"),
                     List.of(),
-                    "Impossible d'enregistrer votre avis pour le moment.",
+                detail,
                     null,
                     null,
                     false,
@@ -736,7 +768,10 @@ public class FrontEventsController implements Initializable {
 
     private boolean canJoinEvent(Evenement event) {
         String normalized = safe(event.getStatut()).toLowerCase(Locale.ROOT);
-        return normalized.contains("à venir") || normalized.contains("a venir");
+        return normalized.contains("à venir")
+                || normalized.contains("a venir")
+                || normalized.contains("en cours")
+                || normalized.contains("cours");
     }
 
     private boolean isEventFull(Evenement event) {
@@ -764,7 +799,10 @@ public class FrontEventsController implements Initializable {
     }
 
     private String formatUser(int userId) {
-        return userId == currentUserIdOrZero() ? "Vous" : "Utilisateur";
+        if (userId == currentUserIdOrZero()) {
+            return "Vous";
+        }
+        return userService.getUserDisplayName(userId);
     }
 
     private int currentUserIdOrZero() {

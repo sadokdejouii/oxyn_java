@@ -100,6 +100,22 @@ public class WeatherService {
             result.cloudiness = root.getAsJsonObject("clouds").get("all").getAsInt();
         }
 
+        // Precipitation data (rain in last hour)
+        if (root.has("rain")) {
+            JsonObject rainObj = root.getAsJsonObject("rain");
+            if (rainObj.has("1h")) {
+                result.rainVolume = rainObj.get("1h").getAsDouble();
+            }
+        }
+
+        // Snow data (snow in last hour)
+        if (root.has("snow")) {
+            JsonObject snowObj = root.getAsJsonObject("snow");
+            if (snowObj.has("1h")) {
+                result.snowVolume = snowObj.get("1h").getAsDouble();
+            }
+        }
+
         return result;
     }
 
@@ -122,6 +138,8 @@ public class WeatherService {
         public int windDeg;
         public int visibility;
         public int cloudiness;
+        public double rainVolume;   // mm of rain in last hour
+        public double snowVolume;   // mm of snow in last hour
 
         public String getWeatherEmoji() {
             if (iconCode == null) return "🌡️";
@@ -149,6 +167,11 @@ public class WeatherService {
         }
 
         public boolean isRainy() {
+            // Check actual precipitation data first (most reliable)
+            if (rainVolume > 0 || snowVolume > 0) {
+                return true;
+            }
+            // Fallback to icon code if precipitation data is missing
             if (iconCode == null) return false;
             return iconCode.startsWith("09") || iconCode.startsWith("10") || iconCode.startsWith("11");
         }

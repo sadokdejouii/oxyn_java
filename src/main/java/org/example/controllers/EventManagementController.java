@@ -1436,12 +1436,36 @@ public class EventManagementController implements Initializable {
                     addWeatherRow(grid, 2, "Humidite", result.humidity + "%");
                     addWeatherRow(grid, 3, "Vent", String.format("%.1f m/s (%s)", result.windSpeed, result.getWindDirection()));
                     addWeatherRow(grid, 4, "Nuages", result.cloudiness + "%");
+                    if (result.rainVolume > 0) {
+                        addWeatherRow(grid, 5, "Pluie (1h)", String.format("%.1f mm", result.rainVolume));
+                    }
+                    if (result.snowVolume > 0) {
+                        addWeatherRow(grid, 6, "Neige (1h)", String.format("%.1f mm", result.snowVolume));
+                    }
                     if (result.visibility > 0) {
-                        addWeatherRow(grid, 5, "Visibilite", (result.visibility / 1000.0) + " km");
+                        int visRow = (result.rainVolume > 0 ? 1 : 0) + (result.snowVolume > 0 ? 1 : 0) + 5;
+                        addWeatherRow(grid, visRow, "Visibilite", (result.visibility / 1000.0) + " km");
                     }
 
-                    Label pluieLabel = new Label(result.isRainy() ? "Pluie detectee: OUI" : "Pluie detectee: NON");
-                    pluieLabel.getStyleClass().add(result.isRainy() ? "event-popup-rain-yes" : "event-popup-rain-no");
+                    Label pluieLabel = new Label();
+                    if (result.isRainy()) {
+                        String precipText = "";
+                        if (result.rainVolume > 0) {
+                            precipText += String.format("Pluie: %.1f mm", result.rainVolume);
+                        }
+                        if (result.snowVolume > 0) {
+                            if (!precipText.isEmpty()) precipText += " | ";
+                            precipText += String.format("Neige: %.1f mm", result.snowVolume);
+                        }
+                        if (precipText.isEmpty()) {
+                            precipText = "Pluie detectee (par icone)";
+                        }
+                        pluieLabel.setText("⚠️ " + precipText);
+                        pluieLabel.getStyleClass().add("event-popup-rain-yes");
+                    } else {
+                        pluieLabel.setText("✓ Aucune precipitation");
+                        pluieLabel.getStyleClass().add("event-popup-rain-no");
+                    }
 
                     Label autoStatusLabel = new Label();
                     if (result.isRainy() && statusChangedToCancelled) {
