@@ -53,6 +53,8 @@
 
         <Button maxWidth="Infinity" onAction="#handleWindowsHelloLogin" styleClass="login-secondary" text="Se connecter avec Windows Hello" />
 
+        <Button maxWidth="Infinity" onAction="#handleFaceLogin" styleClass="login-secondary" text="Se connecter par reconnaissance faciale" />
+
         <HBox alignment="CENTER" spacing="6">
             <Label styleClass="login-hint" text="Pas encore de compte ?" />
             <Hyperlink styleClass="login-link" text="Créer un compte" onAction="#handleGoRegister" />

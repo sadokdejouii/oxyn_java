@@ -24,9 +24,14 @@ import org.example.utils.UserDialogHelper;
 import org.example.windowshello.WindowsHelloBridge;
 import org.example.windowshello.WindowsHelloLinkDAO;
 import org.example.windowshello.WindowsHelloResult;
+import org.example.facerec.FaceCaptureService;
+import org.example.facerec.FaceEmbeddingCodec;
+import org.example.facerec.FaceEmbeddingDAO;
+import org.example.facerec.FaceEmbeddingModel;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ResourceBundle;
 
 /**
@@ -100,6 +105,15 @@ public class ProfilePageController implements Initializable {
     private Button disableWindowsHelloButton;
 
     @FXML
+    private Label faceStatusLabel;
+
+    @FXML
+    private Button enrollFaceButton;
+
+    @FXML
+    private Button disableFaceButton;
+
+    @FXML
     private Label avatarLabel;
 
     @FXML
@@ -113,6 +127,7 @@ public class ProfilePageController implements Initializable {
 
     private final UserService userService = new UserService();
     private final WindowsHelloLinkDAO windowsHelloLinkDAO = new WindowsHelloLinkDAO();
+    private final FaceEmbeddingDAO faceEmbeddingDAO = new FaceEmbeddingDAO();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -191,6 +206,89 @@ public class ProfilePageController implements Initializable {
         clearFieldErrors();
         applyProfileTheme(u);
         refreshWindowsHelloBlock(u);
+        refreshFaceBlock(u);
+    }
+
+    private void refreshFaceBlock(User u) {
+        if (faceStatusLabel == null || enrollFaceButton == null || disableFaceButton == null) {
+            return;
+        }
+        if (u == null || u.getId() <= 0) {
+            faceStatusLabel.setText("Reconnaissance faciale : indisponible (pas de session).");
+            enrollFaceButton.setDisable(true);
+            disableFaceButton.setDisable(true);
+            return;
+        }
+        try {
+            var recOpt = faceEmbeddingDAO.getByUserId(u.getId());
+            if (recOpt.isEmpty()) {
+                faceStatusLabel.setText("Reconnaissance faciale : non enregistrée.");
+                enrollFaceButton.setDisable(false);
+                disableFaceButton.setDisable(true);
+                return;
+            }
+            var rec = recOpt.get();
+            if (rec.enabled()) {
+                faceStatusLabel.setText("Reconnaissance faciale : activée.");
+                enrollFaceButton.setDisable(false);
+                disableFaceButton.setDisable(false);
+            } else {
+                faceStatusLabel.setText("Reconnaissance faciale : désactivée (réactivable).");
+                enrollFaceButton.setDisable(false);
+                disableFaceButton.setDisable(true);
+            }
+        } catch (SQLException e) {
+            faceStatusLabel.setText("Reconnaissance faciale : erreur DB.");
+            enrollFaceButton.setDisable(false);
+            disableFaceButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleEnrollFace() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        try {
+            var face96 = FaceCaptureService.captureSingleFace96x96Bgr(0, Duration.ofSeconds(12));
+            float[] emb = FaceEmbeddingModel.embedFaceBgr96(face96);
+            byte[] bytes = FaceEmbeddingCodec.toBytes(emb);
+            faceEmbeddingDAO.upsert(cur.getId(), bytes, true);
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale",
+                    "Visage enregistré. Vous pourrez vous connecter via la webcam.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            if (msg == null || msg.isBlank() || msg.trim().matches("^\\d+$")) {
+                msg = e.toString();
+            }
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale", msg, true);
+        } finally {
+            refreshFaceBlock(cur);
+        }
+    }
+
+    @FXML
+    private void handleDisableFace() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        try {
+            faceEmbeddingDAO.disable(cur.getId());
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale",
+                    "Reconnaissance faciale désactivée pour ce compte.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshFaceBlock(cur);
+        }
     }
 
     private void refreshWindowsHelloBlock(User u) {

@@ -103,6 +103,14 @@
                         <Button fx:id="enableWindowsHelloButton" onAction="#handleEnableWindowsHello" styleClass="secondary-toolbar-btn" text="Activer" />
                         <Button fx:id="disableWindowsHelloButton" onAction="#handleDisableWindowsHello" styleClass="secondary-toolbar-btn" text="Désactiver" />
                     </HBox>
+
+                    <Label styleClass="pp-section-title" text="RECONNAISSANCE FACIALE" />
+                    <Label styleClass="pp-section-hint" text="Enregistrez votre visage via la webcam pour pouvoir vous connecter ensuite sans mot de passe. Les données restent locales (embedding 128 floats en base)." wrapText="true" />
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label fx:id="faceStatusLabel" styleClass="pp-hint-muted" text="—" />
+                        <Button fx:id="enrollFaceButton" onAction="#handleEnrollFace" styleClass="secondary-toolbar-btn" text="Enregistrer mon visage" />
+                        <Button fx:id="disableFaceButton" onAction="#handleDisableFace" styleClass="secondary-toolbar-btn" text="Désactiver" />
+                    </HBox>
                 </VBox>
             </VBox>
         </HBox>

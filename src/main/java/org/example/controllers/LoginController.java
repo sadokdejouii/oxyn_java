@@ -19,9 +19,12 @@ import org.example.services.SessionContext;
 import org.example.utils.AuthNavigation;
 import org.example.utils.FormFieldFeedback;
 import org.example.utils.PrimaryStageLayout;
+import org.example.facerec.FaceCaptureService;
+import org.example.facerec.FaceEmbeddingModel;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ResourceBundle;
 
 /**
@@ -122,6 +125,42 @@ public class LoginController implements Initializable {
                     e.getMessage() != null ? e.getMessage() : e.toString());
         } catch (Exception e) {
             showError("Windows Hello", e.getMessage() != null ? e.getMessage() : e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleFaceLogin(ActionEvent event) {
+        clearFieldErrors();
+
+        String email = emailField != null ? emailField.getText().trim() : "";
+        String emailErr = AuthValidation.validateEmailContent(emailField != null ? emailField.getText() : "");
+        if (emailErr != null) {
+            FormFieldFeedback.setInputError(emailField, emailErrorLabel, emailErr, LOGIN_THEME);
+            return;
+        }
+
+        try {
+            var face96 = FaceCaptureService.captureSingleFace96x96Bgr(0, Duration.ofSeconds(12));
+            float[] emb = FaceEmbeddingModel.embedFaceBgr96(face96);
+
+            User user = authService.loginWithFaceEmbedding(email, emb);
+            if (user == null) {
+                Double d = authService.faceDistanceForEmail(email, emb);
+                showError("Reconnaissance faciale",
+                        d != null
+                                ? ("Connexion refusée. Distance=" + String.format(java.util.Locale.ROOT, "%.4f", d) + " (seuil=0.12).")
+                                : "Connexion refusée. Vérifiez que vous avez enregistré votre visage dans le profil et que la webcam détecte correctement votre visage.");
+                return;
+            }
+            SessionContext.getInstance().login(user);
+            openMain(event);
+        } catch (SQLException e) {
+            showError("Erreur base de données",
+                    e.getMessage() != null ? e.getMessage() : e.toString());
+        } catch (Exception e) {
+            showError("Reconnaissance faciale",
+                    e.getMessage() != null ? e.getMessage() : e.toString());
             e.printStackTrace();
         }
     }

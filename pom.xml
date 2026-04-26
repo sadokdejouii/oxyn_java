@@ -52,6 +52,13 @@
             <version>2.10.1</version>
         </dependency>
 
+        <!-- JavaCV + OpenCV (webcam + traitements) -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv-platform</artifactId>
+            <version>1.5.10</version>
+        </dependency>
+
         <!-- JUnit 5 for unit testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
