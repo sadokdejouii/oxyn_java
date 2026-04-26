@@ -28,26 +28,44 @@
         </HBox>
 
         <!-- Main Content Container -->
-        <VBox spacing="8" styleClass="saas-chart-card" VBox.vgrow="ALWAYS">
+        <VBox spacing="18" VBox.vgrow="ALWAYS">
             <!-- Events Grid Section -->
             <VBox fx:id="eventsMainSection" spacing="12" VBox.vgrow="ALWAYS" managed="true" visible="true">
-                <VBox spacing="6" styleClass="event-section-header">
-                    <Label styleClass="event-section-title" text="Tableau des Événements" />
-                    <Label styleClass="event-section-sub" text="Vue rapide de vos activités, capacités et statut de publication." wrapText="true" />
+                <VBox spacing="12" styleClass="saas-chart-card" VBox.vgrow="ALWAYS">
+                    <VBox spacing="6" styleClass="event-section-header">
+                        <Label styleClass="event-section-title" text="Tableau des Événements" />
+                        <Label styleClass="event-section-sub" text="Vue rapide de vos activités, capacités et statut de publication." wrapText="true" />
+                    </VBox>
+
+                    <!-- Search and Sort Bar for Events -->
+                    <HBox alignment="CENTER" spacing="16" styleClass="search-sort-bar" style="-fx-padding: 16;">
+                        <TextField fx:id="eventsSearchField" promptText="🔍 Rechercher par titre, lieu, ville, statut..." styleClass="search-field" />
+                        <HBox alignment="CENTER" spacing="8">
+                            <Label text="Trier par:" styleClass="sort-label" />
+                            <ComboBox fx:id="eventsSortByCombo" styleClass="sort-combo" />
+                            <ComboBox fx:id="eventsSortOrderCombo" styleClass="sort-order-combo" promptText="Ordre" />
+                        </HBox>
+                    </HBox>
+
+                    <TilePane fx:id="eventsGridPane" prefColumns="3" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
+                    <HBox fx:id="eventsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
                 </VBox>
 
-                <!-- Search and Sort Bar for Events -->
-                <HBox alignment="CENTER" spacing="16" styleClass="search-sort-bar" style="-fx-padding: 16;">
-                    <TextField fx:id="eventsSearchField" promptText="🔍 Rechercher par titre, lieu, ville, statut..." styleClass="search-field" />
-                    <HBox alignment="CENTER" spacing="8">
-                        <Label text="Trier par:" styleClass="sort-label" />
-                        <ComboBox fx:id="eventsSortByCombo" styleClass="sort-combo" />
-                        <ComboBox fx:id="eventsSortOrderCombo" styleClass="sort-order-combo" promptText="Ordre" />
+                <VBox spacing="14" styleClass="saas-chart-card kanban-board-shell">
+                    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="kanban-board-header">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label styleClass="kanban-board-title" text="Trello des Status" />
+                            <Label styleClass="kanban-board-subtitle" text="Glissez un evenement vers A venir, En cours, Terminée ou Annulée pour mettre a jour son statut comme un tableau Trello." wrapText="true" />
+                        </VBox>
+                        <Label styleClass="kanban-board-chip" text="Trello synchronisé" />
                     </HBox>
-                </HBox>
-                
-                <TilePane fx:id="eventsGridPane" prefColumns="3" hgap="16" vgap="16" styleClass="events-grid" VBox.vgrow="ALWAYS" />
-                <HBox fx:id="eventsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
+
+                    <ScrollPane fitToWidth="true" hbarPolicy="AS_NEEDED" pannable="true" styleClass="kanban-scroll" vbarPolicy="NEVER">
+                        <content>
+                            <HBox fx:id="statusBoardColumns" spacing="18" styleClass="kanban-board-columns" />
+                        </content>
+                    </ScrollPane>
+                </VBox>
             </VBox>
 
             <!-- Add/Modify Form Section (Embedded) -->

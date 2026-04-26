@@ -24,7 +24,7 @@ public class EvenementServices implements ICrud<Evenement> {
                 "created_at_evenement, created_by_evenement) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        PreparedStatement ps = con.prepareStatement(sql);
+        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, e.getTitre());
         ps.setString(2, e.getDescription());
         ps.setTimestamp(3, new Timestamp(e.getDateDebut().getTime()));
@@ -37,6 +37,11 @@ public class EvenementServices implements ICrud<Evenement> {
         ps.setInt(10, e.getCreatedBy());
 
         ps.executeUpdate();
+        try (ResultSet keys = ps.getGeneratedKeys()) {
+            if (keys.next()) {
+                e.setId(keys.getInt(1));
+            }
+        }
         System.out.println("Evenement ajouté avec succès !");
     }
 

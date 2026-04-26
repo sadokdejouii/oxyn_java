@@ -664,3 +664,172 @@ TextArea.form-input:hover {
 .event-card-wide .event-action-btn:disabled {
     -fx-opacity: 0.72;
 }
+
+.kanban-board-shell {
+    -fx-padding: 16 18 20 18;
+    -fx-spacing: 14;
+}
+
+.kanban-board-header {
+    -fx-padding: 20 24;
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(8, 36, 80, 0.96) 0%, rgba(12, 66, 118, 0.92) 100%);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(123, 216, 255, 0.22);
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+
+.kanban-board-title {
+    -fx-text-fill: #F5FBFF;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.kanban-board-subtitle {
+    -fx-text-fill: rgba(228, 242, 255, 0.78);
+    -fx-font-size: 13px;
+}
+
+.kanban-board-chip {
+    -fx-padding: 8 14;
+    -fx-background-color: linear-gradient(to right, rgba(255, 183, 77, 0.92), rgba(255, 138, 101, 0.92));
+    -fx-background-radius: 999;
+    -fx-text-fill: #1A2341;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.kanban-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 2;
+}
+
+.kanban-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.kanban-board-columns {
+    -fx-padding: 6 4 12 4;
+}
+
+.kanban-column {
+    -fx-padding: 18;
+    -fx-spacing: 14;
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-width: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(3, 16, 41, 0.35), 18, 0.14, 0, 10);
+}
+
+.kanban-column-a_venir {
+    -fx-background-color: linear-gradient(to bottom, rgba(32, 56, 111, 0.97), rgba(17, 34, 71, 0.96));
+    -fx-border-color: rgba(120, 190, 255, 0.34);
+}
+
+.kanban-column-en_cours {
+    -fx-background-color: linear-gradient(to bottom, rgba(15, 84, 106, 0.97), rgba(7, 53, 72, 0.96));
+    -fx-border-color: rgba(77, 208, 225, 0.34);
+}
+
+.kanban-column-terminee {
+    -fx-background-color: linear-gradient(to bottom, rgba(28, 93, 59, 0.97), rgba(14, 56, 37, 0.96));
+    -fx-border-color: rgba(129, 199, 132, 0.34);
+}
+
+.kanban-column-annulee {
+    -fx-background-color: linear-gradient(to bottom, rgba(114, 42, 42, 0.97), rgba(70, 22, 24, 0.96));
+    -fx-border-color: rgba(255, 138, 128, 0.34);
+}
+
+.kanban-column-active {
+    -fx-border-color: rgba(255, 255, 255, 0.88);
+    -fx-border-width: 1.8;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.16), 24, 0.18, 0, 0);
+}
+
+.kanban-column-header {
+    -fx-padding: 0 0 4 0;
+}
+
+.kanban-column-title {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+}
+
+.kanban-column-count {
+    -fx-text-fill: rgba(232, 242, 255, 0.74);
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.kanban-cards-host {
+    -fx-spacing: 12;
+}
+
+.kanban-card {
+    -fx-background-color: linear-gradient(to bottom, rgba(250, 252, 255, 0.98), rgba(228, 239, 251, 0.96));
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(255, 255, 255, 0.65);
+    -fx-border-width: 1;
+    -fx-border-radius: 18;
+    -fx-cursor: open-hand;
+    -fx-effect: dropshadow(gaussian, rgba(10, 21, 44, 0.18), 14, 0.10, 0, 6);
+}
+
+.kanban-card:hover {
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(gaussian, rgba(10, 21, 44, 0.26), 20, 0.14, 0, 10);
+}
+
+.kanban-card-dragging {
+    -fx-opacity: 0.56;
+    -fx-rotate: -1.2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.28), 20, 0.16, 0, 10);
+}
+
+.kanban-card-title {
+    -fx-text-fill: #16213D;
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+}
+
+.kanban-card-meta {
+    -fx-text-fill: #4E607C;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.kanban-card-description {
+    -fx-text-fill: #2F4263;
+    -fx-font-size: 12px;
+    -fx-line-spacing: 1.4px;
+}
+
+.kanban-card-footer {
+    -fx-alignment: center-left;
+    -fx-padding: 4 0 0 0;
+}
+
+.kanban-pill {
+    -fx-padding: 5 10;
+    -fx-background-color: rgba(22, 33, 61, 0.08);
+    -fx-background-radius: 999;
+    -fx-text-fill: #203150;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+
+.kanban-empty {
+    -fx-text-fill: rgba(236, 245, 255, 0.72);
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+    -fx-padding: 18 14;
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(255, 255, 255, 0.10);
+    -fx-border-radius: 16;
+    -fx-border-style: segments(6, 8);
+}

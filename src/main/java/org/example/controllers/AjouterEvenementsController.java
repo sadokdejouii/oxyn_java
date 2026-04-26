@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class AjouterEvenementsController implements Initializable {
 
@@ -66,9 +67,9 @@ public class AjouterEvenementsController implements Initializable {
 
     private final EvenementServices es = new EvenementServices();
     private boolean embeddedMode = false;
-    private Runnable onDone;
+    private Consumer<Evenement> onDone;
 
-    public void setEmbeddedMode(Runnable onDone) {
+    public void setEmbeddedMode(Consumer<Evenement> onDone) {
         this.embeddedMode = true;
         this.onDone = onDone;
     }
@@ -77,9 +78,10 @@ public class AjouterEvenementsController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         statut_evenement.setItems(FXCollections.observableArrayList(
                 "Sélectionner",
-                "À venir",
+            "A venir",
                 "En cours",
-                "Terminée"
+            "Terminee",
+            "Annulee"
         ));
         statut_evenement.setValue("Sélectionner");
         clearFeedback();
@@ -183,7 +185,7 @@ public class AjouterEvenementsController implements Initializable {
             es.ajouter(evenement);
             showSuccess("Événement ajouté avec succès !");
             clearFields();
-            closeOrReturn();
+            closeOrReturn(evenement);
 
         } catch (SQLException ex) {
             showError("Erreur lors de l'ajout de l'événement : " + ex.getMessage(), "Erreur base de données");
@@ -282,10 +284,10 @@ public class AjouterEvenementsController implements Initializable {
         }
     }
 
-    private void closeOrReturn() {
+    private void closeOrReturn(Evenement savedEvent) {
         if (embeddedMode) {
             if (onDone != null) {
-                onDone.run();
+                onDone.accept(savedEvent);
             }
             return;
         }

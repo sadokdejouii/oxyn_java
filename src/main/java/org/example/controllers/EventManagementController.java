@@ -1,5 +1,9 @@
 package org.example.controllers;
 
+import javafx.animation.Interpolator;
+import javafx.animation.ParallelTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.application.Platform;
@@ -24,8 +28,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -75,11 +81,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import javafx.util.Duration;
 
 import javax.imageio.ImageIO;
 
@@ -209,6 +219,7 @@ public class EventManagementController implements Initializable {
     @FXML private TilePane eventsGridPane;
     @FXML private TilePane inscriptionsGridPane;
     @FXML private TilePane reviewsGridPane;
+    @FXML private HBox statusBoardColumns;
     @FXML private StackPane weatherOverlay;
     @FXML private VBox weatherContentHost;
     @FXML private Label weatherEventTitleLabel;
@@ -247,6 +258,8 @@ public class EventManagementController implements Initializable {
 
     // ==================== DATA & SERVICES ====================
     private static final int ITEMS_PER_PAGE = 6;
+    private static final List<String> EVENT_STATUS_ORDER = List.of("a_venir", "en_cours", "terminee", "annulee");
+    private static final String EVENT_DRAG_PREFIX = "event-status:";
     
     private final ObservableList<EventItem> eventsList = FXCollections.observableArrayList();
     /** Snapshot used by the grid + pagination (search/sort apply on top of {@link #eventsList}). */
@@ -349,8 +362,8 @@ public class EventManagementController implements Initializable {
             formRoot.getStylesheets().add(eventMgmtCss);
             
             AjouterEvenementsController controller = loader.getController();
-            controller.setEmbeddedMode(() -> {
-                loadData();
+            controller.setEmbeddedMode(savedEvent -> {
+                upsertEventItem(savedEvent);
                 showView(View.EVENTS);
             });
 
@@ -379,8 +392,8 @@ public class EventManagementController implements Initializable {
             // Set event data in the controller
             ModifierEvenementController controller = loader.getController();
             controller.setEventData(eventId);
-            controller.setEmbeddedMode(() -> {
-                loadData();
+            controller.setEmbeddedMode(savedEvent -> {
+                upsertEventItem(savedEvent);
                 showView(View.EVENTS);
             });
 
@@ -729,14 +742,14 @@ public class EventManagementController implements Initializable {
     }
 
     private void applyEventStatusStyle(Label statusLabel, String status) {
-        status = safe(status).toLowerCase();
-        if (status.contains("termin")) {
+        String statusKey = canonicalEventStatusKey(status);
+        if ("terminee".equals(statusKey)) {
             statusLabel.getStyleClass().add("status-finished");
-        } else if (status.contains("annul") || status.contains("cancelled") || status.contains("closed")) {
+        } else if ("annulee".equals(statusKey)) {
             statusLabel.getStyleClass().add("status-error");
-        } else if (status.contains("en cours") || status.contains("active") || status.contains("ongoing")) {
+        } else if ("en_cours".equals(statusKey)) {
             statusLabel.getStyleClass().add("status-active");
-        } else if (status.contains("à venir") || status.contains("a venir") || status.contains("draft") || status.contains("pending")) {
+        } else if ("a_venir".equals(statusKey)) {
             statusLabel.getStyleClass().add("status-upcoming");
         } else {
             statusLabel.getStyleClass().add("status-default");
@@ -770,21 +783,24 @@ public class EventManagementController implements Initializable {
         int totalInscriptions = 0;
         int totalAvis = 0;
 
-        try {
-            totalInscriptions = inscriptionServices.afficher().size();
-        } catch (SQLException ignored) {
+        if (totalInscriptionsStatValue != null) {
+            try {
+                totalInscriptions = inscriptionServices.afficher().size();
+            } catch (SQLException ignored) {
+            }
         }
 
-        try {
-            totalAvis = avisServices.afficher().size();
-        } catch (SQLException ignored) {
+        if (totalAvisStatValue != null) {
+            try {
+                totalAvis = avisServices.afficher().size();
+            } catch (SQLException ignored) {
+            }
         }
 
         long activeEvents = eventsList.stream()
                 .filter(item -> {
-                    String status = safe(item.getStatut()).toLowerCase();
-                    return status.contains("à venir") || status.contains("a venir") || status.contains("en cours")
-                            || status.contains("active") || status.contains("ongoing");
+                String statusKey = canonicalEventStatusKey(item.getStatut());
+                return "a_venir".equals(statusKey) || "en_cours".equals(statusKey);
                 })
                 .count();
 
@@ -812,6 +828,47 @@ public class EventManagementController implements Initializable {
         }
     }
 
+    private void upsertEventItem(Evenement event) {
+        if (event == null) {
+            return;
+        }
+
+        EventItem updatedItem = toEventItem(event);
+        for (int index = 0; index < eventsList.size(); index++) {
+            if (eventsList.get(index).getId() == updatedItem.getId()) {
+                eventsList.set(index, updatedItem);
+                updateEventDerivedUi();
+                return;
+            }
+        }
+
+        eventsList.add(updatedItem);
+        updateEventDerivedUi();
+    }
+
+    private void updateEventDerivedUi() {
+        updateDashboardStats();
+        filterAndSortEvents();
+    }
+
+    private EventItem toEventItem(Evenement event) {
+        Date debut = event.getDateDebut();
+        Date fin = event.getDateFin();
+        Date createdAt = event.getCreatedAt();
+        return new EventItem(
+                event.getId(),
+                safe(event.getTitre()),
+                safe(event.getDescription()),
+                safe(event.getLieu()),
+                safe(event.getVille()),
+                event.getPlacesMax(),
+                debut == null ? "—" : fmt.format(debut),
+                fin == null ? "—" : fmt.format(fin),
+                normalizeEventStatusLabel(event.getStatut()),
+                createdAt == null ? "—" : fmt.format(createdAt)
+        );
+    }
+
     private void loadEventsData() {
         eventsList.clear();
 
@@ -830,7 +887,7 @@ public class EventManagementController implements Initializable {
                         e.getPlacesMax(),
                         d0 == null ? "—" : fmt.format(d0),
                         d1 == null ? "—" : fmt.format(d1),
-                        safe(e.getStatut()),
+                        normalizeEventStatusLabel(e.getStatut()),
                         createdDate == null ? "—" : fmt.format(createdDate)
                 );
                 eventsList.add(eventItem);
@@ -953,6 +1010,7 @@ public class EventManagementController implements Initializable {
             emptyLabel.getStyleClass().add("empty-state-label");
             emptyLabel.setStyle("-fx-text-alignment: center; -fx-padding: 40;");
             eventsGridPane.getChildren().add(emptyLabel);
+            renderEventStatusBoard(List.of());
             return;
         }
 
@@ -965,6 +1023,250 @@ public class EventManagementController implements Initializable {
         }
 
         buildPaginationControls(eventsPaginationBox, eventsPage, totalPages, this::handleEventsPrevPage, this::handleEventsNextPage);
+        renderEventStatusBoard(eventsForGrid);
+    }
+
+    private void renderEventStatusBoard(List<EventItem> items) {
+        if (statusBoardColumns == null) {
+            return;
+        }
+
+        statusBoardColumns.getChildren().clear();
+
+        Map<String, List<EventItem>> groupedItems = new LinkedHashMap<>();
+        for (String statusKey : EVENT_STATUS_ORDER) {
+            groupedItems.put(statusKey, new ArrayList<>());
+        }
+
+        for (EventItem item : items) {
+            groupedItems.computeIfAbsent(canonicalEventStatusKey(item.getStatut()), key -> new ArrayList<>()).add(item);
+        }
+
+        for (String statusKey : EVENT_STATUS_ORDER) {
+            statusBoardColumns.getChildren().add(buildStatusColumn(statusKey, groupedItems.getOrDefault(statusKey, List.of())));
+        }
+    }
+
+    private VBox buildStatusColumn(String statusKey, List<EventItem> items) {
+        VBox column = new VBox(14);
+        column.getStyleClass().addAll("kanban-column", "kanban-column-" + statusKey);
+        column.setFillWidth(true);
+        column.setPrefWidth(280);
+        column.setMinWidth(260);
+
+        Label statusLabel = new Label(eventStatusTitle(statusKey));
+        statusLabel.getStyleClass().add("kanban-column-title");
+
+        Label countLabel = new Label(items.size() + " evenement" + (items.size() > 1 ? "s" : ""));
+        countLabel.getStyleClass().add("kanban-column-count");
+
+        VBox header = new VBox(4, statusLabel, countLabel);
+        header.getStyleClass().add("kanban-column-header");
+
+        VBox cardsHost = new VBox(12);
+        cardsHost.getStyleClass().add("kanban-cards-host");
+
+        if (items.isEmpty()) {
+            Label emptyLabel = new Label("Deposez un evenement ici");
+            emptyLabel.getStyleClass().add("kanban-empty");
+            emptyLabel.setWrapText(true);
+            cardsHost.getChildren().add(emptyLabel);
+        } else {
+            for (EventItem item : items) {
+                cardsHost.getChildren().add(buildStatusBoardCard(item));
+            }
+        }
+
+        configureStatusColumnDragAndDrop(column, statusKey);
+        column.getChildren().addAll(header, cardsHost);
+        return column;
+    }
+
+    private VBox buildStatusBoardCard(EventItem item) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("kanban-card");
+        card.setPadding(new Insets(14));
+
+        Label titleLabel = new Label(item.getTitre().isBlank() ? "Evenement sans titre" : item.getTitre());
+        titleLabel.getStyleClass().add("kanban-card-title");
+        titleLabel.setWrapText(true);
+
+        Label metaLabel = new Label((item.getVille().isBlank() ? "Ville a confirmer" : item.getVille()) + "  •  " + item.getDebut());
+        metaLabel.getStyleClass().add("kanban-card-meta");
+        metaLabel.setWrapText(true);
+
+        Label descLabel = new Label(item.getDescription().isBlank() ? "Aucune description disponible." : item.getDescription());
+        descLabel.getStyleClass().add("kanban-card-description");
+        descLabel.setWrapText(true);
+
+        HBox footer = new HBox(8,
+                createKanbanPill("Capacite " + item.getPlacesMax()),
+                createKanbanPill(normalizeEventStatusLabel(item.getStatut()))
+        );
+        footer.getStyleClass().add("kanban-card-footer");
+
+        card.getChildren().addAll(titleLabel, metaLabel, descLabel, footer);
+        configureStatusCardDrag(card, item);
+        return card;
+    }
+
+    private Label createKanbanPill(String text) {
+        Label pill = new Label(text);
+        pill.getStyleClass().add("kanban-pill");
+        return pill;
+    }
+
+    private void configureStatusCardDrag(VBox card, EventItem item) {
+        card.setOnDragDetected(event -> {
+            Dragboard dragboard = card.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString(EVENT_DRAG_PREFIX + item.getId());
+            dragboard.setContent(content);
+            SnapshotParameters snapshotParameters = new SnapshotParameters();
+            snapshotParameters.setFill(Color.TRANSPARENT);
+            WritableImage dragPreview = card.snapshot(snapshotParameters, null);
+            dragboard.setDragView(dragPreview, dragPreview.getWidth() / 2, 18);
+            card.getStyleClass().add("kanban-card-dragging");
+            animateKanbanCardDrag(card, true);
+            event.consume();
+        });
+
+        card.setOnDragDone(event -> {
+            card.getStyleClass().remove("kanban-card-dragging");
+            animateKanbanCardDrag(card, false);
+            event.consume();
+        });
+    }
+
+    private void configureStatusColumnDragAndDrop(VBox column, String targetStatusKey) {
+        column.setOnDragOver(event -> {
+            if (hasEventDragPayload(event.getDragboard())) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+
+        column.setOnDragEntered(event -> {
+            if (hasEventDragPayload(event.getDragboard())) {
+                column.getStyleClass().add("kanban-column-active");
+                animateKanbanColumnFocus(column, true);
+            }
+            event.consume();
+        });
+
+        column.setOnDragExited(event -> {
+            column.getStyleClass().remove("kanban-column-active");
+            animateKanbanColumnFocus(column, false);
+            event.consume();
+        });
+
+        column.setOnDragDropped(event -> {
+            boolean dropCompleted = false;
+            Dragboard dragboard = event.getDragboard();
+            if (hasEventDragPayload(dragboard)) {
+                int eventId = Integer.parseInt(dragboard.getString().substring(EVENT_DRAG_PREFIX.length()));
+                EventItem item = findEventItem(eventId);
+                if (item != null && !targetStatusKey.equals(canonicalEventStatusKey(item.getStatut()))) {
+                    dropCompleted = persistEventStatusChange(eventId, targetStatusKey);
+                }
+            }
+            column.getStyleClass().remove("kanban-column-active");
+            animateKanbanColumnFocus(column, false);
+            event.setDropCompleted(dropCompleted);
+            event.consume();
+        });
+    }
+
+    private void animateKanbanCardDrag(VBox card, boolean dragging) {
+        ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(dragging ? 120 : 160), card);
+        scaleTransition.setToX(dragging ? 1.04 : 1.0);
+        scaleTransition.setToY(dragging ? 1.04 : 1.0);
+        scaleTransition.setInterpolator(Interpolator.EASE_BOTH);
+
+        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(dragging ? 120 : 160), card);
+        translateTransition.setToY(dragging ? -8 : 0);
+        translateTransition.setInterpolator(Interpolator.EASE_BOTH);
+
+        new ParallelTransition(scaleTransition, translateTransition).play();
+    }
+
+    private void animateKanbanColumnFocus(VBox column, boolean focused) {
+        ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(focused ? 140 : 180), column);
+        scaleTransition.setToX(focused ? 1.015 : 1.0);
+        scaleTransition.setToY(focused ? 1.015 : 1.0);
+        scaleTransition.setInterpolator(Interpolator.EASE_BOTH);
+
+        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(focused ? 140 : 180), column);
+        translateTransition.setToY(focused ? -3 : 0);
+        translateTransition.setInterpolator(Interpolator.EASE_BOTH);
+
+        new ParallelTransition(scaleTransition, translateTransition).play();
+    }
+
+    private boolean hasEventDragPayload(Dragboard dragboard) {
+        return dragboard != null
+                && dragboard.hasString()
+                && dragboard.getString() != null
+                && dragboard.getString().startsWith(EVENT_DRAG_PREFIX);
+    }
+
+    private EventItem findEventItem(int eventId) {
+        return eventsList.stream()
+                .filter(item -> item.getId() == eventId)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean persistEventStatusChange(int eventId, String statusKey) {
+        try {
+            Evenement event = evenementServices.afficherById(eventId);
+            if (event == null) {
+                return false;
+            }
+
+            event.setStatut(eventStatusTitle(statusKey));
+            evenementServices.modifier(event);
+            upsertEventItem(event);
+            return true;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            showStyledError("Mise a jour impossible", ex.getMessage() != null ? ex.getMessage() : "Le statut n'a pas pu etre modifie.");
+            return false;
+        }
+    }
+
+    private String normalizeEventStatusLabel(String status) {
+        return eventStatusTitle(canonicalEventStatusKey(status));
+    }
+
+    private String canonicalEventStatusKey(String status) {
+        String normalized = Normalizer.normalize(safe(status), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .toLowerCase()
+                .trim();
+
+        if (normalized.contains("annul") || normalized.contains("cancel") || normalized.contains("close")) {
+            return "annulee";
+        }
+        if (normalized.contains("termin") || normalized.contains("finish") || normalized.contains("done") || normalized.contains("complete")) {
+            return "terminee";
+        }
+        if (normalized.contains("en cours") || normalized.contains("ongoing") || normalized.contains("active")) {
+            return "en_cours";
+        }
+        if (normalized.contains("a venir") || normalized.contains("avenir") || normalized.contains("draft") || normalized.contains("pending") || normalized.isBlank()) {
+            return "a_venir";
+        }
+        return "a_venir";
+    }
+
+    private String eventStatusTitle(String statusKey) {
+        return switch (statusKey) {
+            case "en_cours" -> "En cours";
+            case "terminee" -> "Terminée";
+            case "annulee" -> "Annulée";
+            default -> "A venir";
+        };
     }
 
     private void displayInscriptionsPaginated() {
@@ -1181,11 +1483,11 @@ public class EventManagementController implements Initializable {
             }
 
             String currentStatus = event.getStatut() == null ? "" : event.getStatut().trim();
-            if ("annulee".equalsIgnoreCase(currentStatus)) {
+            if ("annulee".equals(canonicalEventStatusKey(currentStatus))) {
                 return false;
             }
 
-            event.setStatut("annulee");
+            event.setStatut(eventStatusTitle("annulee"));
             evenementServices.modifier(event);
             return true;
         } catch (SQLException e) {

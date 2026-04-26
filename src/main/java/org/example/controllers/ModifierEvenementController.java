@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class ModifierEvenementController implements Initializable {
 
@@ -72,9 +73,9 @@ public class ModifierEvenementController implements Initializable {
     private Evenement currentEvenement;
     private int eventId = -1;
     private boolean embeddedMode = false;
-    private Runnable onDone;
+    private Consumer<Evenement> onDone;
 
-    public void setEmbeddedMode(Runnable onDone) {
+    public void setEmbeddedMode(Consumer<Evenement> onDone) {
         this.embeddedMode = true;
         this.onDone = onDone;
     }
@@ -88,9 +89,10 @@ public class ModifierEvenementController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         statut_evenement.setItems(FXCollections.observableArrayList(
                 "Sélectionner",
-                "À venir",
+            "A venir",
                 "En cours",
-                "Terminée"
+            "Terminee",
+            "Annulee"
         ));
         statut_evenement.setValue("Sélectionner");
         clearFeedback();
@@ -106,7 +108,7 @@ public class ModifierEvenementController implements Initializable {
                 lieu_evenement.setText(currentEvenement.getLieu());
                 ville_evenement.setText(currentEvenement.getVille());
                 places_max_evenement.setText(String.valueOf(currentEvenement.getPlacesMax()));
-                statut_evenement.setValue(currentEvenement.getStatut());
+                statut_evenement.setValue(normalizeStatus(currentEvenement.getStatut()));
 
                 // Set dates - convert java.util.Date to LocalDate
                 if (currentEvenement.getDateDebut() != null) {
@@ -222,7 +224,7 @@ public class ModifierEvenementController implements Initializable {
 
             es.modifier(evenementModifie);
             showSuccess("Événement modifié avec succès !");
-            closeOrReturn();
+            closeOrReturn(evenementModifie);
 
         } catch (SQLException ex) {
             showError("Erreur lors de la modification de l'événement : " + ex.getMessage(), "Erreur base de données");
@@ -321,10 +323,10 @@ public class ModifierEvenementController implements Initializable {
         }
     }
 
-    private void closeOrReturn() {
+    private void closeOrReturn(Evenement savedEvent) {
         if (embeddedMode) {
             if (onDone != null) {
-                onDone.run();
+                onDone.accept(savedEvent);
             }
             return;
         }
@@ -361,5 +363,23 @@ public class ModifierEvenementController implements Initializable {
         formFeedbackLabel.getStyleClass().removeAll("form-feedback-error", "form-feedback-success");
         formFeedbackLabel.setVisible(false);
         formFeedbackLabel.setManaged(false);
+    }
+
+    private String normalizeStatus(String status) {
+        String normalized = status == null ? "" : java.text.Normalizer.normalize(status, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .toLowerCase()
+                .trim();
+
+        if (normalized.contains("annul")) {
+            return "Annulee";
+        }
+        if (normalized.contains("termin")) {
+            return "Terminee";
+        }
+        if (normalized.contains("en cours")) {
+            return "En cours";
+        }
+        return "A venir";
     }
 }
