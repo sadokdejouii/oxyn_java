@@ -14,7 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- Ikonli FontIcon is swapped in at runtime (see MainLayoutController). Placeholders: Region + ikonli-slot, fas-*, sz-*. -->
-<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css,@../css/login.css,@../css/user-management.css,@../css/profile-page.css,@../css/client-shell-premium.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
+<StackPane fx:id="shellStack" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css,@../css/login.css,@../css/user-management.css,@../css/profile-page.css,@../css/client-shell-premium.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.MainLayoutController">
+
+<BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0">
 
     <left>
         <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="272" spacing="0" styleClass="sidebar">
@@ -314,7 +316,10 @@
 
                     <Button fx:id="notificationBtn" onAction="#handleNotifications" styleClass="topbar-icon-btn" text="">
                         <graphic>
-                            <Region styleClass="ikonli-slot,fas-bell,sz-18" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                            <StackPane styleClass="topbar-notification-graphic">
+                                <Region styleClass="ikonli-slot,fas-bell,sz-18" minHeight="18.0" minWidth="18.0" prefHeight="18.0" prefWidth="18.0" />
+                                <Label fx:id="notificationBadge" managed="false" styleClass="notification-badge" text="0" visible="false" StackPane.alignment="TOP_RIGHT" />
+                            </StackPane>
                         </graphic>
                     </Button>
 
@@ -335,4 +340,29 @@
         </BorderPane>
     </center>
 
-</BorderPane>
+    </BorderPane>
+
+    <StackPane fx:id="notificationOverlay" managed="false" onMouseClicked="#handleNotificationOverlayClick" styleClass="notification-overlay" visible="false">
+        <Region fx:id="notificationOverlayBackdrop" maxHeight="Infinity" maxWidth="Infinity" styleClass="notification-overlay-backdrop" />
+        <VBox maxWidth="720.0" prefWidth="680.0" spacing="18" styleClass="notification-modal-card">
+            <HBox alignment="CENTER_LEFT" spacing="16" styleClass="notification-modal-header">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label styleClass="notification-modal-title" text="Notifications événements" />
+                    <Label fx:id="notificationModalSubtitle" styleClass="notification-modal-subtitle" text="Les dernières annulations apparaissent ici." wrapText="true" />
+                </VBox>
+                <Button mnemonicParsing="false" onAction="#closeNotificationOverlay" styleClass="notification-modal-close-btn" text="✕" />
+            </HBox>
+
+            <Region maxWidth="Infinity" prefHeight="1.0" styleClass="notification-modal-divider" />
+
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="notification-modal-scroll" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+                <VBox fx:id="notificationListBox" spacing="12" styleClass="notification-modal-list" />
+            </ScrollPane>
+
+            <HBox alignment="CENTER_RIGHT" spacing="12" styleClass="notification-modal-actions">
+                <Button mnemonicParsing="false" onAction="#closeNotificationOverlay" styleClass="notification-modal-cancel-btn" text="Annuler" />
+            </HBox>
+        </VBox>
+    </StackPane>
+
+</StackPane>

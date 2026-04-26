@@ -34,6 +34,21 @@ CREATE TABLE IF NOT EXISTS inscriptions_evenement (
     INDEX idx_statut (statut_inscription)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- ========== EVENT NOTIFICATIONS TABLE ==========
+CREATE TABLE IF NOT EXISTS event_notifications (
+    id_notification INT AUTO_INCREMENT PRIMARY KEY,
+    id_user_notification INT NOT NULL,
+    id_evenement_notification INT NOT NULL,
+    titre_notification VARCHAR(255) NOT NULL,
+    message_notification VARCHAR(1000) NOT NULL,
+    lu_notification TINYINT(1) NOT NULL DEFAULT 0,
+    created_at_notification TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_notification_user (id_user_notification),
+    INDEX idx_notification_event (id_evenement_notification),
+    INDEX idx_notification_unread (id_user_notification, lu_notification),
+    FOREIGN KEY (id_evenement_notification) REFERENCES evenements(id_evenement) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- ========== REVIEWS/AVIS TABLE ==========
 CREATE TABLE IF NOT EXISTS avis_evenement (
     id_note_avis_evenement INT AUTO_INCREMENT PRIMARY KEY,

@@ -39,6 +39,7 @@ import org.example.services.AvisEvenementServices;
 import org.example.services.EvenementServices;
 import org.example.services.EventCoverPhotoService;
 import org.example.services.InscriptionEvenementServices;
+import org.example.services.SessionContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -75,8 +76,6 @@ public class FrontEventsController implements Initializable {
 
     @FXML
     private Label citiesLabel;
-
-    private static final int LOCAL_USER_ID = 1;
 
     private final EvenementServices evenementServices = new EvenementServices();
     private final InscriptionEvenementServices inscriptionServices = new InscriptionEvenementServices();
@@ -454,7 +453,7 @@ public class FrontEventsController implements Initializable {
                     .collect(Collectors.toList());
 
             InscriptionEvenement currentUserInscription = inscriptions.stream()
-                    .filter(item -> item.getIdUser() == LOCAL_USER_ID)
+                    .filter(item -> item.getIdUser() == requireCurrentUserId())
                     .findFirst()
                     .orElse(null);
 
@@ -511,7 +510,7 @@ public class FrontEventsController implements Initializable {
                     .collect(Collectors.toList());
 
             AvisEvenement currentUserAvis = avisList.stream()
-                    .filter(item -> item.getIdUser() == LOCAL_USER_ID)
+                    .filter(item -> item.getIdUser() == requireCurrentUserId())
                     .findFirst()
                     .orElse(null);
 
@@ -594,7 +593,7 @@ public class FrontEventsController implements Initializable {
     private void joinEvent(Evenement event) {
         try {
             boolean alreadyRegistered = inscriptionServices.afficher().stream()
-                    .anyMatch(item -> item.getIdEvenement() == event.getId() && item.getIdUser() == LOCAL_USER_ID);
+                    .anyMatch(item -> item.getIdEvenement() == event.getId() && item.getIdUser() == requireCurrentUserId());
 
             boolean eventIsFull = isEventFull(event);
 
@@ -603,7 +602,7 @@ public class FrontEventsController implements Initializable {
                 return;
             }
 
-            InscriptionEvenement inscription = new InscriptionEvenement(new Date(), "confirmée", event.getId(), LOCAL_USER_ID);
+            InscriptionEvenement inscription = new InscriptionEvenement(new Date(), "confirmée", event.getId(), requireCurrentUserId());
             inscriptionServices.ajouter(inscription);
             loadEvents();
             Platform.runLater(() -> showInscriptionsPopup(event));
@@ -681,14 +680,14 @@ public class FrontEventsController implements Initializable {
     private void saveOrUpdateAvis(Evenement event, AvisEvenement existingAvis, int note, String comment) {
         try {
             if (existingAvis == null) {
-                AvisEvenement avis = new AvisEvenement(note, comment, new Date(), event.getId(), LOCAL_USER_ID);
+                AvisEvenement avis = new AvisEvenement(note, comment, new Date(), event.getId(), requireCurrentUserId());
                 avisServices.ajouter(avis);
             } else {
                 existingAvis.setNote(note);
                 existingAvis.setCommentaire(comment);
                 existingAvis.setCreatedAt(new Date());
                 existingAvis.setIdEvenement(event.getId());
-                existingAvis.setIdUser(LOCAL_USER_ID);
+                existingAvis.setIdUser(requireCurrentUserId());
                 avisServices.modifier(existingAvis);
             }
 
@@ -765,7 +764,19 @@ public class FrontEventsController implements Initializable {
     }
 
     private String formatUser(int userId) {
-        return userId == LOCAL_USER_ID ? "Vous" : "Utilisateur";
+        return userId == currentUserIdOrZero() ? "Vous" : "Utilisateur";
+    }
+
+    private int currentUserIdOrZero() {
+        return SessionContext.getInstance().getUserId();
+    }
+
+    private int requireCurrentUserId() {
+        int userId = currentUserIdOrZero();
+        if (userId <= 0) {
+            throw new IllegalStateException("Utilisateur non connecté.");
+        }
+        return userId;
     }
 
     private String formatStars(int note) {
