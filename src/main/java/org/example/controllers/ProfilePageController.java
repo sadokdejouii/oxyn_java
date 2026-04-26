@@ -21,6 +21,9 @@ import org.example.services.UserService;
 import org.example.utils.FormFieldFeedback;
 import org.example.utils.PasswordUtils;
 import org.example.utils.UserDialogHelper;
+import org.example.windowshello.WindowsHelloBridge;
+import org.example.windowshello.WindowsHelloLinkDAO;
+import org.example.windowshello.WindowsHelloResult;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -88,6 +91,15 @@ public class ProfilePageController implements Initializable {
     private Button saveButton;
 
     @FXML
+    private Label windowsHelloStatusLabel;
+
+    @FXML
+    private Button enableWindowsHelloButton;
+
+    @FXML
+    private Button disableWindowsHelloButton;
+
+    @FXML
     private Label avatarLabel;
 
     @FXML
@@ -100,6 +112,7 @@ public class ProfilePageController implements Initializable {
     private VBox profileRoot;
 
     private final UserService userService = new UserService();
+    private final WindowsHelloLinkDAO windowsHelloLinkDAO = new WindowsHelloLinkDAO();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -177,6 +190,95 @@ public class ProfilePageController implements Initializable {
         clearPasswordFields();
         clearFieldErrors();
         applyProfileTheme(u);
+        refreshWindowsHelloBlock(u);
+    }
+
+    private void refreshWindowsHelloBlock(User u) {
+        if (windowsHelloStatusLabel == null || enableWindowsHelloButton == null || disableWindowsHelloButton == null) {
+            return;
+        }
+        if (u == null || u.getId() <= 0) {
+            windowsHelloStatusLabel.setText("Windows Hello : indisponible (pas de session).");
+            enableWindowsHelloButton.setDisable(true);
+            disableWindowsHelloButton.setDisable(true);
+            return;
+        }
+        try {
+            var linkOpt = windowsHelloLinkDAO.getByUserId(u.getId());
+            if (linkOpt.isEmpty()) {
+                windowsHelloStatusLabel.setText("Windows Hello : non activé sur ce PC.");
+                enableWindowsHelloButton.setDisable(false);
+                disableWindowsHelloButton.setDisable(true);
+                return;
+            }
+            var link = linkOpt.get();
+            if (link.enabled()) {
+                windowsHelloStatusLabel.setText("Windows Hello : activé (SID " + link.windowsSid() + ").");
+                enableWindowsHelloButton.setDisable(true);
+                disableWindowsHelloButton.setDisable(false);
+            } else {
+                windowsHelloStatusLabel.setText("Windows Hello : désactivé (réactivable).");
+                enableWindowsHelloButton.setDisable(false);
+                disableWindowsHelloButton.setDisable(true);
+            }
+        } catch (SQLException e) {
+            windowsHelloStatusLabel.setText("Windows Hello : erreur DB.");
+            enableWindowsHelloButton.setDisable(false);
+            disableWindowsHelloButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleEnableWindowsHello() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        WindowsHelloResult r = WindowsHelloBridge.verify("Activer Windows Hello pour OXYN");
+        if (r == null || !r.ok()) {
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    (r != null && r.error() != null && !r.error().isBlank())
+                            ? r.error()
+                            : "Vérification Windows Hello non validée.", true);
+            refreshWindowsHelloBlock(cur);
+            return;
+        }
+        if (r.sid() == null || r.sid().isBlank()) {
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    "Impossible de lire le SID Windows. Activation annulée.", true);
+            refreshWindowsHelloBlock(cur);
+            return;
+        }
+        try {
+            windowsHelloLinkDAO.upsert(cur.getId(), r.sid(), true);
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    "Windows Hello activé sur ce PC. Vous pourrez vous connecter sans mot de passe.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshWindowsHelloBlock(cur);
+        }
+    }
+
+    @FXML
+    private void handleDisableWindowsHello() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        try {
+            windowsHelloLinkDAO.disable(cur.getId());
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    "Windows Hello désactivé pour ce compte.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshWindowsHelloBlock(cur);
+        }
     }
 
     private void clearPasswordFields() {

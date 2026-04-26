@@ -95,6 +95,14 @@
                             <Label fx:id="confirmPasswordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
                         </VBox>
                     </HBox>
+
+                    <Label styleClass="pp-section-title" text="WINDOWS HELLO" />
+                    <Label styleClass="pp-section-hint" text="Activez Windows Hello sur ce PC pour vous connecter ensuite sans mot de passe (empreinte/PIN Windows). Lié au compte Windows (SID)." wrapText="true" />
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label fx:id="windowsHelloStatusLabel" styleClass="pp-hint-muted" text="—" />
+                        <Button fx:id="enableWindowsHelloButton" onAction="#handleEnableWindowsHello" styleClass="secondary-toolbar-btn" text="Activer" />
+                        <Button fx:id="disableWindowsHelloButton" onAction="#handleDisableWindowsHello" styleClass="secondary-toolbar-btn" text="Désactiver" />
+                    </HBox>
                 </VBox>
             </VBox>
         </HBox>

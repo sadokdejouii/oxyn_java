@@ -97,6 +97,35 @@ public class LoginController implements Initializable {
         }
     }
 
+    @FXML
+    private void handleWindowsHelloLogin(ActionEvent event) {
+        clearFieldErrors();
+
+        String email = emailField != null ? emailField.getText().trim() : "";
+        String emailErr = AuthValidation.validateEmailContent(emailField != null ? emailField.getText() : "");
+        if (emailErr != null) {
+            FormFieldFeedback.setInputError(emailField, emailErrorLabel, emailErr, LOGIN_THEME);
+            return;
+        }
+
+        try {
+            User user = authService.loginWithWindowsHello(email);
+            if (user == null) {
+                showError("Windows Hello",
+                        "Connexion refusée. Vérifiez que Windows Hello est disponible, que vous l’avez activé dans votre profil, et que ce PC correspond à votre compte.");
+                return;
+            }
+            SessionContext.getInstance().login(user);
+            openMain(event);
+        } catch (SQLException e) {
+            showError("Erreur base de données",
+                    e.getMessage() != null ? e.getMessage() : e.toString());
+        } catch (Exception e) {
+            showError("Windows Hello", e.getMessage() != null ? e.getMessage() : e.toString());
+            e.printStackTrace();
+        }
+    }
+
     private void clearFieldErrors() {
         FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME);
         FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME);

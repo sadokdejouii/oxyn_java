@@ -6,6 +6,9 @@ import org.example.entities.Client;
 import org.example.entities.User;
 import org.example.utils.MyDataBase;
 import org.example.utils.PasswordUtils;
+import org.example.windowshello.WindowsHelloBridge;
+import org.example.windowshello.WindowsHelloLinkDAO;
+import org.example.windowshello.WindowsHelloResult;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,9 +22,26 @@ import java.util.Optional;
 public final class AuthService {
 
     private final UserDAO userDAO = new UserDAO();
+    private final WindowsHelloLinkDAO windowsHelloLinkDAO = new WindowsHelloLinkDAO();
 
     public User login(String email, String password) throws SQLException {
         return userDAO.login(email, password);
+    }
+
+    /**
+     * Connexion via Windows Hello (empreinte/PIN Windows) : pas de mot de passe applicatif.
+     * Pré-requis : l'utilisateur a activé Windows Hello depuis son profil, ce qui enregistre son SID Windows.
+     *
+     * @return utilisateur connecté si Hello est vérifié + SID correspond ; sinon {@code null}
+     */
+    public User loginWithWindowsHello(String email) throws SQLException {
+        WindowsHelloResult r = WindowsHelloBridge.verify("Connexion à OXYN");
+        if (r == null || !r.ok() || r.sid() == null || r.sid().isBlank()) {
+            return null;
+        }
+        return windowsHelloLinkDAO
+                .findUserEligibleForHelloLogin(email, r.sid())
+                .orElse(null);
     }
 
     /**
