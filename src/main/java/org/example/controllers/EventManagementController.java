@@ -9,22 +9,44 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.image.WritableImage;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -34,11 +56,23 @@ import org.example.entities.InscriptionEvenement;
 import org.example.entities.User;
 import org.example.services.AvisEvenementServices;
 import org.example.services.EvenementServices;
+import org.example.services.EventCoverPhotoService;
+import org.example.services.EventPosterAiService;
 import org.example.services.InscriptionEvenementServices;
 import org.example.services.UserService;
 import org.example.services.WeatherService;
 
+import java.awt.Desktop;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -46,6 +80,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 /**
  * Event Management Controller with detailed event cards, inscriptions and reviews filtering
@@ -94,6 +130,8 @@ public class EventManagementController implements Initializable {
         public String getStatut() { return statut; }
         public String getCreatedAt() { return createdAt; }
     }
+
+    private final EventCoverPhotoService coverPhotoService = new EventCoverPhotoService();
 
     /**
      * Model for Inscription list items (simplified)
@@ -219,6 +257,7 @@ public class EventManagementController implements Initializable {
     private final EvenementServices evenementServices = new EvenementServices();
     private final InscriptionEvenementServices inscriptionServices = new InscriptionEvenementServices();
     private final AvisEvenementServices avisServices = new AvisEvenementServices();
+    private final EventPosterAiService eventPosterAiService = new EventPosterAiService();
     private final UserService userService = new UserService();
     private final DateFormat fmt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
@@ -411,12 +450,12 @@ public class EventManagementController implements Initializable {
 
     private VBox buildEventCard(EventItem item) {
         VBox card = new VBox(12);
-        card.getStyleClass().add("list-card");
+        card.getStyleClass().addAll("list-card", "event-card-wide");
         card.setPadding(new Insets(18));
         card.setAlignment(Pos.TOP_CENTER);
 
         String visualKey = resolveVisualKey(item.getTitre() + " " + item.getDescription());
-        StackPane coverPane = buildCoverPane(visualKey, resolveVisualText(visualKey));
+        StackPane coverPane = buildEventPhotoCover(visualKey, resolveVisualText(visualKey), item.getTitre(), item.getDescription());
 
         Label titleLabel = new Label(item.getTitre());
         titleLabel.getStyleClass().add("list-card-title");
@@ -473,7 +512,18 @@ public class EventManagementController implements Initializable {
         HBox actionBox3 = new HBox(weatherBtn);
         actionBox3.setAlignment(Pos.CENTER);
 
-        card.getChildren().addAll(coverPane, titleLabel, descLabel, detailsBox, statusBox, actionBox1, actionBox2, actionBox3);
+        Button shareBtn = new Button("📘 Partager sur Facebook");
+        shareBtn.getStyleClass().addAll("event-action-btn", "event-btn-primary");
+        shareBtn.setOnAction(e -> shareEventOnFacebook(item));
+
+        Button posterBtn = new Button("✨ Poster IA");
+        posterBtn.getStyleClass().addAll("event-action-btn", "event-btn-primary");
+        posterBtn.setOnAction(e -> generateAiPosterForEvent(item, posterBtn));
+
+        HBox actionBox4 = new HBox(10, shareBtn, posterBtn);
+        actionBox4.setAlignment(Pos.CENTER);
+
+        card.getChildren().addAll(coverPane, titleLabel, descLabel, detailsBox, statusBox, actionBox1, actionBox2, actionBox4, actionBox3);
         return card;
     }
 
@@ -562,15 +612,69 @@ public class EventManagementController implements Initializable {
 
     private StackPane buildCoverPane(String visualKey, String text) {
         StackPane coverPane = new StackPane();
+        coverPane.setMouseTransparent(true);
         coverPane.getStyleClass().addAll("back-card-cover", "back-cover-" + visualKey);
-        coverPane.setPrefHeight(86);
-        coverPane.setMinHeight(86);
+        coverPane.setPrefHeight(132);
+        coverPane.setMinHeight(132);
         coverPane.setMaxWidth(Double.MAX_VALUE);
+        applyRoundedClip(coverPane, 44);
 
         Label coverText = new Label(text);
         coverText.getStyleClass().add("back-card-cover-text");
         coverPane.getChildren().add(coverText);
         return coverPane;
+    }
+
+    private StackPane buildEventPhotoCover(String visualKey, String fallbackText, String title, String description) {
+        StackPane coverPane = buildCoverPane(visualKey, fallbackText);
+        requestPhotoCover(coverPane, visualKey, resolveVisualPhotoText(visualKey), safe(title), safe(description));
+        return coverPane;
+    }
+
+    private void requestPhotoCover(StackPane coverPane, String visualKey, String labelText, String title, String description) {
+        coverPhotoService.resolveCoverImageAsync(visualKey, title, description)
+                .thenAccept(imageBytes -> imageBytes.ifPresent(bytes -> Platform.runLater(() -> applyPhotoCover(coverPane, bytes, labelText))));
+    }
+
+    private void applyPhotoCover(StackPane coverPane, byte[] imageBytes, String labelText) {
+        Image image = new Image(new ByteArrayInputStream(imageBytes));
+        if (image.isError()) {
+            return;
+        }
+
+        Region photoLayer = new Region();
+        photoLayer.setMouseTransparent(true);
+        photoLayer.prefWidthProperty().bind(coverPane.widthProperty());
+        photoLayer.prefHeightProperty().bind(coverPane.heightProperty());
+        photoLayer.setBackground(new Background(new BackgroundImage(
+                image,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(100, 100, true, true, false, true)
+        )));
+
+        Region scrim = new Region();
+        scrim.getStyleClass().add("back-card-cover-scrim");
+        scrim.setMouseTransparent(true);
+        scrim.prefWidthProperty().bind(coverPane.widthProperty());
+        scrim.prefHeightProperty().bind(coverPane.heightProperty());
+
+        Label photoLabel = new Label(labelText);
+        photoLabel.getStyleClass().add("back-card-cover-photo-label");
+        photoLabel.setMouseTransparent(true);
+
+        coverPane.getChildren().setAll(photoLayer, scrim, photoLabel);
+        StackPane.setAlignment(photoLabel, Pos.CENTER);
+    }
+
+    private void applyRoundedClip(StackPane coverPane, double arcSize) {
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(arcSize);
+        clip.setArcHeight(arcSize);
+        clip.widthProperty().bind(coverPane.widthProperty());
+        clip.heightProperty().bind(coverPane.heightProperty());
+        coverPane.setClip(clip);
     }
 
     private String resolveVisualKey(String value) {
@@ -601,6 +705,17 @@ public class EventManagementController implements Initializable {
             case "running" -> "🏃 Course & Fitness";
             case "music" -> "🎵 Événement spécial";
             default -> "✨ Event Spotlight";
+        };
+    }
+
+    private String resolveVisualPhotoText(String visualKey) {
+        return switch (visualKey) {
+            case "yoga" -> "Yoga & Bien-être";
+            case "football" -> "Football";
+            case "basket" -> "Basketball";
+            case "running" -> "Course & Fitness";
+            case "music" -> "Événement spécial";
+            default -> "Event Spotlight";
         };
     }
 
@@ -1330,6 +1445,493 @@ public class EventManagementController implements Initializable {
 
     private void showStyledError(String title, String message) {
         showCustomMessageDialog("Erreur", title, message, true);
+    }
+
+    private void shareEventOnFacebook(EventItem item) {
+        try {
+            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                showStyledError("Partage indisponible", "Le navigateur n'est pas disponible sur cette machine.");
+                return;
+            }
+
+            String description = item.getDescription().isBlank() ? "Description non disponible" : item.getDescription();
+            String lieu = item.getLieu().isBlank() ? "Lieu a confirmer" : item.getLieu();
+            String ville = item.getVille().isBlank() ? "Ville non precisee" : item.getVille();
+
+                String quote = "Evenement : " + item.getTitre()
+                    + "\nDescription : " + description
+                    + "\nDate : " + item.getDebut() + " -> " + item.getFin()
+                    + "\nLieu : " + lieu + " (" + ville + ")";
+
+                ClipboardContent clipboardContent = new ClipboardContent();
+                clipboardContent.putString(quote);
+                Clipboard.getSystemClipboard().setContent(clipboardContent);
+
+                String encodedUrl = URLEncoder.encode("https://www.facebook.com", StandardCharsets.UTF_8.name());
+                String encodedQuote = URLEncoder.encode(quote, StandardCharsets.UTF_8.name());
+                URI uri = new URI("https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl + "&quote=" + encodedQuote);
+            Desktop.getDesktop().browse(uri);
+        } catch (Exception ex) {
+            showStyledError("Echec du partage", "Impossible d'ouvrir Facebook pour le partage.");
+        }
+    }
+
+    private void generateAiPosterForEvent(EventItem item, Button triggerButton) {
+        String originalText = triggerButton.getText();
+        triggerButton.setDisable(true);
+        triggerButton.setText("⏳ Generation...");
+
+        Thread worker = new Thread(() -> {
+            try {
+                EventPosterAiService.PosterRequest request = new EventPosterAiService.PosterRequest(
+                        item.getTitre(),
+                        item.getDescription(),
+                        item.getLieu(),
+                        item.getVille(),
+                        item.getDebut(),
+                        item.getFin(),
+                        item.getPlacesMax()
+                );
+
+                byte[] backgroundBytes = null;
+                Exception aiFailure = null;
+                try {
+                    backgroundBytes = eventPosterAiService.generatePosterBackground(request);
+                } catch (Exception ex) {
+                    aiFailure = ex;
+                }
+
+                byte[] resolvedBackgroundBytes = backgroundBytes;
+                Exception resolvedAiFailure = aiFailure;
+
+                Platform.runLater(() -> {
+                    try {
+                        Path posterPath;
+                        String messageTitle;
+                        String messageBody;
+
+                        if (resolvedBackgroundBytes != null) {
+                            posterPath = savePosterToDownloads(request, resolvedBackgroundBytes);
+                            messageTitle = "Poster IA genere";
+                            messageBody = "L'affiche a ete enregistree ici :\n" + posterPath
+                                    + "\n\nDans Facebook, cliquez sur choisir depuis le PC puis selectionnez cette image.";
+                        } else {
+                            posterPath = savePosterToDownloads(request, buildFallbackBackgroundImage(request));
+                            messageTitle = "Poster genere";
+                            String fallbackReason = resolvedAiFailure == null || resolvedAiFailure.getMessage() == null || resolvedAiFailure.getMessage().isBlank()
+                                    ? "Le service IA n'etait pas disponible"
+                                    : resolvedAiFailure.getMessage();
+                            messageBody = fallbackReason + ".\n\nOXYN a genere une affiche premium locale ici :\n"
+                                    + posterPath
+                                    + "\n\nDans Facebook, cliquez sur choisir depuis le PC puis selectionnez cette image.";
+                        }
+
+                        resetPosterButton(triggerButton, originalText);
+                        openFolderIfPossible(posterPath.getParent());
+                    } catch (Exception ex) {
+                        resetPosterButton(triggerButton, originalText);
+                        showStyledError("Generation poster IA", buildPosterErrorMessage(ex));
+                    }
+                });
+            } catch (Exception ex) {
+                Platform.runLater(() -> {
+                    try {
+                        EventPosterAiService.PosterRequest request = new EventPosterAiService.PosterRequest(
+                                item.getTitre(),
+                                item.getDescription(),
+                                item.getLieu(),
+                                item.getVille(),
+                                item.getDebut(),
+                                item.getFin(),
+                                item.getPlacesMax()
+                        );
+                        Path posterPath = savePosterToDownloads(request, buildFallbackBackgroundImage(request));
+                        resetPosterButton(triggerButton, originalText);
+                        openFolderIfPossible(posterPath.getParent());
+                    } catch (Exception fallbackEx) {
+                        resetPosterButton(triggerButton, originalText);
+                        showStyledError("Generation poster IA", buildPosterErrorMessage(fallbackEx));
+                    }
+                });
+            }
+        }, "event-ai-poster-" + item.getId());
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private Path savePosterToDownloads(EventPosterAiService.PosterRequest request, byte[] backgroundBytes) throws IOException {
+        Image backgroundImage = new Image(new ByteArrayInputStream(backgroundBytes));
+        return savePosterToDownloads(request, backgroundImage);
+    }
+
+    private Path savePosterToDownloads(EventPosterAiService.PosterRequest request, Image backgroundImage) throws IOException {
+        WritableImage posterSnapshot = buildPosterSnapshot(request, backgroundImage);
+
+        Path postersDir = Path.of(System.getProperty("user.dir"), "src", "main", "resources", "images");
+        Files.createDirectories(postersDir);
+
+        String fileName = slugify(request.titre()) + "-poster-"
+                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+                + ".png";
+        Path outputPath = postersDir.resolve(fileName);
+
+        ImageIO.write(SwingFXUtils.fromFXImage(posterSnapshot, null), "png", outputPath.toFile());
+        return outputPath;
+    }
+
+        private Image buildFallbackBackgroundImage(EventPosterAiService.PosterRequest request) {
+        StackPane backgroundRoot = new StackPane();
+        backgroundRoot.setPrefSize(1080, 1350);
+        backgroundRoot.setMinSize(1080, 1350);
+        backgroundRoot.setMaxSize(1080, 1350);
+        backgroundRoot.setStyle("-fx-background-color: linear-gradient(to bottom right, #071327 0%, #0A1E43 48%, #030A15 100%);");
+
+        Rectangle baseGlow = new Rectangle(1180, 1440);
+        baseGlow.setFill(new LinearGradient(
+            0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
+            new Stop(0, Color.web("#0F2B68")),
+            new Stop(0.45, Color.web("#091A3B")),
+            new Stop(1, Color.web("#040B16"))
+        ));
+
+        Rectangle diagonalPanel = new Rectangle(950, 360);
+        diagonalPanel.setArcWidth(48);
+        diagonalPanel.setArcHeight(48);
+        diagonalPanel.setRotate(-18);
+        diagonalPanel.setTranslateX(220);
+        diagonalPanel.setTranslateY(-235);
+        diagonalPanel.setFill(new LinearGradient(
+            0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
+            new Stop(0, Color.web("#1D4ED8", 0.18)),
+            new Stop(0.55, Color.web("#38BDF8", 0.42)),
+            new Stop(1, Color.web("#F59E0B", 0.16))
+        ));
+        diagonalPanel.setEffect(new GaussianBlur(10));
+
+        Circle accentOrbTop = new Circle(215);
+        accentOrbTop.setTranslateX(305);
+        accentOrbTop.setTranslateY(-360);
+        accentOrbTop.setFill(new RadialGradient(
+            0,
+            0,
+            0.5,
+            0.5,
+            1,
+            true,
+            CycleMethod.NO_CYCLE,
+            new Stop(0, Color.web("#22D3EE", 0.88)),
+            new Stop(0.45, Color.web("#2563EB", 0.36)),
+            new Stop(1, Color.TRANSPARENT)
+        ));
+        accentOrbTop.setEffect(new GaussianBlur(48));
+
+        Circle accentOrbBottom = new Circle(245);
+        accentOrbBottom.setTranslateX(-330);
+        accentOrbBottom.setTranslateY(405);
+        accentOrbBottom.setFill(new RadialGradient(
+            0,
+            0,
+            0.5,
+            0.5,
+            1,
+            true,
+            CycleMethod.NO_CYCLE,
+            new Stop(0, Color.web("#F59E0B", 0.52)),
+            new Stop(0.40, Color.web("#1D4ED8", 0.18)),
+            new Stop(1, Color.TRANSPARENT)
+        ));
+        accentOrbBottom.setEffect(new GaussianBlur(60));
+
+        Rectangle glassCard = new Rectangle(910, 1120);
+        glassCard.setArcWidth(64);
+        glassCard.setArcHeight(64);
+        glassCard.setFill(Color.web("#081628", 0.30));
+        glassCard.setStroke(Color.web("#8BD8FF", 0.16));
+        glassCard.setStrokeWidth(1.6);
+
+        Rectangle goldStrip = new Rectangle(11, 1030);
+        goldStrip.setArcWidth(18);
+        goldStrip.setArcHeight(18);
+        goldStrip.setTranslateX(-376);
+        goldStrip.setFill(new LinearGradient(
+            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+            new Stop(0, Color.web("#F8C35C")),
+            new Stop(1, Color.web("#8A5B12"))
+        ));
+
+        Label watermark = new Label(compactPosterWatermark(request.titre()));
+        watermark.setStyle(
+            "-fx-text-fill: rgba(255, 255, 255, 0.045);"
+                + "-fx-font-size: 180px;"
+                + "-fx-font-weight: 900;"
+                + "-fx-letter-spacing: 4px;"
+        );
+        watermark.setRotate(-90);
+        watermark.setTranslateX(355);
+        watermark.setTranslateY(-30);
+
+        backgroundRoot.getChildren().addAll(
+            baseGlow,
+            accentOrbTop,
+            accentOrbBottom,
+            diagonalPanel,
+            glassCard,
+            goldStrip,
+            watermark
+        );
+        return renderNodeToImage(backgroundRoot, 1080, 1350);
+        }
+
+    private WritableImage buildPosterSnapshot(EventPosterAiService.PosterRequest request, Image backgroundImage) {
+        StackPane root = new StackPane();
+        root.setPrefSize(1080, 1350);
+        root.setMinSize(1080, 1350);
+        root.setMaxSize(1080, 1350);
+        root.setStyle("-fx-background-color: #08162E; -fx-background-radius: 38px;");
+
+        ImageView backgroundView = new ImageView(backgroundImage);
+        backgroundView.setFitWidth(1080);
+        backgroundView.setFitHeight(1350);
+        backgroundView.setPreserveRatio(false);
+
+        Rectangle clip = new Rectangle(1080, 1350);
+        clip.setArcWidth(60);
+        clip.setArcHeight(60);
+        root.setClip(clip);
+
+        Region darkOverlay = new Region();
+        darkOverlay.setPrefSize(1080, 1350);
+        darkOverlay.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, rgba(4, 10, 26, 0.18) 0%, rgba(5, 16, 38, 0.55) 34%, rgba(7, 20, 46, 0.94) 100%);"
+        );
+
+        Region accentGlow = new Region();
+        accentGlow.setPrefSize(1080, 1350);
+        accentGlow.setStyle(
+            "-fx-background-color: radial-gradient(center 82% 12%, radius 58%, rgba(35, 167, 255, 0.38), transparent 64%),"
+                + " radial-gradient(center 12% 88%, radius 54%, rgba(8, 211, 255, 0.22), transparent 60%),"
+                + " linear-gradient(to bottom, rgba(2, 8, 20, 0.06) 0%, rgba(3, 9, 23, 0.46) 56%, rgba(4, 10, 24, 0.86) 100%);"
+        );
+
+        Rectangle heroPanel = new Rectangle(930, 1210);
+        heroPanel.setArcWidth(72);
+        heroPanel.setArcHeight(72);
+        heroPanel.setFill(Color.web("#07152B", 0.30));
+        heroPanel.setStroke(Color.web("#8BD8FF", 0.12));
+        heroPanel.setStrokeWidth(1.2);
+
+        Rectangle topGlow = new Rectangle(760, 240);
+        topGlow.setArcWidth(54);
+        topGlow.setArcHeight(54);
+        topGlow.setRotate(-8);
+        topGlow.setTranslateX(170);
+        topGlow.setTranslateY(-370);
+        topGlow.setFill(new LinearGradient(
+            0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
+            new Stop(0, Color.web("#0EA5E9", 0.18)),
+            new Stop(0.55, Color.web("#2563EB", 0.42)),
+            new Stop(1, Color.web("#38BDF8", 0.14))
+        ));
+        topGlow.setEffect(new GaussianBlur(18));
+
+        Rectangle goldAccent = new Rectangle(8, 1010);
+        goldAccent.setArcWidth(16);
+        goldAccent.setArcHeight(16);
+        goldAccent.setTranslateX(-408);
+        goldAccent.setTranslateY(52);
+        goldAccent.setFill(new LinearGradient(
+            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+            new Stop(0, Color.web("#F8D27A")),
+            new Stop(1, Color.web("#9A6517"))
+        ));
+
+        Label titleLabel = new Label(safePosterText(request.titre(), "Evenement OXYN"));
+        titleLabel.setWrapText(true);
+        titleLabel.setMaxWidth(690);
+        titleLabel.setStyle(
+                "-fx-text-fill: #FFFFFF;"
+            + "-fx-font-size: 92px;"
+                + "-fx-font-weight: 900;"
+            + "-fx-line-spacing: 4px;"
+        );
+
+        Label subtitleLabel = new Label("Visuel premium concu pour une publication Facebook elegante et directe.");
+        subtitleLabel.setWrapText(true);
+        subtitleLabel.setMaxWidth(620);
+        subtitleLabel.setStyle(
+            "-fx-text-fill: rgba(189, 212, 240, 0.88);"
+                + "-fx-font-size: 24px;"
+                + "-fx-font-weight: 600;"
+        );
+
+        Label descriptionLabel = new Label(shortPosterDescription(request.description()));
+        descriptionLabel.setWrapText(true);
+        descriptionLabel.setMaxWidth(610);
+        descriptionLabel.setStyle(
+                "-fx-text-fill: rgba(232, 240, 255, 0.93);"
+            + "-fx-font-size: 30px;"
+                + "-fx-line-spacing: 8px;"
+        );
+
+        Label watermark = new Label(compactPosterWatermark(request.titre()));
+        watermark.setStyle(
+            "-fx-text-fill: rgba(255, 255, 255, 0.035);"
+                + "-fx-font-size: 186px;"
+                + "-fx-font-weight: 900;"
+                + "-fx-letter-spacing: 3px;"
+        );
+        watermark.setRotate(-90);
+
+        StackPane watermarkHost = new StackPane(watermark);
+        watermarkHost.setPrefWidth(220);
+        watermarkHost.setMinWidth(220);
+        watermarkHost.setMaxWidth(220);
+        watermarkHost.setAlignment(Pos.CENTER);
+
+        Label detailHeader = new Label("DETAILS EVENEMENT");
+        detailHeader.setStyle(
+            "-fx-text-fill: rgba(220, 235, 252, 0.88);"
+                + "-fx-font-size: 18px;"
+                + "-fx-font-weight: 800;"
+        );
+
+        HBox metaRow1 = new HBox(16,
+                createPosterInfoCard("DATE", safePosterText(request.debut(), "A definir")),
+                createPosterInfoCard("FIN", safePosterText(request.fin(), "A definir"))
+        );
+        metaRow1.setAlignment(Pos.CENTER_LEFT);
+
+        HBox metaRow2 = new HBox(16,
+                createPosterInfoCard("LIEU", safePosterText(buildPosterLocation(request), "OXYN")),
+                createPosterInfoCard("PLACES", String.valueOf(request.placesMax()))
+        );
+        metaRow2.setAlignment(Pos.CENTER_LEFT);
+
+        VBox leftColumn = new VBox(24, titleLabel, subtitleLabel, descriptionLabel);
+        leftColumn.setAlignment(Pos.TOP_LEFT);
+        leftColumn.setMaxWidth(650);
+
+        VBox rightColumn = new VBox(18, detailHeader, metaRow1, metaRow2);
+        rightColumn.setAlignment(Pos.TOP_LEFT);
+        rightColumn.setMaxWidth(620);
+
+        HBox lowerSection = new HBox(34, rightColumn, watermarkHost);
+        lowerSection.setAlignment(Pos.BOTTOM_LEFT);
+
+        VBox content = new VBox(58, leftColumn, lowerSection);
+        content.setPadding(new Insets(138, 92, 96, 92));
+        content.setAlignment(Pos.TOP_LEFT);
+        content.setMaxWidth(940);
+
+        StackPane.setAlignment(heroPanel, Pos.CENTER);
+        StackPane.setAlignment(topGlow, Pos.TOP_RIGHT);
+        StackPane.setAlignment(content, Pos.TOP_LEFT);
+        root.getChildren().addAll(backgroundView, darkOverlay, accentGlow, heroPanel, topGlow, goldAccent, content);
+        return renderNodeToImage(root, 1080, 1350);
+    }
+
+    private WritableImage renderNodeToImage(Parent node, int width, int height) {
+        StackPane container = new StackPane(node);
+        container.setPrefSize(width, height);
+        container.setMinSize(width, height);
+        container.setMaxSize(width, height);
+        container.setStyle("-fx-background-color: transparent;");
+
+        Scene scene = new Scene(container, width, height, Color.TRANSPARENT);
+        container.applyCss();
+        container.layout();
+
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        params.setViewport(new Rectangle2D(0, 0, width, height));
+
+        WritableImage image = new WritableImage(width, height);
+        return container.snapshot(params, image);
+    }
+
+    private VBox createPosterInfoCard(String title, String value) {
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle(
+                "-fx-text-fill: rgba(152, 199, 255, 0.96);"
+                        + "-fx-font-size: 18px;"
+                        + "-fx-font-weight: bold;"
+        );
+
+        Label valueLabel = new Label(value);
+        valueLabel.setWrapText(true);
+        valueLabel.setMaxWidth(340);
+        valueLabel.setStyle(
+                "-fx-text-fill: #FFFFFF;"
+                        + "-fx-font-size: 24px;"
+                        + "-fx-font-weight: 700;"
+        );
+
+        VBox card = new VBox(8, titleLabel, valueLabel);
+        card.setPrefWidth(420);
+        card.setPadding(new Insets(18, 20, 18, 20));
+        card.setStyle(
+                "-fx-background-color: rgba(6, 18, 43, 0.62);"
+                        + "-fx-background-radius: 22px;"
+                        + "-fx-border-color: rgba(123, 216, 255, 0.22);"
+                        + "-fx-border-radius: 22px;"
+        );
+        return card;
+    }
+
+    private String buildPosterLocation(EventPosterAiService.PosterRequest request) {
+        String lieu = safePosterText(request.lieu(), "Lieu a confirmer");
+        String ville = safePosterText(request.ville(), "Ville non precisee");
+        return lieu + " - " + ville;
+    }
+
+    private String shortPosterDescription(String description) {
+        String value = safePosterText(description, "Une experience premium OXYN vous attend.");
+        return value.length() > 170 ? value.substring(0, 167) + "..." : value;
+    }
+
+    private String compactPosterWatermark(String title) {
+        String cleanTitle = safePosterText(title, "OXYN EVENT").toUpperCase();
+        String compact = cleanTitle.replaceAll("[^A-Z0-9 ]", " ").replaceAll("\\s+", " ").trim();
+        if (compact.length() > 18) {
+            compact = compact.substring(0, 18).trim();
+        }
+        return compact.isBlank() ? "OXYN EVENT" : compact;
+    }
+
+    private String safePosterText(String value, String fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        return value.trim();
+    }
+
+    private void resetPosterButton(Button button, String originalText) {
+        button.setDisable(false);
+        button.setText(originalText);
+    }
+
+    private void openFolderIfPossible(Path folder) {
+        try {
+            if (folder != null && Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                Desktop.getDesktop().open(folder.toFile());
+            }
+        } catch (Exception ignored) {
+            // The saved path is still shown in the success dialog.
+        }
+    }
+
+    private String buildPosterErrorMessage(Exception ex) {
+        String message = ex.getMessage();
+        if (message == null || message.isBlank()) {
+            return "La generation du poster a echoue. Verifiez la connexion Internet, les fichiers locaux, et votre configuration OpenAI.";
+        }
+        return message;
+    }
+
+    private String slugify(String input) {
+        String base = safePosterText(input, "oxyn-evenement").toLowerCase();
+        String slug = base.replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
+        return slug.isBlank() ? "oxyn-evenement" : slug;
     }
 
     private static String safe(String s) {

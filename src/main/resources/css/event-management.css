@@ -650,3 +650,17 @@ TextArea.form-input:hover {
     -fx-border-radius: 8;
     -fx-border-width: 1;
 }
+
+.events-grid {
+    -fx-pref-tile-height: 600;
+}
+
+.event-card-wide {
+    -fx-max-width: 360;
+    -fx-pref-height: 580;
+    -fx-min-height: 580;
+}
+
+.event-card-wide .event-action-btn:disabled {
+    -fx-opacity: 0.72;
+}

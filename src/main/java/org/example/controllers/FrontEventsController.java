@@ -15,6 +15,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
+import javafx.scene.image.Image;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -22,6 +28,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -30,8 +37,10 @@ import org.example.entities.Evenement;
 import org.example.entities.InscriptionEvenement;
 import org.example.services.AvisEvenementServices;
 import org.example.services.EvenementServices;
+import org.example.services.EventCoverPhotoService;
 import org.example.services.InscriptionEvenementServices;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -72,6 +81,7 @@ public class FrontEventsController implements Initializable {
     private final EvenementServices evenementServices = new EvenementServices();
     private final InscriptionEvenementServices inscriptionServices = new InscriptionEvenementServices();
     private final AvisEvenementServices avisServices = new AvisEvenementServices();
+    private final EventCoverPhotoService coverPhotoService = new EventCoverPhotoService();
     private final List<Evenement> allEvents = new ArrayList<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.FRENCH);
 
@@ -343,10 +353,12 @@ public class FrontEventsController implements Initializable {
         String visualKey = resolveVisualKey(event);
 
         StackPane cover = new StackPane();
-        cover.setMinHeight(120);
-        cover.setPrefHeight(120);
+        cover.setMinHeight(152);
+        cover.setPrefHeight(152);
         cover.setMaxWidth(Double.MAX_VALUE);
+        cover.setMouseTransparent(true);
         cover.getStyleClass().addAll("front-card-cover", resolveCoverClass(visualKey));
+        applyRoundedClip(cover, 48);
 
         VBox overlay = new VBox(4);
         overlay.setAlignment(Pos.CENTER);
@@ -361,7 +373,55 @@ public class FrontEventsController implements Initializable {
         cover.getChildren().add(overlay);
         StackPane.setAlignment(overlay, Pos.CENTER);
 
+        requestPhotoCover(cover, visualKey, resolveCoverLabel(visualKey), safe(event.getTitre()), safe(event.getDescription()));
+
         return cover;
+    }
+
+    private void requestPhotoCover(StackPane cover, String visualKey, String labelText, String title, String description) {
+        coverPhotoService.resolveCoverImageAsync(visualKey, title, description)
+                .thenAccept(imageBytes -> imageBytes.ifPresent(bytes -> Platform.runLater(() -> applyPhotoCover(cover, bytes, labelText))));
+    }
+
+    private void applyPhotoCover(StackPane cover, byte[] imageBytes, String labelText) {
+        Image image = new Image(new ByteArrayInputStream(imageBytes));
+        if (image.isError()) {
+            return;
+        }
+
+        Region photoLayer = new Region();
+        photoLayer.setMouseTransparent(true);
+        photoLayer.prefWidthProperty().bind(cover.widthProperty());
+        photoLayer.prefHeightProperty().bind(cover.heightProperty());
+        photoLayer.setBackground(new Background(new BackgroundImage(
+                image,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(100, 100, true, true, false, true)
+        )));
+
+        Region scrim = new Region();
+        scrim.getStyleClass().add("front-cover-scrim");
+        scrim.setMouseTransparent(true);
+        scrim.prefWidthProperty().bind(cover.widthProperty());
+        scrim.prefHeightProperty().bind(cover.heightProperty());
+
+        Label photoLabel = new Label(labelText);
+        photoLabel.getStyleClass().add("front-cover-photo-label");
+        photoLabel.setMouseTransparent(true);
+
+        cover.getChildren().setAll(photoLayer, scrim, photoLabel);
+        StackPane.setAlignment(photoLabel, Pos.CENTER);
+    }
+
+    private void applyRoundedClip(StackPane cover, double arcSize) {
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(arcSize);
+        clip.setArcHeight(arcSize);
+        clip.widthProperty().bind(cover.widthProperty());
+        clip.heightProperty().bind(cover.heightProperty());
+        cover.setClip(clip);
     }
 
     private HBox buildMetaRow(String icon, String text) {

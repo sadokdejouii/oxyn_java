@@ -249,9 +249,9 @@
 
 .front-card-cover {
     -fx-alignment: CENTER;
-    -fx-padding: 14 16;
-    -fx-background-radius: 16px;
-    -fx-border-radius: 16px;
+    -fx-padding: 0;
+    -fx-background-radius: 24px;
+    -fx-border-radius: 24px;
 }
 
 .front-cover-yoga {
@@ -297,6 +297,20 @@
     -fx-font-weight: bold;
     -fx-text-fill: #25537f;
     -fx-text-alignment: center;
+}
+
+.front-cover-scrim {
+    -fx-background-color: linear-gradient(to top, rgba(10, 20, 34, 0.72) 0%, rgba(10, 20, 34, 0.18) 100%);
+    -fx-background-radius: 24px;
+}
+
+.front-cover-photo-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-background-color: rgba(8, 18, 31, 0.58);
+    -fx-background-radius: 999px;
+    -fx-padding: 10 18;
 }
 
 .front-chip-row {

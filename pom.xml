@@ -41,6 +41,12 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
         <!-- LineChart, PieChart, BarChart live in javafx.scene.chart → shipped inside javafx-controls (no separate javafx-charts artifact on Maven Central). -->
 
         <dependency>
