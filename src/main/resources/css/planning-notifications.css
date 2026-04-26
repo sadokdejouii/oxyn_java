@@ -1,0 +1,281 @@
+/* =====================================================================
+   Planning · Cloche de notifications (messages non lus)
+   Inspiration : Messenger / Facebook — carte blanche, ombre douce.
+   ===================================================================== */
+
+.planning-notif-bell {
+    -fx-cursor: hand;
+    -fx-background-radius: 24;
+    -fx-background-color: rgba(255, 255, 255, 0.85);
+    -fx-border-color: rgba(148, 163, 184, 0.35);
+    -fx-border-radius: 24;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 6, 0, 0, 2);
+}
+
+.planning-notif-bell:hover {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(58, 122, 254, 0.55);
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.18), 10, 0, 0, 2);
+}
+
+.planning-notif-bell-ring {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}
+
+.planning-notif-bell-icon {
+    -fx-icon-color: #1f2a44;
+}
+
+.planning-notif-bell:hover .planning-notif-bell-icon {
+    -fx-icon-color: #3a7afe;
+}
+
+/* Variante admin : fond sombre */
+.planning-main-shell--admin-dark .planning-notif-bell {
+    -fx-background-color: rgba(14, 24, 40, 0.85);
+    -fx-border-color: rgba(56, 189, 248, 0.35);
+}
+
+.planning-main-shell--admin-dark .planning-notif-bell-icon {
+    -fx-icon-color: #e2e8f0;
+}
+
+.planning-main-shell--admin-dark .planning-notif-bell:hover {
+    -fx-background-color: rgba(22, 34, 56, 0.95);
+    -fx-border-color: rgba(56, 189, 248, 0.7);
+}
+
+.planning-main-shell--admin-dark .planning-notif-bell:hover .planning-notif-bell-icon {
+    -fx-icon-color: #38bdf8;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Badge (bulle rouge)                                               */
+/* ------------------------------------------------------------------ */
+.planning-notif-badge-wrap {
+    -fx-background-color: #FF3B30;
+    -fx-background-radius: 999;
+    -fx-border-color: #ffffff;
+    -fx-border-radius: 999;
+    -fx-border-width: 2;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-pref-width: 20;
+    -fx-pref-height: 20;
+    -fx-alignment: center;
+    -fx-padding: 0 5 0 5;
+    -fx-effect: dropshadow(gaussian, rgba(255, 59, 48, 0.45), 8, 0, 0, 1);
+}
+
+.planning-notif-badge {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Dropdown                                                          */
+/* ------------------------------------------------------------------ */
+.planning-notif-dropdown {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(226, 232, 240, 0.95);
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.18), 24, 0, 0, 10);
+    -fx-padding: 0;
+}
+
+.planning-notif-dropdown-header-row {
+    -fx-padding: 16 18 12 18;
+    -fx-border-color: transparent transparent rgba(226, 232, 240, 0.95) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.planning-notif-dropdown-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-dropdown-sub {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-mark-all {
+    -fx-background-color: transparent;
+    -fx-text-fill: #3a7afe;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 6 10 6 10;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+}
+
+.planning-notif-mark-all:hover {
+    -fx-background-color: rgba(58, 122, 254, 0.1);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Liste                                                             */
+/* ------------------------------------------------------------------ */
+.planning-notif-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.planning-notif-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.planning-notif-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.planning-notif-list {
+    -fx-background-color: transparent;
+    -fx-padding: 4 0 8 0;
+}
+
+.planning-notif-item {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-background-radius: 10;
+}
+
+.planning-notif-item:hover {
+    -fx-background-color: rgba(241, 245, 249, 0.95);
+}
+
+.planning-notif-item-name {
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-item-time {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-item-preview {
+    -fx-font-size: 12.2px;
+    -fx-text-fill: #334155;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-item-email {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #64748b;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-item-pill {
+    -fx-background-color: #FF3B30;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 8 3 8;
+    -fx-background-radius: 999;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-empty {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #64748b;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Avatar                                                            */
+/* ------------------------------------------------------------------ */
+.planning-notif-avatar-ring {
+    -fx-fill: linear-gradient(from 0% 0% to 100% 100%, #3a7afe 0%, #00c9a7 100%);
+    -fx-stroke: rgba(255, 255, 255, 0.95);
+    -fx-stroke-width: 1.5px;
+}
+
+.planning-notif-avatar-fill {
+    -fx-fill: #ffffff;
+}
+
+.planning-notif-avatar-text {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a7afe;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* =====================================================================
+   Toast notification (style Messenger desktop) — bas-droite, glissant
+   ===================================================================== */
+.toast-root {
+    -fx-background-color: transparent;
+}
+
+.toast-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(226, 232, 240, 0.95);
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.28), 24, 0.15, 0, 8);
+}
+
+.toast-card:hover {
+    -fx-border-color: rgba(58, 122, 254, 0.55);
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.30), 24, 0.20, 0, 8);
+}
+
+.toast-avatar {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #3a7afe 0%, #00c9a7 100%);
+    -fx-background-radius: 999;
+    -fx-alignment: center;
+}
+
+.toast-avatar-text {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.toast-title {
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.toast-preview {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.toast-close {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+    -fx-padding: 2 6 2 6;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+}
+
+.toast-close:hover {
+    -fx-text-fill: #0f172a;
+    -fx-background-color: rgba(148, 163, 184, 0.20);
+}

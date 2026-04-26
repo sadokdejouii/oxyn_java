@@ -6,6 +6,7 @@ import org.example.utils.MyDataBase;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ProduitsService implements ICrud<produits>{
     Connection con;
@@ -39,6 +40,57 @@ public class ProduitsService implements ICrud<produits>{
         System.out.println("personne supprime");
     }
 
+    /**
+     * Produit par id — recommandations Planning / panier.
+     */
+    public Optional<produits> findById(int id) throws SQLException {
+        if (con == null || con.isClosed()) {
+            return Optional.empty();
+        }
+        String sql = "SELECT * FROM produits WHERE id_produit = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return Optional.empty();
+                }
+                return Optional.of(mapProduit(rs));
+            }
+        }
+    }
+
+    /**
+     * Catalogue boutique pour recommandations (stock &gt; 0).
+     */
+    public List<produits> listAvailableForRecommendations() throws SQLException {
+        List<produits> all = afficher();
+        List<produits> out = new ArrayList<>();
+        for (produits p : all) {
+            if (p.getQuantite_stock_produit() <= 0) {
+                continue;
+            }
+            String st = p.getStatut_produit();
+            if (st != null && (st.equalsIgnoreCase("inactif") || st.equalsIgnoreCase("archivé"))) {
+                continue;
+            }
+            out.add(p);
+        }
+        return out;
+    }
+
+    private static produits mapProduit(ResultSet rs) throws SQLException {
+        produits prod = new produits();
+        prod.setId_produit(rs.getInt("id_produit"));
+        prod.setNom_produit(rs.getString("nom_produit"));
+        prod.setDescription_produit(rs.getString("description_produit"));
+        prod.setPrix_produit(rs.getDouble("prix_produit"));
+        prod.setQuantite_stock_produit(rs.getInt("quantite_stock_produit"));
+        prod.setImage_produit(rs.getString("image_produit"));
+        prod.setDate_creation_produit(rs.getString("date_creation_produit"));
+        prod.setStatut_produit(rs.getString("statut_produit"));
+        return prod;
+    }
+
     @Override
     public List<produits> afficher() throws SQLException {
         List<produits> produits = new ArrayList<>();
@@ -46,16 +98,7 @@ public class ProduitsService implements ICrud<produits>{
         Statement statement = con.createStatement();
         ResultSet rs = statement.executeQuery(sql);
         while (rs.next()) {
-            produits prod = new produits();
-            prod.setId_produit(rs.getInt("id_produit"));
-            prod.setNom_produit(rs.getString("nom_produit"));
-            prod.setDescription_produit(rs.getString("description_produit"));
-            prod.setPrix_produit(rs.getDouble("prix_produit"));
-            prod.setQuantite_stock_produit(rs.getInt("quantite_stock_produit"));
-            prod.setImage_produit(rs.getString("image_produit"));
-            prod.setDate_creation_produit(rs.getString("date_creation_produit"));
-            prod.setStatut_produit(rs.getString("statut_produit"));
-            produits.add(prod);
+            produits.add(mapProduit(rs));
         }
         return produits;
     }

@@ -1,0 +1,329 @@
+/* Sous-page PlanningCalendarView — design clair professionnel */
+
+.planning-cal-launch-btn {
+    -fx-padding: 11px 20px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-background-color: linear-gradient(to bottom, #14b8a6 0%, #0f766e 100%);
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(15, 118, 110, 0.35);
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(15, 118, 110, 0.18), 14, 0.25, 0, 3);
+}
+
+.planning-cal-launch-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #2dd4bf 0%, #115e59 100%);
+}
+
+.planning-cal-root {
+    -fx-spacing: 14;
+    -fx-max-width: Infinity;
+}
+
+.planning-cal-back {
+    -fx-background-color: transparent;
+    -fx-text-fill: #0369a1;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 4 0 8 0;
+}
+
+.planning-cal-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.planning-cal-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+}
+
+.planning-cal-split {
+    -fx-alignment: TOP_LEFT;
+}
+
+.planning-cal-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(30, 41, 59, 0.1);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.07), 22, 0.22, 0, 4);
+}
+
+.planning-cal-left {
+    -fx-max-width: 320px;
+}
+
+.planning-cal-right {
+    -fx-spacing: 12px;
+}
+
+.planning-cal-card-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.planning-cal-mini-picker {
+    -fx-background-color: #ffffff;
+}
+
+.planning-cal-filter {
+    -fx-font-size: 13px;
+    -fx-text-fill: #334155;
+}
+
+.planning-cal-day-list {
+    -fx-padding: 4 0 0 0;
+}
+
+.planning-cal-month-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.planning-cal-nav-btn {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: rgba(30, 41, 59, 0.12);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.planning-cal-nav-btn:hover {
+    -fx-background-color: #eef2ff;
+    -fx-border-color: rgba(58, 122, 254, 0.32);
+}
+
+.planning-cal-progress-pill {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-padding: 6px 10px;
+    -fx-background-color: #eef2ff;
+    -fx-background-radius: 999px;
+    -fx-border-color: rgba(99, 102, 241, 0.22);
+    -fx-border-radius: 999px;
+}
+
+.planning-cal-grid-head {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748b;
+    -fx-padding: 0 0 2 2;
+}
+
+.planning-cal-day-cell {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(30, 41, 59, 0.1);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+}
+
+.planning-cal-day-cell:hover {
+    -fx-border-color: rgba(58, 122, 254, 0.32);
+    -fx-background-color: #f8fbff;
+}
+
+.planning-cal-day-cell--selected {
+    -fx-border-color: rgba(2, 132, 199, 0.45);
+    -fx-background-color: #f0f9ff;
+}
+
+.planning-cal-day-cell--empty {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: rgba(226, 232, 240, 0.75);
+    -fx-cursor: default;
+}
+
+.planning-cal-day-num {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.planning-cal-day-count {
+    -fx-font-size: 11px;
+    -fx-text-fill: #475569;
+}
+
+.planning-cal-dot-done {
+    -fx-text-fill: #15803d;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.planning-cal-dot-pending {
+    -fx-text-fill: #b91c1c;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.planning-cal-preview {
+    -fx-font-size: 11px;
+    -fx-text-fill: #334155;
+}
+
+.planning-cal-detail-card {
+    -fx-padding: 14px 16px;
+}
+
+.planning-cal-detail-date {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0369a1;
+}
+
+.planning-cal-task-row {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(148, 163, 184, 0.28);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px 12px;
+}
+
+.planning-cal-task-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.planning-cal-task-duration {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+}
+
+.planning-cal-task-status-done {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15803d;
+}
+
+.planning-cal-task-status-pending {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #b45309;
+}
+
+.planning-cal-toggle-btn {
+    -fx-background-color: linear-gradient(to bottom, #38bdf8 0%, #0284c7 100%);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: rgba(2, 132, 199, 0.35);
+    -fx-border-width: 1px;
+    -fx-padding: 8px 12px;
+    -fx-cursor: hand;
+}
+
+.planning-cal-toggle-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #0ea5e9 0%, #0369a1 100%);
+}
+
+.planning-cal-mini-task {
+    -fx-font-size: 12px;
+    -fx-text-fill: #334155;
+}
+
+.planning-cal-mini-status-done {
+    -fx-text-fill: #15803d;
+    -fx-font-weight: bold;
+}
+
+.planning-cal-mini-status-pending {
+    -fx-text-fill: #b45309;
+    -fx-font-weight: bold;
+}
+
+.planning-cal-empty {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.planning-cal-error {
+    -fx-font-size: 12px;
+    -fx-text-fill: #b91c1c;
+}
+
+/* Refonte layout SaaS pro */
+.planning-cal-root {
+    -fx-background-color: #f5f7fb;
+    -fx-background-radius: 14px;
+    -fx-padding: 8px;
+    -fx-spacing: 14px;
+}
+
+.planning-cal-main-shell {
+    -fx-alignment: TOP_LEFT;
+    -fx-spacing: 18px;
+}
+
+.planning-cal-sidebar {
+    -fx-min-width: 280px;
+    -fx-pref-width: 280px;
+    -fx-max-width: 280px;
+    -fx-padding: 15px;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(148, 163, 184, 0.28);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0.2, 0, 4);
+}
+
+.planning-cal-mini-wrap {
+    -fx-padding: 4 0 6 0;
+}
+
+.planning-cal-mini-picker {
+    -fx-pref-width: 220px;
+}
+
+.planning-cal-right-col {
+    -fx-spacing: 20px;
+    -fx-padding: 20px;
+}
+
+.planning-cal-calendar-card {
+    -fx-padding: 20px;
+}
+
+.planning-cal-detail-card {
+    -fx-padding: 20px;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(148, 163, 184, 0.26);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.07), 14, 0.18, 0, 3);
+}
+
+.planning-cal-grid {
+    -fx-hgap: 10px;
+    -fx-vgap: 10px;
+}
+
+.planning-cal-day-cell {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: rgba(148, 163, 184, 0.26);
+    -fx-border-width: 1px;
+}
+
+.planning-cal-day-cell:hover {
+    -fx-background-color: #f8fbff;
+    -fx-border-color: rgba(59, 130, 246, 0.36);
+}

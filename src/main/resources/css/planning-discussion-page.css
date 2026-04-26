@@ -246,6 +246,54 @@
     -fx-text-fill: #94a3b8;
 }
 
+/* ----------------------------------------------------------------------
+ * Pastille présence ancrée en bas-droite de l'avatar (style Messenger)
+ * + halo qui pulse en vert quand l'utilisateur est en ligne.
+ * ---------------------------------------------------------------------- */
+.msg-presence-dot {
+    -fx-stroke: #ffffff;
+    -fx-stroke-width: 2.2;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 4, 0.0, 0, 1);
+}
+
+.msg-presence-dot--online {
+    -fx-fill: #22c55e;
+}
+
+.msg-presence-dot--offline {
+    -fx-fill: #cbd5e1;
+}
+
+.msg-presence-halo {
+    -fx-fill: #22c55e;
+    -fx-stroke: transparent;
+}
+
+/* ----------------------------------------------------------------------
+ * Bulle "typing" façon Messenger : 3 points qui rebondissent + libellé.
+ * ---------------------------------------------------------------------- */
+.msg-typing-bubble {
+    -fx-background-color: #eef2f7;
+    -fx-background-radius: 999px;
+    -fx-padding: 6 12 6 10;
+    -fx-spacing: 8;
+}
+
+.msg-typing-dots {
+    -fx-padding: 0 2 0 2;
+    -fx-spacing: 4;
+}
+
+.msg-typing-dot {
+    -fx-fill: #64748b;
+}
+
+.msg-typing-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+    -fx-font-style: italic;
+}
+
 /* Zone messages */
 .msg-messages-scroll {
     -fx-background-color: #f9fafb;

@@ -18,8 +18,11 @@ import org.example.model.planning.task.TacheQuotidienne;
 import org.example.model.planning.task.WeeklyTaskSummary;
 import org.example.planning.widgets.StructuredProgrammePane;
 import org.example.services.EncadrantClientPlanningService;
+import org.example.services.ObjectifClientService;
+import org.example.model.planning.objectif.ObjectifClientRow;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * Vue Planning encadrant : lecture du client suivi + observation persistée si objectif hebdo présent.
@@ -74,8 +77,17 @@ public final class EncadrantPlanningDashboardController {
     private Button btnRefresh;
     @FXML
     private Button btnSaveObs;
+    @FXML
+    private Label lblObjLibreClient;
+    @FXML
+    private TextArea txtReponseIaObjLibre;
+    @FXML
+    private TextArea txtInterventionObjLibre;
+    @FXML
+    private Button btnSendObjLibre;
 
     private final EncadrantClientPlanningService service = new EncadrantClientPlanningService();
+    private final ObjectifClientService objectifClientService = new ObjectifClientService();
     private int clientUserId;
 
     public void setup(int clientUserId) {
@@ -85,6 +97,9 @@ public final class EncadrantPlanningDashboardController {
         lblClientStatut.setText("—");
         btnRefresh.setOnAction(e -> loadAll());
         btnSaveObs.setOnAction(e -> saveObservation());
+        if (btnSendObjLibre != null) {
+            btnSendObjLibre.setOnAction(e -> saveObjectifLibreIntervention());
+        }
         txtObservation.textProperty().addListener((o, a, b) -> clearObsValidation());
         loadAll();
     }
@@ -191,6 +206,47 @@ public final class EncadrantPlanningDashboardController {
                     + "jusqu’à ce qu’une ligne existe côté base (ex. après activité client).");
             btnSaveObs.setDisable(true);
             chkEfforts.setDisable(true);
+        }
+        applyObjectifLibre();
+    }
+
+    private void applyObjectifLibre() {
+        if (lblObjLibreClient == null || txtReponseIaObjLibre == null) {
+            return;
+        }
+        try {
+            Optional<ObjectifClientRow> opt = objectifClientService.findLatestForUser(clientUserId);
+            if (opt.isEmpty()) {
+                lblObjLibreClient.setText("Aucune saisie « objectif libre » (assistant IA boutique) pour ce client.");
+                txtReponseIaObjLibre.clear();
+                if (txtInterventionObjLibre != null) {
+                    txtInterventionObjLibre.clear();
+                }
+                return;
+            }
+            ObjectifClientRow r = opt.get();
+            lblObjLibreClient.setText(r.texteObjectif());
+            txtReponseIaObjLibre.setText(r.reponseIa() != null ? r.reponseIa() : "");
+            if (txtInterventionObjLibre != null) {
+                txtInterventionObjLibre.setText(r.interventionEncadrant() != null ? r.interventionEncadrant() : "");
+            }
+        } catch (SQLException ex) {
+            lblObjLibreClient.setText("— Impossible de charger (vérifiez la table objectifs_hebdomadaires) : "
+                    + (ex.getMessage() != null ? ex.getMessage() : ex));
+            txtReponseIaObjLibre.clear();
+        }
+    }
+
+    private void saveObjectifLibreIntervention() {
+        if (txtInterventionObjLibre == null) {
+            return;
+        }
+        try {
+            objectifClientService.saveEncadrantInterventionForLatest(clientUserId, txtInterventionObjLibre.getText());
+            alert(Alert.AlertType.INFORMATION, "Intervention", "Message enregistré — visible immédiatement côté client sur « Objectif / Assistant IA ».");
+            loadAll();
+        } catch (SQLException ex) {
+            alert(Alert.AlertType.ERROR, "Enregistrement", ex.getMessage() != null ? ex.getMessage() : ex.toString());
         }
     }
 

@@ -87,6 +87,11 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
+            try {
+                org.example.realtime.RealtimeService.getInstance().startForUser(user.getId());
+            } catch (Exception rtErr) {
+                System.err.println("[Realtime] start failed : " + rtErr.getMessage());
+            }
             openMain(event);
         } catch (SQLException e) {
             showError("Erreur base de données",

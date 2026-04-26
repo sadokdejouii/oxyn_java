@@ -1,0 +1,48 @@
+# =====================================================================
+#  Mercure Hub — bus temps réel pour OXYN JavaFX
+#
+#  ► MySQL n'est PAS dans cette stack : la base oxyn tourne déjà sur le
+#    poste hôte (port 3306). On ne touche à rien côté DB.
+#
+#  Démarrage :
+#      docker compose -f docker/docker-compose.mercure.yml up -d
+#
+#  Arrêt :
+#      docker compose -f docker/docker-compose.mercure.yml down
+#
+#  Variables :
+#      MERCURE_PUBLISHER_JWT_KEY = secret HMAC pour signer les JWT publishers
+#      MERCURE_SUBSCRIBER_JWT_KEY = secret HMAC pour signer les JWT subscribers
+#        ► Dans le client JavaFX, ces deux secrets sont identiques par défaut
+#          (clé `realtime.mercure.jwtSecret`) — alignés avec ce fichier.
+#      MERCURE_EXTRA_DIRECTIVES   = configuration Caddy/Mercure
+#        ► anonymous = autorise l'accès sans JWT (utile dev local seul)
+#          → on l'a DÉSACTIVÉ ici : tout le monde doit présenter un JWT.
+# =====================================================================
+
+services:
+  mercure:
+    image: dunglas/mercure:v0.16
+    container_name: oxyn-mercure
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ":3000"
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_SECRET:-oxyn-dev-secret-change-me-please-use-32+chars}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_SECRET:-oxyn-dev-secret-change-me-please-use-32+chars}
+      MERCURE_EXTRA_DIRECTIVES: |
+        cors_origins http://localhost http://127.0.0.1
+        anonymous
+        subscriptions
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - oxyn-realtime
+
+networks:
+  oxyn-realtime:
+    driver: bridge

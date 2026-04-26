@@ -32,8 +32,17 @@ import org.example.discussion.ui.MessageInput;
 import org.example.discussion.ui.UserListItemCell;
 import org.example.entities.ConversationInboxItem;
 import org.example.entities.MessageRow;
+import org.example.realtime.PresenceService;
+import org.example.realtime.RealtimeChatService;
+import org.example.realtime.RealtimeService;
+import org.example.realtime.TypingService;
 import org.example.services.DiscussionService;
+import org.example.services.NotificationService;
 import org.example.services.SessionContext;
+import org.example.services.UserService;
+import org.example.entities.User;
+
+import java.util.function.BiConsumer;
 
 import javafx.scene.control.DialogPane;
 import java.net.URL;
@@ -89,7 +98,24 @@ public class DiscussionPageController implements Initializable {
     private CheckBox inboxUnreadOnlyCheck;
 
     private final DiscussionService discussionService = new DiscussionService();
+    private final NotificationService notificationService = new NotificationService();
+    private final UserService userService = new UserService();
+    private final RealtimeChatService realtimeChatService = RealtimeChatService.getInstance();
+    private final PresenceService presenceService = PresenceService.getInstance();
+    private final TypingService typingService = TypingService.getInstance();
     private int activeConversationId = -1;
+    /** ID du peer (autre participant) de la conversation active, -1 si inconnu. */
+    private int activePeerUserId = -1;
+    /** Nom à afficher pour le pair (utilisé dans la bulle typing « X est en train d'écrire »). */
+    private String activePeerDisplayName = "";
+    /** Souscription Mercure courante au topic /chat/conversation/{id}, ou null. */
+    private String chatSubscriptionId = null;
+    /** Topic Mercure typing actif (ex. /typing/conversation/12), à retirer au rebind. */
+    private String activeTypingTopic = null;
+    /** Topic Mercure présence du pair actif (ex. /presence/user/7), à retirer au rebind. */
+    private String activePeerPresenceTopic = null;
+    private BiConsumer<Integer, PresenceService.Presence> presenceListener;
+    private BiConsumer<TypingService.TypingEvent, Boolean> typingListener;
     /** Édition inline : id du message en cours, ou -1. */
     private int editingMessageId = -1;
 
@@ -150,6 +176,72 @@ public class DiscussionPageController implements Initializable {
         mi.refreshButton().setOnAction(e -> handleRefresh());
 
         messagesBox.prefWidthProperty().bind(messagesScroll.widthProperty());
+
+        messageField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (activeConversationId > 0 && newVal != null && !newVal.isEmpty()) {
+                typingService.notifyLocalTyping(activeConversationId);
+            }
+        });
+
+        installRealtimeListeners();
+        installSceneCleanupHook();
+    }
+
+    private void installRealtimeListeners() {
+        presenceListener = (userId, presence) -> {
+            if (userId != null && userId == activePeerUserId) {
+                applyPresenceToHeader();
+            }
+        };
+        presenceService.addListener(presenceListener);
+
+        typingListener = (event, active) -> {
+            if (event != null && event.conversationId() == activeConversationId
+                    && event.userId() != SessionContext.getInstance().getUserId()) {
+                if (chatHeader != null) {
+                    chatHeader.setTypingActive(active, buildTypingLabel());
+                }
+            }
+        };
+        typingService.addListener(typingListener);
+    }
+
+    private void installSceneCleanupHook() {
+        chatHeader.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) {
+                disposeRealtime();
+            }
+        });
+    }
+
+    private void disposeRealtime() {
+        if (chatSubscriptionId != null) {
+            realtimeChatService.unsubscribeFromConversation(activeConversationId, chatSubscriptionId);
+            chatSubscriptionId = null;
+        }
+        if (presenceListener != null) {
+            presenceService.removeListener(presenceListener);
+            presenceListener = null;
+        }
+        if (typingListener != null) {
+            typingService.removeListener(typingListener);
+            typingListener = null;
+        }
+        if (activeConversationId > 0) {
+            typingService.notifyLocalStopped(activeConversationId);
+        }
+        // Retire les topics dynamiques (typing + présence du pair) ajoutés au rebind.
+        RealtimeService rt = RealtimeService.getInstance();
+        if (activeTypingTopic != null) {
+            rt.removeTopic(activeTypingTopic);
+            activeTypingTopic = null;
+        }
+        if (activePeerPresenceTopic != null) {
+            rt.removeTopic(activePeerPresenceTopic);
+            activePeerPresenceTopic = null;
+        }
+        // Plus aucune conversation ouverte -> les toasts redeviennent actifs.
+        SessionContext.getInstance().setActiveDiscussionConversationId(-1);
     }
 
     private void wireInboxDataModel() {
@@ -283,10 +375,15 @@ public class DiscussionPageController implements Initializable {
                 statusLabel.setText("Impossible de créer ou charger la conversation (base indisponible ?).");
                 return;
             }
+            int previous = activeConversationId;
             activeConversationId = cid;
+            // Force la résolution du nom de l'encadrant côté client (bulle typing).
+            activePeerDisplayName = "";
             updateThreadHeaderForClient(ctx);
             statusLabel.setText("");
             reloadMessages();
+            markActiveConversationAsRead(ctx);
+            rebindRealtimeForActiveConversation(previous);
         } catch (Exception e) {
             statusLabel.setText("Impossible d’ouvrir la conversation. Réessayez plus tard.");
         }
@@ -391,16 +488,177 @@ public class DiscussionPageController implements Initializable {
             if (assignEncadrantOnSelect && !ctx.isAdmin()) {
                 discussionService.assignEncadrantToConversation(item.conversationId(), ctx.getUserId());
             }
+            int previous = activeConversationId;
             activeConversationId = item.conversationId();
             editingMessageId = -1;
+            // Mémorise le nom du pair pour la bulle typing (« Sami est en train d'écrire »).
+            activePeerDisplayName = item.clientName() != null ? item.clientName().trim() : "";
             String sub = item.clientEmail() != null && !item.clientEmail().isBlank() ? item.clientEmail() : "";
             if (chatHeader != null) {
                 chatHeader.update(item.clientName(), sub, item.presenceLabel(), initials(item.clientName()));
             }
             statusLabel.setText("");
             reloadMessages();
+            markActiveConversationAsRead(ctx);
+            rebindRealtimeForActiveConversation(previous);
         } catch (Exception e) {
             statusLabel.setText("Action impossible pour le moment.");
+        }
+    }
+
+    /**
+     * Met à jour le « last seen » local pour la conversation active — alimente la
+     * cloche de notifications du Planning sans toucher à la base de données.
+     */
+    private void markActiveConversationAsRead(SessionContext ctx) {
+        if (activeConversationId <= 0 || ctx == null || !ctx.hasDbUser()) {
+            return;
+        }
+        notificationService.markConversationAsRead(ctx.getUserId(), activeConversationId);
+    }
+
+    /**
+     * Bascule l'écoute Mercure vers la conversation active : se désabonne de
+     * la précédente, calcule le peer (présence) et s'abonne au topic chat.
+     */
+    private void rebindRealtimeForActiveConversation(int oldConversationId) {
+        RealtimeService rt = RealtimeService.getInstance();
+        // Indique au ToastNotificationService quelle conversation est ouverte (skip toast si match).
+        SessionContext.getInstance().setActiveDiscussionConversationId(activeConversationId);
+        if (oldConversationId > 0 && chatSubscriptionId != null) {
+            realtimeChatService.unsubscribeFromConversation(oldConversationId, chatSubscriptionId);
+            chatSubscriptionId = null;
+        }
+        // Retire l'ancien topic typing + l'ancien topic présence du pair (Mercure exige
+        // une souscription explicite à chaque topic — pas de wildcard).
+        if (activeTypingTopic != null) {
+            rt.removeTopic(activeTypingTopic);
+            activeTypingTopic = null;
+        }
+        if (activePeerPresenceTopic != null) {
+            rt.removeTopic(activePeerPresenceTopic);
+            activePeerPresenceTopic = null;
+        }
+        if (activeConversationId <= 0) {
+            activePeerUserId = -1;
+            activePeerDisplayName = "";
+            if (chatHeader != null) {
+                chatHeader.clearPresence();
+                chatHeader.setTypingActive(false, null);
+            }
+            return;
+        }
+        SessionContext ctx = SessionContext.getInstance();
+        if (ctx.hasDbUser()) {
+            try {
+                activePeerUserId = discussionService.findOtherParticipantUserId(activeConversationId, ctx.getUserId());
+            } catch (Exception e) {
+                activePeerUserId = -1;
+            }
+            // Résolution du nom à afficher pour le pair (utilisé dans typing).
+            // Côté encadrant, onSelectConversation a déjà rempli activePeerDisplayName ;
+            // on ne l'écrase que si on n'a rien — par exemple côté client (peer = encadrant).
+            if (activePeerUserId > 0 && (activePeerDisplayName == null || activePeerDisplayName.isBlank())) {
+                try {
+                    User peer = userService.getUserById(activePeerUserId);
+                    if (peer != null) {
+                        String full = peer.getFullName();
+                        activePeerDisplayName = full != null ? full.trim() : "";
+                        // Côté client : reflète le vrai nom de l'encadrant dans l'en-tête.
+                        if (chatHeader != null && !ctx.isAdmin()
+                                && (peer.getNom() != null || peer.getPrenom() != null)
+                                && !activePeerDisplayName.isEmpty()) {
+                            chatHeader.update("Votre conversation",
+                                    "Avec " + activePeerDisplayName,
+                                    "", initials(activePeerDisplayName));
+                        }
+                    }
+                } catch (Exception ignored) { /* on garde le fallback générique */ }
+            }
+            applyPresenceToHeader();
+        } else {
+            activePeerUserId = -1;
+            activePeerDisplayName = "";
+            if (chatHeader != null) {
+                chatHeader.clearPresence();
+            }
+        }
+        chatSubscriptionId = realtimeChatService.subscribeToConversation(
+                activeConversationId, this::onIncomingChatEvent);
+
+        // Souscrit au topic typing de la conversation (les deux côtés en publient/écoutent).
+        activeTypingTopic = "/typing/conversation/" + activeConversationId;
+        rt.addTopic(activeTypingTopic);
+
+        // Souscrit au topic présence du pair pour recevoir ses heartbeats ONLINE/OFFLINE.
+        if (activePeerUserId > 0) {
+            activePeerPresenceTopic = "/presence/user/" + activePeerUserId;
+            rt.addTopic(activePeerPresenceTopic);
+        }
+        if (chatHeader != null) {
+            chatHeader.setTypingActive(false, null);
+        }
+    }
+
+    /**
+     * Construit le libellé affiché dans la bulle typing — préfixé par le nom du pair
+     * (« Sami est en train d'écrire… ») quand on le connaît, sinon générique.
+     */
+    private String buildTypingLabel() {
+        String first = firstName(activePeerDisplayName);
+        if (first.isEmpty()) {
+            return "En train d'écrire…";
+        }
+        return first + " est en train d'écrire…";
+    }
+
+    private static String firstName(String displayName) {
+        if (displayName == null) {
+            return "";
+        }
+        String trimmed = displayName.trim();
+        if (trimmed.isEmpty()) {
+            return "";
+        }
+        int sep = trimmed.indexOf(' ');
+        return sep > 0 ? trimmed.substring(0, sep) : trimmed;
+    }
+
+    private void applyPresenceToHeader() {
+        if (chatHeader == null) {
+            return;
+        }
+        if (activePeerUserId <= 0) {
+            chatHeader.clearPresence();
+            return;
+        }
+        boolean online = presenceService.currentPresence(activePeerUserId) == PresenceService.Presence.ONLINE;
+        String label = presenceService.formatPresenceLabel(activePeerUserId);
+        chatHeader.updatePresence(online, label);
+    }
+
+    private void onIncomingChatEvent(org.example.realtime.RealtimeEvent event) {
+        if (event == null || activeConversationId <= 0) {
+            return;
+        }
+        Integer convId = event.asObject()
+                .filter(o -> o.has("conversationId") && !o.get("conversationId").isJsonNull())
+                .map(o -> o.get("conversationId").getAsInt())
+                .orElse(activeConversationId);
+        if (convId != activeConversationId) {
+            return;
+        }
+        Integer senderId = event.asObject()
+                .filter(o -> o.has("senderId") && !o.get("senderId").isJsonNull())
+                .map(o -> o.get("senderId").getAsInt())
+                .orElse(-1);
+        if (senderId != null && senderId == SessionContext.getInstance().getUserId()) {
+            return;
+        }
+        reloadMessages();
+        markActiveConversationAsRead(SessionContext.getInstance());
+        if (chatHeader != null) {
+            chatHeader.setTypingActive(false, null);
         }
     }
 
@@ -419,19 +677,49 @@ public class DiscussionPageController implements Initializable {
             return;
         }
         try {
-            discussionService.sendMessage(
+            int messageId = discussionService.sendMessage(
                     activeConversationId,
                     ctx.getUserId(),
                     text,
                     ctx.isEncadrant()
             );
             messageField.clear();
+            typingService.notifyLocalStopped(activeConversationId);
             reloadMessages();
             if (ctx.isEncadrant() || ctx.isAdmin()) {
                 loadConversationList();
             }
+            publishMessageRealtime(messageId, text, ctx);
         } catch (Exception e) {
             alert("L’envoi du message a échoué. Vérifiez votre connexion puis réessayez.");
+        }
+    }
+
+    private void publishMessageRealtime(int messageId, String text, SessionContext ctx) {
+        if (messageId <= 0) {
+            return;
+        }
+        int peerId = activePeerUserId;
+        if (peerId <= 0) {
+            try {
+                peerId = discussionService.findOtherParticipantUserId(activeConversationId, ctx.getUserId());
+                if (peerId > 0) {
+                    activePeerUserId = peerId;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        String type = ctx.isEncadrant() ? DiscussionService.TYPE_CONSEIL : DiscussionService.TYPE_MESSAGE;
+        try {
+            realtimeChatService.publishNewMessage(activeConversationId, messageId, ctx.getUserId(),
+                    text, peerId, type);
+            if (peerId > 0) {
+                org.example.realtime.RealtimeNotificationService.getInstance()
+                        .publishNewMessage(peerId, activeConversationId, ctx.getUserId(), text);
+            }
+        } catch (Exception ex) {
+            // jamais bloquant : la persistence DB est déjà OK
+            System.err.println("[Realtime] publish message failed : " + ex.getMessage());
         }
     }
 
