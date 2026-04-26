@@ -24,6 +24,7 @@ import org.example.facerec.FaceEmbeddingModel;
 import org.example.totp.Totp;
 import org.example.totp.TotpDAO;
 import org.example.utils.UserDialogHelper;
+import org.example.notifications.LoginEmailNotifier;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -97,6 +98,7 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
+            LoginEmailNotifier.notifyLoginAsync(user.getEmail(), user.getPrenom() + " " + user.getNom());
             openMain(event);
         } catch (SQLException e) {
             showError("Erreur base de données",
@@ -129,6 +131,7 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
+            LoginEmailNotifier.notifyLoginAsync(user.getEmail(), user.getPrenom() + " " + user.getNom());
             openMain(event);
         } catch (SQLException e) {
             showError("Erreur base de données",
@@ -167,6 +170,7 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
+            LoginEmailNotifier.notifyLoginAsync(user.getEmail(), user.getPrenom() + " " + user.getNom());
             openMain(event);
         } catch (SQLException e) {
             showError("Erreur base de données",

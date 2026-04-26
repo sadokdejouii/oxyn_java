@@ -77,6 +77,13 @@
             <version>3.5.3</version>
         </dependency>
 
+        <!-- SendGrid (emails) -->
+        <dependency>
+            <groupId>com.sendgrid</groupId>
+            <artifactId>sendgrid-java</artifactId>
+            <version>4.10.3</version>
+        </dependency>
+
         <!-- JUnit 5 for unit testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
