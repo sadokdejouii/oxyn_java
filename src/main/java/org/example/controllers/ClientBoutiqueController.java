@@ -15,7 +15,9 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import org.example.entities.PanierSession;
 import org.example.entities.produits;
+import org.example.services.ProduitRecommendationService;
 import org.example.services.ProduitsService;
+import org.example.utils.CommandeClientResolver;
 import org.example.utils.ProductImageStorage;
 import org.example.utils.TexteRecherche;
 
@@ -32,8 +34,13 @@ public class ClientBoutiqueController {
     private TextField rechercheProduitsClient;
     @FXML
     private ComboBox<String> triProduitsClient;
+    @FXML
+    private TilePane recommandationsContainer;
+    @FXML
+    private Label recoHintLabel;
 
     private final ProduitsService produitsService = new ProduitsService();
+    private final ProduitRecommendationService recommendationService = new ProduitRecommendationService();
     private final List<produits> tousLesProduits = new ArrayList<>();
     private MainLayoutController mainLayoutController;
     private final PanierSession panier = PanierSession.getInstance();
@@ -71,6 +78,7 @@ public class ClientBoutiqueController {
                 triProduitsClient.getSelectionModel().selectFirst();
             }
             appliquerFiltreEtTri();
+            chargerRecommandations();
         } catch (SQLException e) {
             showAlert("Erreur", "Impossible de charger les produits: " + e.getMessage());
         }
@@ -98,6 +106,42 @@ public class ClientBoutiqueController {
         produitsContainer.getChildren().clear();
         for (produits produit : filtered) {
             produitsContainer.getChildren().add(createProductCard(produit));
+        }
+        chargerRecommandations();
+    }
+
+    private void chargerRecommandations() {
+        if (recommandationsContainer == null) {
+            return;
+        }
+        recommandationsContainer.getChildren().clear();
+        int clientId = CommandeClientResolver.idClientConnecte();
+        if (clientId <= 0) {
+            if (recoHintLabel != null) {
+                recoHintLabel.setText("Connectez-vous en compte client pour des recommandations personnalisées.");
+            }
+            return;
+        }
+
+        String q = rechercheProduitsClient != null ? rechercheProduitsClient.getText() : "";
+        try {
+            List<produits> recos = recommendationService.recommanderPourClient(clientId, q, 3);
+            if (recos.isEmpty()) {
+                if (recoHintLabel != null) {
+                    recoHintLabel.setText("Aucune recommandation disponible pour le moment.");
+                }
+                return;
+            }
+            if (recoHintLabel != null) {
+                recoHintLabel.setText("Sélection IA basée sur vos commandes précédentes et vos mots-clés de recherche.");
+            }
+            for (produits p : recos) {
+                recommandationsContainer.getChildren().add(createProductCard(p));
+            }
+        } catch (SQLException e) {
+            if (recoHintLabel != null) {
+                recoHintLabel.setText("Recommandations indisponibles: " + e.getMessage());
+            }
         }
     }
 

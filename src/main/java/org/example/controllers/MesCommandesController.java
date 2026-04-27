@@ -14,10 +14,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.example.entities.LigneCommandeAffichage;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
+import org.example.services.FacturePdfService;
 import org.example.services.SessionContext;
+import org.example.services.StripePaymentService;
+import org.example.services.StripePaymentSession;
 import org.example.services.UserRole;
 import org.example.utils.AdresseCommandeValidator;
 import org.example.utils.CommandeClientResolver;
@@ -33,6 +38,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.io.File;
+import java.io.FileOutputStream;
 
 public class MesCommandesController {
 
@@ -59,6 +66,8 @@ public class MesCommandesController {
     private MainLayoutController mainLayoutController;
 
     private final CommandesService commandesService = new CommandesService();
+    private final StripePaymentService stripePaymentService = new StripePaymentService();
+    private final FacturePdfService facturePdfService = new FacturePdfService();
 
     private final List<commandes> toutesMesCommandes = new ArrayList<>();
 
@@ -366,6 +375,24 @@ public class MesCommandesController {
 
         card.getChildren().addAll(header, meta, total, addrTitle, addr, sep, lignesTitle, lignesBox);
 
+        HBox actionsSupplementaires = new HBox(10);
+        actionsSupplementaires.setAlignment(Pos.CENTER_RIGHT);
+        String statut = c.getStatut_commande() == null ? "" : c.getStatut_commande().trim().toLowerCase(Locale.ROOT);
+        if (statut.contains("valid")) {
+            Button imprimerFacture = new Button("Imprimer facture PDF");
+            imprimerFacture.getStyleClass().add("client-shop-outline-btn");
+            imprimerFacture.setOnAction(e -> imprimerFacturePdf(c));
+            actionsSupplementaires.getChildren().add(imprimerFacture);
+        } else if (statut.contains("attente")) {
+            Button terminerPaiement = new Button("Terminer le paiement");
+            terminerPaiement.getStyleClass().add("front-refresh-btn");
+            terminerPaiement.setOnAction(e -> relancerPaiement(c));
+            actionsSupplementaires.getChildren().add(terminerPaiement);
+        }
+        if (!actionsSupplementaires.getChildren().isEmpty()) {
+            card.getChildren().add(actionsSupplementaires);
+        }
+
         if (commandesService.peutModifierAdresse(c)) {
             Button modifierAdresse = new Button("Modifier l’adresse");
             modifierAdresse.getStyleClass().add("client-shop-outline-btn");
@@ -381,6 +408,67 @@ public class MesCommandesController {
         }
 
         return card;
+    }
+
+    private void relancerPaiement(commandes c) {
+        int clientId = CommandeClientResolver.idClientConnecte();
+        if (clientId <= 0) {
+            warn("Session client invalide.");
+            return;
+        }
+        try {
+            commandes commande = commandesService.findCommandeClientById(c.getId_commande(), clientId);
+            if (commande == null) {
+                warn("Commande introuvable.");
+                return;
+            }
+            String st = commande.getStatut_commande() == null ? "" : commande.getStatut_commande().toLowerCase(Locale.ROOT);
+            if (!st.contains("attente")) {
+                warn("Cette commande n'est plus en attente de paiement.");
+                refresh();
+                return;
+            }
+            StripePaymentService.PaymentIntentData intent = stripePaymentService.createPaymentIntentForCommande(commande);
+            StripePaymentSession.getInstance().start(
+                    commande.getId_commande(),
+                    clientId,
+                    commande.getTotal_commande(),
+                    intent.clientSecret(),
+                    intent.publishableKey()
+            );
+            if (mainLayoutController != null) {
+                mainLayoutController.navigate("/FXML/pages/PaiementEnLigne.fxml", "Paiement en ligne", null);
+            }
+        } catch (Exception ex) {
+            error("Impossible de relancer le paiement: " + ex.getMessage());
+        }
+    }
+
+    private void imprimerFacturePdf(commandes c) {
+        try {
+            List<LigneCommandeAffichage> lignes = commandesService.getLignesPourCommande(c.getId_commande());
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Enregistrer la facture PDF");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+            chooser.setInitialFileName("facture-commande-" + c.getId_commande() + ".pdf");
+            File file = chooser.showSaveDialog(getStage());
+            if (file == null) {
+                return;
+            }
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                facturePdfService.genererFacture(fos, c, lignes);
+            }
+            info("Facture générée: " + file.getAbsolutePath());
+        } catch (Exception ex) {
+            error("Erreur génération facture: " + ex.getMessage());
+        }
+    }
+
+    private Stage getStage() {
+        if (ordersContainer != null && ordersContainer.getScene() != null) {
+            return (Stage) ordersContainer.getScene().getWindow();
+        }
+        return null;
     }
 
     private static void info(String msg) {

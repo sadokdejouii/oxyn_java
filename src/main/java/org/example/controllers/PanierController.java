@@ -17,6 +17,8 @@ import org.example.entities.PanierSession;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
 import org.example.services.SessionContext;
+import org.example.services.StripePaymentService;
+import org.example.services.StripePaymentSession;
 import org.example.services.UserRole;
 import org.example.utils.AdresseCommandeValidator;
 import org.example.utils.CommandeClientResolver;
@@ -181,7 +183,7 @@ public class PanierController {
         commandes commande = new commandes(
                 LocalDateTime.now().format(DATE_HEURE),
                 panier.getTotal(),
-                "validée",
+                modePaiement.equalsIgnoreCase("En ligne") ? "en attente" : "validée",
                 modePaiement,
                 idClient,
                 adresse
@@ -189,13 +191,44 @@ public class PanierController {
         CommandesService commandesService = new CommandesService();
         boolean success = commandesService.ajouterCommande(commande, panier.getLignes());
         if (success) {
-            showAlert(Alert.AlertType.INFORMATION, "Commande enregistrée", "Votre commande a été validée. Merci pour votre achat !");
-            panier.viderPanier();
-            rafraichirPanier();
-            adresseField.clear();
+            if (modePaiement.equalsIgnoreCase("En ligne")) {
+                ouvrirPaiementStripe(commande, idClient);
+            } else {
+                showAlert(Alert.AlertType.INFORMATION, "Commande enregistrée", "Votre commande a été validée. Merci pour votre achat !");
+                panier.viderPanier();
+                rafraichirPanier();
+                adresseField.clear();
+            }
         } else {
             showAlert(Alert.AlertType.ERROR, "Commande impossible",
                     "L’enregistrement a échoué : stock insuffisant pour un ou plusieurs produits, ou erreur de base de données. Vérifiez les quantités disponibles.");
+        }
+    }
+
+    private void ouvrirPaiementStripe(commandes commande, int idClient) {
+        StripePaymentService stripePaymentService = new StripePaymentService();
+        try {
+            StripePaymentService.PaymentIntentData paymentIntentData =
+                    stripePaymentService.createPaymentIntentForCommande(commande.getId_commande(), commande.getTotal_commande());
+            StripePaymentSession.getInstance().start(
+                    commande.getId_commande(),
+                    idClient,
+                    commande.getTotal_commande(),
+                    paymentIntentData.clientSecret(),
+                    paymentIntentData.publishableKey()
+            );
+            panier.viderPanier();
+            rafraichirPanier();
+            adresseField.clear();
+            if (mainLayoutController != null) {
+                mainLayoutController.navigate("/FXML/pages/PaiementEnLigne.fxml", "Paiement en ligne", null);
+            }
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.WARNING,
+                    "Commande en attente",
+                    "La commande a été enregistrée en attente de paiement, mais l'initialisation Stripe a échoué : "
+                            + ex.getMessage()
+                            + ". Vous pourrez relancer le paiement plus tard.");
         }
     }
 

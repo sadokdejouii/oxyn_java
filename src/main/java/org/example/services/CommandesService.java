@@ -336,6 +336,29 @@ public class CommandesService implements ICrud<commandes> {
     }
 
     /**
+     * Compte le nombre d'achats par produit pour un client.
+     * Utilisé par le moteur de recommandation boutique.
+     */
+    public Map<Integer, Integer> compterAchatsProduitParClient(int idClient) throws SQLException {
+        Map<Integer, Integer> result = new HashMap<>();
+        String sql = "SELECT l.id_produit_ligne_commande AS pid, SUM(l.quantite_ligne_commande) AS qte "
+                + "FROM ligne_commande l "
+                + "INNER JOIN commandes c ON c.id_commande = l.id_commande_ligne_commande "
+                + "WHERE c.id_client_commande = ? "
+                + "AND LOWER(TRIM(c.statut_commande)) NOT LIKE '%annul%' "
+                + "GROUP BY l.id_produit_ligne_commande";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idClient);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.put(rs.getInt("pid"), rs.getInt("qte"));
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * Passe le statut à {@code annulée} si la commande appartient au client, est validée, et date &lt; 24 h.
      */
     public boolean annulerCommande(int idCommande, int idClient) throws SQLException {
@@ -352,10 +375,10 @@ public class CommandesService implements ICrud<commandes> {
             con.setAutoCommit(false);
             String sqlCmd = "UPDATE commandes SET statut_commande = ? WHERE id_commande = ? AND id_client_commande = ? AND statut_commande = ?";
             try (PreparedStatement ps = con.prepareStatement(sqlCmd)) {
-                ps.setString(1, "annulée");
+                ps.setString(1, "Annulée");
                 ps.setInt(2, idCommande);
                 ps.setInt(3, idClient);
-                ps.setString(4, "validée");
+                ps.setString(4, "Validée");
                 if (ps.executeUpdate() != 1) {
                     con.rollback();
                     return false;
@@ -439,9 +462,39 @@ public class CommandesService implements ICrud<commandes> {
             ps.setString(1, nouvelleAdresse);
             ps.setInt(2, idCommande);
             ps.setInt(3, idClient);
-            ps.setString(4, "validée");
+            ps.setString(4, "Validée");
             return ps.executeUpdate() == 1;
         }
+    }
+
+    /**
+     * Finalise le paiement en ligne : une commande "en attente" passe à "validée".
+     */
+    public boolean confirmerPaiementCommande(int idCommande, int idClient) throws SQLException {
+        String sql = "UPDATE commandes SET statut_commande = ? "
+                + "WHERE id_commande = ? AND id_client_commande = ? "
+                + "AND LOWER(TRIM(statut_commande)) = LOWER(TRIM(?))";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "Validée");
+            ps.setInt(2, idCommande);
+            ps.setInt(3, idClient);
+            ps.setString(4, "En attente");
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    public commandes findCommandeClientById(int idCommande, int idClient) throws SQLException {
+        String sql = "SELECT * FROM commandes WHERE id_commande = ? AND id_client_commande = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idCommande);
+            ps.setInt(2, idClient);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapCommande(rs);
+                }
+            }
+        }
+        return null;
     }
 
     private commandes findById(int id) throws SQLException {

@@ -38,6 +38,10 @@
         </HBox>
 
         <VBox spacing="12" styleClass="client-shop-section-card" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+            <Label styleClass="front-result-label" text="Recommandés pour vous" />
+            <Label fx:id="recoHintLabel" styleClass="client-shop-muted" wrapText="true"
+                   text="Sélection personnalisée selon vos achats et votre recherche en cours." />
+            <TilePane fx:id="recommandationsContainer" hgap="18" vgap="18" alignment="TOP_CENTER" prefColumns="3" styleClass="front-events-grid" />
             <Label styleClass="front-result-label" text="Nos produits" />
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="products-scroll client-shop-inner-scroll" maxHeight="720" VBox.vgrow="ALWAYS">
                 <TilePane fx:id="produitsContainer" hgap="18" vgap="18" alignment="TOP_CENTER" prefColumns="3" styleClass="front-events-grid" />

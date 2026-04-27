@@ -10,6 +10,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.example.entities.produits;
+import org.example.services.ProduitAiService;
 import org.example.services.ProduitsService;
 import org.example.utils.ProductImageStorage;
 
@@ -45,6 +46,7 @@ public class AjouterProduitPageController {
     private TextField dateField;
     
     private ProduitsService produitsService;
+    private final ProduitAiService produitAiService = new ProduitAiService();
     private MainLayoutController mainLayoutController;
 
     /** Fichier image choisi par l’utilisateur (avant copie vers product_images). */
@@ -108,6 +110,34 @@ public class AjouterProduitPageController {
             showAlert("Erreur", "Veuillez vérifier les champs numériques (prix et quantité)");
         } catch (SQLException e) {
             showAlert("Erreur", "Erreur lors de l'ajout du produit: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleGenerateDescriptionAi() {
+        String nom = nomField != null ? nomField.getText().trim() : "";
+        if (nom.isBlank()) {
+            showAlert("Données incomplètes", "Veuillez d'abord renseigner le nom du produit.");
+            return;
+        }
+
+        double prix;
+        try {
+            prix = Double.parseDouble(prixField.getText().trim());
+            if (prix < 0) {
+                showAlert("Prix invalide", "Le prix doit être positif.");
+                return;
+            }
+        } catch (Exception ex) {
+            showAlert("Prix invalide", "Veuillez saisir un prix valide avant de générer la description.");
+            return;
+        }
+
+        String statut = statutField != null ? statutField.getText().trim() : "";
+        ProduitAiService.GenerationResult result = produitAiService.genererDescriptionProduit(nom, prix, statut);
+        descriptionField.setText(result.description());
+        if (result.warning() != null && !result.warning().isBlank()) {
+            showAlert("Info génération AI", result.warning());
         }
     }
 
