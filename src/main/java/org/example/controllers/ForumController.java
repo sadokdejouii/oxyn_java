@@ -1152,22 +1152,11 @@ public class ForumController implements Initializable {
         actionsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         actionsBox.setPadding(new Insets(4, 0, 0, 0));
 
-        Button likeBtn = new Button("❤  " + (comment.getLike_count() > 0 ? comment.getLike_count() : "0"));
-        likeBtn.getStyleClass().add("comment-like-btn");
-        likeBtn.setOnAction(e -> {
-            try {
-                commentService.likeComment(comment.getId_comment());
-                loadCommentsIntoSection(commentsSection, post, commentBtn);
-            } catch (SQLException ex) {
-                showError("Erreur: " + ex.getMessage());
-            }
-        });
-
         Button replyBtn = new Button("↩  Répondre");
         replyBtn.getStyleClass().add("comment-reply-btn");
         replyBtn.setOnAction(e -> showReplyInput(comment, post, commentsSection, commentBtn));
 
-        actionsBox.getChildren().addAll(likeBtn, replyBtn);
+        actionsBox.getChildren().add(replyBtn);
 
         // Owner actions (edit/delete) - only for comment author
         boolean isCommentOwner = comment.getId_author_comment() == currentUserId;
