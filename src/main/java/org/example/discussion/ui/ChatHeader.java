@@ -15,6 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * En-tête conversation façon Messenger :
  * <ul>
@@ -46,6 +49,8 @@ public final class ChatHeader extends HBox {
     private final Circle typingDot2;
     private final Circle typingDot3;
     private Timeline typingDotsTimeline;
+    /** Entrée / sortie douce de la bulle « en train d'écrire ». */
+    private Timeline typingBubbleEntranceTimeline;
 
     public ChatHeader() {
         setAlignment(Pos.CENTER_LEFT);
@@ -203,8 +208,10 @@ public final class ChatHeader extends HBox {
             typingText.setVisible(!text.isEmpty());
             typingBubble.setManaged(true);
             typingBubble.setVisible(true);
+            playTypingBubbleEntrance();
             startTypingDotsAnimation();
         } else {
+            stopTypingBubbleEntrance();
             typingBubble.setManaged(false);
             typingBubble.setVisible(false);
             stopTypingDotsAnimation();
@@ -246,31 +253,61 @@ public final class ChatHeader extends HBox {
         presenceHalo.setScaleY(1.0);
     }
 
+    private void playTypingBubbleEntrance() {
+        if (typingBubbleEntranceTimeline != null) {
+            typingBubbleEntranceTimeline.stop();
+        }
+        typingBubble.setOpacity(0);
+        typingBubble.setScaleX(0.90);
+        typingBubble.setScaleY(0.90);
+        typingBubbleEntranceTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(typingBubble.opacityProperty(), 0),
+                        new KeyValue(typingBubble.scaleXProperty(), 0.90, Interpolator.EASE_OUT),
+                        new KeyValue(typingBubble.scaleYProperty(), 0.90, Interpolator.EASE_OUT)),
+                new KeyFrame(Duration.millis(260),
+                        new KeyValue(typingBubble.opacityProperty(), 1, Interpolator.EASE_OUT),
+                        new KeyValue(typingBubble.scaleXProperty(), 1.02, Interpolator.SPLINE(0.34, 1.56, 0.64, 1)),
+                        new KeyValue(typingBubble.scaleYProperty(), 1.02, Interpolator.SPLINE(0.34, 1.56, 0.64, 1))),
+                new KeyFrame(Duration.millis(420),
+                        new KeyValue(typingBubble.scaleXProperty(), 1, Interpolator.EASE_OUT),
+                        new KeyValue(typingBubble.scaleYProperty(), 1, Interpolator.EASE_OUT))
+        );
+        typingBubbleEntranceTimeline.play();
+    }
+
+    private void stopTypingBubbleEntrance() {
+        if (typingBubbleEntranceTimeline != null) {
+            typingBubbleEntranceTimeline.stop();
+            typingBubbleEntranceTimeline = null;
+        }
+        typingBubble.setOpacity(1);
+        typingBubble.setScaleX(1);
+        typingBubble.setScaleY(1);
+    }
+
     private void startTypingDotsAnimation() {
         if (typingDotsTimeline != null) {
             return;
         }
-        // 3 points qui font un "bounce" séquentiel — style Messenger
+        Interpolator wave = Interpolator.SPLINE(0.34, 1.56, 0.64, 1);
+        Interpolator soft = Interpolator.EASE_BOTH;
+        // Chaque keyframe fixe les 3 points (évite les états fantômes entre pics).
         typingDotsTimeline = new Timeline(
-                kvOpacity(typingDot1, 0.30, 0),
-                kvOpacity(typingDot2, 0.30, 0),
-                kvOpacity(typingDot3, 0.30, 0),
-
-                kvOpacity(typingDot1, 1.0, 200),
-                kvTranslateY(typingDot1, -3, 200),
-
-                kvOpacity(typingDot1, 0.30, 400),
-                kvTranslateY(typingDot1, 0, 400),
-                kvOpacity(typingDot2, 1.0, 400),
-                kvTranslateY(typingDot2, -3, 400),
-
-                kvOpacity(typingDot2, 0.30, 600),
-                kvTranslateY(typingDot2, 0, 600),
-                kvOpacity(typingDot3, 1.0, 600),
-                kvTranslateY(typingDot3, -3, 600),
-
-                kvOpacity(typingDot3, 0.30, 800),
-                kvTranslateY(typingDot3, 0, 800)
+                kfDots(0, soft, soft, soft,
+                        0.40, 0.0, 1.0, 0.40, 0.0, 1.0, 0.40, 0.0, 1.0),
+                kfDots(130, wave, soft, soft,
+                        1.0, -5.0, 1.32, 0.40, 0.0, 1.0, 0.40, 0.0, 1.0),
+                kfDots(260, soft, soft, soft,
+                        0.40, 0.0, 1.0, 0.40, 0.0, 1.0, 0.40, 0.0, 1.0),
+                kfDots(390, soft, wave, soft,
+                        0.40, 0.0, 1.0, 1.0, -5.0, 1.32, 0.40, 0.0, 1.0),
+                kfDots(520, soft, soft, soft,
+                        0.40, 0.0, 1.0, 0.40, 0.0, 1.0, 0.40, 0.0, 1.0),
+                kfDots(650, soft, soft, wave,
+                        0.40, 0.0, 1.0, 0.40, 0.0, 1.0, 1.0, -5.0, 1.32),
+                kfDots(780, soft, soft, soft,
+                        0.40, 0.0, 1.0, 0.40, 0.0, 1.0, 0.40, 0.0, 1.0)
         );
         typingDotsTimeline.setCycleCount(Timeline.INDEFINITE);
         typingDotsTimeline.play();
@@ -281,21 +318,37 @@ public final class ChatHeader extends HBox {
             typingDotsTimeline.stop();
             typingDotsTimeline = null;
         }
-        typingDot1.setOpacity(1);
-        typingDot2.setOpacity(1);
-        typingDot3.setOpacity(1);
+        typingDot1.setOpacity(0.55);
+        typingDot2.setOpacity(0.55);
+        typingDot3.setOpacity(0.55);
         typingDot1.setTranslateY(0);
         typingDot2.setTranslateY(0);
         typingDot3.setTranslateY(0);
+        typingDot1.setScaleX(1);
+        typingDot1.setScaleY(1);
+        typingDot2.setScaleX(1);
+        typingDot2.setScaleY(1);
+        typingDot3.setScaleX(1);
+        typingDot3.setScaleY(1);
     }
 
-    private static KeyFrame kvOpacity(Circle dot, double opacity, double atMs) {
-        return new KeyFrame(Duration.millis(atMs),
-                new KeyValue(dot.opacityProperty(), opacity, Interpolator.EASE_BOTH));
+    private KeyFrame kfDots(double atMs,
+            Interpolator i1, Interpolator i2, Interpolator i3,
+            double o1, double y1, double s1,
+            double o2, double y2, double s2,
+            double o3, double y3, double s3) {
+        List<KeyValue> list = new ArrayList<>(12);
+        addDotKV(list, typingDot1, o1, y1, s1, i1);
+        addDotKV(list, typingDot2, o2, y2, s2, i2);
+        addDotKV(list, typingDot3, o3, y3, s3, i3);
+        return new KeyFrame(Duration.millis(atMs), list.toArray(new KeyValue[0]));
     }
 
-    private static KeyFrame kvTranslateY(Circle dot, double y, double atMs) {
-        return new KeyFrame(Duration.millis(atMs),
-                new KeyValue(dot.translateYProperty(), y, Interpolator.EASE_BOTH));
+    private static void addDotKV(List<KeyValue> list, Circle dot,
+                                 double opacity, double ty, double scale, Interpolator i) {
+        list.add(new KeyValue(dot.opacityProperty(), opacity, i));
+        list.add(new KeyValue(dot.translateYProperty(), ty, i));
+        list.add(new KeyValue(dot.scaleXProperty(), scale, i));
+        list.add(new KeyValue(dot.scaleYProperty(), scale, i));
     }
 }

@@ -39,6 +39,7 @@ public final class ObjectifClientService {
         if (texteObjectif == null || texteObjectif.isBlank()) {
             throw new SQLException("Veuillez décrire votre objectif ou problème.");
         }
+        // Pipeline IA local: extraction -> matching produits -> generation reponse.
         List<ObjectifIAService.Keyword> keywords = ia.extractKeywords(texteObjectif);
         List<produits> catalogue = produitsService.listAvailableForRecommendations();
         List<produits> recommended = ia.recommendProducts(keywords, catalogue);
@@ -53,6 +54,7 @@ public final class ObjectifClientService {
                 row.id(), row.userId(), row.texteObjectif(), row.reponseIa(),
                 keywordsText, ids, row.dateEnregistrement(), row.interventionEncadrant());
         try {
+            // Evenement interne planning pour rafraichir les ecrans relies (dashboard, hub, etc.).
             org.example.realtime.RealtimePlanningSyncService.getInstance()
                     .notifyObjectifUpdated(userId, newId);
         } catch (Exception ignored) {
@@ -104,6 +106,7 @@ public final class ObjectifClientService {
     }
 
     private ObjectifClientRow enrichWithComputedMeta(ObjectifClientRow row) throws SQLException {
+        // Backfill defensif: recalcule metadonnees si anciennes lignes incomplètes.
         List<ObjectifIAService.Keyword> keywords = ia.extractKeywords(row.texteObjectif());
         String keywordsText = ia.keywordsAsText(keywords);
         List<produits> recommended = ia.recommendProducts(keywords, produitsService.listAvailableForRecommendations());

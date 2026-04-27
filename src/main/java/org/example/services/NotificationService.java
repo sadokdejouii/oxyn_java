@@ -70,6 +70,7 @@ public final class NotificationService {
             List<ConversationRef> refs = loadConversationRefs(c, userId);
             List<UnreadNotification> notifications = new ArrayList<>();
             for (ConversationRef ref : refs) {
+                // Last-seen local par conversation: evite toute migration schema en base.
                 int lastSeen = getLastSeenId(userId, ref.conversationId);
                 UnreadSummary summary = loadUnreadForConversation(c, ref, userId, lastSeen);
                 if (summary != null && summary.count > 0) {
@@ -125,6 +126,7 @@ public final class NotificationService {
             }
             int current = getLastSeenId(userId, conversationId);
             if (maxId > current) {
+                // Ecriture locale uniquement (Preferences): non destructif pour le backend existant.
                 setLastSeenId(userId, conversationId, maxId);
             }
         } catch (SQLException ignored) {
@@ -224,7 +226,7 @@ public final class NotificationService {
                 FROM messages
                 WHERE conversation_id = ?
                   AND sender_id <> ?
-                  AND type IN (%s)
+                  AND (type IS NULL OR TRIM(UPPER(type)) IN (%s))
                   AND id > ?
                 """.formatted(ALLOWED_TYPES);
         int cnt = 0;

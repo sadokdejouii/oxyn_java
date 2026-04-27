@@ -38,6 +38,7 @@ public final class CalendarService {
         YearMonth ym = month != null ? month : YearMonth.now();
         LocalDate from = ym.atDay(1);
         LocalDate to = ym.atEndOfMonth();
+        // API interne planning: source unique des taches du mois pour la vue calendrier.
         List<TacheQuotidienne> monthTasks = tacheRepo.findForUserBetween(userId, from, to);
 
         Map<LocalDate, List<CalendarTaskItem>> grouped = monthTasks.stream()
@@ -50,6 +51,7 @@ public final class CalendarService {
 
         List<CalendarDayItem> days = grouped.entrySet().stream()
                 .map(e -> {
+                    // Pré-calcule les KPI affiches sur les cartes jours (fait/non fait/apercu).
                     long done = e.getValue().stream().filter(CalendarTaskItem::fait).count();
                     long pending = e.getValue().size() - done;
                     List<String> preview = e.getValue().stream().map(CalendarTaskItem::nom).limit(2).toList();
@@ -77,6 +79,7 @@ public final class CalendarService {
         TacheQuotidienne existing = tacheRepo.findById(taskId, userId)
                 .orElseThrow(() -> new SQLException("Tâche introuvable"));
         TacheEtat next = existing.etat() == TacheEtat.FAIT ? TacheEtat.NON_FAIT : TacheEtat.FAIT;
+        // Point d'ecriture principal du calendrier: toggle etat puis resynchronisation hebdo.
         tacheRepo.updateEtat(taskId, userId, next);
         weeklyTaskService.ensureCurrentWeekObjectifForUser(userId);
         TacheQuotidienne updated = tacheRepo.findById(taskId, userId)
@@ -93,6 +96,7 @@ public final class CalendarService {
     }
 
     private static CalendarTaskItem toApiTask(TacheQuotidienne t) {
+        // Mapping stable DB -> DTO UI/API interne (nom, duree lisible, statut logique).
         String desc = t.description() != null ? t.description().trim() : "";
         String nom = extractName(desc);
         String duree = extractDuration(desc);

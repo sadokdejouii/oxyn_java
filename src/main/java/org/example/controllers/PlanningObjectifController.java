@@ -187,8 +187,9 @@ public final class PlanningObjectifController {
                 productsGrid.getChildren().clear();
                 showProductsCard(false);
             }
-        } catch (SQLException ex) {
-            alert(Alert.AlertType.ERROR, "Analyse", ex.getMessage() != null ? ex.getMessage() : ex.toString());
+        } catch (SQLException e) {
+            alert(Alert.AlertType.ERROR, "Analyse",
+                    e.getMessage() != null ? e.getMessage() : e.toString());
         }
     }
 
@@ -280,4 +281,5 @@ public final class PlanningObjectifController {
         a.setContentText(msg);
         a.showAndWait();
     }
+
 }

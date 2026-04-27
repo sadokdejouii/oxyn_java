@@ -1,61 +1,51 @@
 /* =====================================================================
-   Planning · Cloche de notifications (messages non lus)
-   Inspiration : Messenger / Facebook — carte blanche, ombre douce.
-   ===================================================================== */
+ *  NOTIFICATIONS — Refonte premium type Twitter / Messenger
+ *  Palette : blanc / #F5F7FB / #3B82F6 (accent) / #EF4444 (badge)
+ *  Panel 360 px · radius 20 · shadow forte
+ * ===================================================================== */
 
+/* ---------------------------------------------------------------------
+ *  CLOCHE (point d'ancrage du popup)
+ * --------------------------------------------------------------------- */
 .planning-notif-bell {
     -fx-cursor: hand;
-    -fx-background-radius: 24;
-    -fx-background-color: rgba(255, 255, 255, 0.85);
-    -fx-border-color: rgba(148, 163, 184, 0.35);
-    -fx-border-radius: 24;
+    -fx-background-radius: 999;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-border-color: rgba(148, 163, 184, 0.30);
+    -fx-border-radius: 999;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 8, 0.2, 0, 2);
 }
 
 .planning-notif-bell:hover {
     -fx-background-color: #ffffff;
-    -fx-border-color: rgba(58, 122, 254, 0.55);
-    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.18), 10, 0, 0, 2);
+    -fx-border-color: rgba(59, 130, 246, 0.55);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.26), 18, 0.40, 0, 5);
+    -fx-translate-y: -1;
 }
 
-.planning-notif-bell-ring {
-    -fx-fill: transparent;
-    -fx-stroke: transparent;
-}
+.planning-notif-bell-icon { -fx-icon-color: #1e293b; }
+.planning-notif-bell:hover .planning-notif-bell-icon { -fx-icon-color: #3b82f6; }
 
-.planning-notif-bell-icon {
-    -fx-icon-color: #1f2a44;
-}
-
-.planning-notif-bell:hover .planning-notif-bell-icon {
-    -fx-icon-color: #3a7afe;
-}
-
-/* Variante admin : fond sombre */
+/* Variante shell admin sombre */
 .planning-main-shell--admin-dark .planning-notif-bell {
     -fx-background-color: rgba(14, 24, 40, 0.85);
     -fx-border-color: rgba(56, 189, 248, 0.35);
 }
-
-.planning-main-shell--admin-dark .planning-notif-bell-icon {
-    -fx-icon-color: #e2e8f0;
-}
-
+.planning-main-shell--admin-dark .planning-notif-bell-icon { -fx-icon-color: #e2e8f0; }
 .planning-main-shell--admin-dark .planning-notif-bell:hover {
     -fx-background-color: rgba(22, 34, 56, 0.95);
     -fx-border-color: rgba(56, 189, 248, 0.7);
 }
-
 .planning-main-shell--admin-dark .planning-notif-bell:hover .planning-notif-bell-icon {
     -fx-icon-color: #38bdf8;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Badge (bulle rouge)                                               */
-/* ------------------------------------------------------------------ */
+/* ---------------------------------------------------------------------
+ *  BADGE (rouge + halo pulsé) — position bas-droite de la cloche
+ * --------------------------------------------------------------------- */
 .planning-notif-badge-wrap {
-    -fx-background-color: #FF3B30;
+    -fx-background-color: linear-gradient(to bottom right, #ef4444, #dc2626);
     -fx-background-radius: 999;
     -fx-border-color: #ffffff;
     -fx-border-radius: 999;
@@ -66,7 +56,7 @@
     -fx-pref-height: 20;
     -fx-alignment: center;
     -fx-padding: 0 5 0 5;
-    -fx-effect: dropshadow(gaussian, rgba(255, 59, 48, 0.45), 8, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.55), 10, 0.35, 0, 2);
 }
 
 .planning-notif-badge {
@@ -76,173 +66,298 @@
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Dropdown                                                          */
-/* ------------------------------------------------------------------ */
+.planning-notif-badge-halo {
+    -fx-fill: #ef4444;
+    -fx-stroke: transparent;
+}
+
+/* ---------------------------------------------------------------------
+ *  POPUP / DROPDOWN
+ * --------------------------------------------------------------------- */
 .planning-notif-dropdown {
     -fx-background-color: #ffffff;
-    -fx-background-radius: 14;
-    -fx-border-color: rgba(226, 232, 240, 0.95);
-    -fx-border-radius: 14;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15, 23, 42, 0.06);
+    -fx-border-radius: 16;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.18), 24, 0, 0, 10);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.20), 28, 0.18, 0, 10);
     -fx-padding: 0;
 }
 
-.planning-notif-dropdown-header-row {
-    -fx-padding: 16 18 12 18;
-    -fx-border-color: transparent transparent rgba(226, 232, 240, 0.95) transparent;
+/* ---- Header (titre + tabs) ---- */
+.planning-notif-header {
+    -fx-padding: 0;
+    -fx-border-color: transparent transparent rgba(15, 23, 42, 0.06) transparent;
     -fx-border-width: 0 0 1 0;
+    -fx-background-radius: 20 20 0 0;
+}
+
+.planning-notif-dropdown-header-row {
+    -fx-padding: 18 20 6 20;
 }
 
 .planning-notif-dropdown-title {
-    -fx-font-size: 15px;
+    -fx-font-size: 17px;
     -fx-font-weight: bold;
     -fx-text-fill: #0f172a;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-letter-spacing: -0.01em;
 }
 
 .planning-notif-dropdown-sub {
     -fx-font-size: 11px;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #94a3b8;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-letter-spacing: 0.02em;
 }
 
 .planning-notif-mark-all {
-    -fx-background-color: transparent;
-    -fx-text-fill: #3a7afe;
-    -fx-font-size: 11px;
+    -fx-background-color: rgba(59, 130, 246, 0.10);
+    -fx-text-fill: #3b82f6;
+    -fx-font-size: 11.5px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
-    -fx-padding: 6 10 6 10;
-    -fx-background-radius: 8;
+    -fx-padding: 7 12 7 12;
+    -fx-background-radius: 999;
+    -fx-graphic-text-gap: 6;
+    -fx-icon-color: #3b82f6;
     -fx-border-color: transparent;
 }
 
 .planning-notif-mark-all:hover {
-    -fx-background-color: rgba(58, 122, 254, 0.1);
+    -fx-background-color: rgba(59, 130, 246, 0.18);
 }
 
-/* ------------------------------------------------------------------ */
-/*  Liste                                                             */
-/* ------------------------------------------------------------------ */
+/* ---- Tabs (All | Messages) ---- */
+.planning-notif-tabs {
+    -fx-padding: 4 16 14 16;
+}
+
+.planning-notif-tab {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748b;
+    -fx-padding: 7 16 7 16;
+    -fx-background-radius: 999;
+    -fx-cursor: hand;
+    -fx-background-color: transparent;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-tab:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
+}
+
+.planning-notif-tab--active {
+    -fx-background-color: #0f172a;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.15), 6, 0.30, 0, 1);
+}
+
+.planning-notif-tab--active:hover {
+    -fx-background-color: #1e293b;
+}
+
+/* ---------------------------------------------------------------------
+ *  LISTE
+ * --------------------------------------------------------------------- */
 .planning-notif-scroll {
     -fx-background-color: transparent;
     -fx-background: transparent;
     -fx-padding: 0;
+    -fx-border-color: transparent;
 }
 
-.planning-notif-scroll > .viewport {
-    -fx-background-color: transparent;
-}
+.planning-notif-scroll > .viewport { -fx-background-color: transparent; }
 
 .planning-notif-scroll .scroll-bar:vertical {
     -fx-background-color: transparent;
     -fx-padding: 0;
+    -fx-pref-width: 6;
+}
+
+.planning-notif-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(15, 23, 42, 0.18);
+    -fx-background-radius: 999;
+}
+
+.planning-notif-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(15, 23, 42, 0.32);
+}
+
+.planning-notif-scroll .scroll-bar .increment-button,
+.planning-notif-scroll .scroll-bar .decrement-button,
+.planning-notif-scroll .scroll-bar .increment-arrow,
+.planning-notif-scroll .scroll-bar .decrement-arrow {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-shape: " ";
 }
 
 .planning-notif-list {
     -fx-background-color: transparent;
-    -fx-padding: 4 0 8 0;
+    -fx-padding: 6 8 8 8;
+    -fx-spacing: 2;
 }
 
+/* ---- ITEM (line de notification) ---- */
 .planning-notif-item {
     -fx-background-color: transparent;
     -fx-cursor: hand;
-    -fx-background-radius: 10;
+    -fx-background-radius: 14;
 }
 
 .planning-notif-item:hover {
-    -fx-background-color: rgba(241, 245, 249, 0.95);
+    -fx-background-color: #f3f4f6;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 12, 0.22, 0, 2);
+    -fx-translate-x: 2;
+}
+
+/* Variante NON LU : fond bleu léger + barre latérale gauche bleue */
+.planning-notif-item--unread {
+    -fx-background-color: linear-gradient(to right, rgba(59, 130, 246, 0.10), rgba(59, 130, 246, 0.04));
+    -fx-border-color: rgba(59, 130, 246, 0.18);
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+}
+
+.planning-notif-item--unread:hover {
+    -fx-background-color: linear-gradient(to right, rgba(59, 130, 246, 0.16), rgba(59, 130, 246, 0.06));
+    -fx-border-color: rgba(59, 130, 246, 0.32);
 }
 
 .planning-notif-item-name {
-    -fx-font-size: 13.5px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-text-fill: #0f172a;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-.planning-notif-item-time {
-    -fx-font-size: 10.5px;
-    -fx-text-fill: #94a3b8;
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+.planning-notif-item--unread .planning-notif-item-name {
+    -fx-text-fill: #1e3a8a;
 }
 
 .planning-notif-item-preview {
-    -fx-font-size: 12.2px;
-    -fx-text-fill: #334155;
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
-}
-
-.planning-notif-item-email {
-    -fx-font-size: 10.5px;
-    -fx-text-fill: #64748b;
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
-}
-
-.planning-notif-item-pill {
-    -fx-background-color: #FF3B30;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
-    -fx-padding: 3 8 3 8;
-    -fx-background-radius: 999;
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
-}
-
-.planning-notif-empty {
     -fx-font-size: 12.5px;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #475569;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-line-spacing: 1px;
+}
+
+.planning-notif-item--unread .planning-notif-item-preview {
+    -fx-text-fill: #1e293b;
+}
+
+.planning-notif-item-time {
+    -fx-font-size: 11px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-padding: 2 0 0 0;
+}
+
+.planning-notif-item--unread .planning-notif-item-time {
+    -fx-text-fill: #3b82f6;
+    -fx-font-weight: bold;
+}
+
+/* Point bleu de non-lu */
+.planning-notif-unread-dot {
+    -fx-fill: #3b82f6;
+    -fx-stroke: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.55), 6, 0.4, 0, 0);
+}
+
+/* Avatar circulaire 40px */
+.planning-notif-avatar {
+    -fx-background-color: linear-gradient(to bottom right, #6366f1, #3b82f6 50%, #06b6d4 100%);
+    -fx-background-radius: 999;
     -fx-alignment: center;
-    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.35), 8, 0.25, 0, 2);
 }
 
-/* ------------------------------------------------------------------ */
-/*  Avatar                                                            */
-/* ------------------------------------------------------------------ */
-.planning-notif-avatar-ring {
-    -fx-fill: linear-gradient(from 0% 0% to 100% 100%, #3a7afe 0%, #00c9a7 100%);
-    -fx-stroke: rgba(255, 255, 255, 0.95);
-    -fx-stroke-width: 1.5px;
-}
-
-.planning-notif-avatar-fill {
-    -fx-fill: #ffffff;
+.planning-notif-item--unread .planning-notif-avatar {
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #2563eb 50%, #1d4ed8 100%);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.55), 12, 0.35, 0, 3);
 }
 
 .planning-notif-avatar-text {
-    -fx-font-size: 12.5px;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-text-fill: #3a7afe;
+    -fx-text-fill: #ffffff;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
 }
 
+/* ---------------------------------------------------------------------
+ *  ÉTAT VIDE
+ * --------------------------------------------------------------------- */
+.planning-notif-empty {
+    -fx-alignment: center;
+}
+
+.planning-notif-empty-icon-wrap {
+    -fx-background-color: linear-gradient(to bottom right, rgba(99, 102, 241, 0.10), rgba(59, 130, 246, 0.10));
+    -fx-background-radius: 999;
+    -fx-alignment: center;
+    -fx-border-color: rgba(59, 130, 246, 0.20);
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+}
+
+.planning-notif-empty-icon { -fx-icon-color: #3b82f6; }
+
+.planning-notif-empty-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.planning-notif-empty-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-line-spacing: 1px;
+}
+
+/* ---------------------------------------------------------------------
+ *  FOOTER
+ * --------------------------------------------------------------------- */
+.planning-notif-footer {
+    -fx-font-size: 11px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-padding: 12 16 14 16;
+    -fx-border-color: rgba(15, 23, 42, 0.05) transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-background-radius: 0 0 20 20;
+    -fx-background-color: #fafbfc;
+}
+
 /* =====================================================================
-   Toast notification (style Messenger desktop) — bas-droite, glissant
-   ===================================================================== */
+ *  TOAST (préservé — utilisé par MessageToast)
+ * ===================================================================== */
 .toast-root {
     -fx-background-color: transparent;
 }
 
 .toast-card {
     -fx-background-color: #ffffff;
-    -fx-background-radius: 14;
+    -fx-background-radius: 16;
     -fx-border-color: rgba(226, 232, 240, 0.95);
-    -fx-border-radius: 14;
+    -fx-border-radius: 16;
     -fx-border-width: 1;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.28), 24, 0.15, 0, 8);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.28), 28, 0.15, 0, 10);
 }
 
 .toast-card:hover {
-    -fx-border-color: rgba(58, 122, 254, 0.55);
-    -fx-effect: dropshadow(gaussian, rgba(58, 122, 254, 0.30), 24, 0.20, 0, 8);
+    -fx-border-color: rgba(59, 130, 246, 0.55);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.30), 28, 0.20, 0, 10);
 }
 
 .toast-avatar {
-    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #3a7afe 0%, #00c9a7 100%);
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6 0%, #06b6d4 100%);
     -fx-background-radius: 999;
     -fx-alignment: center;
 }

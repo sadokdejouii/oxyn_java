@@ -90,6 +90,7 @@ public final class RealtimeService {
         baseTopics.add("/notifications/user/" + userId);
         baseTopics.add("/planning/user/" + userId);
         baseTopics.add("/presence/user/" + userId);
+        // Les topics de base couvrent les besoins transverses de planning + discussion.
         statusProperty.set(Status.CONNECTING);
         mercure.start(combinedTopics());
         try {
@@ -126,6 +127,7 @@ public final class RealtimeService {
             return;
         }
         if (dynamicTopics.add(topic)) {
+            // Reconnexion volontaire pour appliquer la nouvelle liste de souscriptions SSE.
             mercure.start(combinedTopics());
         }
     }
@@ -174,6 +176,7 @@ public final class RealtimeService {
     }
 
     private void onMercureStatusChanged(MercureClientService.Status mercureStatus) {
+        // Adaptateur Mercure -> statut UI uniforme pour badges/indicateurs JavaFX.
         Status mapped = switch (mercureStatus) {
             case DISCONNECTED -> sessionUserId.get() > 0 ? Status.OFFLINE : Status.OFFLINE;
             case CONNECTING -> Status.CONNECTING;

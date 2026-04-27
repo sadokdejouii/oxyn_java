@@ -68,6 +68,9 @@ public final class MercureClientService {
         return t;
     });
 
+    /** Évite d'inonder la console si le hub Mercure est injoignable. */
+    private volatile long lastPublishErrorLogMs;
+
     public MercureClientService() {
         this(RealtimeConfig.getInstance(), RealtimeEventDispatcher.getInstance());
     }
@@ -165,7 +168,16 @@ public final class MercureClientService {
                         + topic + " : " + resp.body());
             }
         } catch (Exception e) {
-            System.err.println("[Realtime] Publish error on " + topic + " : " + e.getMessage());
+            long now = System.currentTimeMillis();
+            if (now - lastPublishErrorLogMs >= 30_000L) {
+                lastPublishErrorLogMs = now;
+                String detail = e.getMessage();
+                if (detail == null || detail.isBlank()) {
+                    detail = e.getClass().getSimpleName();
+                }
+                System.err.println("[Realtime] Publication Mercure impossible (hub arrêté ou "
+                        + "realtime.properties). " + detail + " — prochains échecs silencieux ~30s.");
+            }
         }
     }
 
