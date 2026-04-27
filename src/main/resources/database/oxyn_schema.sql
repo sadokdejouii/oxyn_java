@@ -49,7 +49,6 @@ CREATE TABLE IF NOT EXISTS google_calendar_user_tokens (
     INDEX idx_google_token_user (id_user_google_token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- ========== GOOGLE CALENDAR EVENT LINKS TABLE ==========
 CREATE TABLE IF NOT EXISTS google_calendar_event_links (
     id_google_event_link INT AUTO_INCREMENT PRIMARY KEY,
     id_inscription_google_link INT NOT NULL,
@@ -65,7 +64,36 @@ CREATE TABLE IF NOT EXISTS google_calendar_event_links (
     INDEX idx_google_link_evenement (id_evenement_google_link)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- ========== EVENT NOTIFICATIONS TABLE ==========
+-- ========== GOOGLE CALENDAR ADMIN TOKENS TABLE ==========
+CREATE TABLE IF NOT EXISTS google_calendar_admin_tokens (
+    id_admin_token INT AUTO_INCREMENT PRIMARY KEY,
+    admin_email VARCHAR(255) NOT NULL,
+    access_token_admin_token LONGTEXT NOT NULL,
+    refresh_token_admin_token LONGTEXT,
+    access_token_expires_at_admin_token DATETIME,
+    scope_admin_token VARCHAR(500),
+    token_type_admin_token VARCHAR(50),
+    created_at_admin_token TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at_admin_token TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_admin_token_email (admin_email),
+    INDEX idx_admin_token_email (admin_email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ========== GOOGLE CALENDAR ADMIN EVENT LINKS TABLE ==========
+CREATE TABLE IF NOT EXISTS google_calendar_admin_event_links (
+    id_admin_event_link INT AUTO_INCREMENT PRIMARY KEY,
+    id_evenement_admin_link INT NOT NULL,
+    admin_email VARCHAR(255) NOT NULL,
+    google_calendar_id VARCHAR(255) NOT NULL DEFAULT 'primary',
+    google_event_id VARCHAR(255) NOT NULL,
+    sync_status_admin_link VARCHAR(50) NOT NULL DEFAULT 'synced',
+    created_at_admin_link TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at_admin_link TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_admin_event (id_evenement_admin_link),
+    INDEX idx_admin_event (id_evenement_admin_link),
+    INDEX idx_admin_email (admin_email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE IF NOT EXISTS event_notifications (
     id_notification INT AUTO_INCREMENT PRIMARY KEY,
     id_user_notification INT NOT NULL,

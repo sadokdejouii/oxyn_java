@@ -42,8 +42,10 @@ import java.util.concurrent.TimeUnit;
 
 public class GoogleCalendarSyncService {
 
-    private static final String TOKEN_TABLE = "google_calendar_user_tokens";
-    private static final String LINK_TABLE = "google_calendar_event_links";
+    private static final String USER_TOKEN_TABLE = "google_calendar_user_tokens";
+    private static final String USER_LINK_TABLE = "google_calendar_event_links";
+    private static final String ADMIN_TOKEN_TABLE = "google_calendar_admin_tokens";
+    private static final String ADMIN_LINK_TABLE = "google_calendar_admin_event_links";
     private static final String CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
     private static final DateTimeFormatter ISO_OFFSET = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
@@ -111,41 +113,287 @@ public class GoogleCalendarSyncService {
     }
 
     private void ensureTables() {
-        String tokenSql = "CREATE TABLE IF NOT EXISTS " + TOKEN_TABLE + " ("
-                + "id_google_token INT AUTO_INCREMENT PRIMARY KEY, "
-                + "id_user_google_token INT NOT NULL, "
-                + "access_token_google_token TEXT NOT NULL, "
-                + "refresh_token_google_token TEXT NULL, "
-                + "access_token_expires_at_google_token DATETIME NULL, "
-                + "scope_google_token VARCHAR(500) NULL, "
-                + "token_type_google_token VARCHAR(50) NULL, "
-                + "created_at_google_token TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-                + "updated_at_google_token TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
-                + "UNIQUE KEY uniq_google_token_user (id_user_google_token), "
-                + "INDEX idx_google_token_user (id_user_google_token)"
-                + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+        // User tables (already created by schema)
+        // Admin tables (already created by schema)
+        // No-op here, schema migration is handled by SQL
+    }
 
-        String linkSql = "CREATE TABLE IF NOT EXISTS " + LINK_TABLE + " ("
-                + "id_google_event_link INT AUTO_INCREMENT PRIMARY KEY, "
-                + "id_inscription_google_link INT NOT NULL, "
-                + "id_user_google_link INT NOT NULL, "
-                + "id_evenement_google_link INT NOT NULL, "
-                + "google_calendar_id VARCHAR(255) NOT NULL DEFAULT 'primary', "
-                + "google_event_id VARCHAR(255) NOT NULL, "
-                + "sync_status_google_link VARCHAR(50) NOT NULL DEFAULT 'synced', "
-                + "created_at_google_link TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-                + "updated_at_google_link TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
-                + "UNIQUE KEY uniq_google_link_inscription (id_inscription_google_link), "
-                + "INDEX idx_google_link_user (id_user_google_link), "
-                + "INDEX idx_google_link_evenement (id_evenement_google_link)"
-                + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+    // ================= ADMIN SYNC METHODS =================
 
-        try (Statement st = con.createStatement()) {
-            st.execute(tokenSql);
-            st.execute(linkSql);
-        } catch (SQLException ex) {
-            throw new IllegalStateException("Impossible d'initialiser les tables Google Calendar.", ex);
+    public SyncResult syncAdminEvent(Evenement event, String adminEmail) {
+        if (event == null || adminEmail == null || adminEmail.isBlank() || event.getId() <= 0) {
+            return SyncResult.withWarning("Événement enregistré, mais la synchronisation Google Calendar admin a été ignorée.");
         }
+        try {
+            OAuthClientConfig config = loadClientConfig();
+            AdminTokenRecord token = ensureAuthorizedAdminToken(adminEmail, config);
+            AdminEventLinkRecord link = findAdminEventLink(event.getId());
+            String googleEventId;
+            if (link != null && link.googleEventId() != null && !link.googleEventId().isBlank()) {
+                // Update existing event
+                updateGoogleCalendarEvent(token.accessToken(), link.googleEventId(), event);
+                googleEventId = link.googleEventId();
+            } else {
+                // Create new event
+                googleEventId = createGoogleCalendarEvent(token.accessToken(), event);
+                try {
+                    upsertAdminEventLink(event.getId(), adminEmail, "primary", googleEventId, "synced");
+                } catch (SQLException sqlException) {
+                    deleteGoogleCalendarEvent(token.accessToken(), "primary", googleEventId);
+                    throw sqlException;
+                }
+            }
+            return SyncResult.ok();
+        } catch (Exception exception) {
+            return SyncResult.withWarning("Ajout admin Google Calendar échoué: " + sanitizeMessage(exception));
+        }
+    }
+
+    // Update an existing Google Calendar event by ID.
+    private void updateGoogleCalendarEvent(String accessToken, String googleEventId, Evenement event) throws Exception {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("summary", safe(event.getTitre(), "Événement OXYN"));
+        payload.addProperty("description", buildEventDescription(event));
+        payload.addProperty("location", buildLocation(event));
+
+        JsonObject start = new JsonObject();
+        start.addProperty("dateTime", toOffsetDateTime(event.getDateDebut()));
+        start.addProperty("timeZone", ZoneId.systemDefault().getId());
+        payload.add("start", start);
+
+        JsonObject end = new JsonObject();
+        end.addProperty("dateTime", toOffsetDateTime(resolveEndDate(event)));
+        end.addProperty("timeZone", ZoneId.systemDefault().getId());
+        payload.add("end", end);
+
+        JsonObject reminders = new JsonObject();
+        reminders.addProperty("useDefault", true);
+        payload.add("reminders", reminders);
+
+        String url = "https://www.googleapis.com/calendar/v3/calendars/primary/events/"
+                + URLEncoder.encode(googleEventId, StandardCharsets.UTF_8);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(gson.toJson(payload), StandardCharsets.UTF_8))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        ensureSuccess(response, "Impossible de mettre à jour l'événement Google Calendar.");
+    }
+
+    public SyncResult removeAdminEventSync(int eventId, String adminEmail) {
+        if (eventId <= 0 || adminEmail == null || adminEmail.isBlank()) {
+            return SyncResult.ok();
+        }
+        AdminEventLinkRecord link;
+        try {
+            link = findAdminEventLink(eventId);
+        } catch (SQLException exception) {
+            return SyncResult.withWarning("Suppression admin Google Calendar: lien introuvable.");
+        }
+        if (link == null || link.googleEventId() == null || link.googleEventId().isBlank()) {
+            deleteAdminEventLinkQuietly(eventId);
+            return SyncResult.ok();
+        }
+        try {
+            OAuthClientConfig config = loadClientConfig();
+            AdminTokenRecord token = ensureAuthorizedAdminToken(adminEmail, config);
+            deleteGoogleCalendarEvent(token.accessToken(), link.calendarId(), link.googleEventId());
+            deleteAdminEventLink(eventId);
+            return SyncResult.ok();
+        } catch (Exception exception) {
+            deleteAdminEventLinkQuietly(eventId);
+            return SyncResult.withWarning("Suppression admin Google Calendar échouée: " + sanitizeMessage(exception));
+        }
+    }
+
+    // ========== ADMIN TOKEN MANAGEMENT ==========
+    private AdminTokenRecord ensureAuthorizedAdminToken(String adminEmail, OAuthClientConfig config) throws Exception {
+        AdminTokenRecord current = findAdminToken(adminEmail);
+        if (current == null) {
+            return authorizeAdmin(adminEmail, config);
+        }
+        if (!current.isExpiredSoon()) {
+            return current;
+        }
+        if (current.refreshToken() == null || current.refreshToken().isBlank()) {
+            return authorizeAdmin(adminEmail, config);
+        }
+        try {
+            return refreshAdminToken(adminEmail, config, current);
+        } catch (IOException exception) {
+            return authorizeAdmin(adminEmail, config);
+        }
+    }
+
+    private AdminTokenRecord authorizeAdmin(String adminEmail, OAuthClientConfig config) throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        CompletableFuture<AuthorizationResponse> authFuture = new CompletableFuture<>();
+        String state = UUID.randomUUID().toString();
+        int port = server.getAddress().getPort();
+        String redirectUri = "http://localhost:" + port + "/oauth2/callback";
+        server.createContext("/oauth2/callback", exchange -> handleOAuthCallback(exchange, state, authFuture));
+        server.start();
+        try {
+            openAuthorizationPage(buildAuthorizationUrl(config, redirectUri, state));
+            AuthorizationResponse response = authFuture.get(180, TimeUnit.SECONDS);
+            if (response.error() != null && !response.error().isBlank()) {
+                throw new IOException("Autorisation Google refusée ou interrompue.");
+            }
+            if (response.code() == null || response.code().isBlank()) {
+                throw new IOException("Code d'autorisation Google introuvable.");
+            }
+            return exchangeAdminAuthorizationCode(adminEmail, config, response.code(), redirectUri);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    private AdminTokenRecord exchangeAdminAuthorizationCode(String adminEmail, OAuthClientConfig config, String code, String redirectUri) throws Exception {
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("code", code);
+        body.put("client_id", config.clientId());
+        body.put("client_secret", config.clientSecret());
+        body.put("redirect_uri", redirectUri);
+        body.put("grant_type", "authorization_code");
+        JsonObject json = postForm(config.tokenUri(), body);
+        AdminTokenRecord token = toAdminTokenRecord(adminEmail, json, null);
+        upsertAdminToken(token);
+        return token;
+    }
+
+    private AdminTokenRecord refreshAdminToken(String adminEmail, OAuthClientConfig config, AdminTokenRecord existing) throws Exception {
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("client_id", config.clientId());
+        body.put("client_secret", config.clientSecret());
+        body.put("refresh_token", existing.refreshToken());
+        body.put("grant_type", "refresh_token");
+        JsonObject json = postForm(config.tokenUri(), body);
+        AdminTokenRecord refreshed = toAdminTokenRecord(adminEmail, json, existing);
+        upsertAdminToken(refreshed);
+        return refreshed;
+    }
+
+    private AdminTokenRecord findAdminToken(String adminEmail) throws SQLException {
+        String sql = "SELECT access_token_admin_token, refresh_token_admin_token, access_token_expires_at_admin_token, "
+                + "scope_admin_token, token_type_admin_token FROM " + ADMIN_TOKEN_TABLE + " WHERE admin_email = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, adminEmail);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Timestamp expiresAt = rs.getTimestamp("access_token_expires_at_admin_token");
+                return new AdminTokenRecord(
+                        adminEmail,
+                        rs.getString("access_token_admin_token"),
+                        rs.getString("refresh_token_admin_token"),
+                        expiresAt == null ? null : expiresAt.toInstant(),
+                        rs.getString("scope_admin_token"),
+                        rs.getString("token_type_admin_token")
+                );
+            }
+        }
+    }
+
+    private void upsertAdminToken(AdminTokenRecord token) throws SQLException {
+        String sql = "INSERT INTO " + ADMIN_TOKEN_TABLE + " ("
+                + "admin_email, access_token_admin_token, refresh_token_admin_token, "
+                + "access_token_expires_at_admin_token, scope_admin_token, token_type_admin_token"
+                + ") VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE "
+                + "access_token_admin_token = VALUES(access_token_admin_token), "
+                + "refresh_token_admin_token = VALUES(refresh_token_admin_token), "
+                + "access_token_expires_at_admin_token = VALUES(access_token_expires_at_admin_token), "
+                + "scope_admin_token = VALUES(scope_admin_token), "
+                + "token_type_admin_token = VALUES(token_type_admin_token)";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, token.adminEmail());
+            ps.setString(2, token.accessToken());
+            ps.setString(3, token.refreshToken());
+            if (token.expiresAt() == null) {
+                ps.setTimestamp(4, null);
+            } else {
+                ps.setTimestamp(4, Timestamp.from(token.expiresAt()));
+            }
+            ps.setString(5, token.scope());
+            ps.setString(6, token.tokenType());
+            ps.executeUpdate();
+        }
+    }
+
+    // ========== ADMIN EVENT LINK MANAGEMENT ==========
+    private AdminEventLinkRecord findAdminEventLink(int eventId) throws SQLException {
+        String sql = "SELECT google_calendar_id, google_event_id, sync_status_admin_link FROM " + ADMIN_LINK_TABLE + " WHERE id_evenement_admin_link = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                return new AdminEventLinkRecord(
+                        rs.getString("google_calendar_id"),
+                        rs.getString("google_event_id"),
+                        rs.getString("sync_status_admin_link")
+                );
+            }
+        }
+    }
+
+    private void upsertAdminEventLink(int eventId, String adminEmail, String calendarId, String googleEventId, String status) throws SQLException {
+        String sql = "INSERT INTO " + ADMIN_LINK_TABLE + " ("
+                + "id_evenement_admin_link, admin_email, google_calendar_id, google_event_id, sync_status_admin_link"
+                + ") VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE "
+                + "admin_email = VALUES(admin_email), "
+                + "google_calendar_id = VALUES(google_calendar_id), "
+                + "google_event_id = VALUES(google_event_id), "
+                + "sync_status_admin_link = VALUES(sync_status_admin_link)";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            ps.setString(2, adminEmail);
+            ps.setString(3, calendarId);
+            ps.setString(4, googleEventId);
+            ps.setString(5, status);
+            ps.executeUpdate();
+        }
+    }
+
+    private void deleteAdminEventLink(int eventId) throws SQLException {
+        String sql = "DELETE FROM " + ADMIN_LINK_TABLE + " WHERE id_evenement_admin_link = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            ps.executeUpdate();
+        }
+    }
+
+    private void deleteAdminEventLinkQuietly(int eventId) {
+        try {
+            deleteAdminEventLink(eventId);
+        } catch (SQLException ignored) {
+        }
+    }
+
+    private AdminTokenRecord toAdminTokenRecord(String adminEmail, JsonObject json, AdminTokenRecord fallback) {
+        String accessToken = getRequiredString(json, "access_token");
+        String refreshToken = getOptionalString(json, "refresh_token", fallback == null ? null : fallback.refreshToken());
+        long expiresIn = json.has("expires_in") && !json.get("expires_in").isJsonNull()
+                ? json.get("expires_in").getAsLong()
+                : 3600L;
+        Instant expiresAt = Instant.now().plusSeconds(Math.max(60L, expiresIn - 60L));
+        String scope = getOptionalString(json, "scope", fallback == null ? CALENDAR_SCOPE : fallback.scope());
+        String tokenType = getOptionalString(json, "token_type", fallback == null ? "Bearer" : fallback.tokenType());
+        return new AdminTokenRecord(adminEmail, accessToken, refreshToken, expiresAt, scope, tokenType);
+    }
+
+    private record AdminTokenRecord(String adminEmail, String accessToken, String refreshToken, Instant expiresAt, String scope, String tokenType) {
+        private boolean isExpiredSoon() {
+            return expiresAt == null || Instant.now().plusSeconds(60).isAfter(expiresAt);
+        }
+    }
+
+    private record AdminEventLinkRecord(String calendarId, String googleEventId, String syncStatus) {
     }
 
     private TokenRecord ensureAuthorizedToken(int localUserId, OAuthClientConfig config) throws Exception {
@@ -459,7 +707,7 @@ public class GoogleCalendarSyncService {
 
     private TokenRecord findToken(int localUserId) throws SQLException {
         String sql = "SELECT access_token_google_token, refresh_token_google_token, access_token_expires_at_google_token, "
-                + "scope_google_token, token_type_google_token FROM " + TOKEN_TABLE + " WHERE id_user_google_token = ?";
+            + "scope_google_token, token_type_google_token FROM " + USER_TOKEN_TABLE + " WHERE id_user_google_token = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, localUserId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -481,7 +729,7 @@ public class GoogleCalendarSyncService {
     }
 
     private void upsertToken(TokenRecord token) throws SQLException {
-        String sql = "INSERT INTO " + TOKEN_TABLE + " ("
+        String sql = "INSERT INTO " + USER_TOKEN_TABLE + " ("
                 + "id_user_google_token, access_token_google_token, refresh_token_google_token, "
                 + "access_token_expires_at_google_token, scope_google_token, token_type_google_token"
                 + ") VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE "
@@ -507,7 +755,7 @@ public class GoogleCalendarSyncService {
     }
 
     private EventLinkRecord findEventLink(int inscriptionId) throws SQLException {
-        String sql = "SELECT google_calendar_id, google_event_id, sync_status_google_link FROM " + LINK_TABLE + " WHERE id_inscription_google_link = ?";
+        String sql = "SELECT google_calendar_id, google_event_id, sync_status_google_link FROM " + USER_LINK_TABLE + " WHERE id_inscription_google_link = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, inscriptionId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -527,7 +775,7 @@ public class GoogleCalendarSyncService {
                                  String calendarId,
                                  String googleEventId,
                                  String status) throws SQLException {
-        String sql = "INSERT INTO " + LINK_TABLE + " ("
+        String sql = "INSERT INTO " + USER_LINK_TABLE + " ("
                 + "id_inscription_google_link, id_user_google_link, id_evenement_google_link, google_calendar_id, google_event_id, sync_status_google_link"
                 + ") VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE "
                 + "id_user_google_link = VALUES(id_user_google_link), "
@@ -547,7 +795,7 @@ public class GoogleCalendarSyncService {
     }
 
     private void deleteEventLink(int inscriptionId) throws SQLException {
-        String sql = "DELETE FROM " + LINK_TABLE + " WHERE id_inscription_google_link = ?";
+        String sql = "DELETE FROM " + USER_LINK_TABLE + " WHERE id_inscription_google_link = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, inscriptionId);
             ps.executeUpdate();

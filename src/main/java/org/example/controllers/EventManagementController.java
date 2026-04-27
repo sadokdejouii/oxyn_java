@@ -1,5 +1,6 @@
 package org.example.controllers;
 
+import org.example.services.GoogleCalendarSyncService;
 import javafx.animation.Interpolator;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -97,6 +98,11 @@ import javax.imageio.ImageIO;
  * Event Management Controller with detailed event cards, inscriptions and reviews filtering
  */
 public class EventManagementController implements Initializable {
+
+    // Google Calendar admin sync service
+    private final GoogleCalendarSyncService googleCalendarSyncService = new GoogleCalendarSyncService();
+    // TODO: Replace with dynamic admin email (from session/user context)
+    private static final String ADMIN_EMAIL = "admin@oxyn.local";
 
     // ==================== MODELS ====================
 
@@ -833,6 +839,27 @@ public class EventManagementController implements Initializable {
             return;
         }
 
+        // Admin Google Calendar sync on event create/update (run in background thread)
+        if (event.getId() > 0) {
+            javafx.concurrent.Task<GoogleCalendarSyncService.SyncResult> syncTask = new javafx.concurrent.Task<>() {
+                @Override
+                protected GoogleCalendarSyncService.SyncResult call() {
+                    return googleCalendarSyncService.syncAdminEvent(event, ADMIN_EMAIL);
+                }
+            };
+            syncTask.setOnSucceeded(e -> {
+                GoogleCalendarSyncService.SyncResult syncResult = syncTask.getValue();
+                if (syncResult.hasMessage()) {
+                    showStyledError("Google Calendar (admin)", syncResult.message());
+                }
+            });
+            syncTask.setOnFailed(e -> {
+                Throwable ex = syncTask.getException();
+                showStyledError("Google Calendar (admin)", ex != null ? ex.getMessage() : "Erreur inconnue lors de la synchronisation Google Calendar.");
+            });
+            new Thread(syncTask).start();
+        }
+
         EventItem updatedItem = toEventItem(event);
         for (int index = 0; index < eventsList.size(); index++) {
             if (eventsList.get(index).getId() == updatedItem.getId()) {
@@ -1551,15 +1578,32 @@ public class EventManagementController implements Initializable {
         );
 
         if (confirmed) {
-            try {
-                evenementServices.supprimer(eventId);
-                showStyledSuccess("Événement supprimé ✓", "L'événement \"" + eventTitle + "\" a été supprimé avec succès.");
-
-                loadData();
-                showView(View.EVENTS);
-            } catch (SQLException ex) {
-                showStyledError("Erreur lors de la suppression", "Détail: " + ex.getMessage());
-            }
+            // Admin Google Calendar sync on event delete (run in background thread)
+            javafx.concurrent.Task<GoogleCalendarSyncService.SyncResult> syncTask = new javafx.concurrent.Task<>() {
+                @Override
+                protected GoogleCalendarSyncService.SyncResult call() {
+                    return googleCalendarSyncService.removeAdminEventSync(eventId, ADMIN_EMAIL);
+                }
+            };
+            syncTask.setOnSucceeded(e -> {
+                GoogleCalendarSyncService.SyncResult syncResult = syncTask.getValue();
+                if (syncResult.hasMessage()) {
+                    showStyledError("Google Calendar (admin)", syncResult.message());
+                }
+                try {
+                    evenementServices.supprimer(eventId);
+                    showStyledSuccess("Événement supprimé ✓", "L'événement \"" + eventTitle + "\" a été supprimé avec succès.");
+                    loadData();
+                    showView(View.EVENTS);
+                } catch (SQLException ex) {
+                    showStyledError("Erreur lors de la suppression", "Détail: " + ex.getMessage());
+                }
+            });
+            syncTask.setOnFailed(e -> {
+                Throwable ex = syncTask.getException();
+                showStyledError("Google Calendar (admin)", ex != null ? ex.getMessage() : "Erreur inconnue lors de la synchronisation Google Calendar.");
+            });
+            new Thread(syncTask).start();
         }
     }
 
