@@ -107,6 +107,10 @@ public class InscriptionEvenementServices implements ICrud<InscriptionEvenement>
 
     @Override
     public void ajouter(InscriptionEvenement i) throws SQLException {
+        ajouterEtRetournerId(i);
+    }
+
+    public int ajouterEtRetournerId(InscriptionEvenement i) throws SQLException {
         InscriptionCols cols = loadInscriptionCols();
         String qd = quoteIdent(con, cols.dateInscription);
         String qs = quoteIdent(con, cols.statut);
@@ -114,13 +118,19 @@ public class InscriptionEvenementServices implements ICrud<InscriptionEvenement>
         String qu = quoteIdent(con, cols.idUser);
         String sql = "INSERT INTO inscription_evenement (" + qd + ", " + qs + ", " + qe + ", " + qu + ") VALUES (?,?,?,?)";
 
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setTimestamp(1, new Timestamp(i.getDateInscription().getTime()));
             ps.setString(2, i.getStatut());
             ps.setInt(3, i.getIdEvenement());
             ps.setInt(4, i.getIdUser());
             ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    i.setId(keys.getInt(1));
+                }
+            }
             System.out.println("Inscription ajoutée avec succès !");
+            return i.getId();
         }
     }
 

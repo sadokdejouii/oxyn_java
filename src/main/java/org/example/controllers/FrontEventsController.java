@@ -39,6 +39,7 @@ import org.example.services.AvisModerationException;
 import org.example.services.AvisEvenementServices;
 import org.example.services.EvenementServices;
 import org.example.services.EventCoverPhotoService;
+import org.example.services.GoogleCalendarSyncService;
 import org.example.services.InscriptionEvenementServices;
 import org.example.services.SessionContext;
 import org.example.services.UserService;
@@ -54,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -617,9 +619,10 @@ public class FrontEventsController implements Initializable {
             }
 
             InscriptionEvenement inscription = new InscriptionEvenement(new Date(), "confirmée", event.getId(), requireCurrentUserId());
-            inscriptionServices.ajouter(inscription);
+            inscriptionServices.ajouterEtRetournerId(inscription);
             loadEvents();
             Platform.runLater(() -> showInscriptionsPopup(event));
+            syncRegistrationWithGoogle(event, inscription);
         } catch (Exception exception) {
             showDataPopup(
                     "Inscriptions",
@@ -640,9 +643,11 @@ public class FrontEventsController implements Initializable {
 
     private void cancelMyInscription(Evenement event, int inscriptionId) {
         try {
+            int currentUserId = requireCurrentUserId();
             inscriptionServices.supprimer(inscriptionId);
             loadEvents();
             Platform.runLater(() -> showInscriptionsPopup(event));
+            removeRegistrationFromGoogleAsync(currentUserId, inscriptionId);
         } catch (Exception exception) {
             showDataPopup(
                     "Inscriptions",
@@ -764,6 +769,42 @@ public class FrontEventsController implements Initializable {
                     false
             );
         }
+    }
+
+    private void syncRegistrationWithGoogle(Evenement event, InscriptionEvenement inscription) {
+        CompletableFuture
+                .supplyAsync(() -> new GoogleCalendarSyncService().syncRegistration(event, inscription))
+                .thenAccept(result -> {
+                    if (result != null && result.hasMessage()) {
+                        Platform.runLater(() -> showCalendarSyncAlert(result.message()));
+                    }
+                })
+                .exceptionally(error -> {
+                    Platform.runLater(() -> showCalendarSyncAlert("Inscription enregistrée, mais Google Calendar n'a pas pu être synchronisé."));
+                    return null;
+                });
+    }
+
+    private void removeRegistrationFromGoogleAsync(int userId, int inscriptionId) {
+        CompletableFuture
+                .supplyAsync(() -> new GoogleCalendarSyncService().removeRegistrationSync(userId, inscriptionId))
+                .thenAccept(result -> {
+                    if (result != null && result.hasMessage()) {
+                        Platform.runLater(() -> showCalendarSyncAlert(result.message()));
+                    }
+                })
+                .exceptionally(error -> {
+                    Platform.runLater(() -> showCalendarSyncAlert("Désinscription enregistrée, mais Google Calendar n'a pas pu être mis à jour."));
+                    return null;
+                });
+    }
+
+    private void showCalendarSyncAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Google Calendar");
+        alert.setHeaderText("Synchronisation partielle");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private boolean canJoinEvent(Evenement event) {

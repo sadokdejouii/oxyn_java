@@ -34,6 +34,37 @@ CREATE TABLE IF NOT EXISTS inscriptions_evenement (
     INDEX idx_statut (statut_inscription)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- ========== GOOGLE CALENDAR TOKENS TABLE ==========
+CREATE TABLE IF NOT EXISTS google_calendar_user_tokens (
+    id_google_token INT AUTO_INCREMENT PRIMARY KEY,
+    id_user_google_token INT NOT NULL,
+    access_token_google_token LONGTEXT NOT NULL,
+    refresh_token_google_token LONGTEXT,
+    access_token_expires_at_google_token DATETIME,
+    scope_google_token VARCHAR(500),
+    token_type_google_token VARCHAR(50),
+    created_at_google_token TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at_google_token TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_google_token_user (id_user_google_token),
+    INDEX idx_google_token_user (id_user_google_token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ========== GOOGLE CALENDAR EVENT LINKS TABLE ==========
+CREATE TABLE IF NOT EXISTS google_calendar_event_links (
+    id_google_event_link INT AUTO_INCREMENT PRIMARY KEY,
+    id_inscription_google_link INT NOT NULL,
+    id_user_google_link INT NOT NULL,
+    id_evenement_google_link INT NOT NULL,
+    google_calendar_id VARCHAR(255) NOT NULL DEFAULT 'primary',
+    google_event_id VARCHAR(255) NOT NULL,
+    sync_status_google_link VARCHAR(50) NOT NULL DEFAULT 'synced',
+    created_at_google_link TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at_google_link TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_google_link_inscription (id_inscription_google_link),
+    INDEX idx_google_link_user (id_user_google_link),
+    INDEX idx_google_link_evenement (id_evenement_google_link)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- ========== EVENT NOTIFICATIONS TABLE ==========
 CREATE TABLE IF NOT EXISTS event_notifications (
     id_notification INT AUTO_INCREMENT PRIMARY KEY,
