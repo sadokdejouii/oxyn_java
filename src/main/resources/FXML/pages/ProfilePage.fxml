@@ -6,6 +6,7 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -19,6 +20,7 @@
         <!-- Hero -->
         <HBox styleClass="pp-hero">
             <StackPane styleClass="pp-avatar-wrap">
+                <ImageView fx:id="avatarImageView" fitWidth="64" fitHeight="64" preserveRatio="true" visible="false" managed="false" />
                 <Label fx:id="avatarLabel" styleClass="pp-avatar-text" text="?" />
             </StackPane>
             <VBox spacing="10" HBox.hgrow="ALWAYS">
@@ -118,6 +120,15 @@
                         <Label fx:id="totpStatusLabel" styleClass="pp-hint-muted" text="—" />
                         <Button fx:id="enableTotpButton" onAction="#handleEnableTotp" styleClass="secondary-toolbar-btn" text="Activer" />
                         <Button fx:id="disableTotpButton" onAction="#handleDisableTotp" styleClass="secondary-toolbar-btn" text="Désactiver" />
+                    </HBox>
+
+                    <Label styleClass="pp-section-title" text="AVATAR" />
+                    <Label styleClass="pp-section-hint" text="Générez automatiquement un avatar à partir de votre photo (visage détecté puis stylisé localement)." wrapText="true" />
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label fx:id="avatarStatusLabel" styleClass="pp-hint-muted" text="—" />
+                        <Button fx:id="generateAvatarButton" onAction="#handleGenerateAvatar" styleClass="secondary-toolbar-btn" text="Générer depuis webcam" />
+                        <Button fx:id="generateAvatarAiButton" text="Générer Avatar IA 🎨" onAction="#handleGenerateAvatarAi" styleClass="secondary-toolbar-btn" />
+                        <Button fx:id="removeAvatarButton" onAction="#handleRemoveAvatar" styleClass="secondary-toolbar-btn" text="Supprimer" />
                     </HBox>
                 </VBox>
             </VBox>

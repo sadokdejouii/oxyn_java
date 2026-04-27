@@ -2,12 +2,16 @@ package org.example.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.entities.Admin;
@@ -32,11 +36,15 @@ import org.example.totp.Base32;
 import org.example.totp.QrCode;
 import org.example.totp.Totp;
 import org.example.totp.TotpDAO;
+import org.example.avatar.AvatarDAO;
+import org.example.avatar.AvatarGenerator;
+import org.example.avatar.AvatarAiService;
 
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ResourceBundle;
+import java.io.ByteArrayInputStream;
 
 /**
  * Profil connecté : e-mail, nom, prénom, téléphone et changement de mot de passe (admin, client, encadrant).
@@ -130,6 +138,21 @@ public class ProfilePageController implements Initializable {
     private Label avatarLabel;
 
     @FXML
+    private ImageView avatarImageView;
+
+    @FXML
+    private Label avatarStatusLabel;
+
+    @FXML
+    private Button generateAvatarButton;
+
+    @FXML
+    private Button generateAvatarAiButton;
+
+    @FXML
+    private Button removeAvatarButton;
+
+    @FXML
     private Label formHintLabel;
 
     @FXML
@@ -142,6 +165,8 @@ public class ProfilePageController implements Initializable {
     private final WindowsHelloLinkDAO windowsHelloLinkDAO = new WindowsHelloLinkDAO();
     private final FaceEmbeddingDAO faceEmbeddingDAO = new FaceEmbeddingDAO();
     private final TotpDAO totpDAO = new TotpDAO();
+    private final AvatarDAO avatarDAO = new AvatarDAO();
+    private final AvatarAiService avatarAiService = new AvatarAiService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -222,6 +247,151 @@ public class ProfilePageController implements Initializable {
         refreshWindowsHelloBlock(u);
         refreshFaceBlock(u);
         refreshTotpBlock(u);
+        refreshAvatarImage(u);
+    }
+
+    private void refreshAvatarImage(User u) {
+        if (avatarImageView == null || avatarLabel == null || avatarStatusLabel == null
+                || generateAvatarButton == null || removeAvatarButton == null) {
+            return;
+        }
+        if (u == null || u.getId() <= 0) {
+            avatarImageView.setVisible(false);
+            avatarImageView.setManaged(false);
+            avatarLabel.setVisible(true);
+            avatarLabel.setManaged(true);
+            avatarStatusLabel.setText("Avatar : indisponible (pas de session).");
+            generateAvatarButton.setDisable(true);
+            removeAvatarButton.setDisable(true);
+            return;
+        }
+        try {
+            var recOpt = avatarDAO.getByUserId(u.getId());
+            if (recOpt.isEmpty() || recOpt.get().avatarPng() == null || recOpt.get().avatarPng().length == 0) {
+                avatarImageView.setVisible(false);
+                avatarImageView.setManaged(false);
+                avatarLabel.setVisible(true);
+                avatarLabel.setManaged(true);
+                avatarStatusLabel.setText("Avatar : non généré.");
+                generateAvatarButton.setDisable(false);
+                removeAvatarButton.setDisable(true);
+                return;
+            }
+            Image img = new Image(new ByteArrayInputStream(recOpt.get().avatarPng()));
+            avatarImageView.setImage(img);
+            avatarImageView.setVisible(true);
+            avatarImageView.setManaged(true);
+            avatarLabel.setVisible(false);
+            avatarLabel.setManaged(false);
+            avatarStatusLabel.setText("Avatar : généré.");
+            generateAvatarButton.setDisable(false);
+            removeAvatarButton.setDisable(false);
+        } catch (SQLException e) {
+            avatarStatusLabel.setText("Avatar : erreur DB.");
+            generateAvatarButton.setDisable(false);
+            removeAvatarButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleGenerateAvatar() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) return;
+        try {
+            // Réutilise la capture visage (webcam) existante: détecte visage puis crop.
+            var face96 = FaceCaptureService.captureSingleFace96x96Bgr(0, Duration.ofSeconds(12));
+            byte[] png = AvatarGenerator.generateAvatarPng(face96);
+            avatarDAO.upsert(cur.getId(), png);
+            UserDialogHelper.showMessage(owner(), "Avatar", "Avatar généré et enregistré.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Avatar",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } catch (Exception e) {
+            UserDialogHelper.showMessage(owner(), "Avatar",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshAvatarImage(cur);
+        }
+    }
+
+    @FXML
+    private void handleGenerateAvatarAi() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) return;
+
+        // Désactiver les boutons pendant le traitement (appel réseau ~10-30s)
+        if (generateAvatarAiButton != null) generateAvatarAiButton.setDisable(true);
+        if (generateAvatarButton   != null) generateAvatarButton.setDisable(true);
+        if (avatarStatusLabel      != null) avatarStatusLabel.setText("Avatar IA : génération en cours…");
+
+        Task<byte[]> task = new Task<>() {
+            @Override
+            protected byte[] call() throws Exception {
+                // Capture le visage depuis la webcam (réutilise l'infrastructure existante)
+                var face96 = org.example.facerec.FaceCaptureService
+                        .captureSingleFace96x96Bgr(0, java.time.Duration.ofSeconds(12));
+
+                // Encode le Mat OpenCV en JPEG pour l'envoyer à l'API
+                org.bytedeco.javacpp.BytePointer buf = new org.bytedeco.javacpp.BytePointer();
+                org.bytedeco.opencv.global.opencv_imgcodecs.imencode(".jpg", face96, buf);
+                byte[] jpegBytes = new byte[(int) buf.limit()];
+                buf.get(jpegBytes);
+                buf.close();
+
+                return avatarAiService.generateAnimeAvatar(jpegBytes);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            byte[] result = task.getValue();
+            Platform.runLater(() -> {
+                if (result != null && result.length > 0) {
+                    try {
+                        avatarDAO.upsert(cur.getId(), result);
+                        UserDialogHelper.showMessage(owner(), "Avatar IA", "Avatar anime généré et enregistré ✨", false);
+                    } catch (java.sql.SQLException ex) {
+                        UserDialogHelper.showMessage(owner(), "Avatar IA", "Erreur DB: " + ex.getMessage(), true);
+                    }
+                } else {
+                    UserDialogHelper.showMessage(owner(), "Avatar IA",
+                            "La génération IA a échoué (API HuggingFace indisponible ou quota dépassé).", true);
+                }
+                refreshAvatarImage(cur);
+                if (generateAvatarAiButton != null) generateAvatarAiButton.setDisable(false);
+                if (generateAvatarButton   != null) generateAvatarButton.setDisable(false);
+            });
+        });
+
+        task.setOnFailed(e -> {
+            Throwable ex = task.getException();
+            Platform.runLater(() -> {
+                UserDialogHelper.showMessage(owner(), "Avatar IA",
+                        ex != null ? ex.getMessage() : "Erreur inconnue", true);
+                refreshAvatarImage(cur);
+                if (generateAvatarAiButton != null) generateAvatarAiButton.setDisable(false);
+                if (generateAvatarButton   != null) generateAvatarButton.setDisable(false);
+            });
+        });
+
+        new Thread(task, "avatar-ai-thread").start();
+    }
+
+    @FXML
+    private void handleRemoveAvatar() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) return;
+        try {
+            avatarDAO.delete(cur.getId());
+            UserDialogHelper.showMessage(owner(), "Avatar", "Avatar supprimé.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Avatar",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshAvatarImage(cur);
+        }
     }
 
     private void refreshTotpBlock(User u) {
