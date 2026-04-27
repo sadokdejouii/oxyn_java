@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-final class SendGridConfig {
+public final class SendGridConfig {
 
-    record Cfg(String apiKey, String fromEmail, boolean debug) {
+    public record Cfg(String apiKey, String fromEmail, boolean debug) {
     }
 
     private static final String BOM = "\uFEFF";
@@ -19,7 +19,7 @@ final class SendGridConfig {
     private SendGridConfig() {
     }
 
-    static Cfg load() {
+    public static Cfg load() {
         // 1) env
         String apiKey = trim(System.getenv("SENDGRID_API_KEY"));
         String from = trim(System.getenv("SENDGRID_FROM_EMAIL"));
@@ -51,7 +51,7 @@ final class SendGridConfig {
         return new Cfg(apiKey, from, debug);
     }
 
-    static Path userHomePropsPath() {
+    public static Path userHomePropsPath() {
         String home = System.getProperty("user.home");
         if (home == null || home.isBlank()) {
             return Paths.get("sendgrid.properties");

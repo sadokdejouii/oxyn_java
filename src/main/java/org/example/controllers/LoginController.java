@@ -27,7 +27,9 @@ import org.example.totp.Totp;
 import org.example.totp.TotpDAO;
 import org.example.utils.UserDialogHelper;
 import org.example.notifications.LoginEmailNotifier;
+import org.example.notifications.TemporalPermissionNotifier;
 import javafx.concurrent.Task;
+import org.example.digitalwill.DigitalWillService;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -63,6 +65,8 @@ public class LoginController implements Initializable {
 
     private final AuthService authService = new AuthService();
     private final TotpDAO totpDAO = new TotpDAO();
+    private final org.example.services.UserService userService = new org.example.services.UserService();
+    private final DigitalWillService digitalWillService = new DigitalWillService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -179,7 +183,13 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
+            try {
+                userService.touchLastSeen(user.getId());
+            } catch (SQLException ignored) {
+            }
             LoginEmailNotifier.notifyLoginAsync(user.getEmail(), user.getPrenom() + " " + user.getNom());
+            TemporalPermissionNotifier.notifyExpiringSoonAsync(user);
+            digitalWillService.startMaintenanceOnceAsync();
             openMain(event);
         } catch (SQLException e) {
             showError("Erreur base de données",
@@ -261,6 +271,22 @@ public class LoginController implements Initializable {
                     e.getMessage() != null ? e.getMessage() : e.toString());
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void handleForgotPassword(ActionEvent event) {
+        String emailPrefill = emailField != null ? emailField.getText() : "";
+        UserDialogHelper.showForgotPasswordDialog(ownerStage(), emailPrefill);
+    }
+
+    private Stage ownerStage() {
+        if (emailField != null && emailField.getScene() != null) {
+            return (Stage) emailField.getScene().getWindow();
+        }
+        if (passwordField != null && passwordField.getScene() != null) {
+            return (Stage) passwordField.getScene().getWindow();
+        }
+        return null;
     }
 
     private void clearFieldErrors() {

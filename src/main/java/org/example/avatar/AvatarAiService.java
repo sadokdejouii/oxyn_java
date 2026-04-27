@@ -11,7 +11,7 @@ import java.util.Base64;
  */
 public class AvatarAiService {
 
-    
+   
     private static final String SUBMIT_URL = "https://router.huggingface.co/wavespeed/api/v3/wavespeed-ai/qwen-image/edit-plus-lora";
     private static final String PROMPT     = "Convert this portrait into anime style";
     private static final String SDXL_URL   = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0";
