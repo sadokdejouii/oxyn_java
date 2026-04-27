@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -21,6 +22,7 @@ import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -35,7 +37,6 @@ import javafx.stage.StageStyle;
 import org.example.entities.AvisEvenement;
 import org.example.entities.Evenement;
 import org.example.entities.InscriptionEvenement;
-import org.example.services.AvisModerationException;
 import org.example.services.AvisEvenementServices;
 import org.example.services.EvenementServices;
 import org.example.services.EventCoverPhotoService;
@@ -52,10 +53,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -84,9 +86,11 @@ public class FrontEventsController implements Initializable {
     private final EvenementServices evenementServices = new EvenementServices();
     private final InscriptionEvenementServices inscriptionServices = new InscriptionEvenementServices();
     private final AvisEvenementServices avisServices = new AvisEvenementServices();
-    private final EventCoverPhotoService coverPhotoService = new EventCoverPhotoService();
+    private final GoogleCalendarSyncService googleCalendarSyncService = new GoogleCalendarSyncService();
     private final UserService userService = new UserService();
+    private final EventCoverPhotoService coverPhotoService = new EventCoverPhotoService();
     private final List<Evenement> allEvents = new ArrayList<>();
+    private final Map<Integer, String> userDisplayNameCache = new HashMap<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.FRENCH);
 
     @Override
@@ -167,7 +171,6 @@ public class FrontEventsController implements Initializable {
         allEvents.clear();
         try {
             List<Evenement> loadedEvents = evenementServices.afficher();
-            applyEventBusinessRules(loadedEvents);
             allEvents.addAll(loadedEvents);
             updateCounters();
             applyFilters();
@@ -177,21 +180,6 @@ public class FrontEventsController implements Initializable {
                     "Impossible de charger les événements",
                     "Vérifiez la connexion à la base de données puis réessayez."
             );
-        }
-    }
-
-    private void applyEventBusinessRules(List<Evenement> events) {
-        Date now = new Date();
-
-        for (Evenement event : events) {
-            if (event.getDateFin() != null && now.after(event.getDateFin()) && !isFinishedStatus(event.getStatut())) {
-                event.setStatut("Terminée");
-                try {
-                    evenementServices.modifier(event);
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
-                }
-            }
         }
     }
 
@@ -377,7 +365,7 @@ public class FrontEventsController implements Initializable {
         cover.getChildren().add(overlay);
         StackPane.setAlignment(overlay, Pos.CENTER);
 
-        requestPhotoCover(cover, visualKey, resolveCoverLabel(visualKey), safe(event.getTitre()), safe(event.getDescription()));
+        requestPhotoCover(cover, visualKey, resolvePhotoLabel(event, visualKey), safe(event.getTitre()), safe(event.getDescription()));
 
         return cover;
     }
@@ -393,17 +381,14 @@ public class FrontEventsController implements Initializable {
             return;
         }
 
-        Region photoLayer = new Region();
+        ImageView photoLayer = new ImageView(image);
         photoLayer.setMouseTransparent(true);
-        photoLayer.prefWidthProperty().bind(cover.widthProperty());
-        photoLayer.prefHeightProperty().bind(cover.heightProperty());
-        photoLayer.setBackground(new Background(new BackgroundImage(
-                image,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
-                new BackgroundSize(100, 100, true, true, false, true)
-        )));
+        photoLayer.setSmooth(true);
+        photoLayer.fitWidthProperty().bind(cover.widthProperty());
+        photoLayer.fitHeightProperty().bind(cover.heightProperty());
+        cover.widthProperty().addListener((obs, oldValue, newValue) -> updateCoverViewport(photoLayer, image, cover.getWidth(), cover.getHeight()));
+        cover.heightProperty().addListener((obs, oldValue, newValue) -> updateCoverViewport(photoLayer, image, cover.getWidth(), cover.getHeight()));
+        updateCoverViewport(photoLayer, image, cover.getWidth(), cover.getHeight());
 
         Region scrim = new Region();
         scrim.getStyleClass().add("front-cover-scrim");
@@ -417,6 +402,35 @@ public class FrontEventsController implements Initializable {
 
         cover.getChildren().setAll(photoLayer, scrim, photoLabel);
         StackPane.setAlignment(photoLabel, Pos.CENTER);
+    }
+
+    private void updateCoverViewport(ImageView imageView, Image image, double targetWidth, double targetHeight) {
+        if (targetWidth <= 0 || targetHeight <= 0 || image.getWidth() <= 0 || image.getHeight() <= 0) {
+            return;
+        }
+
+        double imageRatio = image.getWidth() / image.getHeight();
+        double targetRatio = targetWidth / targetHeight;
+
+        double viewportWidth = image.getWidth();
+        double viewportHeight = image.getHeight();
+        double viewportX = 0;
+        double viewportY = 0;
+
+        if (imageRatio > targetRatio) {
+            viewportWidth = image.getHeight() * targetRatio;
+            viewportX = (image.getWidth() - viewportWidth) / 2.0;
+        } else {
+            viewportHeight = image.getWidth() / targetRatio;
+            viewportY = (image.getHeight() - viewportHeight) / 2.0;
+        }
+
+        imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
+    }
+
+    private String resolvePhotoLabel(Evenement event, String visualKey) {
+        String title = fallback(event.getTitre(), "Event Spotlight");
+        return "generic".equals(visualKey) ? title : resolveCoverLabel(visualKey);
     }
 
     private void applyRoundedClip(StackPane cover, double arcSize) {
@@ -458,7 +472,7 @@ public class FrontEventsController implements Initializable {
                     .collect(Collectors.toList());
 
             InscriptionEvenement currentUserInscription = inscriptions.stream()
-                    .filter(item -> item.getIdUser() == requireCurrentUserId())
+                    .filter(item -> item.getIdUser() == getCurrentUserId())
                     .findFirst()
                     .orElse(null);
 
@@ -504,13 +518,10 @@ public class FrontEventsController implements Initializable {
 
     private void showAvisPopup(Evenement event) {
         try {
-            List<InscriptionEvenement> inscriptions = inscriptionServices.afficher().stream()
-                    .filter(item -> item.getIdEvenement() == event.getId())
-                    .collect(Collectors.toList());
-
             List<AvisEvenement> avisList = avisServices.afficher().stream()
                     .filter(item -> item.getIdEvenement() == event.getId())
                     .collect(Collectors.toList());
+            boolean currentUserRegistered = hasCurrentUserRegistration(event.getId());
 
             List<String> rows = avisList.stream()
                     .map(item -> "• " + formatUser(item.getIdUser())
@@ -519,16 +530,13 @@ public class FrontEventsController implements Initializable {
                     .collect(Collectors.toList());
 
             AvisEvenement currentUserAvis = avisList.stream()
-                    .filter(item -> item.getIdUser() == requireCurrentUserId())
+                    .filter(item -> item.getIdUser() == getCurrentUserId())
                     .findFirst()
                     .orElse(null);
 
-                boolean currentUserRegistered = inscriptions.stream()
-                    .anyMatch(item -> item.getIdUser() == requireCurrentUserId());
-
                 String primaryText = currentUserRegistered
                     ? (currentUserAvis == null ? "Ajouter mon avis" : "Modifier mon avis")
-                    : "Inscrivez-vous pour donner un avis";
+                    : "Inscription requise";
 
             showDataPopup(
                     "Avis",
@@ -608,8 +616,9 @@ public class FrontEventsController implements Initializable {
 
     private void joinEvent(Evenement event) {
         try {
+            int currentUserId = getRequiredCurrentUserId();
             boolean alreadyRegistered = inscriptionServices.afficher().stream()
-                    .anyMatch(item -> item.getIdEvenement() == event.getId() && item.getIdUser() == requireCurrentUserId());
+                .anyMatch(item -> item.getIdEvenement() == event.getId() && item.getIdUser() == currentUserId);
 
             boolean eventIsFull = isEventFull(event);
 
@@ -618,17 +627,17 @@ public class FrontEventsController implements Initializable {
                 return;
             }
 
-            InscriptionEvenement inscription = new InscriptionEvenement(new Date(), "confirmée", event.getId(), requireCurrentUserId());
-            inscriptionServices.ajouterEtRetournerId(inscription);
+            InscriptionEvenement inscription = new InscriptionEvenement(new Date(), "confirmée", event.getId(), currentUserId);
+            inscriptionServices.ajouter(inscription);
             loadEvents();
             Platform.runLater(() -> showInscriptionsPopup(event));
-            syncRegistrationWithGoogle(event, inscription);
+                runCalendarRegistrationSync(event, inscription);
         } catch (Exception exception) {
             showDataPopup(
                     "Inscriptions",
                     "Inscriptions pour : " + fallback(event.getTitre(), "cet événement"),
                     List.of(),
-                    "Impossible d'effectuer l'inscription pour le moment.",
+                    exception.getMessage() != null ? exception.getMessage() : "Impossible d'effectuer l'inscription pour le moment.",
                     null,
                     null,
                     false,
@@ -643,17 +652,17 @@ public class FrontEventsController implements Initializable {
 
     private void cancelMyInscription(Evenement event, int inscriptionId) {
         try {
-            int currentUserId = requireCurrentUserId();
+            int currentUserId = getRequiredCurrentUserId();
             inscriptionServices.supprimer(inscriptionId);
             loadEvents();
             Platform.runLater(() -> showInscriptionsPopup(event));
-            removeRegistrationFromGoogleAsync(currentUserId, inscriptionId);
+            runCalendarRemovalSync(event, currentUserId, inscriptionId);
         } catch (Exception exception) {
             showDataPopup(
                     "Inscriptions",
                     "Inscriptions pour : " + fallback(event.getTitre(), "cet événement"),
                     List.of(),
-                    "Impossible d'annuler votre inscription pour le moment.",
+                    exception.getMessage() != null ? exception.getMessage() : "Impossible d'annuler votre inscription pour le moment.",
                     null,
                     null,
                     false,
@@ -668,6 +677,11 @@ public class FrontEventsController implements Initializable {
 
     private void openAvisForm(Evenement event, AvisEvenement existingAvis) {
         try {
+            if (!hasCurrentUserRegistration(event.getId())) {
+                showAvisRegistrationRequired(event);
+                return;
+            }
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/pages/FrontAvisFormPopup.fxml"));
             Parent root = loader.load();
 
@@ -691,6 +705,21 @@ public class FrontEventsController implements Initializable {
             if (controller.isConfirmed()) {
                 saveOrUpdateAvis(event, existingAvis, controller.getSelectedNote(), controller.getComment());
             }
+        } catch (SQLException exception) {
+            showDataPopup(
+                    "Avis",
+                    "Avis pour : " + fallback(event.getTitre(), "cet événement"),
+                    List.of(),
+                    exception.getMessage() != null ? exception.getMessage() : "Impossible de vérifier votre inscription pour le moment.",
+                    null,
+                    null,
+                    false,
+                    false,
+                    null,
+                    null,
+                    false,
+                    false
+            );
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -698,44 +727,27 @@ public class FrontEventsController implements Initializable {
 
     private void saveOrUpdateAvis(Evenement event, AvisEvenement existingAvis, int note, String comment) {
         try {
+            int currentUserId = getRequiredCurrentUserId();
             if (existingAvis == null) {
-                AvisEvenement avis = new AvisEvenement(note, comment, new Date(), event.getId(), requireCurrentUserId());
+                AvisEvenement avis = new AvisEvenement(note, comment, new Date(), event.getId(), currentUserId);
                 avisServices.ajouter(avis);
             } else {
                 existingAvis.setNote(note);
                 existingAvis.setCommentaire(comment);
                 existingAvis.setCreatedAt(new Date());
                 existingAvis.setIdEvenement(event.getId());
-                existingAvis.setIdUser(requireCurrentUserId());
+                existingAvis.setIdUser(currentUserId);
                 avisServices.modifier(existingAvis);
             }
 
             loadEvents();
             Platform.runLater(() -> showAvisPopup(event));
-    } catch (AvisModerationException exception) {
-        showDataPopup(
-            "Avis",
-            "Avis pour : " + fallback(event.getTitre(), "cet événement"),
-            exception.getPopupRows(),
-            exception.getMessage(),
-            null,
-            null,
-            false,
-            false,
-            null,
-            null,
-            false,
-            false
-        );
         } catch (Exception exception) {
-            String detail = exception.getMessage() == null || exception.getMessage().isBlank()
-                ? "Impossible d'enregistrer votre avis pour le moment."
-                : exception.getMessage();
             showDataPopup(
                     "Avis",
                     "Avis pour : " + fallback(event.getTitre(), "cet événement"),
                     List.of(),
-                detail,
+                    exception.getMessage() != null ? exception.getMessage() : "Impossible d'enregistrer votre avis pour le moment.",
                     null,
                     null,
                     false,
@@ -771,48 +783,9 @@ public class FrontEventsController implements Initializable {
         }
     }
 
-    private void syncRegistrationWithGoogle(Evenement event, InscriptionEvenement inscription) {
-        CompletableFuture
-                .supplyAsync(() -> new GoogleCalendarSyncService().syncRegistration(event, inscription))
-                .thenAccept(result -> {
-                    if (result != null && result.hasMessage()) {
-                        Platform.runLater(() -> showCalendarSyncAlert(result.message()));
-                    }
-                })
-                .exceptionally(error -> {
-                    Platform.runLater(() -> showCalendarSyncAlert("Inscription enregistrée, mais Google Calendar n'a pas pu être synchronisé."));
-                    return null;
-                });
-    }
-
-    private void removeRegistrationFromGoogleAsync(int userId, int inscriptionId) {
-        CompletableFuture
-                .supplyAsync(() -> new GoogleCalendarSyncService().removeRegistrationSync(userId, inscriptionId))
-                .thenAccept(result -> {
-                    if (result != null && result.hasMessage()) {
-                        Platform.runLater(() -> showCalendarSyncAlert(result.message()));
-                    }
-                })
-                .exceptionally(error -> {
-                    Platform.runLater(() -> showCalendarSyncAlert("Désinscription enregistrée, mais Google Calendar n'a pas pu être mis à jour."));
-                    return null;
-                });
-    }
-
-    private void showCalendarSyncAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Google Calendar");
-        alert.setHeaderText("Synchronisation partielle");
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
     private boolean canJoinEvent(Evenement event) {
         String normalized = safe(event.getStatut()).toLowerCase(Locale.ROOT);
-        return normalized.contains("à venir")
-                || normalized.contains("a venir")
-                || normalized.contains("en cours")
-                || normalized.contains("cours");
+        return normalized.contains("à venir") || normalized.contains("a venir");
     }
 
     private boolean isEventFull(Evenement event) {
@@ -834,28 +807,81 @@ public class FrontEventsController implements Initializable {
         return inscriptions.size() >= maxPlaces;
     }
 
-    private boolean isFinishedStatus(String status) {
-        String normalized = safe(status).toLowerCase(Locale.ROOT);
-        return normalized.contains("termin");
-    }
-
-    private String formatUser(int userId) {
-        if (userId == currentUserIdOrZero()) {
-            return "Vous";
-        }
-        return userService.getUserDisplayName(userId);
-    }
-
-    private int currentUserIdOrZero() {
+    private int getCurrentUserId() {
         return SessionContext.getInstance().getUserId();
     }
 
-    private int requireCurrentUserId() {
-        int userId = currentUserIdOrZero();
+    private int getRequiredCurrentUserId() {
+        int userId = getCurrentUserId();
         if (userId <= 0) {
-            throw new IllegalStateException("Utilisateur non connecté.");
+            throw new IllegalStateException("Vous devez être connecté pour gérer une inscription ou publier un avis.");
         }
         return userId;
+    }
+
+    private void runCalendarRegistrationSync(Evenement event, InscriptionEvenement inscription) {
+        Thread worker = new Thread(() -> {
+            GoogleCalendarSyncService.SyncResult result = googleCalendarSyncService.syncRegistration(event, inscription);
+            showCalendarSyncWarningIfNeeded("Inscriptions", result);
+        }, "google-calendar-registration-sync");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private void runCalendarRemovalSync(Evenement event, int currentUserId, int inscriptionId) {
+        Thread worker = new Thread(() -> {
+            GoogleCalendarSyncService.SyncResult result = googleCalendarSyncService.removeRegistrationSync(currentUserId, inscriptionId);
+            showCalendarSyncWarningIfNeeded("Inscriptions", result);
+        }, "google-calendar-removal-sync");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private void showCalendarSyncWarningIfNeeded(String title, GoogleCalendarSyncService.SyncResult result) {
+        if (result == null || result.success() || result.message() == null || result.message().isBlank()) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(title);
+            alert.setHeaderText("Google Calendar");
+            alert.setContentText(result.message());
+            if (eventsContainer != null && eventsContainer.getScene() != null) {
+                alert.initOwner(eventsContainer.getScene().getWindow());
+            }
+            alert.show();
+        });
+    }
+
+    private boolean hasCurrentUserRegistration(int eventId) throws SQLException {
+        int currentUserId = getCurrentUserId();
+        if (currentUserId <= 0) {
+            return false;
+        }
+        return inscriptionServices.afficher().stream()
+                .anyMatch(item -> item.getIdEvenement() == eventId && item.getIdUser() == currentUserId);
+    }
+
+    private void showAvisRegistrationRequired(Evenement event) {
+        showDataPopup(
+                "Avis",
+                "Avis pour : " + fallback(event.getTitre(), "cet événement"),
+                List.of(),
+                "Vous devez être inscrit à cet événement avant de publier ou modifier un avis.",
+                null,
+                null,
+                false,
+                false,
+                null,
+                null,
+                false,
+                false
+        );
+    }
+
+    private String formatUser(int userId) {
+        return userDisplayNameCache.computeIfAbsent(userId, userService::getUserDisplayName);
     }
 
     private String formatStars(int note) {

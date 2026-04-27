@@ -401,7 +401,10 @@ public class GoogleCalendarSyncService {
         Path[] directCandidates = new Path[] {
                 Paths.get("google-oauth-client.json"),
                 Paths.get("secrets", "google-oauth-client.json"),
-                Paths.get("secrets", "google-oauth-client-local.json")
+            Paths.get("secrets", "google-oauth-client-local.json"),
+            Paths.get("oxyn_java", "google-oauth-client.json"),
+            Paths.get("oxyn_java", "secrets", "google-oauth-client.json"),
+            Paths.get("oxyn_java", "secrets", "google-oauth-client-local.json")
         };
 
         for (Path candidate : directCandidates) {
@@ -424,6 +427,28 @@ public class GoogleCalendarSyncService {
                 for (Path candidate : stream) {
                     if (Files.isRegularFile(candidate)) {
                         return candidate;
+                    }
+                }
+            }
+        }
+
+        Path oxynJavaDir = Paths.get("oxyn_java");
+        if (Files.isDirectory(oxynJavaDir)) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(oxynJavaDir, "client_secret_*.json")) {
+                for (Path candidate : stream) {
+                    if (Files.isRegularFile(candidate)) {
+                        return candidate;
+                    }
+                }
+            }
+
+            Path oxynSecretsDir = oxynJavaDir.resolve("secrets");
+            if (Files.isDirectory(oxynSecretsDir)) {
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(oxynSecretsDir, "client_secret_*.json")) {
+                    for (Path candidate : stream) {
+                        if (Files.isRegularFile(candidate)) {
+                            return candidate;
+                        }
                     }
                 }
             }

@@ -11,7 +11,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -189,7 +193,65 @@ public class EventCoverPhotoService {
         }
 
         String propertyKey = System.getProperty("pexels.api.key");
-        return propertyKey == null || propertyKey.isBlank() ? null : propertyKey;
+        if (propertyKey != null && !propertyKey.isBlank()) {
+            return propertyKey;
+        }
+
+        return readApiKeyFromLocalFile();
+    }
+
+    private String readApiKeyFromLocalFile() {
+        for (Path candidate : localConfigCandidates()) {
+            if (!Files.isRegularFile(candidate)) {
+                continue;
+            }
+
+            try {
+                for (String rawLine : Files.readAllLines(candidate, StandardCharsets.UTF_8)) {
+                    String line = rawLine.trim();
+                    if (line.isEmpty() || line.startsWith("#") || !line.contains("=")) {
+                        continue;
+                    }
+
+                    int separatorIndex = line.indexOf('=');
+                    String key = line.substring(0, separatorIndex).trim();
+                    if (!"PEXELS_API_KEY".equals(key) && !"OXYN_PEXELS_API_KEY".equals(key)) {
+                        continue;
+                    }
+
+                    String value = line.substring(separatorIndex + 1).trim();
+                    value = stripWrappingQuotes(value);
+                    if (!value.isBlank()) {
+                        return value;
+                    }
+                }
+            } catch (IOException ignored) {
+                // Fall through to the next candidate.
+            }
+        }
+
+        return null;
+    }
+
+    private List<Path> localConfigCandidates() {
+        Path current = Paths.get("").toAbsolutePath().normalize();
+        return List.of(
+                current.resolve(".env.local"),
+                current.resolve(".env"),
+                current.resolve("oxyn_java").resolve(".env.local"),
+                current.resolve("oxyn_java").resolve(".env")
+        );
+    }
+
+    private String stripWrappingQuotes(String value) {
+        if (value.length() >= 2) {
+            boolean doubleQuoted = value.startsWith("\"") && value.endsWith("\"");
+            boolean singleQuoted = value.startsWith("'") && value.endsWith("'");
+            if (doubleQuoted || singleQuoted) {
+                return value.substring(1, value.length() - 1).trim();
+            }
+        }
+        return value;
     }
 
     private String safe(String value) {

@@ -1481,7 +1481,12 @@ public class EventManagementController implements Initializable {
                     noteLabel.getStyleClass().add("event-popup-note");
                     noteLabel.setMaxWidth(370);
 
-                    VBox weatherContent = new VBox(10, topWeather, pluieLabel, autoStatusLabel, new Separator(), grid, noteLabel);
+                    Label debugLabel = new Label("[DEBUG] " + result.getDebugInfo());
+                    debugLabel.getStyleClass().add("event-popup-note");
+                    debugLabel.setStyle("-fx-font-size: 9px; -fx-text-fill: #666;");
+                    debugLabel.setMaxWidth(370);
+
+                    VBox weatherContent = new VBox(10, topWeather, pluieLabel, autoStatusLabel, new Separator(), grid, noteLabel, debugLabel);
                     weatherContent.setAlignment(Pos.TOP_CENTER);
                     weatherContentHost.getChildren().setAll(weatherContent);
                 });

@@ -581,15 +581,19 @@
     -fx-background-color: #fff3f4;
     -fx-border-color: #f2778f;
     -fx-border-width: 1.2px;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
 }
 
 .front-modal-textarea-danger .content {
     -fx-background-color: #fff3f4;
+    -fx-background-radius: 14px;
 }
 
 .front-moderation-alert {
     -fx-background-color: linear-gradient(to bottom, #fff4f5 0%, #ffe7ea 100%);
     -fx-border-color: #f5a8b5;
+    -fx-border-width: 1px;
     -fx-border-radius: 16px;
     -fx-background-radius: 16px;
     -fx-padding: 12 14;

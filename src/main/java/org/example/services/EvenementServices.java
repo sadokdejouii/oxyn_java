@@ -9,8 +9,6 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 public class EvenementServices implements ICrud<Evenement> {
 
@@ -24,8 +22,6 @@ public class EvenementServices implements ICrud<Evenement> {
 
     @Override
     public void ajouter(Evenement e) throws SQLException {
-        e.setStatut(resolveStatusFromDates(e.getStatut(), e.getDateDebut(), e.getDateFin()));
-
         String sql = "INSERT INTO evenements (" +
                 "titre_evenement, description_evenement, date_debut_evenement, date_fin_evenement, " +
                 "lieu_evenement, ville_evenement, places_max_evenement, statut_evenement, " +
@@ -65,8 +61,6 @@ public class EvenementServices implements ICrud<Evenement> {
 
     @Override
     public List<Evenement> afficher() throws SQLException {
-        synchronizeStatusesFromDates();
-
         List<Evenement> evenements = new ArrayList<>();
 
         String sql = "SELECT * FROM evenements";
@@ -101,7 +95,6 @@ public class EvenementServices implements ICrud<Evenement> {
     public void modifier(Evenement e) throws SQLException {
         boolean previousAutoCommit = con.getAutoCommit();
         String previousStatus = null;
-        e.setStatut(resolveStatusFromDates(e.getStatut(), e.getDateDebut(), e.getDateFin()));
         String sql = "UPDATE evenements SET " +
                 "titre_evenement = ?, " +
                 "description_evenement = ?, " +
@@ -149,8 +142,6 @@ public class EvenementServices implements ICrud<Evenement> {
     }
 
     public Evenement afficherById(int id) throws SQLException {
-        synchronizeStatusesFromDates();
-
         String sql = "SELECT * FROM evenements WHERE id_evenement = ?";
         PreparedStatement ps = con.prepareStatement(sql);
         ps.setInt(1, id);
@@ -199,71 +190,5 @@ public class EvenementServices implements ICrud<Evenement> {
                 .toLowerCase()
                 .trim();
         return normalized.contains("annul") || normalized.contains("cancel") || normalized.contains("close");
-    }
-
-    private void synchronizeStatusesFromDates() throws SQLException {
-        String selectSql = "SELECT id_evenement, statut_evenement, date_debut_evenement, date_fin_evenement FROM evenements";
-        String updateSql = "UPDATE evenements SET statut_evenement = ? WHERE id_evenement = ?";
-
-        List<StatusUpdate> updates = new ArrayList<>();
-
-        try (Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(selectSql)) {
-            while (rs.next()) {
-                int eventId = rs.getInt("id_evenement");
-                String currentStatus = rs.getString("statut_evenement");
-                Date startDate = SqlDateReaders.readTimestampOrNull(rs, "date_debut_evenement");
-                Date endDate = SqlDateReaders.readTimestampOrNull(rs, "date_fin_evenement");
-                String resolvedStatus = resolveStatusFromDates(currentStatus, startDate, endDate);
-
-                if (!resolvedStatus.equals(currentStatus)) {
-                    updates.add(new StatusUpdate(eventId, resolvedStatus));
-                }
-            }
-        }
-
-        if (updates.isEmpty()) {
-            return;
-        }
-
-        try (PreparedStatement ps = con.prepareStatement(updateSql)) {
-            for (StatusUpdate update : updates) {
-                ps.setString(1, update.status());
-                ps.setInt(2, update.eventId());
-                ps.addBatch();
-            }
-            ps.executeBatch();
-        }
-    }
-
-    private String resolveStatusFromDates(String currentStatus, Date startDate, Date endDate) {
-        if (isCancelledStatus(currentStatus)) {
-            return currentStatus == null || currentStatus.isBlank() ? "Annulée" : currentStatus;
-        }
-
-        LocalDate today = LocalDate.now();
-        LocalDate start = toLocalDate(startDate);
-        LocalDate end = toLocalDate(endDate);
-
-        if (end != null && today.isAfter(end)) {
-            return "Terminée";
-        }
-        if (start != null && (!today.isBefore(start)) && (end == null || !today.isAfter(end))) {
-            return "En cours";
-        }
-        if (start != null && today.isBefore(start)) {
-            return "À venir";
-        }
-        return currentStatus == null || currentStatus.isBlank() ? "À venir" : currentStatus;
-    }
-
-    private LocalDate toLocalDate(Date date) {
-        if (date == null) {
-            return null;
-        }
-        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    }
-
-    private record StatusUpdate(int eventId, String status) {
     }
 }

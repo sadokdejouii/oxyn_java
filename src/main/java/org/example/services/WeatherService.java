@@ -176,6 +176,11 @@ public class WeatherService {
             return iconCode.startsWith("09") || iconCode.startsWith("10") || iconCode.startsWith("11");
         }
 
+        public String getDebugInfo() {
+            return String.format("Icon: %s | Rain: %.2f mm | Snow: %.2f mm | Desc: %s", 
+                iconCode, rainVolume, snowVolume, description);
+        }
+
         public String getWindDirection() {
             String[] dirs = {"N", "NE", "E", "SE", "S", "SO", "O", "NO"};
             return dirs[(int) Math.round(windDeg / 45.0) % 8];
