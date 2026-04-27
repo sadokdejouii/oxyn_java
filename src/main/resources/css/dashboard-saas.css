@@ -276,6 +276,41 @@
     -fx-cursor: hand;
 }
 
+.secondary-toolbar-btn {
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 0% 100%, rgba(255, 255, 255, 0.10) 0%, transparent 55%),
+            rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(79, 195, 247, 0.22);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-text-fill: rgba(232, 238, 247, 0.95);
+    -fx-font-weight: 600;
+    -fx-padding: 9 14;
+    -fx-cursor: hand;
+    -fx-background-insets: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.secondary-toolbar-btn:hover {
+    -fx-background-color:
+            linear-gradient(from 0% 0% to 0% 100%, rgba(255, 255, 255, 0.12) 0%, transparent 55%),
+            rgba(0, 191, 255, 0.10);
+    -fx-border-color: rgba(0, 191, 255, 0.40);
+    -fx-effect: dropshadow(gaussian, rgba(0, 191, 255, 0.18), 16, 0.35, 0, 2);
+}
+
+.secondary-toolbar-btn:pressed {
+    -fx-background-color: rgba(0, 191, 255, 0.12);
+    -fx-translate-y: 1px;
+}
+
+.secondary-toolbar-btn:disabled {
+    -fx-opacity: 0.55;
+    -fx-cursor: default;
+}
+
 .danger-toolbar-btn {
     -fx-background-color: rgba(198, 40, 40, 0.55);
     -fx-background-radius: 10px;
@@ -1030,6 +1065,7 @@
 .action-btn.delete:hover {
     -fx-background-color: linear-gradient(to bottom, rgba(255, 107, 107, 0.45) 0%, rgba(255, 82, 82, 0.55) 100%);
     -fx-effect: dropshadow(gaussian, rgba(255, 107, 107, 0.3), 8, 0, 0, 2);
+}
 /* Mes commandes — panneau d’édition d’adresse (inline) */
 .mes-commandes-edit-panel {
     -fx-border-color: rgba(79, 195, 247, 0.28);
@@ -1055,6 +1091,7 @@
 .list-view.boutique-admin-pro-list .list-cell:filled:selected,
 .list-view.boutique-admin-pro-list .list-cell:filled:selected:hover {
     -fx-background-color: rgba(0, 191, 255, 0.15);
+}
 /* ========== PAGINATION CONTROLS ========== */
 .pagination-btn {
     -fx-background-color: linear-gradient(to bottom, rgba(0, 191, 255, 0.25) 0%, rgba(0, 153, 204, 0.40) 100%);

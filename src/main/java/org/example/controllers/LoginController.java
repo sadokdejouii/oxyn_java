@@ -30,6 +30,7 @@ import org.example.notifications.LoginEmailNotifier;
 import org.example.notifications.TemporalPermissionNotifier;
 import javafx.concurrent.Task;
 import org.example.digitalwill.DigitalWillService;
+import org.example.utils.AppStyles;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -337,6 +338,7 @@ public class LoginController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/MainLayout.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root, 1530, 880);
+            AppStyles.apply(scene);
             SessionContext ctx = SessionContext.getInstance();
             stage.setScene(scene);
             stage.setTitle("OXYN — " + ctx.getRole().displayLabel());
