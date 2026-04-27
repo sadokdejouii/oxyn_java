@@ -10,76 +10,56 @@
 
     <!-- MAIN CONTENT -->
     <center>
-        <VBox spacing="10" styleClass="forum-main-content" VBox.vgrow="ALWAYS">
+        <VBox spacing="16" styleClass="forum-main-content" VBox.vgrow="ALWAYS">
             <padding>
-                <Insets bottom="12" left="20" right="20" top="8" />
+                <Insets top="40" bottom="30" left="48" right="48" />
             </padding>
 
-            <!-- CREATE POST SECTION -->
-            <VBox styleClass="create-post-section" spacing="10">
+            <!-- CREATE POST SECTION — compact -->
+            <VBox styleClass="create-post-section" spacing="8">
+                <VBox.margin>
+                    <Insets top="15" bottom="15" left="10" right="10" />
+                </VBox.margin>
 
-
-                <!-- Header -->
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="✨ Créer un nouveau post" styleClass="create-post-header" />
-                </HBox>
-
-                <!-- Content Area -->
-                <TextArea fx:id="postContentArea" promptText="Qu'y a-t-il sur votre esprit ? Partagez votre expérience avec la communauté..." prefRowCount="5" wrapText="true" styleClass="create-post-textarea" />
-                <Label fx:id="postContentError" text="" styleClass="error-label" visible="false" />
-
-                <!-- Attachment & Media Preview -->
-                <HBox fx:id="attachmentPreviewBox" spacing="8" alignment="CENTER_LEFT" />
-                <Label fx:id="attachmentLabel" text="Aucun fichier sélectionné" styleClass="attachment-status-label" />
-
-                <!-- Controls Row -->
+                <!-- Inline header + controls row -->
                 <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="✨ Nouveau post" styleClass="create-post-header" />
+                    <Region HBox.hgrow="ALWAYS" />
                     <Button fx:id="attachmentButton" text="📎 Joindre" styleClass="post-control-button" />
                     <Button fx:id="emojiButton" text="😊 Emoji" styleClass="post-control-button" />
-
-                    <!-- Category Selector -->
-                    <ComboBox fx:id="categoryComboBox" promptText="Sélectionner une catégorie" styleClass="post-category-combo" prefWidth="180" />
-
-                    <Region HBox.hgrow="ALWAYS" />
-
-                    <!-- Post Button -->
+                    <ComboBox fx:id="categoryComboBox" promptText="Catégorie" styleClass="post-category-combo" prefWidth="150" />
                     <Button fx:id="postButton" text="✓ Publier" styleClass="post-button-primary" />
                 </HBox>
+
+                <!-- Content Area — reduced height -->
+                <TextArea fx:id="postContentArea" promptText="Partagez votre expérience avec la communauté..." prefRowCount="2" wrapText="true" styleClass="create-post-textarea" />
+                <Label fx:id="postContentError" text="" styleClass="error-label" visible="false" />
+
+                <!-- Attachment preview (hidden by default) -->
+                <HBox fx:id="attachmentPreviewBox" spacing="8" alignment="CENTER_LEFT" />
+                <Label fx:id="attachmentLabel" text="" styleClass="attachment-status-label" />
             </VBox>
 
-            <!-- Filter & Controls Section -->
-            <HBox alignment="CENTER">
+            <!-- Filter & Controls — compact bar -->
+            <HBox styleClass="filter-bar" spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="🔍 Rechercher..." prefHeight="32" prefWidth="180" styleClass="search-field" />
 
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <!-- Search -->
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <TextField fx:id="searchField" promptText="Rechercher..." prefHeight="36" prefWidth="200" styleClass="search-field" />
-                        <Button text="🔍" styleClass="search-button" prefWidth="36" prefHeight="36" />
-                    </HBox>
+                <Separator orientation="VERTICAL" prefHeight="24" />
 
-                    <Separator orientation="VERTICAL" prefHeight="32" />
+                <Label text="Catégorie:" styleClass="filter-label" />
+                <ComboBox fx:id="categoriesFilterCombo" prefWidth="140" prefHeight="32" styleClass="sort-combo" />
 
-                    <!-- Categories -->
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <Label text="Catégorie:" styleClass="filter-label" />
-                        <ComboBox fx:id="categoriesFilterCombo" prefWidth="160" styleClass="sort-combo" />
-                    </HBox>
+                <Separator orientation="VERTICAL" prefHeight="24" />
 
-                    <Separator orientation="VERTICAL" prefHeight="32" />
+                <Label text="Trier:" styleClass="filter-label" />
+                <ComboBox fx:id="sortComboBox" prefWidth="140" prefHeight="32" styleClass="sort-combo" />
 
-                    <!-- Sort -->
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <Label text="Trier par:" styleClass="filter-label" />
-                        <ComboBox fx:id="sortComboBox" prefWidth="160" styleClass="sort-combo" />
-                    </HBox>
+                <Region HBox.hgrow="ALWAYS" />
 
-                    <Separator orientation="VERTICAL" prefHeight="32" />
-
-                    <!-- Grid/List Toggle -->
-                    <HBox spacing="4" styleClass="view-toggle-box">
-                        <Button fx:id="gridViewBtn" text="⊞" styleClass="view-button,grid-view-btn" prefWidth="40" prefHeight="40" />
-                        <Button fx:id="listViewBtn" text="☰" styleClass="view-button,list-view-btn" prefWidth="40" prefHeight="40" />
-                    </HBox>
+                <!-- Grid/List Toggle -->
+                <HBox spacing="3" styleClass="view-toggle-box">
+                    <Button fx:id="gridViewBtn" text="⊞" styleClass="view-button,grid-view-btn" prefWidth="32" prefHeight="32" />
+                    <Button fx:id="listViewBtn" text="☰" styleClass="view-button,list-view-btn" prefWidth="32" prefHeight="32" />
                 </HBox>
             </HBox>
 

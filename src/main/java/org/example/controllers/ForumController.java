@@ -11,6 +11,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -20,9 +23,13 @@ import org.example.entities.Post;
 import org.example.entities.ForumReaction;
 import org.example.services.*;
 import org.example.utils.EmojiUtil;
+import org.example.utils.TranslationUtil;
+import org.example.utils.CohereSummarizer;
 
-import java.io.File;
-import java.net.URL;
+
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -50,6 +57,9 @@ public class ForumController implements Initializable {
     private ForumPostService postService;
     private ForumCommentService commentService;
     private ForumReactionService reactionService;
+    private GamificationService gamificationService;
+    private RecommendationService recommendationService;
+    private PostLikeService postLikeService;
 
     // Current user
     private int currentUserId = 1;
@@ -71,6 +81,7 @@ public class ForumController implements Initializable {
     private String selectedCategory = "Tous les posts";
     private String selectedSort = "Popularité (likes)";
     private String attachedFilePath = null;
+    private javafx.stage.Popup emojiPopup;
 
     // Categories
     private final List<String> categories = Arrays.asList(
@@ -98,11 +109,14 @@ public class ForumController implements Initializable {
             postService = new ForumPostService();
             commentService = new ForumCommentService();
             reactionService = new ForumReactionService();
+            gamificationService = new GamificationService();
+            recommendationService = new RecommendationService();
+            postLikeService = new PostLikeService();
 
             // Get current user from session
             SessionContext context = SessionContext.getInstance();
             currentUsername = context.getDisplayName();
-            currentUserId = 1;
+            currentUserId = context.getUserId();
 
             setupEventHandlers();
             // Initialize error labels and simple listeners
@@ -255,14 +269,19 @@ public class ForumController implements Initializable {
         }
 
         if (isGridView) {
-            // Grid layout - 2 columns
+            // Grid layout - 2 columns using FlowPane that fills width
             FlowPane gridPane = new FlowPane();
-            gridPane.setHgap(16);
-            gridPane.setVgap(16);
-            gridPane.setPrefWrapLength(900);
+            gridPane.setHgap(20);
+            gridPane.setVgap(20);
+            gridPane.setPrefWrapLength(Double.MAX_VALUE);
+            // Bind wrap length to container width so 2 cards fill each row
+            gridPane.prefWrapLengthProperty().bind(postsContainer.widthProperty().subtract(24));
 
             for (Post post : filtered) {
-                Node postCard = createModernPostCard(post);
+                VBox postCard = (VBox) createModernPostCard(post);
+                // Each card takes ~half the available width minus the gap
+                postCard.prefWidthProperty().bind(postsContainer.widthProperty().subtract(44).divide(2));
+                postCard.setMaxWidth(Double.MAX_VALUE);
                 gridPane.getChildren().add(postCard);
             }
 
@@ -279,13 +298,16 @@ public class ForumController implements Initializable {
     private Node createModernPostCard(Post post) {
         VBox card = new VBox(0);
         card.getStyleClass().add("post-card");
-        card.setPrefWidth(isGridView ? 400 : Double.MAX_VALUE);
-        // Removed fixed minHeight to allow flexible resizing when comments are toggled
+        // Width is set externally for grid view; for list view fill the container
+        if (!isGridView) {
+            card.setPrefWidth(Double.MAX_VALUE);
+            card.setMaxWidth(Double.MAX_VALUE);
+        }
 
         // Header with user info and badge
         HBox headerBox = new HBox(12);
         headerBox.getStyleClass().add("post-header");
-        headerBox.setPadding(new Insets(16));
+        headerBox.setPadding(new Insets(20, 20, 12, 20));
 
         String initials = getInitialsForAuthor(post.getId_author_post());
         Label avatarLabel = new Label(initials);
@@ -294,13 +316,36 @@ public class ForumController implements Initializable {
         VBox userInfoBox = new VBox(4);
         userInfoBox.getStyleClass().add("post-user-info");
         String fullName = getFullNameForAuthor(post.getId_author_post());
+        
+        // Username with badges
+        HBox usernameWithBadges = new HBox(6);
+        usernameWithBadges.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        
         Label usernameLabel = new Label(fullName);
         usernameLabel.getStyleClass().add("post-username");
+        usernameWithBadges.getChildren().add(usernameLabel);
+        
+        // Fetch and display only the highest priority badge
+        try {
+            org.example.entities.UserGamification gamification = gamificationService.getGamificationByUserId(post.getId_author_post());
+            if (gamification != null && !gamification.getBadges().isEmpty()) {
+                String highestPriorityBadge = gamificationService.getHighestPriorityBadge(gamification.getBadges());
+                if (highestPriorityBadge != null) {
+                    Label badgeLabel = createBadgeLabel(highestPriorityBadge);
+                    usernameWithBadges.getChildren().add(badgeLabel);
+                }
+            }
+        } catch (SQLException e) {
+            // Silently fail if gamification fetch fails - don't break post display
+            System.err.println("Error fetching gamification for user " + post.getId_author_post() + ": " + e.getMessage());
+        }
+        
+        userInfoBox.getChildren().add(usernameWithBadges);
 
         Label dateLabel = new Label(post.getCreated_at_post());
         dateLabel.getStyleClass().add("post-date");
 
-        userInfoBox.getChildren().addAll(usernameLabel, dateLabel);
+        userInfoBox.getChildren().add(dateLabel);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -309,27 +354,57 @@ public class ForumController implements Initializable {
         Label categoryBadge = new Label(post.getCategory_post().toUpperCase());
         categoryBadge.getStyleClass().add("post-category-badge");
         // Apply category-specific style class if matches
-        String cat = post.getCategory_post().toLowerCase().replace(" ", "-");
-        if (cat.contains("wellness") || cat.contains("nutrition")) {
-            categoryBadge.getStyleClass().add("wellness");
-        } else if (cat.contains("cardio") || cat.contains("force")) {
-            categoryBadge.getStyleClass().add("cardio");
-        } else if (cat.contains("workout") || cat.contains("conseil")) {
-            categoryBadge.getStyleClass().add("workout-tips");
-        } else if (cat.contains("trend") || cat.contains("tendance")) {
-            categoryBadge.getStyleClass().add("trending");
+        String cat = post.getCategory_post().toLowerCase();
+        if (cat.contains("nutrition")) {
+            categoryBadge.getStyleClass().add("cat-nutrition");
+        } else if (cat.contains("motivation")) {
+            categoryBadge.getStyleClass().add("cat-motivation");
+        } else if (cat.contains("question")) {
+            categoryBadge.getStyleClass().add("cat-questions");
+        } else if (cat.contains("réussite") || cat.contains("reussite")) {
+            categoryBadge.getStyleClass().add("cat-reussites");
+        } else if (cat.contains("équipement") || cat.contains("equipement")) {
+            categoryBadge.getStyleClass().add("cat-equipement");
+        } else if (cat.contains("conseil")) {
+            categoryBadge.getStyleClass().add("cat-conseils");
+        } else {
+            categoryBadge.getStyleClass().add("cat-general"); // Default for "Général" or unknown
         }
 
-        headerBox.getChildren().addAll(avatarLabel, userInfoBox, spacer, categoryBadge);
+        // Recommended indicator
+        HBox categoryWithRecommendation = new HBox(8);
+        categoryWithRecommendation.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        categoryWithRecommendation.getChildren().add(categoryBadge);
+        
+        try {
+            List<String> recommendedCategories = recommendationService.getRecommendedCategories(currentUserId, 5);
+            if (recommendedCategories.contains(post.getCategory_post())) {
+                Label recommendedLabel = new Label("✨ Recommended");
+                recommendedLabel.getStyleClass().add("recommended-badge");
+                categoryWithRecommendation.getChildren().add(recommendedLabel);
+            }
+        } catch (SQLException e) {
+            // Silently fail if recommendation fetch fails
+            System.err.println("Error checking recommendations: " + e.getMessage());
+        }
+
+        // Owner actions box (will be populated later if isOwner)
+        HBox ownerActionsBox = new HBox(8);
+        ownerActionsBox.setAlignment(javafx.geometry.Pos.TOP_RIGHT);
+        ownerActionsBox.setPadding(new Insets(0, 4, 0, 0)); // a little padding to align perfectly
+
+        headerBox.getChildren().addAll(avatarLabel, userInfoBox, spacer, ownerActionsBox, categoryWithRecommendation);
 
         // Content - Editable container
         VBox contentContainer = new VBox();
-        contentContainer.setPadding(new Insets(0, 16, 12, 16));
+        contentContainer.setPadding(new Insets(0, 20, 14, 20));
 
-        // View mode: Label
-        Label contentLabel = new Label(post.getContent_post());
-        contentLabel.setWrapText(true);
-        contentLabel.getStyleClass().add("post-content");
+        // View mode: TextFlow for colored emojis
+        javafx.scene.text.TextFlow contentFlow = new javafx.scene.text.TextFlow();
+        javafx.scene.text.Text contentText = new javafx.scene.text.Text(post.getContent_post());
+        contentText.getStyleClass().add("post-content-text");
+        contentFlow.getChildren().add(contentText);
+        contentFlow.getStyleClass().add("post-content");
 
         // Edit mode: TextArea (initially hidden)
         TextArea contentEditor = new TextArea(post.getContent_post());
@@ -351,18 +426,17 @@ public class ForumController implements Initializable {
         cancelBtn.getStyleClass().addAll("action-button", "cancel-btn");
         editActions.getChildren().addAll(cancelBtn, saveBtn);
 
-        contentContainer.getChildren().addAll(contentLabel, contentEditor, editActions);
+        contentContainer.getChildren().addAll(contentFlow, contentEditor, editActions);
 
         // Media support - check for file path or BLOB
         VBox mediaBox = new VBox();
         String mediaUrl = post.getMedia_url_post();
-        byte[] mediaBlob = post.getMedia_blob_post();
         String mediaType = post.getMedia_type_post();
 
-        System.out.println("Post ID: " + post.getId_post() + " - URL: " + mediaUrl + " - BLOB size: " + (mediaBlob != null ? mediaBlob.length : 0) + " - Type: " + mediaType);
+        System.out.println("Post ID: " + post.getId_post() + " - URL: " + mediaUrl + " - Type: " + mediaType);
 
         if (mediaUrl != null && !mediaUrl.isEmpty()) {
-            // Load from file path
+            // Load from URL (or local file path if legacy)
             if (mediaType != null && mediaType.toLowerCase().contains("image")) {
                 ImageView imageView = createImageViewFromPath(mediaUrl);
                 if (imageView != null) {
@@ -371,50 +445,46 @@ public class ForumController implements Initializable {
                     imageView.setFitWidth(isGridView ? 360 : 600);
                     imageView.setFitHeight(350);
                     mediaBox.getChildren().add(imageView);
-                    mediaBox.setPadding(new Insets(0, 16, 12, 16));
+                    mediaBox.setPadding(new Insets(0, 20, 14, 20));
                 }
             } else if (mediaType != null && mediaType.toLowerCase().contains("video")) {
-                // Video placeholder
-                VBox videoContainer = new VBox(8);
-                videoContainer.getStyleClass().add("post-video-container");
-                videoContainer.setAlignment(javafx.geometry.Pos.CENTER);
-                videoContainer.setPadding(new Insets(16));
-                videoContainer.setStyle("-fx-background-color: rgba(15, 23, 42, 0.9); -fx-background-radius: 12;");
-
-                Label videoIcon = new Label("▶");
-                videoIcon.setStyle("-fx-font-size: 48px; -fx-text-fill: #3B82F6;");
-
-                Label videoLabel = new Label("Vidéo");
-                videoLabel.getStyleClass().add("post-media-label");
-                videoLabel.setStyle("-fx-text-fill: white;");
-
-                videoContainer.getChildren().addAll(videoIcon, videoLabel);
-                mediaBox.getChildren().add(videoContainer);
-                mediaBox.setPadding(new Insets(0, 16, 12, 16));
-            }
-        } else if (mediaBlob != null && mediaBlob.length > 0) {
-            // Load from BLOB
-            ImageView imageView = createImageViewFromBlob(mediaBlob);
-            if (imageView != null) {
-                imageView.getStyleClass().add("post-image-view");
-                imageView.setPreserveRatio(true);
-                imageView.setFitWidth(isGridView ? 360 : 600);
-                imageView.setFitHeight(350);
-                mediaBox.getChildren().add(imageView);
-                mediaBox.setPadding(new Insets(0, 16, 12, 16));
+                // Modern video player
+                VBox videoContainer = createVideoPlayer(mediaUrl);
+                if (videoContainer != null) {
+                    mediaBox.getChildren().add(videoContainer);
+                    mediaBox.setPadding(new Insets(0, 20, 14, 20));
+                }
+            } else if (mediaType != null && mediaType.toLowerCase().contains("audio")) {
+                // Modern audio player
+                VBox audioContainer = createAudioPlayer(mediaUrl);
+                if (audioContainer != null) {
+                    mediaBox.getChildren().add(audioContainer);
+                    mediaBox.setPadding(new Insets(0, 20, 14, 20));
+                }
             }
         }
 
         // Actions and stats
-        HBox actionsBox = new HBox(16);
+        HBox actionsBox = new HBox(10);
         actionsBox.getStyleClass().add("post-actions");
-        actionsBox.setPadding(new Insets(12, 16, 16, 16));
+        actionsBox.setPadding(new Insets(14, 20, 16, 20));
         actionsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        // Like button with count
-        Button likeBtn = new Button("❤ " + post.getLike_count_post());
-        likeBtn.getStyleClass().add("action-button");
-        likeBtn.setOnAction(e -> likePost(post));
+        // Like button with count — modern pill style
+        // Check if current user has already liked this post
+        boolean isLiked = false;
+        try {
+            isLiked = postLikeService.hasUserLikedPost(currentUserId, post.getId_post());
+        } catch (SQLException e) {
+            System.err.println("Error checking like status: " + e.getMessage());
+        }
+
+        Button likeBtn = new Button((isLiked ? "❤️  Liked  " : "❤  J'aime  ") + post.getLike_count_post());
+        likeBtn.getStyleClass().addAll("action-button", "like-action-btn");
+        if (isLiked) {
+            likeBtn.getStyleClass().add("liked");
+        }
+        likeBtn.setOnAction(e -> likePost(post, likeBtn));
 
         // Comments section (expandable, initially hidden)
         VBox commentsSection = new VBox(0);
@@ -422,33 +492,52 @@ public class ForumController implements Initializable {
         commentsSection.setVisible(false);
         commentsSection.setManaged(false);
 
-        // Comment count label for button
+        // Comment button — modern pill style
         int commentCount = getCommentCount(post.getId_post());
-        Button commentBtn = new Button("💬 " + (commentCount > 0 ? commentCount : "Commenter"));
-        commentBtn.getStyleClass().add("action-button");
+        Button commentBtn = new Button("💬  Commenter  " + (commentCount > 0 ? commentCount : "0"));
+        commentBtn.getStyleClass().addAll("action-button", "comment-action-btn");
         commentBtn.setOnAction(e -> toggleCommentsSection(commentsSection, post, commentBtn));
 
-        actionsBox.getChildren().addAll(likeBtn, commentBtn);
+        // Translate button — modern pill style
+        Button translateBtn = new Button("🌐  Translate");
+        translateBtn.getStyleClass().addAll("action-button", "translate-action-btn");
+        translateBtn.setOnAction(e -> handleTranslatePost(post, contentText, translateBtn));
 
-        // Owner actions container (under the post)
-        HBox ownerActionsBox = null;
+        // Summarize button — only show for long content (>200 characters)
+        Button summarizeBtn = null;
+        String originalContent = post.getContent_post();
+        if (originalContent != null && originalContent.length() > 200) {
+            summarizeBtn = new Button("✨  Summarize");
+            summarizeBtn.getStyleClass().addAll("action-button", "summarize-action-btn");
+            final Button finalSummarizeBtn = summarizeBtn;
+            final javafx.scene.text.Text finalContentText = contentText;
+            summarizeBtn.setOnAction(e -> handleSummarizePost(post, finalContentText, finalSummarizeBtn));
+        }
 
-        // Owner actions (edit/delete) - only for post author
+        // Spacer to push owner buttons right
+        Region actionSpacer = new Region();
+        HBox.setHgrow(actionSpacer, Priority.ALWAYS);
+
+        // Add action buttons to the actions box
+        if (summarizeBtn != null) {
+            actionsBox.getChildren().addAll(likeBtn, commentBtn, translateBtn, summarizeBtn, actionSpacer);
+        } else {
+            actionsBox.getChildren().addAll(likeBtn, commentBtn, translateBtn, actionSpacer);
+        }
+
+
+
+        // Owner actions — inline in the actions bar
         boolean isOwner = post.getId_author_post() == currentUserId;
         if (isOwner) {
-            ownerActionsBox = new HBox(8);
-            ownerActionsBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-            ownerActionsBox.setPadding(new Insets(8, 16, 8, 16));
-            ownerActionsBox.getStyleClass().add("owner-actions-box");
-
-            // Update icon button
+            // Modern icon edit button
             Button editBtn = new Button("✎");
-            editBtn.getStyleClass().addAll("icon-btn", "edit-icon-btn");
-            editBtn.setTooltip(new Tooltip("Edit post"));
+            editBtn.getStyleClass().addAll("icon-action-btn", "edit-icon-btn");
+            editBtn.setTooltip(new Tooltip("Modifier ce post"));
             editBtn.setOnAction(e -> {
                 // Switch to edit mode
-                contentLabel.setVisible(false);
-                contentLabel.setManaged(false);
+                contentFlow.setVisible(false);
+                contentFlow.setManaged(false);
                 contentEditor.setVisible(true);
                 contentEditor.setManaged(true);
                 editActions.setVisible(true);
@@ -458,10 +547,10 @@ public class ForumController implements Initializable {
                 contentEditor.positionCaret(contentEditor.getText().length());
             });
 
-            // Trash icon button
+            // Modern icon delete button
             Button deleteBtn = new Button("🗑");
-            deleteBtn.getStyleClass().addAll("icon-btn", "delete-icon-btn");
-            deleteBtn.setTooltip(new Tooltip("Delete post"));
+            deleteBtn.getStyleClass().addAll("icon-action-btn", "delete-icon-btn");
+            deleteBtn.setTooltip(new Tooltip("Supprimer ce post"));
             deleteBtn.setOnAction(e -> handleDeletePost(post));
 
             ownerActionsBox.getChildren().addAll(editBtn, deleteBtn);
@@ -483,9 +572,9 @@ public class ForumController implements Initializable {
                 editActions.getChildren().removeIf(node -> node instanceof Label && ((Label)node).getText().contains("empty"));
                 handleUpdatePost(post, newContent);
                 // Switch back to view mode
-                contentLabel.setText(newContent);
-                contentLabel.setVisible(true);
-                contentLabel.setManaged(true);
+                contentText.setText(newContent);
+                contentFlow.setVisible(true);
+                contentFlow.setManaged(true);
                 contentEditor.setVisible(false);
                 contentEditor.setManaged(false);
                 editActions.setVisible(false);
@@ -496,8 +585,8 @@ public class ForumController implements Initializable {
                 contentEditor.setText(post.getContent_post());
                 // Remove any error labels
                 editActions.getChildren().removeIf(node -> node instanceof Label && ((Label)node).getText().contains("empty"));
-                contentLabel.setVisible(true);
-                contentLabel.setManaged(true);
+                contentFlow.setVisible(true);
+                contentFlow.setManaged(true);
                 contentEditor.setVisible(false);
                 contentEditor.setManaged(false);
                 editActions.setVisible(false);
@@ -511,23 +600,144 @@ public class ForumController implements Initializable {
             card.getChildren().add(mediaBox);
         }
         card.getChildren().add(actionsBox);
-        if (ownerActionsBox != null) {
-            card.getChildren().add(ownerActionsBox);
-        }
         card.getChildren().add(commentsSection);
 
         return card;
     }
 
-    private void likePost(Post post) {
+    private void likePost(Post post, Button likeBtn) {
         try {
-            post.setLike_count_post(post.getLike_count_post() + 1);
-            postService.updateLikeCount(post.getId_post());
-            displayPosts();
+            // Toggle like/unlike using PostLikeService
+            boolean isNowLiked = postLikeService.toggleLike(currentUserId, post.getId_post());
+
+            // Update the like count in the posts table
+            postLikeService.updatePostLikeCount(post.getId_post());
+
+            // Update the post object with the new count
+            int newCount = postLikeService.getLikeCount(post.getId_post());
+            post.setLike_count_post(newCount);
+
+            // Update button appearance
+            if (isNowLiked) {
+                likeBtn.setText("❤️  Liked  " + newCount);
+                likeBtn.getStyleClass().add("liked");
+
+                // Update gamification for the post author receiving a like (+1 point)
+                try {
+                    gamificationService.handleUserAction(post.getId_author_post(), GamificationService.ActionType.RECEIVE_LIKE);
+                } catch (SQLException gamifEx) {
+                    System.err.println("Error updating gamification: " + gamifEx.getMessage());
+                }
+
+                // Update recommendation scores
+                try {
+                    recommendationService.handleUserAction(currentUserId, post.getCategory_post(), RecommendationService.ActionType.LIKE_POST);
+                } catch (SQLException recEx) {
+                    System.err.println("Error updating recommendations: " + recEx.getMessage());
+                }
+            } else {
+                likeBtn.setText("❤  J'aime  " + newCount);
+                likeBtn.getStyleClass().remove("liked");
+            }
+
         } catch (SQLException e) {
-            showError("Error liking post: " + e.getMessage());
+            showError("Error toggling like: " + e.getMessage());
         }
     }
+
+    private void handleTranslatePost(Post post, javafx.scene.text.Text contentText, Button translateBtn) {
+        String originalContent = post.getContent_post();
+        String currentText = contentText.getText();
+
+        // Check if currently showing translated content
+        if (translateBtn.getUserData() != null && translateBtn.getUserData().equals("translated")) {
+            // Revert to original
+            contentText.setText(originalContent);
+            translateBtn.setText("🌐  Translate");
+            translateBtn.setUserData("original");
+            return;
+        }
+
+        // Detect language and translate
+        String detectedLang = TranslationUtil.detectLanguage(originalContent);
+
+        // If already English, show a message
+        if ("en".equals(detectedLang)) {
+            showSuccess("This post is already in English");
+            return;
+        }
+
+        // Show loading state
+        String originalBtnText = translateBtn.getText();
+        translateBtn.setText("⏳  Translating...");
+        translateBtn.setDisable(true);
+
+        // Perform translation in background thread
+        new Thread(() -> {
+            try {
+                String translatedText = TranslationUtil.translateToEnglish(originalContent);
+
+                // Update UI on JavaFX thread
+                Platform.runLater(() -> {
+                    contentText.setText(translatedText);
+                    translateBtn.setText("🔄  Original");
+                    translateBtn.setUserData("translated");
+                    translateBtn.setDisable(false);
+
+                    // Show success message with language info
+                    String langName = TranslationUtil.getLanguageName(detectedLang);
+                    showSuccess("Translated from " + langName + " to English");
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    translateBtn.setText(originalBtnText);
+                    translateBtn.setDisable(false);
+                    showError("Translation failed: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    private void handleSummarizePost(Post post, javafx.scene.text.Text contentText, Button summarizeBtn) {
+        String originalContent = post.getContent_post();
+
+        // Check if currently showing summary
+        if (summarizeBtn.getUserData() != null && summarizeBtn.getUserData().equals("summarized")) {
+            // Revert to original
+            contentText.setText(originalContent);
+            summarizeBtn.setText("✨  Summarize");
+            summarizeBtn.setUserData("original");
+            return;
+        }
+
+        // Show loading state
+        String originalBtnText = summarizeBtn.getText();
+        summarizeBtn.setText("⏳  Summarizing...");
+        summarizeBtn.setDisable(true);
+
+        // Perform summarization in background thread
+        new Thread(() -> {
+            try {
+                String summary = CohereSummarizer.summarize(originalContent);
+
+                // Update UI on JavaFX thread
+                Platform.runLater(() -> {
+                    contentText.setText(summary);
+                    summarizeBtn.setText("🔄  Original");
+                    summarizeBtn.setUserData("summarized");
+                    summarizeBtn.setDisable(false);
+                    showSuccess("Post summarized successfully");
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    summarizeBtn.setText(originalBtnText);
+                    summarizeBtn.setDisable(false);
+                    showError("Summarization failed: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
 
     private void handleDeletePost(Post post) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -576,10 +786,22 @@ public class ForumController implements Initializable {
             String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             String mediaType = (attachedFilePath != null) ? getMediaType(attachedFilePath) : "";
             String category = categoryComboBox.getValue() != null ? categoryComboBox.getValue() : "Général";
+            
+            String mediaUrl = "";
+            if (attachedFilePath != null && !attachedFilePath.isEmpty()) {
+                System.out.println("Uploading media to Cloudinary...");
+                String uploadedUrl = org.example.utils.CloudinaryUtil.uploadMedia(attachedFilePath);
+                if (uploadedUrl != null) {
+                    mediaUrl = uploadedUrl;
+                } else {
+                    showError("Erreur lors de l'upload du fichier vers Cloudinary.");
+                    return;
+                }
+            }
 
             Post post = new Post(
                     content,
-                    attachedFilePath != null ? attachedFilePath : "",
+                    mediaUrl,
                     mediaType,
                     "public",
                     timestamp,
@@ -590,6 +812,23 @@ public class ForumController implements Initializable {
             );
 
             postService.ajouter(post);
+            
+            // Update gamification for creating a post (+5 points)
+            try {
+                gamificationService.handleUserAction(currentUserId, GamificationService.ActionType.CREATE_POST);
+            } catch (SQLException gamifEx) {
+                System.err.println("Error updating gamification: " + gamifEx.getMessage());
+                // Don't fail the post creation if gamification fails
+            }
+            
+            // Update recommendation scores for creating a post in this category
+            try {
+                recommendationService.handleUserAction(currentUserId, category, RecommendationService.ActionType.CREATE_POST);
+            } catch (SQLException recEx) {
+                System.err.println("Error updating recommendations: " + recEx.getMessage());
+                // Don't fail the post creation if recommendation fails
+            }
+            
             if (postContentArea != null) postContentArea.clear();
             if (attachmentLabel != null) attachmentLabel.setText("Aucun fichier sélectionné");
             if (attachmentPreviewBox != null) attachmentPreviewBox.getChildren().clear();
@@ -605,11 +844,15 @@ public class ForumController implements Initializable {
     private void handleAttachmentSelect() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Sélectionner une pièce jointe");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif"),
-                new FileChooser.ExtensionFilter("Vidéos", "*.mp4", "*.avi", "*.mov"),
-                new FileChooser.ExtensionFilter("Tous les fichiers", "*.*")
-        );
+        
+        // Add filters - All files first so it's selected by default
+        FileChooser.ExtensionFilter allFiles = new FileChooser.ExtensionFilter("Tous les fichiers", "*.*");
+        FileChooser.ExtensionFilter images = new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.bmp");
+        FileChooser.ExtensionFilter videos = new FileChooser.ExtensionFilter("Vidéos", "*.mp4", "*.avi", "*.mov", "*.mkv", "*.flv", "*.wmv", "*.webm", "*.m4v");
+        FileChooser.ExtensionFilter audio = new FileChooser.ExtensionFilter("Audio", "*.mp3", "*.wav", "*.flac", "*.aac", "*.ogg", "*.m4a", "*.wma");
+        
+        fileChooser.getExtensionFilters().addAll(allFiles, images, videos, audio);
+        fileChooser.setSelectedExtensionFilter(allFiles); // Default to all files
 
         Stage stage = new Stage();
         File file = fileChooser.showOpenDialog(stage);
@@ -620,46 +863,74 @@ public class ForumController implements Initializable {
     }
 
     private void handleEmojiPicker() {
-        Stage emojiStage = new Stage();
-        emojiStage.setTitle("Sélectionner un emoji");
-        emojiStage.setWidth(600);
-        emojiStage.setHeight(400);
-
-        TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        Map<String, String[]> categories = EmojiUtil.getEmojisPerCategory();
-        for (String category : categories.keySet()) {
-            Tab tab = new Tab();
-            tab.setText(category);
-            tab.setStyle("-fx-font-size: 12px;");
-
-            FlowPane flowPane = new FlowPane();
-            flowPane.setPrefWrapLength(500);
-            flowPane.setHgap(8);
-            flowPane.setVgap(8);
-            flowPane.setPadding(new Insets(12));
-            flowPane.setStyle("-fx-font-size: 20px;");
-
-            for (String emoji : categories.get(category)) {
-                Button emojiBtn = new Button(emoji);
-                emojiBtn.setPrefSize(40, 40);
-                emojiBtn.setStyle("-fx-font-size: 20px; -fx-padding: 5;");
-                emojiBtn.setOnAction(e -> {
-                    postContentArea.appendText(emoji);
-                    emojiStage.close();
-                });
-                flowPane.getChildren().add(emojiBtn);
-            }
-
-            ScrollPane scrollPane = new ScrollPane(flowPane);
-            scrollPane.setFitToWidth(true);
-            tab.setContent(scrollPane);
-            tabPane.getTabs().add(tab);
+        if (emojiPopup != null && emojiPopup.isShowing()) {
+            emojiPopup.hide();
+            return;
         }
 
-        emojiStage.setScene(new javafx.scene.Scene(tabPane));
-        emojiStage.show();
+        if (emojiPopup == null) {
+            emojiPopup = new javafx.stage.Popup();
+            emojiPopup.setAutoHide(true);
+            
+            TabPane tabPane = new TabPane();
+            tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+            tabPane.getStyleClass().add("emoji-tab-pane");
+
+            Map<String, String[]> categories = EmojiUtil.getEmojisPerCategory();
+            for (String category : categories.keySet()) {
+                Tab tab = new Tab();
+                tab.setText(category);
+
+                FlowPane flowPane = new FlowPane();
+                flowPane.setPrefWrapLength(380);
+                flowPane.setHgap(8);
+                flowPane.setVgap(8);
+                flowPane.setPadding(new Insets(12));
+                flowPane.getStyleClass().add("emoji-flow-pane");
+
+                for (String emoji : categories.get(category)) {
+                    javafx.scene.text.Text emojiText = new javafx.scene.text.Text(emoji);
+                    emojiText.setStyle("-fx-font-family: 'Segoe UI Emoji'; -fx-font-size: 24px;"); // removed -fx-fill completely
+                    Button emojiBtn = new Button("", emojiText);
+                    emojiBtn.getStyleClass().add("emoji-button");
+                    emojiBtn.setOnAction(e -> {
+                        if (postContentArea != null) {
+                            postContentArea.appendText(emoji);
+                            postContentArea.requestFocus(); // Bring focus back to text area but keep emoji picker open
+                            postContentArea.positionCaret(postContentArea.getText().length());
+                        }
+                    });
+                    flowPane.getChildren().add(emojiBtn);
+                }
+
+                ScrollPane scrollPane = new ScrollPane(flowPane);
+                scrollPane.setFitToWidth(true);
+                scrollPane.setPrefHeight(250);
+                scrollPane.getStyleClass().add("emoji-scroll-pane");
+                tab.setContent(scrollPane);
+                tabPane.getTabs().add(tab);
+            }
+
+            VBox root = new VBox(tabPane);
+            root.getStyleClass().add("emoji-popup-root");
+            root.setPrefWidth(420);
+            root.setPrefHeight(320);
+            VBox.setVgrow(tabPane, Priority.ALWAYS);
+            
+            // Add stylesheet to the Popup's scene (we have to do this via the popup's scene root or scene once shown, 
+            // but Popup doesn't have a Scene accessible the same way. We apply it to the root node.)
+            root.getStylesheets().add(getClass().getResource("/css/forum.css").toExternalForm());
+
+            emojiPopup.getContent().add(root);
+        }
+
+        // Calculate position exactly under the emoji button
+        javafx.geometry.Point2D point = emojiButton.localToScreen(0.0, emojiButton.getHeight());
+        if (point != null) {
+            emojiPopup.show(emojiButton.getScene().getWindow(), point.getX(), point.getY() + 5);
+        } else {
+            emojiPopup.show(emojiButton.getScene().getWindow());
+        }
     }
 
     private int getCommentCount(int postId) {
@@ -697,9 +968,9 @@ public class ForumController implements Initializable {
             // Comments header with count
             HBox headerBox = new HBox(8);
             headerBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-            headerBox.setPadding(new Insets(12, 16, 8, 16));
+            headerBox.setPadding(new Insets(10, 16, 6, 16));
 
-            Label commentsTitle = new Label("Commentaires (" + comments.size() + ")");
+            Label commentsTitle = new Label("💬 Commentaires (" + comments.size() + ")");
             commentsTitle.getStyleClass().add("comments-header-title");
 
             Region spacer = new Region();
@@ -720,7 +991,7 @@ public class ForumController implements Initializable {
             // Add comment input section (NOW FIRST - before comments list)
             VBox inputSection = new VBox(8);
             inputSection.getStyleClass().add("comment-input-section");
-            inputSection.setPadding(new Insets(12, 16, 16, 16));
+            inputSection.setPadding(new Insets(10, 16, 12, 16));
 
             HBox inputBox = new HBox(10);
             inputBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -792,7 +1063,7 @@ public class ForumController implements Initializable {
             // Comments list (NOW AFTER input section)
             VBox commentsList = new VBox(8);
             commentsList.getStyleClass().add("comments-list");
-            commentsList.setPadding(new Insets(8, 16, 8, 16));
+            commentsList.setPadding(new Insets(6, 16, 10, 16));
 
             if (comments.isEmpty()) {
                 Label noCommentsLabel = new Label("Aucun commentaire. Soyez le premier à commenter !");
@@ -827,7 +1098,6 @@ public class ForumController implements Initializable {
         String initials = getInitialsForAuthor(comment.getId_author_comment());
         Label avatarLabel = new Label(initials);
         avatarLabel.getStyleClass().addAll("comment-avatar", "standard-avatar");
-        avatarLabel.setStyle("-fx-min-width: 32; -fx-max-width: 32; -fx-min-height: 32; -fx-max-height: 32; -fx-font-size: 12px;");
 
         VBox userInfoBox = new VBox(2);
         String fullName = getFullNameForAuthor(comment.getId_author_comment());
@@ -869,19 +1139,20 @@ public class ForumController implements Initializable {
         editActions.setVisible(false);
         editActions.setManaged(false);
 
-        Button saveBtn = new Button("✓ Save");
-        saveBtn.getStyleClass().addAll("comment-action-btn", "save-btn");
-        Button cancelBtn = new Button("✕ Cancel");
-        cancelBtn.getStyleClass().addAll("comment-action-btn", "cancel-btn");
+        Button saveBtn = new Button("✓ Enregistrer");
+        saveBtn.getStyleClass().add("save-btn");
+        Button cancelBtn = new Button("✕ Annuler");
+        cancelBtn.getStyleClass().add("cancel-btn");
         editActions.getChildren().addAll(cancelBtn, saveBtn);
 
         contentContainer.getChildren().addAll(contentLabel, contentEditor, editActions);
 
-        // Comment actions
-        HBox actionsBox = new HBox(16);
+        // Comment actions — modern pill style
+        HBox actionsBox = new HBox(8);
         actionsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        actionsBox.setPadding(new Insets(4, 0, 0, 0));
 
-        Button likeBtn = new Button("❤ " + (comment.getLike_count() > 0 ? comment.getLike_count() : "J'aime"));
+        Button likeBtn = new Button("❤  " + (comment.getLike_count() > 0 ? comment.getLike_count() : "0"));
         likeBtn.getStyleClass().add("comment-like-btn");
         likeBtn.setOnAction(e -> {
             try {
@@ -892,7 +1163,7 @@ public class ForumController implements Initializable {
             }
         });
 
-        Button replyBtn = new Button("↩ Répondre");
+        Button replyBtn = new Button("↩  Répondre");
         replyBtn.getStyleClass().add("comment-reply-btn");
         replyBtn.setOnAction(e -> showReplyInput(comment, post, commentsSection, commentBtn));
 
@@ -904,9 +1175,9 @@ public class ForumController implements Initializable {
             Region spacer2 = new Region();
             HBox.setHgrow(spacer2, Priority.ALWAYS);
 
-            Button editBtn = new Button("✎");
-            editBtn.getStyleClass().addAll("icon-btn", "edit-icon-btn");
-            editBtn.setTooltip(new Tooltip("Edit comment"));
+            Button editBtn = new Button("✎  Modifier");
+            editBtn.getStyleClass().addAll("owner-pill-btn", "edit-pill-btn");
+            editBtn.setTooltip(new Tooltip("Modifier ce commentaire"));
             editBtn.setOnAction(e -> {
                 // Switch to edit mode
                 contentLabel.setVisible(false);
@@ -920,9 +1191,9 @@ public class ForumController implements Initializable {
                 contentEditor.positionCaret(contentEditor.getText().length());
             });
 
-            Button deleteBtn = new Button("🗑");
-            deleteBtn.getStyleClass().addAll("icon-btn", "delete-icon-btn");
-            deleteBtn.setTooltip(new Tooltip("Delete comment"));
+            Button deleteBtn = new Button("🗑  Supprimer");
+            deleteBtn.getStyleClass().addAll("owner-pill-btn", "delete-pill-btn");
+            deleteBtn.setTooltip(new Tooltip("Supprimer ce commentaire"));
             deleteBtn.setOnAction(e -> handleDeleteComment(comment, post, commentsSection, commentBtn));
 
             actionsBox.getChildren().addAll(spacer2, editBtn, deleteBtn);
@@ -982,7 +1253,11 @@ public class ForumController implements Initializable {
     }
 
     private void showReplyInput(ForumComment parentComment, Post post, VBox commentsSection, Button commentBtn) {
-        // Find the comment box and add reply input below it
+        // Remove any existing reply input box to prevent duplicates
+        commentsSection.getChildren().removeIf(node ->
+                node instanceof VBox && ((VBox) node).getStyleClass().contains("reply-input-box"));
+
+        // Create new reply input below the comment
         VBox replyInputBox = new VBox(8);
         replyInputBox.getStyleClass().add("reply-input-box");
         replyInputBox.setPadding(new Insets(8, 0, 8, 40));
@@ -1027,6 +1302,23 @@ public class ForumController implements Initializable {
         try {
             ForumComment comment = new ForumComment(content, currentUserId, post.getId_post());
             commentService.ajouter(comment);
+            
+            // Update gamification for adding a comment (+2 points)
+            try {
+                gamificationService.handleUserAction(currentUserId, GamificationService.ActionType.ADD_COMMENT);
+            } catch (SQLException gamifEx) {
+                System.err.println("Error updating gamification: " + gamifEx.getMessage());
+                // Don't fail the comment creation if gamification fails
+            }
+            
+            // Update recommendation scores for commenting on a post in this category
+            try {
+                recommendationService.handleUserAction(currentUserId, post.getCategory_post(), RecommendationService.ActionType.ADD_COMMENT);
+            } catch (SQLException recEx) {
+                System.err.println("Error updating recommendations: " + recEx.getMessage());
+                // Don't fail the comment creation if recommendation fails
+            }
+            
             loadCommentsIntoSection(commentsSection, post, commentBtn);
             commentBtn.setText("💬 Masquer");
         } catch (SQLException e) {
@@ -1039,6 +1331,23 @@ public class ForumController implements Initializable {
             ForumComment reply = new ForumComment(content, currentUserId, post.getId_post());
             reply.setParent_id(parentComment.getId_comment());
             commentService.ajouter(reply);
+            
+            // Update gamification for adding a comment/reply (+2 points)
+            try {
+                gamificationService.handleUserAction(currentUserId, GamificationService.ActionType.ADD_COMMENT);
+            } catch (SQLException gamifEx) {
+                System.err.println("Error updating gamification: " + gamifEx.getMessage());
+                // Don't fail the reply creation if gamification fails
+            }
+            
+            // Update recommendation scores for replying to a post in this category
+            try {
+                recommendationService.handleUserAction(currentUserId, post.getCategory_post(), RecommendationService.ActionType.ADD_COMMENT);
+            } catch (SQLException recEx) {
+                System.err.println("Error updating recommendations: " + recEx.getMessage());
+                // Don't fail the reply creation if recommendation fails
+            }
+            
             loadCommentsIntoSection(commentsSection, post, commentBtn);
         } catch (SQLException e) {
             showError("Erreur lors de la réponse: " + e.getMessage());
@@ -1199,6 +1508,14 @@ public class ForumController implements Initializable {
     }
 
     private String getInitialsForAuthor(int authorId) {
+        if (authorId == currentUserId && currentUsername != null && !currentUsername.trim().isEmpty()) {
+            String[] parts = currentUsername.trim().split("\\s+");
+            if (parts.length >= 2) {
+                return (parts[0].charAt(0) + "" + parts[1].charAt(0)).toUpperCase();
+            } else {
+                return currentUsername.substring(0, Math.min(2, currentUsername.length())).toUpperCase();
+            }
+        }
         // Use author ID to deterministically pick a name
         int index = Math.abs(authorId) % RANDOM_NAMES.length;
         String firstName = RANDOM_NAMES[index][0];
@@ -1207,7 +1524,268 @@ public class ForumController implements Initializable {
     }
 
     private String getFullNameForAuthor(int authorId) {
+        if (authorId == currentUserId && currentUsername != null && !currentUsername.trim().isEmpty()) {
+            return currentUsername;
+        }
         int index = Math.abs(authorId) % RANDOM_NAMES.length;
         return RANDOM_NAMES[index][0] + " " + RANDOM_NAMES[index][1];
     }
+
+    /**
+     * Creates a styled badge label for gamification badges.
+     * Applies different styles based on the badge type.
+     */
+    private Label createBadgeLabel(String badge) {
+        Label badgeLabel = new Label(badge);
+        badgeLabel.getStyleClass().add("user-badge");
+        
+        // Add specific style class based on badge type
+        String badgeLower = badge.toLowerCase();
+        if (badgeLower.contains("first post")) {
+            badgeLabel.getStyleClass().add("badge-first-post");
+        } else if (badgeLower.contains("rising star")) {
+            badgeLabel.getStyleClass().add("badge-rising-star");
+        } else if (badgeLower.contains("content creator")) {
+            badgeLabel.getStyleClass().add("badge-content-creator");
+        } else if (badgeLower.contains("chatty")) {
+            badgeLabel.getStyleClass().add("badge-chatty");
+        } else if (badgeLower.contains("conversation starter")) {
+            badgeLabel.getStyleClass().add("badge-conversation-starter");
+        } else if (badgeLower.contains("liked")) {
+            badgeLabel.getStyleClass().add("badge-liked");
+        } else if (badgeLower.contains("beloved")) {
+            badgeLabel.getStyleClass().add("badge-beloved");
+        } else if (badgeLower.contains("superstar")) {
+            badgeLabel.getStyleClass().add("badge-superstar");
+        } else {
+            badgeLabel.getStyleClass().add("badge-default");
+        }
+        
+        return badgeLabel;
+    }
+
+    private VBox createVideoPlayer(String mediaUrl) {
+        try {
+            // Main container with dark background
+            VBox videoContainer = new VBox(0);
+            videoContainer.getStyleClass().add("post-video-container");
+            videoContainer.setAlignment(javafx.geometry.Pos.CENTER);
+            
+            // Responsive sizing based on view mode
+            double width = isGridView ? 340 : 560;
+            double height = 280;
+            
+            videoContainer.setPrefWidth(width);
+            videoContainer.setMaxWidth(width);
+            videoContainer.setPrefHeight(height + 60); // Height + controls
+            videoContainer.setMaxHeight(height + 60);
+
+            // Create media components
+            Media media = new Media(mediaUrl);
+            MediaPlayer mediaPlayer = new MediaPlayer(media);
+            MediaView mediaView = new MediaView(mediaPlayer);
+
+            // Set media view size
+            mediaView.setFitWidth(width);
+            mediaView.setFitHeight(height);
+            mediaView.setPreserveRatio(true);
+            mediaView.getStyleClass().add("post-video-view");
+            mediaView.setSmooth(true);
+
+            // Loading placeholder
+            Label loadingLabel = new Label("Chargement...");
+            loadingLabel.setStyle("-fx-text-fill: #94A3B8; -fx-font-size: 14px;");
+            
+            // Error handling
+            mediaPlayer.setOnError(() -> {
+                loadingLabel.setText("Erreur de chargement");
+                loadingLabel.setStyle("-fx-text-fill: #EF4444; -fx-font-size: 14px;");
+            });
+            
+            media.setOnError(() -> {
+                loadingLabel.setText("Vidéo invalide");
+                loadingLabel.setStyle("-fx-text-fill: #EF4444; -fx-font-size: 14px;");
+            });
+
+            // StackPane to center video
+            javafx.scene.layout.StackPane videoPane = new javafx.scene.layout.StackPane();
+            videoPane.setPrefWidth(width);
+            videoPane.setPrefHeight(height);
+            videoPane.setStyle("-fx-background-color: #0F172A; -fx-background-radius: 16 16 0 0;");
+            videoPane.getChildren().addAll(mediaView, loadingLabel);
+
+            // Remove loading text when ready
+            mediaPlayer.setOnReady(() -> {
+                loadingLabel.setVisible(false);
+            });
+
+            // Modern controls container
+            HBox controlsBox = new HBox(10);
+            controlsBox.getStyleClass().add("video-controls");
+            controlsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            controlsBox.setPadding(new Insets(12, 16, 12, 16));
+            controlsBox.setPrefWidth(width);
+
+            // Play/Pause button (circular)
+            Button playBtn = new Button("▶");
+            playBtn.getStyleClass().addAll("media-control-btn", "play-btn");
+            playBtn.setStyle("-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-font-size: 16px; " +
+                           "-fx-min-width: 40px; -fx-min-height: 40px; -fx-background-radius: 20px;");
+            playBtn.setOnAction(e -> {
+                if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+                    mediaPlayer.pause();
+                    playBtn.setText("▶");
+                } else {
+                    mediaPlayer.play();
+                    playBtn.setText("⏸");
+                }
+            });
+
+            // Time label
+            Label timeLabel = new Label("00:00 / 00:00");
+            timeLabel.setStyle("-fx-text-fill: #CBD5E1; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif;");
+            timeLabel.setPrefWidth(90);
+
+            // Progress slider
+            Slider progressSlider = new Slider(0, 100, 0);
+            progressSlider.setStyle("-fx-pref-height: 8px;");
+            HBox.setHgrow(progressSlider, Priority.ALWAYS);
+
+            // Update progress
+            mediaPlayer.currentTimeProperty().addListener((obs, oldVal, newVal) -> {
+                if (mediaPlayer.getTotalDuration() != null && mediaPlayer.getTotalDuration().toSeconds() > 0) {
+                    double progress = newVal.toSeconds() / mediaPlayer.getTotalDuration().toSeconds() * 100;
+                    progressSlider.setValue(progress);
+                    
+                    String current = String.format("%02d:%02d", (int)newVal.toMinutes(), (int)newVal.toSeconds() % 60);
+                    String total = String.format("%02d:%02d", 
+                        (int)mediaPlayer.getTotalDuration().toMinutes(), 
+                        (int)mediaPlayer.getTotalDuration().toSeconds() % 60);
+                    timeLabel.setText(current + " / " + total);
+                }
+            });
+
+            // Seek on slider change
+            progressSlider.setOnMouseReleased(e -> {
+                if (mediaPlayer.getTotalDuration() != null) {
+                    double seekTime = progressSlider.getValue() / 100 * mediaPlayer.getTotalDuration().toSeconds();
+                    mediaPlayer.seek(javafx.util.Duration.seconds(seekTime));
+                }
+            });
+
+            // Volume button
+            Button volumeBtn = new Button("🔊");
+            volumeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94A3B8; -fx-font-size: 16px; " +
+                              "-fx-min-width: 36px; -fx-min-height: 36px; -fx-cursor: hand;");
+            
+            controlsBox.getChildren().addAll(playBtn, progressSlider, timeLabel, volumeBtn);
+
+            // Assemble container
+            videoContainer.getChildren().addAll(videoPane, controlsBox);
+
+            return videoContainer;
+        } catch (Exception e) {
+            System.err.println("Error creating video player: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Return error placeholder
+            VBox errorBox = new VBox(10);
+            errorBox.setAlignment(javafx.geometry.Pos.CENTER);
+            errorBox.setStyle("-fx-background-color: #1E293B; -fx-padding: 40; -fx-background-radius: 16;");
+            errorBox.setPrefSize(340, 200);
+            
+            Label errorIcon = new Label("🎬");
+            errorIcon.setStyle("-fx-font-size: 48px;");
+            
+            Label errorLabel = new Label("Vidéo non disponible");
+            errorLabel.setStyle("-fx-text-fill: #94A3B8; -fx-font-size: 14px;");
+            
+            errorBox.getChildren().addAll(errorIcon, errorLabel);
+            return errorBox;
+        }
+    }
+
+    private VBox createAudioPlayer(String mediaUrl) {
+        try {
+            Media media = new Media(mediaUrl);
+            MediaPlayer mediaPlayer = new MediaPlayer(media);
+
+            // Modern audio player container
+            VBox audioContainer = new VBox(12);
+            audioContainer.getStyleClass().add("post-audio-container");
+            audioContainer.setPadding(new Insets(20));
+            audioContainer.setAlignment(javafx.geometry.Pos.CENTER);
+
+            // Audio icon/waveform visualization placeholder
+            HBox waveformBox = new HBox(4);
+            waveformBox.getStyleClass().add("audio-waveform");
+            waveformBox.setAlignment(javafx.geometry.Pos.CENTER);
+            waveformBox.setPadding(new Insets(10, 0, 10, 0));
+
+            // Create animated bars
+            for (int i = 0; i < 20; i++) {
+                javafx.scene.layout.Region bar = new javafx.scene.layout.Region();
+                bar.getStyleClass().add("audio-bar");
+                bar.setPrefWidth(4);
+                bar.setPrefHeight(20 + Math.random() * 30);
+                waveformBox.getChildren().add(bar);
+            }
+
+            // Controls
+            HBox controlsBox = new HBox(16);
+            controlsBox.getStyleClass().add("audio-controls");
+            controlsBox.setAlignment(javafx.geometry.Pos.CENTER);
+
+            Button playBtn = new Button("▶");
+            playBtn.getStyleClass().addAll("media-control-btn", "audio-play-btn");
+            playBtn.setOnAction(e -> {
+                if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+                    mediaPlayer.pause();
+                    playBtn.setText("▶");
+                } else {
+                    mediaPlayer.play();
+                    playBtn.setText("⏸");
+                }
+            });
+
+            // Progress slider
+            Slider progressSlider = new Slider(0, 100, 0);
+            progressSlider.getStyleClass().add("media-progress-slider");
+            progressSlider.setPrefWidth(300);
+
+            mediaPlayer.currentTimeProperty().addListener((obs, oldVal, newVal) -> {
+                if (mediaPlayer.getTotalDuration() != null && mediaPlayer.getTotalDuration().toSeconds() > 0) {
+                    progressSlider.setValue(newVal.toSeconds() / mediaPlayer.getTotalDuration().toSeconds() * 100);
+                }
+            });
+
+            progressSlider.setOnMouseReleased(e -> {
+                if (mediaPlayer.getTotalDuration() != null) {
+                    mediaPlayer.seek(javafx.util.Duration.seconds(progressSlider.getValue() / 100 * mediaPlayer.getTotalDuration().toSeconds()));
+                }
+            });
+
+            Label timeLabel = new Label("00:00 / 00:00");
+            timeLabel.getStyleClass().add("media-time-label");
+
+            mediaPlayer.currentTimeProperty().addListener((obs, oldVal, newVal) -> {
+                String current = String.format("%02d:%02d", (int)newVal.toMinutes(), (int)newVal.toSeconds() % 60);
+                String total = mediaPlayer.getTotalDuration() != null ?
+                    String.format("%02d:%02d", (int)mediaPlayer.getTotalDuration().toMinutes(), (int)mediaPlayer.getTotalDuration().toSeconds() % 60) : "00:00";
+                timeLabel.setText(current + " / " + total);
+            });
+
+            Label audioLabel = new Label("🎵 Audio");
+            audioLabel.getStyleClass().add("audio-title-label");
+
+            controlsBox.getChildren().addAll(playBtn, progressSlider, timeLabel);
+            audioContainer.getChildren().addAll(audioLabel, waveformBox, controlsBox);
+
+            return audioContainer;
+        } catch (Exception e) {
+            System.err.println("Error creating audio player: " + e.getMessage());
+            return null;
+        }
+    }
+
 }
