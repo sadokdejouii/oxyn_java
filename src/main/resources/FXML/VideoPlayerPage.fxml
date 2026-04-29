@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="org.example.controllers.VideoPlayerController"
+      spacing="15" style="-fx-background-color: #0D1B3E; -fx-padding: 20;">
+    
+    <!-- Header avec informations -->
+    <VBox spacing="10">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="🎬 Lecteur Vidéo Salle Pro" 
+                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="statusLabel" text="📺 Lecteur vidéo prêt - Mode normal" 
+                   style="-fx-font-size: 16px; -fx-text-fill: #00BFFF; -fx-font-weight: bold;"/>
+        </HBox>
+        
+        <!-- Informations vidéo -->
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Label fx:id="titleLabel" text="" visible="false"
+                   style="-fx-font-size: 18px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Label fx:id="durationLabel" text="" visible="false"
+                   style="-fx-font-size: 14px; -fx-text-fill: #95A5A6;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </VBox>
+    
+    <!-- Contrôles principaux -->
+    <VBox spacing="12" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 20; -fx-background-radius: 10;">
+        <Label text="🔗 URL YouTube :" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+        
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <TextField fx:id="videoUrlField" 
+                       promptText="https://www.youtube.com/watch?v=... ou ID direct" 
+                       HBox.hgrow="ALWAYS"
+                       style="-fx-pref-height: 45px; -fx-font-size: 16px; -fx-background-radius: 8;"/>
+            
+            <Button fx:id="loadVideoButton" text="▶️ Charger" 
+                    style="-fx-pref-height: 45px; -fx-pref-width: 140px; 
+                           -fx-background-color: #E74C3C; -fx-text-fill: white; 
+                           -fx-font-weight: bold; -fx-font-size: 16px; -fx-background-radius: 8;"/>
+        </HBox>
+        
+        <ProgressBar fx:id="loadingProgress" 
+                     progress="-1" 
+                     visible="false"
+                     style="-fx-pref-height: 6px; -fx-accent: #3498DB;"/>
+        
+        <!-- Miniature -->
+        <StackPane fx:id="thumbnailContainer" visible="false">
+            <ImageView fx:id="thumbnailView" 
+                       fitWidth="320" fitHeight="180" 
+                       preserveRatio="true"
+                       style="-fx-cursor: hand;"/>
+            <Label text="🖱️ Cliquez pour jouer" 
+                   style="-fx-background-color: rgba(0,0,0,0.7); -fx-text-fill: white; 
+                          -fx-padding: 10; -fx-background-radius: 5; -fx-font-weight: bold;"/>
+        </StackPane>
+    </VBox>
+    
+    <!-- Zone principale avec lecteur et playlist -->
+    <HBox spacing="15" VBox.vgrow="ALWAYS">
+        <!-- Lecteur vidéo principal - JCEF Container -->
+        <AnchorPane fx:id="videoContainer" HBox.hgrow="ALWAYS" 
+                   prefHeight="500" prefWidth="900"
+                   style="-fx-background-color: #000; -fx-background-radius: 10; -fx-border-color: #34495E; -fx-border-width: 2;">
+        </AnchorPane>
+        
+        <!-- Playlist latérale -->
+        <VBox fx:id="playlistContainer" visible="false" 
+              prefWidth="250" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 15; -fx-background-radius: 8;">
+            <!-- Contenu dynamique ajouté par le contrôleur -->
+        </VBox>
+    </HBox>
+    
+    <!-- Contrôles avancés -->
+    <HBox fx:id="controlsContainer" spacing="12" alignment="CENTER">
+        <Button fx:id="stopVideoButton" text="⏹️ Arrêter"
+                style="-fx-pref-height: 40px; -fx-pref-width: 120px;
+                       -fx-background-color: #95A5A6; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 6;"/>
+        
+        <Button fx:id="tvModeButton" text="📺 Mode TV"
+                style="-fx-pref-height: 40px; -fx-pref-width: 120px;
+                       -fx-background-color: #FF6B6B; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 6;"/>
+        
+        <Button fx:id="addToPlaylistButton" text="➕ Playlist"
+                style="-fx-pref-height: 40px; -fx-pref-width: 120px;
+                       -fx-background-color: #4ECDC4; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 6;"/>
+        
+        <Region HBox.hgrow="ALWAYS"/>
+        
+        <!-- Boutons utilitaires -->
+        <Button text="📊 Cache" onAction="#showCacheStats"
+                style="-fx-pref-height: 40px; -fx-pref-width: 100px;
+                       -fx-background-color: #3498DB; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 6;"/>
+        
+        <Button text="🗑️ Vider" onAction="#clearCache"
+                style="-fx-pref-height: 40px; -fx-pref-width: 100px;
+                       -fx-background-color: #E67E22; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 6;"/>
+    </HBox>
+    
+    <!-- Footer informatif -->
+    <VBox spacing="8" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 15; -fx-background-radius: 8;">
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <Label text="📱 Formats supportés :" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Label text="youtube.com/watch" style="-fx-text-fill: #3498DB;"/>
+            <Label text="youtu.be" style="-fx-text-fill: #3498DB;"/>
+            <Label text="youtube.com/embed" style="-fx-text-fill: #3498DB;"/>
+            <Label text="youtube.com/shorts" style="-fx-text-fill: #3498DB;"/>
+        </HBox>
+        
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <Label text="🔒 Sécurité :" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Label text="Validation API complète" style="-fx-text-fill: #27AE60;"/>
+            <Label text="Cache intelligent" style="-fx-text-fill: #27AE60;"/>
+            <Label text="Pas de téléchargement" style="-fx-text-fill: #27AE60;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="v2.0 - Mode TV" style="-fx-text-fill: #9B59B6; -fx-font-style: italic;"/>
+        </HBox>
+    </VBox>
+    
+</VBox>

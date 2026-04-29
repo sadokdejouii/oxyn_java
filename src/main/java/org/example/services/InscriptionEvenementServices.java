@@ -14,7 +14,7 @@ public class InscriptionEvenementServices implements ICrud<InscriptionEvenement>
     Connection con;
 
     public InscriptionEvenementServices() {
-        con = MyDataBase.getInstance().getConnection();
+        con = MyDataBase.getConnection();
     }
 
     /** Noms réels des colonnes tels que renvoyés par le driver (SELECT * … LIMIT 0). */

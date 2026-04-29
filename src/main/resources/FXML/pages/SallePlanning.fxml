@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+            styleClass="planning-scroll-root"
+            stylesheets="@../../css/salle-planning.css"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controllers.SallePlanningController">
+    
+    <VBox spacing="16" maxWidth="Infinity" styleClass="planning-container">
+        
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" spacing="16" styleClass="planning-header">
+            <Button fx:id="btnBack" text="← Retour" styleClass="planning-back-btn" onAction="#handleBack"/>
+            <VBox HBox.hgrow="ALWAYS">
+                <Label fx:id="salleNameLabel" styleClass="planning-title" text="Nom de la salle"/>
+                <Label styleClass="planning-subtitle" text="Planning hebdomadaire des sessions"/>
+            </VBox>
+        </HBox>
+        
+        <!-- Légende couleurs -->
+        <HBox alignment="CENTER" spacing="12" styleClass="planning-legend">
+            <Label styleClass="legend-title" text="Légende :"/>
+            <HBox styleClass="legend-item style-yoga">
+                <Label styleClass="legend-color" text="●"/>
+                <Label styleClass="legend-label" text="Yoga/Pilates"/>
+            </HBox>
+            <HBox styleClass="legend-item style-combat">
+                <Label styleClass="legend-color" text="●"/>
+                <Label styleClass="legend-label" text="Box/Combat"/>
+            </HBox>
+            <HBox styleClass="legend-item style-cardio">
+                <Label styleClass="legend-color" text="●"/>
+                <Label styleClass="legend-label" text="Cardio/HIIT"/>
+            </HBox>
+            <HBox styleClass="legend-item style-muscu">
+                <Label styleClass="legend-color" text="●"/>
+                <Label styleClass="legend-label" text="Musculation"/>
+            </HBox>
+            <HBox styleClass="legend-item style-danse">
+                <Label styleClass="legend-color" text="●"/>
+                <Label styleClass="legend-label" text="Zumba/Danse"/>
+            </HBox>
+            <HBox styleClass="legend-item style-fitness">
+                <Label styleClass="legend-color" text="●"/>
+                <Label styleClass="legend-label" text="Fitness"/>
+            </HBox>
+        </HBox>
+        
+        <!-- Grille de planning -->
+        <GridPane fx:id="planningGrid" styleClass="planning-grid" hgap="8" vgap="8">
+            <!-- Colonnes configurées par le contrôleur -->
+        </GridPane>
+        
+        <!-- Label vide -->
+        <Label fx:id="emptyLabel" styleClass="planning-empty" text="Aucune session prévue cette semaine" 
+               visible="false" managed="false"/>
+        
+    </VBox>
+</ScrollPane>

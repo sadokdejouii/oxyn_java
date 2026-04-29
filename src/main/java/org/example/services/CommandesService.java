@@ -42,7 +42,11 @@ public class CommandesService implements ICrud<commandes> {
     private final Connection con;
 
     public CommandesService() {
-        con = MyDataBase.getInstance().getConnection();
+        // ✅ getConnection() ne lance plus d'exception
+        con = MyDataBase.getConnection();
+        if (con == null) {
+            System.err.println("❌ Impossible d'initialiser CommandesService - connexion BD null");
+        }
     }
 
     @Override

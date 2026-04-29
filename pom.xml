@@ -27,6 +27,18 @@
             <version>21.0.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>21.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>21.0.2</version>
+        </dependency>
+
         <!-- LineChart, PieChart, BarChart live in javafx.scene.chart → shipped inside javafx-controls (no separate javafx-charts artifact on Maven Central). -->
 
         <dependency>
@@ -46,6 +58,34 @@
             <version>0.4</version>
         </dependency>
 
+        <!-- Jackson for JSON -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.16.1</version>
+        </dependency>
+
+        <!-- HTTP Client pour appels API Flouci -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
+
+        <!-- JSON parsing pour Flouci -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
+        </dependency>
+
+        <!-- JCEF - Chromium embarqué pour remplacer WebView JavaFX -->
+        <dependency>
+            <groupId>me.friwi</groupId>
+            <artifactId>jcefmaven</artifactId>
+            <version>122.1.10</version>
+        </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -62,6 +102,14 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -74,10 +122,35 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>org.example.mains.MainFX</mainClass>
-                    <!-- JDK 24+ : évite l’avertissement "restricted method System::load" pour JavaFX natif -->
+                    <!-- JDK 24+ : évite l'avertissement "restricted method System::load" pour JavaFX natif -->
                     <options>
                         <option>--enable-native-access=javafx.graphics</option>
+                        <option>-Xmx512m</option>
+                        <option>-Xms256m</option>
+                        <!-- Fix JOGL module invalide -->
+                        <option>--add-reads</option>
+                        <option>javafx.base=ALL-UNNAMED</option>
+                        <!-- Fix WebView réseau JavaFX complet -->
+                        <option>--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED</option>
+                        <option>--add-opens=javafx.web/com.sun.webkit.network=ALL-UNNAMED</option>
+                        <option>--add-opens=javafx.web/com.sun.javafx.webkit=ALL-UNNAMED</option>
+                        <option>-Dsun.net.http.allowRestrictedHeaders=true</option>
+                        <option>-Djdk.httpclient.allowRestrictedHeaders=user-agent,host,connection</option>
+                        <!-- Fix crash GPU/WebKit - forcer rendu logiciel -->
+                        <option>-Dprism.order=sw</option>
+                        <option>-Dprism.verbose=true</option>
+                        <option>-Djava.awt.headless=false</option>
+                        <!-- Fix SwingNode JCEF - accès aux modules internes -->
+                        <option>--add-opens</option>
+                        <option>javafx.swing/javafx.embed.swing=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED</option>
+                        <option>-Djavafx.embed.singleThread=true</option>
                     </options>
+                    <!-- Exclure JOGL du module path -->
+                    <classpathExcludes>
+                        <classpathExclude>jogl-all-v2.4.0-rc-20210111.jar</classpathExclude>
+                    </classpathExcludes>
                 </configuration>
             </plugin>
         </plugins>

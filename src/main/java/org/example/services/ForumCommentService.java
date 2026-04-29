@@ -12,7 +12,7 @@ public class ForumCommentService implements ICrud<ForumComment> {
     Connection con;
 
     public ForumCommentService() {
-        con = MyDataBase.getInstance().getConnection();
+        con = MyDataBase.getConnection();
     }
 
     @Override

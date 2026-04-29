@@ -13,7 +13,7 @@ public class EvenementServices implements ICrud<Evenement> {
     Connection con;
 
     public EvenementServices() {
-        con = MyDataBase.getInstance().getConnection();
+        con = MyDataBase.getConnection();
     }
 
     @Override

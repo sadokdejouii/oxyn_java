@@ -43,10 +43,21 @@ public class LoginController implements Initializable {
     @FXML
     private Label passwordErrorLabel;
 
-    private final AuthService authService = new AuthService();
+    private AuthService authService;
+
+    private AuthService getAuthService() {
+        if (authService == null) {
+            authService = new AuthService();
+        }
+        return authService;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        System.out.println("🔧 LoginController.initialize() - Début");
+        
+        // Temporairement désactivé pour tester
+        /*
         if (emailField != null) {
             emailField.textProperty().addListener((o, a, b) ->
                     FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME));
@@ -55,6 +66,9 @@ public class LoginController implements Initializable {
             passwordField.textProperty().addListener((o, a, b) ->
                     FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME));
         }
+        */
+        
+        System.out.println("✅ LoginController.initialize() - Fin");
     }
 
     @FXML
@@ -80,7 +94,7 @@ public class LoginController implements Initializable {
         }
 
         try {
-            User user = authService.login(email, password);
+            User user = getAuthService().login(email, password);
             if (user == null) {
                 FormFieldFeedback.setInputError(passwordField, passwordErrorLabel,
                         "E-mail ou mot de passe incorrect, ou compte désactivé.", LOGIN_THEME);
@@ -126,7 +140,7 @@ public class LoginController implements Initializable {
             SessionContext ctx = SessionContext.getInstance();
             stage.setScene(scene);
             stage.setTitle("OXYN — " + ctx.getRole().displayLabel());
-            PrimaryStageLayout.applyFullScreen(stage);
+            stage.setMaximized(true); // ✅ remplace applyFullScreen
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();

@@ -1030,6 +1030,8 @@
 .action-btn.delete:hover {
     -fx-background-color: linear-gradient(to bottom, rgba(255, 107, 107, 0.45) 0%, rgba(255, 82, 82, 0.55) 100%);
     -fx-effect: dropshadow(gaussian, rgba(255, 107, 107, 0.3), 8, 0, 0, 2);
+}
+
 /* Mes commandes — panneau d’édition d’adresse (inline) */
 .mes-commandes-edit-panel {
     -fx-border-color: rgba(79, 195, 247, 0.28);
@@ -1055,6 +1057,8 @@
 .list-view.boutique-admin-pro-list .list-cell:filled:selected,
 .list-view.boutique-admin-pro-list .list-cell:filled:selected:hover {
     -fx-background-color: rgba(0, 191, 255, 0.15);
+}
+
 /* ========== PAGINATION CONTROLS ========== */
 .pagination-btn {
     -fx-background-color: linear-gradient(to bottom, rgba(0, 191, 255, 0.25) 0%, rgba(0, 153, 204, 0.40) 100%);
@@ -1495,4 +1499,5 @@
 
 .date-picker {
     -fx-font-family: "Segoe UI";
+}
 }

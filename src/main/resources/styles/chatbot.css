@@ -1,0 +1,323 @@
+/* ==========================================
+   CHATBOT OXYN - Thème Sombre Orange
+   ========================================== */
+
+/* Fond principal */
+.root {
+    -fx-background-color: #0d0d0f;
+}
+
+/* ==========================================
+   BOUTON FAB FLOTTANT
+   ========================================== */
+
+.fab-button {
+    -fx-background-color: #ff6b35;
+    -fx-text-fill: white;
+    -fx-background-radius: 28;
+    -fx-border-radius: 28;
+    -fx-pref-width: 56;
+    -fx-pref-height: 56;
+    -fx-font-size: 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 53, 0.3), 10, 0, 0, 0);
+    -fx-border-color: transparent;
+}
+
+.fab-button:hover {
+    -fx-background-color: #e64e1e;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 53, 0.5), 15, 0, 0, 0);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.fab-button:pressed {
+    -fx-background-color: #d6391e;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+/* ==========================================
+   FENÊTRE DE CHAT
+   ========================================== */
+
+.chat-window {
+    -fx-background-color: #1a1a2e;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #2d2d42;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 20, 0, 0, 0);
+}
+
+.scroll-pane {
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.messages-container {
+    -fx-padding: 12;
+    -fx-spacing: 10;
+}
+
+/* ==========================================
+   HEADER DU CHAT
+   ========================================== */
+
+.chat-header {
+    -fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);
+    -fx-background-radius: 16 16 0 0;
+    -fx-border-radius: 16 16 0 0;
+    -fx-padding: 12;
+    -fx-alignment: center_left;
+    -fx-spacing: 10;
+}
+
+.chat-header .avatar {
+    -fx-font-size: 18;
+}
+
+.chat-header .header-title {
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.chat-header .header-subtitle {
+    -fx-font-size: 12;
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+}
+
+.close-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 4;
+    -fx-pref-width: 24;
+    -fx-pref-height: 24;
+    -fx-border-color: transparent;
+}
+
+.close-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.close-btn:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================
+   MESSAGES UTILISATEUR
+   ========================================== */
+
+.user-message-container {
+    -fx-alignment: center_right;
+    -fx-padding: 4 0;
+}
+
+.user-message-container .bubble-text {
+    -fx-background-color: linear-gradient(to bottom right, #ff6b35, #e64e1e);
+    -fx-text-fill: white;
+    -fx-background-radius: 14;
+    -fx-padding: 12 16;
+    -fx-font-size: 14;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-wrap-text: true;
+    -fx-max-width: 240;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 53, 0.2), 8, 0, 0, 0);
+}
+
+/* ==========================================
+   MESSAGES BOT
+   ========================================== */
+
+.bot-message-container {
+    -fx-alignment: center_left;
+    -fx-spacing: 8;
+    -fx-padding: 4 0;
+}
+
+.avatar-container {
+    -fx-alignment: top_center;
+}
+
+.avatar {
+    -fx-fill: #ff6b35;
+    -fx-stroke: #e64e1e;
+    -fx-stroke-width: 2;
+}
+
+.bot-bubble {
+    -fx-background-color: #1a1a2e;
+    -fx-text-fill: #e8eaf6;
+    -fx-background-radius: 14;
+    -fx-border-color: #2d2d42;
+    -fx-border-width: 1;
+    -fx-padding: 12 16;
+    -fx-font-size: 14;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-wrap-text: true;
+    -fx-max-width: 280;
+}
+
+.bubble-text {
+    -fx-wrap-text: true;
+}
+
+.message-time {
+    -fx-font-size: 11;
+    -fx-text-fill: #888;
+    -fx-padding: 4 0 0 0;
+}
+
+/* ==========================================
+   INDICATEUR DE CHARGEMENT
+   ========================================== */
+
+.typing-container {
+    -fx-alignment: center_left;
+    -fx-padding: 4 0;
+}
+
+.typing-dots {
+    -fx-text-fill: #ff6b35;
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-background-color: #1a1a2e;
+    -fx-border-radius: 12;
+    -fx-padding: 8 12;
+}
+
+/* ==========================================
+   ZONE DE SAISIE
+   ========================================== */
+
+.input-area {
+    -fx-background-color: #1e1e2e;
+    -fx-padding: 10;
+    -fx-spacing: 8;
+    -fx-alignment: center;
+}
+
+.message-input {
+    -fx-background-color: #0d0d0f;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-border-color: #2d2d42;
+    -fx-border-width: 1;
+    -fx-prompt-text-fill: #888;
+    -fx-padding: 8 12;
+    -fx-font-size: 14;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.message-input:focused {
+    -fx-border-color: #ff6b35;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 53, 0.3), 6, 0, 0, 0);
+}
+
+.message-input:hover {
+    -fx-border-color: #e64e1e;
+}
+
+/* ==========================================
+   BOUTON D'ENVOI
+   ========================================== */
+
+.send-btn {
+    -fx-background-color: #ff6b35;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+    -fx-cursor: hand;
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+}
+
+.send-btn:hover {
+    -fx-background-color: #e64e1e;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 53, 0.3), 6, 0, 0, 0);
+}
+
+.send-btn:pressed {
+    -fx-background-color: #d6391e;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+.send-btn:disabled {
+    -fx-background-color: #333344;
+    -fx-opacity: 0.6;
+}
+
+/* ==========================================
+   SCROLLBAR PERSONNALISÉE
+   ========================================== */
+
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4;
+    -fx-pref-width: 8;
+}
+
+.scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: #111118;
+    -fx-background-radius: 4;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #ff6b35;
+    -fx-background-radius: 4;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #e64e1e;
+}
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+
+.chat-window {
+    -fx-opacity: 0;
+    -fx-scale-x: 0.8;
+    -fx-scale-y: 0.8;
+}
+
+.chat-window.visible {
+    -fx-opacity: 1;
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-transition: all 0.3s ease-in-out;
+}
+
+/* ==========================================
+   RESPONSIVE ET ACCESSIBILITÉ
+   ========================================== */
+
+@media (max-width: 480px) {
+    .chat-window {
+        -fx-max-width: 320;
+        -fx-max-height: 480;
+    }
+    
+    .user-message-container .bubble-text,
+    .bot-bubble {
+        -fx-max-width: 200;
+    }
+}
+
+.chat-error-banner {
+    -fx-background-color: #c0392b;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 8 12;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}

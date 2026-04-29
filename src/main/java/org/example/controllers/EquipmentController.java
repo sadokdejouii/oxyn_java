@@ -10,9 +10,11 @@ import org.example.entities.Salle;
 import org.example.services.AdminFormValidation;
 import org.example.services.EquipmentService;
 import org.example.services.SalleService;
+import org.example.utils.MyDataBase;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ public class EquipmentController implements Initializable {
     private List<Equipment> allItems = List.of();
     private Equipment editing = null, toDelete = null;
     private String currentFilter = "ALL";
+    private Salle salleActuelle = null;  // ← Salle actuelle pour le filtrage
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -55,8 +58,30 @@ public class EquipmentController implements Initializable {
         } catch (SQLException ignored) {}
     }
 
+    /**
+     * Passer la salle actuelle depuis la fenêtre parent
+     */
+    public void setSalle(Salle salle) {
+        this.salleActuelle = salle;
+        System.out.println("📍 Salle reçue: " + salle.getName() + " (ID: " + salle.getId() + ")");
+        load(); // Recharger les données pour la nouvelle salle
+    }
+    
     private void load() {
-        try { allItems = service.afficher(); } catch (SQLException e) { e.printStackTrace(); }
+        if (salleActuelle != null) {
+            // Charger les équipements de la salle actuelle
+            allItems = service.getByGym(salleActuelle.getId());
+            System.out.println("📊 " + allItems.size() + " équipements chargés pour la salle " + salleActuelle.getName());
+        } else {
+            // Charger tous les équipements
+            try { 
+                allItems = service.afficher(); 
+            } catch (SQLException e) { 
+                e.printStackTrace(); 
+                allItems = new ArrayList<>();
+            }
+        }
+        
         statTotal.setText(String.valueOf(allItems.size()));
         statActifs.setText(String.valueOf(allItems.stream().filter(Equipment::isActive).count()));
         statQte.setText(String.valueOf(allItems.stream().mapToInt(Equipment::getQuantity).sum()));
@@ -124,21 +149,50 @@ public class EquipmentController implements Initializable {
     }
 
     @FXML private void handleSave() {
+        System.out.println("🔍 handleSave() appelé");
+        
         Salle s = fieldSalle.getValue();
         Integer gymId = (s != null && s.getId() > 0) ? s.getId() : null;
+        String name = fieldName.getText().trim();
+        String desc = fieldDesc.getText().trim();
+        String qtyStr = fieldQty.getText().trim();
+        
+        System.out.println("🔍 Données: name=" + name + ", qty=" + qtyStr + ", gymId=" + gymId + ", editing=" + (editing != null ? "YES" : "NO"));
+        
         String err = AdminFormValidation.validateEquipmentAdminForm(
                 fieldName.getText(), fieldDesc.getText(), fieldQty.getText(), gymId);
         if (err != null) {
+            System.out.println("❌ Validation erreur: " + err);
             dialogError.setText(err);
             return;
         }
-        int qty = Integer.parseInt(fieldQty.getText().trim());
-        String name = fieldName.getText().trim();
-        try {
-            if (editing == null) service.ajouter(new Equipment(name, fieldDesc.getText().trim(), qty, gymId));
-            else { editing.setName(name); editing.setDescription(fieldDesc.getText().trim()); editing.setQuantity(qty); editing.setGymnasiumId(gymId); service.modifier(editing); }
-            showDialog(false); load();
-        } catch (SQLException e) { dialogError.setText("Erreur : " + e.getMessage()); }
+        
+        int qty = Integer.parseInt(qtyStr);
+        
+        if (editing == null) {
+            System.out.println("🔍 Ajout nouvel équipement...");
+            Equipment e = new Equipment(name, desc, qty, gymId);
+            service.add(e);  // ← INSERT en BD immédiatement
+            System.out.println("✅ Équipement ajouté avec ID: " + e.getId());
+        } else {
+            System.out.println("🔍 Modification équipement ID: " + editing.getId());
+            editing.setName(name);
+            editing.setDescription(desc);
+            editing.setQuantity(qty);
+            editing.setGymnasiumId(gymId);
+            try {
+                service.modifier(editing);
+                System.out.println("✅ Équipement modifié");
+            } catch (SQLException ex) {
+                System.err.println("❌ Erreur modification: " + ex.getMessage());
+                dialogError.setText("Erreur : " + ex.getMessage());
+                return;
+            }
+        }
+        
+        showDialog(false);
+        load();  // ← refresh depuis BD
+        System.out.println("🔍 Dialog fermé et données rechargées");
     }
 
     @FXML private void handleCancel() { showDialog(false); }

@@ -18,10 +18,17 @@ import java.util.Optional;
  */
 public final class AuthService {
 
-    private final UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO;
+
+    private UserDAO getUserDAO() {
+        if (userDAO == null) {
+            userDAO = new UserDAO();
+        }
+        return userDAO;
+    }
 
     public User login(String email, String password) throws SQLException {
-        return userDAO.login(email, password);
+        return getUserDAO().login(email, password);
     }
 
     /**
@@ -32,7 +39,7 @@ public final class AuthService {
             return Optional.empty();
         }
         String email = emailInput.trim();
-        Connection c = MyDataBase.getInstance().getConnection();
+        Connection c = MyDataBase.getConnection();
         if (c == null) {
             return Optional.empty();
         }

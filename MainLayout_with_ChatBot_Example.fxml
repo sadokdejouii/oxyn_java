@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Ikonli FontIcon is swapped in at runtime (see MainLayoutController). Placeholders: Region + ikonli-slot, fas-*, sz-*. -->
+<StackPane prefHeight="880.0" prefWidth="1530.0" styleClass="app-root" stylesheets="@../css/sidebar.css,@../css/topbar.css,@../css/home.css,@../css/cards.css,@../css/dashboard-saas.css,@../css/login.css,@../css/user-management.css,@../css/profile-page.css,@../css/client-shell-premium.css,@../css/chatbot.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    
+    <!-- Contenu principal existant dans un BorderPane -->
+    <BorderPane fx:id="shellRoot" prefHeight="880.0" prefWidth="1530.0" styleClass="app-root">
+    
+        <!-- Sidebar existante -->
+        <left>
+            <VBox fx:id="sidebar" maxHeight="Infinity" maxWidth="288" prefWidth="272" spacing="0" styleClass="sidebar">
+                <!-- Contenu sidebar existant -->
+                <Label text="Sidebar OXYN" style="-fx-text-fill: white; -fx-padding: 20; -fx-font-size: 18;"/>
+                <!-- ... autres éléments du sidebar ... -->
+            </VBox>
+        </left>
+        
+        <!-- Top bar existante -->
+        <top>
+            <HBox styleClass="topbar" prefHeight="60" alignment="CENTER_LEFT">
+                <Label text="OXYN Gestion" style="-fx-text-fill: white; -fx-font-size: 20; -fx-font-weight: bold; -fx-padding: 0 20;"/>
+                <!-- ... autres éléments de la top bar ... -->
+            </HBox>
+        </top>
+        
+        <!-- Zone principale avec le contenu existant -->
+        <center>
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-content">
+                <VBox spacing="20" styleClass="content-container">
+                    
+                    <!-- Contenu principal existant -->
+                    <Label text="Tableau de bord OXYN" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 20;"/>
+                    
+                    <!-- Exemple de contenu existant -->
+                    <HBox spacing="20" styleClass="dashboard-cards">
+                        <VBox styleClass="dashboard-card" prefWidth="300" prefHeight="200">
+                            <Label text="🏋️ Salles" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+                            <Label text="3 salles actives" style="-fx-text-fill: #666;"/>
+                        </VBox>
+                        
+                        <VBox styleClass="dashboard-card" prefWidth="300" prefHeight="200">
+                            <Label text="👥 Membres" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+                            <Label text="247 membres" style="-fx-text-fill: #666;"/>
+                        </VBox>
+                        
+                        <VBox styleClass="dashboard-card" prefWidth="300" prefHeight="200">
+                            <Label text="📅 Séances" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+                            <Label text="15 séances aujourd'hui" style="-fx-text-fill: #666;"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <!-- Autre contenu existant -->
+                    <VBox styleClass="content-section">
+                        <Label text="Activités récentes" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-padding: 10;"/>
+                        <!-- ... contenu des activités ... -->
+                    </VBox>
+                    
+                </VBox>
+            </ScrollPane>
+        </center>
+        
+    </BorderPane>
+    
+    <!-- Chatbot intégré comme dernier élément -->
+    <fx:include source="ChatBot.fxml"/>
+    
+</StackPane>

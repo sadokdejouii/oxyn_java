@@ -36,7 +36,7 @@ public final class EncadrantClientPlanningService {
      * Clients actifs avec fiche santé — pour la grille encadrant (lecture seule).
      */
     public List<EncadrantClientCardRow> listActiveClientsWithFicheCards() throws SQLException {
-        Connection c = MyDataBase.getInstance().getConnection();
+        Connection c = MyDataBase.getConnection();
         if (c == null || c.isClosed()) {
             return List.of();
         }
@@ -166,7 +166,7 @@ public final class EncadrantClientPlanningService {
     }
 
     private static String resolveClientLabel(int userId) throws SQLException {
-        Connection c = MyDataBase.getInstance().getConnection();
+        Connection c = MyDataBase.getConnection();
         if (c == null || c.isClosed()) {
             return "Client";
         }

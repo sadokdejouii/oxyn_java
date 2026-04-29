@@ -15,8 +15,7 @@ import java.util.List;
 public class SessionService implements ICrud<Session> {
 
     private static Connection fresh() throws SQLException {
-        Connection c = DriverManager.getConnection(
-            MyDataBase.getURL(), MyDataBase.getUSERNAME(), MyDataBase.getPASSWORD());
+        Connection c = MyDataBase.getConnectionWithException();
         c.setAutoCommit(true);
         return c;
     }
@@ -156,10 +155,61 @@ public class SessionService implements ICrud<Session> {
     @Override
     public void supprimer(int id) throws SQLException {
         try (Connection c = fresh()) {
-            PreparedStatement ps = c.prepareStatement(
-                "UPDATE training_sessions SET is_active = 0 WHERE id = ?");
+            PreparedStatement ps = c.prepareStatement("DELETE FROM training_sessions WHERE id = ?");
             ps.setInt(1, id);
             ps.executeUpdate();
         }
+    }
+
+    /**
+     * Récupère toutes les sessions actives pour un gymnase spécifique
+     */
+    public List<Session> findByGymnasiumId(int gymnasiumId) throws SQLException {
+        List<Session> sessions = new ArrayList<>();
+        try (Connection c = fresh()) {
+            PreparedStatement ps = c.prepareStatement(
+                "SELECT ts.*, g.name AS gym_name " +
+                "FROM training_sessions ts " +
+                "LEFT JOIN gymnasia g ON ts.gymnasium_id = g.id " +
+                "WHERE ts.gymnasium_id = ? AND ts.is_active = 1 " +
+                "ORDER BY ts.start_at ASC");
+            ps.setInt(1, gymnasiumId);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Session s = new Session();
+                s.setId(rs.getInt("id"));
+                s.setTitle(rs.getString("title"));
+                s.setDescription(rs.getString("description"));
+                
+                // Null-safe handling for start_at
+                Timestamp start = rs.getTimestamp("start_at");
+                if (start != null) {
+                    s.setStartAt(start.toLocalDateTime());
+                } else {
+                    s.setStartAt(java.time.LocalDateTime.now()); // fallback
+                }
+                
+                // Null-safe handling for end_at
+                Timestamp end = rs.getTimestamp("end_at");
+                if (end != null) {
+                    s.setEndAt(end.toLocalDateTime());
+                } else {
+                    // fallback: 1h after start_at
+                    s.setEndAt(s.getStartAt().plusHours(1));
+                }
+                
+                s.setCapacity(rs.getInt("capacity"));
+                s.setPrice(rs.getDouble("price"));
+                s.setActive(rs.getInt("is_active") == 1);
+                s.setCreatedAt(rs.getTimestamp("created_at"));
+                s.setGymnasiumId(rs.getInt("gymnasium_id"));
+                s.setGymnasiumName(rs.getString("gym_name"));
+                s.setCoachUserId(rs.getInt("coach_user_id"));
+                s.setPlacesRestantes(s.getCapacity());
+                sessions.add(s);
+            }
+        }
+        return sessions;
     }
 }

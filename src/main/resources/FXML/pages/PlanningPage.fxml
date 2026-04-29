@@ -33,12 +33,4 @@
             </VBox>
         </VBox>
     </ScrollPane>
-    <Button focusTraversable="false" onAction="#handleOpenDiscussion" styleClass="planning-discussion-fab" StackPane.alignment="BOTTOM_RIGHT" text="">
-        <StackPane.margin>
-            <Insets bottom="28" right="28" />
-        </StackPane.margin>
-        <graphic>
-            <FontIcon iconLiteral="fas-comments" iconSize="22" styleClass="planning-fab-icon" />
-        </graphic>
-    </Button>
 </StackPane>

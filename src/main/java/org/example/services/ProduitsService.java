@@ -11,7 +11,7 @@ public class ProduitsService implements ICrud<produits>{
     Connection con;
 
     public ProduitsService() {
-        con = MyDataBase.getInstance().getConnection();
+        con = MyDataBase.getConnection();
     }
 
     @Override

@@ -64,6 +64,8 @@ public class MainLayoutController implements Initializable {
     private static final String PAGE_ENC_HOME = "/FXML/pages/EncadrantHome.fxml";
     private static final String PAGE_ENC_GROUPE = "/FXML/pages/EncadrantGroupe.fxml";
     private static final String PAGE_ENC_PLANNING = "/FXML/pages/EncadrantPlanning.fxml";
+    private static final Set<String> CHAT_PAGES = Set.of(); // Plus de chatbot sur aucune page
+    
     @FXML
     private BorderPane shellRoot;
 
@@ -98,20 +100,26 @@ public class MainLayoutController implements Initializable {
     private VBox sidebarActionsBox;
 
     @FXML
+    private VBox chatBotContainer;
+
+    @FXML
+    private Button chatBubbleBtn;
+
+    @FXML
     private Label footerText;
 
     @FXML
     private StackPane contentArea;
-
+    
+    @FXML
+    private TextField topbarSearchField;
+    
     @FXML
     private Label topbarPageTitle;
 
     @FXML
-    private TextField topbarSearchField;
-
-    @FXML
     private Label topbarUserName;
-
+    
     @FXML
     private Label topbarUserRole;
 
@@ -192,6 +200,9 @@ public class MainLayoutController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Stocker le contrôleur comme userData pour y accéder depuis d'autres contrôleurs
+        shellRoot.setUserData(this);
+        
         Runnable installIcons = () -> installIkonliFontIcons(shellRoot);
         installIcons.run();
         // After skins attach button graphics / scroll content, placeholders may only appear on this pass.
@@ -254,9 +265,9 @@ public class MainLayoutController implements Initializable {
         clientNavGroup.setManaged(client);
 
         String modeLabel = admin ? "ADMINISTRATOR" : encadrant ? "ENCADRANT" : "MEMBRE";
-        shellModeLabel.setText(modeLabel);
+        if (shellModeLabel != null) shellModeLabel.setText(modeLabel);
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        footerText.setText(admin ? "Back office session"
+        if (footerText != null) footerText.setText(admin ? "Back office session"
             : encadrant ? "Encadrant — planning"
             : "Session active · accès sécurisé");
         if (topbarSearchField != null) {
@@ -293,7 +304,6 @@ public class MainLayoutController implements Initializable {
 
     private void navigatePlaceholder(String moduleTitle, Button navButton) {
         try {
-            PlaceholderContext.setModuleLabel(moduleTitle);
             PageLoader.show(contentArea, PAGE_PLACEHOLDER, this);
             topbarPageTitle.setText(moduleTitle);
             setActiveNav(navButton);
@@ -321,6 +331,7 @@ public class MainLayoutController implements Initializable {
             PageLoader.show(contentArea, classpath, this);
             topbarPageTitle.setText(title);
             setActiveNav(navButton);
+            updateChatVisibility(resolvePageKey(classpath));
         } catch (Exception e) {
             e.printStackTrace();
             if (footerText != null) {
@@ -352,6 +363,31 @@ public class MainLayoutController implements Initializable {
         activeNavButton = button;
         if (button != null && !button.getStyleClass().contains("active")) {
             button.getStyleClass().add("active");
+        }
+    }
+
+    private String resolvePageKey(String classpath) {
+        if (classpath == null) {
+            return "";
+        }
+        if (classpath.contains("ClientSalle") || classpath.contains("Salle")) {
+            return "salle";
+        }
+        if (classpath.contains("Session") || classpath.contains("Planning")) {
+            return "session";
+        }
+        return "accueil";
+    }
+
+    private void updateChatVisibility(String pageKey) {
+        boolean show = CHAT_PAGES.contains(pageKey);
+        if (chatBotContainer != null) {
+            chatBotContainer.setVisible(show);
+            chatBotContainer.setManaged(show);
+        }
+        if (chatBubbleBtn != null) {
+            chatBubbleBtn.setVisible(show);
+            chatBubbleBtn.setManaged(show);
         }
     }
 
@@ -446,6 +482,11 @@ public class MainLayoutController implements Initializable {
     }
 
     @FXML
+    private void handleDashboard() {
+        navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
+    }
+
+    @FXML
     private void handleAdminSalle() {
         navigate(PAGE_STOCK, "Salle", adminSalleBtn);
     }
@@ -461,7 +502,7 @@ public class MainLayoutController implements Initializable {
     }
 
     /**
-     * Ouvert depuis la page Boutique : garde l’entrée « Boutique » active dans la barre latérale.
+     * Ouvert depuis la page Boutique : garde l'entrée « Boutique » active dans la barre latérale.
      */
     public void navigateToAdminCommandes() {
         navigate(PAGE_ADMIN_COMMANDES, "Commandes", adminBoutiqueBtn);
@@ -488,7 +529,7 @@ public class MainLayoutController implements Initializable {
     }
 
     @FXML
-    private void handleSalle() {
+    public void handleSalle() {
         navigate(PAGE_CLIENT_SALLE, "Salles", salleBtn);
     }
 
@@ -553,7 +594,12 @@ public class MainLayoutController implements Initializable {
     }
 
     @FXML
-    private void handleLogout() {
+    public StackPane getContentArea() {
+        return contentArea;
+    }
+
+    @FXML
+    public void handleLogout() {
         try {
             SessionContext.getInstance().logout();
             Stage stage = (Stage) contentArea.getScene().getWindow();
@@ -578,6 +624,22 @@ public class MainLayoutController implements Initializable {
             return parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
         }
         return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    
+    /**
+     * Charge le chatbot manuellement via FXMLLoader
+     */
+    private void loadChatBot() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/FXML/ChatBot.fxml"));
+            StackPane chatBotPane = loader.load();
+            // Ajouter au StackPane racine (parent du shellRoot)
+            StackPane rootPane = (StackPane) shellRoot.getParent();
+            rootPane.getChildren().add(chatBotPane);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void info(String title, String msg) {

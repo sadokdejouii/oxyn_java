@@ -12,7 +12,7 @@ public class ForumPostService implements ICrud<Post> {
     Connection con;
 
     public ForumPostService() {
-        con = MyDataBase.getInstance().getConnection();
+        con = MyDataBase.getConnection();
     }
 
     @Override
