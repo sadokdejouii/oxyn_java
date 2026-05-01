@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -13,10 +15,9 @@ import java.util.function.Consumer;
  * publie un évènement {@code message-created} sur
  * {@code /chat/conversation/{id}}.</p>
  *
- * <p>Côté récepteur : {@link #subscribeToConversation(int, Consumer)} ajoute le
- * topic dynamique au {@link RealtimeService} et abonne un consumer au
- * dispatcher. {@link #unsubscribeFromConversation(int, String)} fait le
- * miroir et retire proprement le topic.</p>
+ * <p>Côté récepteur : {@link #subscribeToConversation(int, Consumer, String)} ajoute les topics
+ * {@code /chat/conversation/…}, {@code /typing/conversation/…} et optionnellement présence du pair,
+ * en une seule reconnexion SSE. {@link #unsubscribeFromConversation(int, String, String)} retire le tout.</p>
  */
 public final class RealtimeChatService {
 
@@ -58,23 +59,40 @@ public final class RealtimeChatService {
     }
 
     /**
-     * Abonne un consumer au topic conversation et ajoute ce topic au flux SSE.
-     * Renvoie l'identifiant de souscription (à passer à
-     * {@link #unsubscribeFromConversation(int, String)}).
+     * Abonne un consumer aux évènements « nouveau message » et souscrit en une fois au chat,
+     * au flux typing de la même conversation, et optionnellement à la présence du pair.
+     *
+     * @param peerPresenceTopic ex. {@code /presence/user/42} ou {@code null}
      */
-    public String subscribeToConversation(int conversationId, Consumer<RealtimeEvent> handler) {
+    public String subscribeToConversation(int conversationId, Consumer<RealtimeEvent> handler,
+                                          String peerPresenceTopic) {
         if (conversationId <= 0 || handler == null) {
             return null;
         }
-        String topic = "/chat/conversation/" + conversationId;
-        realtime.addTopic(topic);
-        return dispatcher.subscribe(topic, handler);
+        String chatTopic = "/chat/conversation/" + conversationId;
+        String typingTopic = "/typing/conversation/" + conversationId;
+        List<String> topics = new ArrayList<>(3);
+        topics.add(chatTopic);
+        topics.add(typingTopic);
+        if (peerPresenceTopic != null && !peerPresenceTopic.isBlank()) {
+            topics.add(peerPresenceTopic.trim());
+        }
+        realtime.addTopics(topics);
+        return dispatcher.subscribe(chatTopic, handler);
     }
 
-    public void unsubscribeFromConversation(int conversationId, String subscriptionId) {
+    public void unsubscribeFromConversation(int conversationId, String subscriptionId,
+                                            String peerPresenceTopic) {
         dispatcher.unsubscribe(subscriptionId);
-        if (conversationId > 0) {
-            realtime.removeTopic("/chat/conversation/" + conversationId);
+        if (conversationId <= 0) {
+            return;
         }
+        List<String> topics = new ArrayList<>(3);
+        topics.add("/chat/conversation/" + conversationId);
+        topics.add("/typing/conversation/" + conversationId);
+        if (peerPresenceTopic != null && !peerPresenceTopic.isBlank()) {
+            topics.add(peerPresenceTopic.trim());
+        }
+        realtime.removeTopics(topics);
     }
 }

@@ -24,6 +24,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Client SSE Mercure : ouvre une connexion HTTP long-lived vers le hub,
@@ -67,6 +69,8 @@ public final class MercureClientService {
         t.setDaemon(true);
         return t;
     });
+
+    private static final Pattern TOPIC_IN_JSON = Pattern.compile("\"topic\"\\s*:\\s*\"([^\"]+)\"");
 
     /** Évite d'inonder la console si le hub Mercure est injoignable. */
     private volatile long lastPublishErrorLogMs;
@@ -308,7 +312,16 @@ public final class MercureClientService {
                 }
             }
         } catch (Exception ignored) {
-            // sera converti en {"raw": ...} par fromRawPayload
+            String extracted = extractTopicFromRawJson(rawData);
+            if (extracted != null) {
+                topic = extracted;
+            }
+        }
+        if ((topic == null || "message".equalsIgnoreCase(topic)) && rawData != null) {
+            String extracted = extractTopicFromRawJson(rawData);
+            if (extracted != null) {
+                topic = extracted;
+            }
         }
         if (topic == null && !subscribedTopics.isEmpty()) {
             topic = subscribedTopics.get(0);
@@ -317,6 +330,15 @@ public final class MercureClientService {
             return;
         }
         dispatcher.dispatch(RealtimeEvent.fromRawPayload(topic, rawData));
+    }
+
+    /** Si le JSON complet ne parse pas, on récupère au moins le topic Mercure pour router l'évènement. */
+    private static String extractTopicFromRawJson(String rawData) {
+        if (rawData == null || rawData.isBlank()) {
+            return null;
+        }
+        Matcher m = TOPIC_IN_JSON.matcher(rawData);
+        return m.find() ? m.group(1) : null;
     }
 
     private String buildSubscribeUrl(List<String> topics) {

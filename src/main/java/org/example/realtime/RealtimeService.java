@@ -4,6 +4,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -126,8 +127,24 @@ public final class RealtimeService {
         if (topic == null || topic.isBlank() || sessionUserId.get() <= 0) {
             return;
         }
-        if (dynamicTopics.add(topic)) {
-            // Reconnexion volontaire pour appliquer la nouvelle liste de souscriptions SSE.
+        addTopics(List.of(topic));
+    }
+
+    /**
+     * Ajoute plusieurs topics dynamiques en une seule reconnexion Mercure (évite une fenêtre
+     * où le SSE serait abonné au chat mais pas encore au typing, etc.).
+     */
+    public synchronized void addTopics(Collection<String> topics) {
+        if (topics == null || sessionUserId.get() <= 0) {
+            return;
+        }
+        boolean changed = false;
+        for (String topic : topics) {
+            if (topic != null && !topic.isBlank() && dynamicTopics.add(topic)) {
+                changed = true;
+            }
+        }
+        if (changed) {
             mercure.start(combinedTopics());
         }
     }
@@ -139,7 +156,23 @@ public final class RealtimeService {
         if (topic == null || sessionUserId.get() <= 0) {
             return;
         }
-        if (dynamicTopics.remove(topic)) {
+        removeTopics(List.of(topic));
+    }
+
+    /**
+     * Retire plusieurs topics en une seule reconnexion.
+     */
+    public synchronized void removeTopics(Collection<String> topics) {
+        if (topics == null || sessionUserId.get() <= 0) {
+            return;
+        }
+        boolean changed = false;
+        for (String topic : topics) {
+            if (topic != null && !topic.isBlank() && dynamicTopics.remove(topic)) {
+                changed = true;
+            }
+        }
+        if (changed) {
             mercure.start(combinedTopics());
         }
     }

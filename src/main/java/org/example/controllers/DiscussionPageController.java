@@ -50,13 +50,14 @@ import org.example.entities.MessageRow;
 import org.example.entities.User;
 import org.example.realtime.PresenceService;
 import org.example.realtime.RealtimeChatService;
-import org.example.realtime.RealtimeService;
 import org.example.realtime.TypingService;
 import org.example.services.DiscussionService;
 import org.example.services.NotificationService;
 import org.example.services.SessionContext;
 import org.example.services.TranslationService;
 import org.example.services.UserService;
+
+import com.google.gson.JsonObject;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -111,7 +112,6 @@ public class DiscussionPageController implements Initializable {
     private String activePeerDisplayName = "";
     private String activePeerEmail = "";
     private String chatSubscriptionId = null;
-    private String activeTypingTopic = null;
     private String activePeerPresenceTopic = null;
     private BiConsumer<Integer, PresenceService.Presence> presenceListener;
     private BiConsumer<TypingService.TypingEvent, Boolean> typingListener;
@@ -246,7 +246,8 @@ public class DiscussionPageController implements Initializable {
 
     private void disposeRealtime() {
         if (chatSubscriptionId != null) {
-            realtimeChatService.unsubscribeFromConversation(activeConversationId, chatSubscriptionId);
+            realtimeChatService.unsubscribeFromConversation(activeConversationId, chatSubscriptionId,
+                    activePeerPresenceTopic);
             chatSubscriptionId = null;
         }
         if (presenceListener != null) {
@@ -260,15 +261,7 @@ public class DiscussionPageController implements Initializable {
         if (activeConversationId > 0) {
             typingService.notifyLocalStopped(activeConversationId);
         }
-        RealtimeService rt = RealtimeService.getInstance();
-        if (activeTypingTopic != null) {
-            rt.removeTopic(activeTypingTopic);
-            activeTypingTopic = null;
-        }
-        if (activePeerPresenceTopic != null) {
-            rt.removeTopic(activePeerPresenceTopic);
-            activePeerPresenceTopic = null;
-        }
+        activePeerPresenceTopic = null;
         if (voiceRecorder != null && voiceRecorder.isRecording()) {
             voiceRecorder.cancel();
         }
@@ -541,20 +534,13 @@ public class DiscussionPageController implements Initializable {
     }
 
     private void rebindRealtimeForActiveConversation(int oldConversationId) {
-        RealtimeService rt = RealtimeService.getInstance();
         SessionContext.getInstance().setActiveDiscussionConversationId(activeConversationId);
         if (oldConversationId > 0 && chatSubscriptionId != null) {
-            realtimeChatService.unsubscribeFromConversation(oldConversationId, chatSubscriptionId);
+            realtimeChatService.unsubscribeFromConversation(oldConversationId, chatSubscriptionId,
+                    activePeerPresenceTopic);
             chatSubscriptionId = null;
         }
-        if (activeTypingTopic != null) {
-            rt.removeTopic(activeTypingTopic);
-            activeTypingTopic = null;
-        }
-        if (activePeerPresenceTopic != null) {
-            rt.removeTopic(activePeerPresenceTopic);
-            activePeerPresenceTopic = null;
-        }
+        activePeerPresenceTopic = null;
         if (activeConversationId <= 0) {
             activePeerUserId = -1;
             activePeerDisplayName = "";
@@ -602,16 +588,19 @@ public class DiscussionPageController implements Initializable {
                 chatHeader.clearPresence();
             }
         }
+        activePeerPresenceTopic = activePeerUserId > 0 ? "/presence/user/" + activePeerUserId : null;
+        final int boundConversationId = activeConversationId;
+        final String boundChatTopic = "/chat/conversation/" + boundConversationId;
         chatSubscriptionId = realtimeChatService.subscribeToConversation(
-                activeConversationId, this::onIncomingChatEvent);
-
-        activeTypingTopic = "/typing/conversation/" + activeConversationId;
-        rt.addTopic(activeTypingTopic);
-
-        if (activePeerUserId > 0) {
-            activePeerPresenceTopic = "/presence/user/" + activePeerUserId;
-            rt.addTopic(activePeerPresenceTopic);
-        }
+                boundConversationId,
+                ev -> {
+                    // Évite le faux positif du préfixe Mercure (/chat/conversation/3 matche aussi …/30).
+                    if (!boundChatTopic.equals(ev.topic())) {
+                        return;
+                    }
+                    onIncomingChatEvent(ev);
+                },
+                activePeerPresenceTopic);
         if (chatHeader != null) {
             chatHeader.setTypingActive(false, null);
         }
@@ -672,25 +661,46 @@ public class DiscussionPageController implements Initializable {
         if (event == null || activeConversationId <= 0) {
             return;
         }
-        // On ignore les events d'autres conversations: cette vue affiche uniquement le thread actif.
-        Integer convId = event.asObject()
-                .filter(o -> o.has("conversationId") && !o.get("conversationId").isJsonNull())
-                .map(o -> o.get("conversationId").getAsInt())
-                .orElse(activeConversationId);
+        Optional<JsonObject> root = event.asObject();
+        if (root.isEmpty()) {
+            return;
+        }
+        JsonObject o = root.get();
+        // Uniquement les publications « nouveau message » (évite tout bruit republié sur un topic voisin).
+        if (gsonPositiveInt(o, "messageId").isEmpty()) {
+            return;
+        }
+        int convId = gsonPositiveInt(o, "conversationId").orElse(activeConversationId);
         if (convId != activeConversationId) {
             return;
         }
-        Integer senderId = event.asObject()
-                .filter(o -> o.has("senderId") && !o.get("senderId").isJsonNull())
-                .map(o -> o.get("senderId").getAsInt())
-                .orElse(-1);
-        if (senderId != null && senderId == SessionContext.getInstance().getUserId()) {
+        Optional<Integer> senderOpt = gsonPositiveInt(o, "senderId");
+        int senderId = senderOpt.orElse(-1);
+        if (senderId >= 0 && senderId == SessionContext.getInstance().getUserId()) {
             return;
         }
         reloadMessages();
         markActiveConversationAsRead(SessionContext.getInstance());
         if (chatHeader != null) {
             chatHeader.setTypingActive(false, null);
+        }
+    }
+
+    /** Entier strictement positif (expéditeur / identifiants métier), tolère les nombres sérialisés en chaîne. */
+    private static Optional<Integer> gsonPositiveInt(JsonObject o, String key) {
+        if (o == null || !o.has(key) || o.get(key).isJsonNull()) {
+            return Optional.empty();
+        }
+        try {
+            int v = o.get(key).getAsInt();
+            return v > 0 ? Optional.of(v) : Optional.empty();
+        } catch (RuntimeException ignored) {
+            try {
+                int v = Integer.parseInt(o.get(key).getAsString().trim());
+                return v > 0 ? Optional.of(v) : Optional.empty();
+            } catch (RuntimeException ignored2) {
+                return Optional.empty();
+            }
         }
     }
 
@@ -883,6 +893,10 @@ public class DiscussionPageController implements Initializable {
         slide.setInterpolator(Interpolator.EASE_OUT);
         ParallelTransition intro = new ParallelTransition(fade, slide);
         intro.setDelay(Duration.millis(Math.min(staggerIndex, 14) * 32L));
+        intro.setOnFinished(e -> {
+            node.setOpacity(1);
+            node.setTranslateX(0);
+        });
         intro.play();
     }
 
