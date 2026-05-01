@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+            styleClass="front-events-scroll client-salle-surface-root"
+            stylesheets="@../../css/front-events.css,@../../css/client-salle.css"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controllers.ClientSalleListController">
+    <VBox alignment="TOP_CENTER" maxWidth="Infinity" spacing="22" styleClass="front-page client-salle-page">
+
+        <StackPane styleClass="front-hero-banner client-salle-hero">
+            <VBox alignment="CENTER" spacing="8">
+                <Label styleClass="front-overline" text="ESPACE CLIENT" />
+                <Label styleClass="front-banner-title" text="Nos salles de sport" />
+                <Label styleClass="front-banner-subtitle" text="Découvrez les salles, les abonnements et les sessions" />
+                <Label styleClass="front-banner-text"
+                       text="Filtrez par nom ou adresse, triez par note ou popularité, puis ouvrez la fiche d'une salle pour les offres et le planning."
+                       wrapText="true" />
+            </VBox>
+        </StackPane>
+
+        <HBox alignment="CENTER" spacing="14" styleClass="front-stats-row client-salle-stats">
+            <VBox HBox.hgrow="ALWAYS" spacing="4" styleClass="front-stat-card">
+                <Label styleClass="client-salle-stat-kicker" text="SALLES" />
+                <Label fx:id="statSalles" styleClass="front-stat-number" text="—" />
+                <Label styleClass="client-salle-stat-hint" text="Actives" />
+            </VBox>
+            <VBox HBox.hgrow="ALWAYS" spacing="4" styleClass="front-stat-card">
+                <Label styleClass="client-salle-stat-kicker" text="ABONNEMENTS" />
+                <Label fx:id="statOffres" styleClass="front-stat-number" text="—" />
+                <Label styleClass="client-salle-stat-hint" text="Offres publiées" />
+            </VBox>
+            <VBox HBox.hgrow="ALWAYS" spacing="4" styleClass="front-stat-card">
+                <Label styleClass="client-salle-stat-kicker" text="SESSIONS" />
+                <Label fx:id="statSessions" styleClass="front-stat-number" text="—" />
+                <Label styleClass="client-salle-stat-hint" text="À venir" />
+            </VBox>
+        </HBox>
+
+        <HBox alignment="CENTER" spacing="12" styleClass="front-toolbar client-salle-toolbar">
+            <TextField fx:id="searchField" promptText="Rechercher une salle, une ville ou une adresse…"
+                       styleClass="front-search" HBox.hgrow="ALWAYS" />
+            <ComboBox fx:id="sortCombo" promptText="Trier par" styleClass="front-sort" prefWidth="220" />
+            <Button onAction="#handleRefresh" styleClass="front-refresh-btn" text="Actualiser" />
+        </HBox>
+
+        <Label fx:id="countLabel" styleClass="front-result-label client-salle-count" text="0 salle(s)" />
+
+        <FlowPane fx:id="sallesGrid" alignment="TOP_CENTER" hgap="18" prefWrapLength="1040" styleClass="front-events-grid client-salle-grid" vgap="18">
+            <padding>
+                <Insets bottom="32" left="4" right="4" top="4" />
+            </padding>
+        </FlowPane>
+    </VBox>
+</ScrollPane>

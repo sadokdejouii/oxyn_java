@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AdminDashboardController">
+    <VBox spacing="20" styleClass="page-root">
+        <VBox spacing="6">
+            <Label styleClass="page-hero-title" text="Operations dashboard" />
+            <Label styleClass="page-hero-sub" text="Real-time KPIs, workload mix, and recent activity across your organization." wrapText="true" />
+        </VBox>
+
+        <HBox spacing="16" styleClass="saas-stat-row">
+            <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="TOTAL STOCK (UNITS)" />
+                <Label fx:id="kpiStockLabel" styleClass="saas-stat-value" text="—" />
+                <Label styleClass="saas-stat-hint" text="Warehouse + cold storage" />
+            </VBox>
+            <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="TOTAL EVENTS" />
+                <Label fx:id="kpiEventsLabel" styleClass="saas-stat-value" text="—" />
+                <Label styleClass="saas-stat-hint" text="Published &amp; scheduled" />
+            </VBox>
+            <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="USERS" />
+                <Label fx:id="kpiUsersLabel" styleClass="saas-stat-value" text="—" />
+                <Label styleClass="saas-stat-hint" text="Active workspace members" />
+            </VBox>
+            <VBox spacing="4" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="REVENUE (MTD)" />
+                <Label fx:id="kpiRevenueLabel" styleClass="saas-stat-value" text="—" />
+                <Label styleClass="saas-stat-hint" text="Rolling 30-day estimate" />
+            </VBox>
+        </HBox>
+
+        <HBox spacing="16" alignment="TOP_LEFT">
+            <VBox spacing="10" styleClass="saas-chart-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-card-title" text="Activity over time" />
+                <LineChart fx:id="activityLineChart" animated="false" legendVisible="false" prefHeight="280" styleClass="saas-chart" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis label="Period" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Actions" autoRanging="true" />
+                    </yAxis>
+                </LineChart>
+            </VBox>
+            <VBox spacing="10" styleClass="saas-chart-card" prefWidth="380">
+                <Label styleClass="saas-card-title" text="Distribution" />
+                <PieChart fx:id="mixPieChart" labelsVisible="true" legendVisible="true" prefHeight="280" styleClass="saas-chart" />
+            </VBox>
+        </HBox>
+
+        <VBox spacing="0" styleClass="saas-activity-card">
+            <padding>
+                <Insets bottom="6" left="0" right="0" top="14" />
+            </padding>
+            <Label styleClass="saas-card-title">
+                <padding>
+                    <Insets bottom="8" left="18" right="18" top="0" />
+                </padding>
+                <text>Recent activity</text>
+            </Label>
+            <VBox fx:id="activityList" spacing="0" />
+        </VBox>
+    </VBox>
+</ScrollPane>

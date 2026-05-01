@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.AdminCommandesController"
+           styleClass="apd-root apd-root--premium boutique-admin-root"
+           maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../../css/admin-planning-dashboard.css,@../../css/dashboard-saas.css,@../../css/product-form.css,@../../css/admin-commandes.css">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="20" styleClass="apd-page-inner product-form-page admin-commandes-root" maxWidth="Infinity">
+            <padding>
+                <Insets bottom="24" left="4" right="4" top="4" />
+            </padding>
+
+            <VBox styleClass="apd-hero" spacing="8">
+                <Label styleClass="apd-eyebrow" text="ADMINISTRATION · BOUTIQUE" />
+                <Label styleClass="apd-title" text="Commandes clients" />
+                <Label styleClass="apd-sub" text="Vue consolidée de toutes les commandes. Aucun identifiant interne n'est affiché. Les commandes annulées depuis au moins 7 jours sont retirées automatiquement de la base ; vous pouvez aussi supprimer manuellement une commande annulée récente." wrapText="true" />
+                <Separator styleClass="apd-sep-hero" />
+            </VBox>
+
+            <GridPane styleClass="apd-kpi-grid" hgap="14" vgap="14" maxWidth="Infinity">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="100" />
+                </columnConstraints>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--users" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="COMMANDES LISTÉES" />
+                    <Label fx:id="countLabel" styleClass="apd-kpi-value" text="0" />
+                    <Label styleClass="apd-kpi-hint" text="Après filtre et recherche" wrapText="true" />
+                </VBox>
+            </GridPane>
+
+            <Label fx:id="purgeInfoLabel" managed="false" styleClass="apd-match-hint" visible="false" wrapText="true" />
+
+            <VBox spacing="12" styleClass="apd-filter-panel" maxWidth="Infinity">
+                <HBox alignment="CENTER_LEFT" spacing="12" maxWidth="Infinity">
+                    <Button onAction="#handleRefresh" styleClass="apd-btn-ghost" text="Actualiser" />
+                    <Region prefWidth="8" />
+                    <Label styleClass="apd-filter-label" text="RECHERCHE" />
+                    <TextField fx:id="rechercheCommandes" onAction="#handleRechercheOuTri" promptText="Client, statut, adresse…" styleClass="apd-field" HBox.hgrow="ALWAYS" />
+                    <Label styleClass="apd-filter-label" text="TRIER PAR" />
+                    <ComboBox fx:id="triCommandes" onAction="#handleRechercheOuTri" prefWidth="220" styleClass="apd-select" />
+                </HBox>
+            </VBox>
+
+            <VBox spacing="12" styleClass="apd-content-block admin-orders-detail-card" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                <Label styleClass="apd-section-title" text="Détail des commandes" />
+                <ListView fx:id="listCommandes" minHeight="420" prefHeight="560" styleClass="list-view admin-orders-list" VBox.vgrow="ALWAYS" />
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</StackPane>

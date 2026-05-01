@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.SubscriptionController"
+           maxWidth="Infinity" maxHeight="Infinity">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="18" styleClass="apd-page-inner salle-mgmt-inner" maxWidth="Infinity">
+            <VBox spacing="4">
+                <Label styleClass="apd-section-title" text="Abonnements" />
+                <Label styleClass="apd-section-sub" text="Gérez les offres d'abonnement par salle." wrapText="true"/>
+            </VBox>
+
+            <GridPane styleClass="apd-kpi-grid" hgap="14" vgap="14" maxWidth="Infinity">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.34" />
+                </columnConstraints>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--users" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="TOTAL OFFRES" />
+                    <Label fx:id="statTotal" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Toutes offres" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--prog" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="ACTIVES" />
+                    <Label fx:id="statActives" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Disponibles" wrapText="true" />
+                </VBox>
+                <VBox spacing="4" styleClass="apd-kpi-card apd-kpi-card--tasks" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="PRIX MOYEN" />
+                    <Label fx:id="statPrix" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="TND / offre" wrapText="true" />
+                </VBox>
+            </GridPane>
+
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="apd-filter-panel" maxWidth="Infinity">
+                <Button onAction="#handleAjouter" styleClass="apd-btn" text="+ Nouvelle offre" />
+                <Region HBox.hgrow="ALWAYS"/>
+                <ToggleButton fx:id="filterAll"      onAction="#handleFilter" styleClass="sess-filter-btn" text="Toutes"    userData="ALL"      selected="true"/>
+                <ToggleButton fx:id="filterActive"   onAction="#handleFilter" styleClass="sess-filter-btn" text="Actives"   userData="ACTIVE"/>
+                <ToggleButton fx:id="filterInactive" onAction="#handleFilter" styleClass="sess-filter-btn" text="Inactives" userData="INACTIVE"/>
+                <Button onAction="#handleRefresh" styleClass="apd-btn-ghost" text="Actualiser"/>
+            </HBox>
+
+            <Label fx:id="countLabel" styleClass="apd-match-hint" text="0 offre(s)"/>
+
+            <FlowPane fx:id="offersGrid" hgap="16" vgap="16" prefWrapLength="1100" styleClass="apd-user-cards-flow" maxWidth="Infinity">
+                <padding><Insets bottom="8" left="2" right="2" top="4"/></padding>
+            </FlowPane>
+        </VBox>
+    </ScrollPane>
+
+    <StackPane fx:id="dialogOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox maxWidth="500" spacing="14" styleClass="sess-dialog-card sess-dialog-card--apd" alignment="TOP_LEFT">
+            <padding><Insets bottom="28" left="28" right="28" top="24"/></padding>
+            <Label fx:id="dialogTitle" styleClass="sess-dialog-title" text="Nouvelle offre"/>
+            <VBox spacing="5">
+                <Label styleClass="sess-lbl" text="Nom de l'offre *"/>
+                <TextField fx:id="fieldName" promptText="ex: Abonnement mensuel" styleClass="apd-field" maxWidth="Infinity"/>
+            </VBox>
+            <HBox spacing="12">
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label styleClass="sess-lbl" text="Durée (mois) *"/>
+                    <TextField fx:id="fieldDuration" promptText="ex: 1" styleClass="apd-field" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label styleClass="sess-lbl" text="Prix (TND) *"/>
+                    <TextField fx:id="fieldPrice" promptText="49,90 ou 0 pour offre gratuite" styleClass="apd-field" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
+            <VBox spacing="5">
+                <Label styleClass="sess-lbl" text="Salle *"/>
+                <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="apd-select" promptText="Choisir une salle"/>
+            </VBox>
+            <VBox spacing="5">
+                <Label styleClass="sess-lbl" text="Description"/>
+                <TextArea fx:id="fieldDesc" promptText="Description… (2000 caractères max.)" styleClass="apd-field" prefRowCount="3" maxWidth="Infinity" wrapText="true"/>
+            </VBox>
+            <Label styleClass="apd-section-sub" text="Durée : 1 à 120 mois. Prix : jusqu'à 2 décimales (ex. 29,90). Une salle est obligatoire." wrapText="true"/>
+            <Label fx:id="dialogError" styleClass="sess-error" text="" wrapText="true"/>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button onAction="#handleCancel" styleClass="apd-btn-ghost" text="Annuler"/>
+                <Button onAction="#handleSave"   styleClass="apd-btn"   text="Enregistrer"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <StackPane fx:id="ordersOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox maxWidth="640" spacing="14" styleClass="sess-dialog-card sess-dialog-card--apd" alignment="TOP_LEFT">
+            <padding><Insets bottom="28" left="28" right="28" top="24"/></padding>
+            <Label styleClass="sess-dialog-title" text="Commandes liées"/>
+            <TableView fx:id="ordersTable" prefHeight="320" styleClass="data-table salle-admin-table">
+                <columns>
+                    <TableColumn fx:id="colOrderId"   prefWidth="60"  text="ID"/>
+                    <TableColumn fx:id="colUserId"    prefWidth="80"  text="User"/>
+                    <TableColumn fx:id="colQty"       prefWidth="70"  text="Qte"/>
+                    <TableColumn fx:id="colUnitPrice" prefWidth="90"  text="Prix unit."/>
+                    <TableColumn fx:id="colTotal"     prefWidth="90"  text="Total"/>
+                    <TableColumn fx:id="colStatus"    prefWidth="100" text="Statut"/>
+                    <TableColumn fx:id="colDate"      prefWidth="140" text="Date"/>
+                </columns>
+            </TableView>
+            <HBox alignment="CENTER_RIGHT">
+                <Button onAction="#handleCloseOrders" styleClass="apd-btn-ghost" text="Fermer"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <StackPane fx:id="confirmOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox maxWidth="380" spacing="16" styleClass="sess-confirm-card sess-confirm-card--apd" alignment="CENTER">
+            <padding><Insets bottom="24" left="24" right="24" top="20"/></padding>
+            <Label styleClass="sess-confirm-icon" text="!"/>
+            <Label styleClass="sess-confirm-title" text="Supprimer l'offre ?"/>
+            <Label fx:id="confirmMsg" styleClass="apd-section-sub" text="" wrapText="true"/>
+            <HBox spacing="12" alignment="CENTER">
+                <Button onAction="#handleConfirmCancel" styleClass="apd-btn-ghost" text="Annuler"/>
+                <Button onAction="#handleConfirmDelete" styleClass="sess-btn-danger" text="Supprimer"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+</StackPane>

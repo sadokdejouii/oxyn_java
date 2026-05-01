@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.SessionManagementController"
+           styleClass="enc-sessions-root" maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../../css/front-events.css,@../../css/client-salle.css,@../../css/product-form.css,@../../css/encadrant-sessions-client.css">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxWidth="Infinity" maxHeight="Infinity"
+                styleClass="front-events-scroll client-salle-surface-root">
+        <VBox alignment="TOP_CENTER" maxWidth="Infinity" spacing="22" styleClass="front-page client-salle-page enc-sessions-page">
+
+            <StackPane styleClass="front-hero-banner client-salle-hero">
+                <VBox alignment="CENTER" spacing="8">
+                    <Label styleClass="front-overline" text="ESPACE ENCADRANT" />
+                    <Label styleClass="front-banner-title" text="Gestion des sessions" />
+                    <Label styleClass="front-banner-subtitle" text="Planification des séances sportives" />
+                    <Label styleClass="front-banner-text"
+                           text="Créez et mettez à jour vos sessions comme sur l’espace client : vue claire, cartes lisibles et formulaire cohérent avec le reste de l’application."
+                           wrapText="true" />
+                </VBox>
+            </StackPane>
+
+            <HBox alignment="CENTER" spacing="14" styleClass="front-stats-row client-salle-stats">
+                <VBox HBox.hgrow="ALWAYS" spacing="4" styleClass="front-stat-card">
+                    <Label styleClass="client-salle-stat-kicker" text="TOTAL SESSIONS" />
+                    <Label fx:id="statTotal" styleClass="front-stat-number" text="—" />
+                    <Label styleClass="client-salle-stat-hint" text="Toutes confondues" wrapText="true" />
+                </VBox>
+                <VBox HBox.hgrow="ALWAYS" spacing="4" styleClass="front-stat-card">
+                    <Label styleClass="client-salle-stat-kicker" text="PLANIFIÉES" />
+                    <Label fx:id="statPlanifiees" styleClass="front-stat-number" text="—" />
+                    <Label styleClass="client-salle-stat-hint" text="À venir" wrapText="true" />
+                </VBox>
+                <VBox HBox.hgrow="ALWAYS" spacing="4" styleClass="front-stat-card">
+                    <Label styleClass="client-salle-stat-kicker" text="CAPACITÉ TOTALE" />
+                    <Label fx:id="statInscrits" styleClass="front-stat-number" text="—" />
+                    <Label styleClass="client-salle-stat-hint" text="Somme des places" wrapText="true" />
+                </VBox>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="front-toolbar client-salle-toolbar enc-sessions-toolbar">
+                <Button onAction="#handleAjouter" styleClass="front-refresh-btn" text="Nouvelle session" />
+                <Region HBox.hgrow="ALWAYS" />
+                <ToggleButton fx:id="filterAll" onAction="#handleFilter" styleClass="enc-sess-filter-toggle" text="Tous"
+                              userData="ALL" selected="true" />
+                <ToggleButton fx:id="filterActive" onAction="#handleFilter" styleClass="enc-sess-filter-toggle" text="Actives"
+                              userData="ACTIVE" />
+                <ToggleButton fx:id="filterInactive" onAction="#handleFilter" styleClass="enc-sess-filter-toggle" text="Inactives"
+                              userData="INACTIVE" />
+                <Button onAction="#handleRefresh" styleClass="enc-sess-outline-btn" text="Actualiser" />
+            </HBox>
+
+            <Label fx:id="countLabel" styleClass="front-result-label client-salle-count" text="0 session(s)" />
+
+            <FlowPane fx:id="sessionsGrid" alignment="TOP_CENTER" hgap="18" vgap="18" prefWrapLength="1080"
+                      styleClass="front-events-grid client-salle-grid enc-sessions-grid" maxWidth="Infinity">
+                <padding>
+                    <Insets bottom="32" left="4" right="4" top="4" />
+                </padding>
+            </FlowPane>
+
+        </VBox>
+    </ScrollPane>
+
+    <StackPane fx:id="dialogOverlay" visible="false" managed="false" styleClass="enc-sessions-modal-overlay"
+               maxWidth="Infinity" maxHeight="Infinity">
+        <VBox alignment="CENTER" maxWidth="Infinity" maxHeight="Infinity" styleClass="enc-sessions-modal-outer">
+            <VBox spacing="0" styleClass="enc-sessions-session-modal" alignment="TOP_LEFT">
+
+                <VBox styleClass="enc-sess-modal-header" spacing="6">
+                    <padding>
+                        <Insets bottom="16" left="26" right="26" top="22" />
+                    </padding>
+                    <HBox alignment="CENTER_LEFT" spacing="14">
+                        <StackPane styleClass="enc-sess-modal-icon-wrap" minWidth="44" minHeight="44" maxWidth="44" maxHeight="44">
+                            <FontIcon iconLiteral="fas-clipboard-list" iconSize="20" styleClass="enc-sess-modal-ikon" />
+                        </StackPane>
+                        <VBox spacing="4">
+                            <Label fx:id="dialogTitle" styleClass="front-modal-title" text="Nouvelle session" />
+                            <Label styleClass="front-modal-subtitle" text="Renseignez les informations de la session" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefViewportHeight="340" maxHeight="460"
+                            styleClass="enc-sess-modal-scroll" VBox.vgrow="NEVER">
+                    <VBox spacing="18" styleClass="enc-sess-modal-body">
+                        <padding>
+                            <Insets bottom="20" left="26" right="26" top="18" />
+                        </padding>
+
+                        <VBox spacing="10" styleClass="enc-sess-form-section">
+                            <Label styleClass="enc-sess-form-section-title" text="Informations générales" />
+                            <Region styleClass="enc-sess-form-divider" prefHeight="1" maxWidth="Infinity" />
+                            <Label styleClass="front-form-label" text="Titre affiché (libre) *" />
+                            <TextField fx:id="fieldTitle" promptText="ex. Séance découverte, renforcement…"
+                                       styleClass="form-input" maxWidth="Infinity" />
+                            <HBox spacing="14">
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="front-form-label" text="Type d'activité *" />
+                                    <ComboBox fx:id="fieldActivite" maxWidth="Infinity" styleClass="form-input"
+                                              promptText="Sélectionner…" />
+                                </VBox>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="front-form-label" text="Salle associée" />
+                                    <ComboBox fx:id="fieldSalle" maxWidth="Infinity" styleClass="form-input"
+                                              promptText="Aucune salle" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="10" styleClass="enc-sess-form-section">
+                            <Label styleClass="enc-sess-form-section-title" text="Horaires" />
+                            <Region styleClass="enc-sess-form-divider" prefHeight="1" maxWidth="Infinity" />
+                            <HBox spacing="14">
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="front-form-label" text="Date *" />
+                                    <DatePicker fx:id="fieldDate" maxWidth="Infinity" styleClass="form-input date-picker" />
+                                </VBox>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="front-form-label" text="Heure début * (HH:mm)" />
+                                    <TextField fx:id="fieldHeureDebut" promptText="09:00" styleClass="form-input"
+                                               maxWidth="Infinity" />
+                                </VBox>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="front-form-label" text="Heure fin (HH:mm)" />
+                                    <TextField fx:id="fieldHeureFin" promptText="10:30" styleClass="form-input"
+                                               maxWidth="Infinity" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="10" styleClass="enc-sess-form-section">
+                            <Label styleClass="enc-sess-form-section-title" text="Capacité et tarif" />
+                            <Region styleClass="enc-sess-form-divider" prefHeight="1" maxWidth="Infinity" />
+                            <HBox spacing="14">
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="front-form-label" text="Nombre de places *" />
+                                    <TextField fx:id="fieldCapacite" promptText="ex. 20" styleClass="form-input"
+                                               maxWidth="Infinity" />
+                                </VBox>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="front-form-label" text="Prix (TND)" />
+                                    <TextField fx:id="fieldPrice" promptText="0.00" styleClass="form-input"
+                                               maxWidth="Infinity" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="10" styleClass="enc-sess-form-section">
+                            <Label styleClass="enc-sess-form-section-title" text="Notes" />
+                            <Region styleClass="enc-sess-form-divider" prefHeight="1" maxWidth="Infinity" />
+                            <TextArea fx:id="fieldDescription"
+                                      promptText="Informations complémentaires, équipements, niveau attendu…"
+                                      styleClass="form-input" prefRowCount="3" maxWidth="Infinity"
+                                      wrapText="true" />
+                        </VBox>
+
+                        <Label fx:id="dialogError" styleClass="enc-sess-form-error" text="" wrapText="true" />
+                    </VBox>
+                </ScrollPane>
+
+                <HBox styleClass="enc-sess-modal-footer" spacing="10" alignment="CENTER_RIGHT">
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#handleDialogCancel" styleClass="front-modal-action-secondary" text="Annuler" />
+                    <Button onAction="#handleDialogSave" styleClass="front-modal-action-primary" text="Enregistrer la session" />
+                </HBox>
+
+            </VBox>
+        </VBox>
+    </StackPane>
+
+</StackPane>

@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Supervision encadrant : mise en page type « command center » (rail + insights) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controllers.EncadrantPlanningDashboardController"
+      styleClass="planning-dash-root epd-root epd-root--supervision"
+      maxWidth="Infinity" maxHeight="Infinity"
+      stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-widgets.css,@../../css/encadrant-planning-dashboard.css">
+
+    <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                  styleClass="epd-page-scroll" VBox.vgrow="ALWAYS">
+        <VBox spacing="24" styleClass="epd-page-inner" maxWidth="1240">
+            <padding>
+                <Insets top="28" right="28" bottom="48" left="28"/>
+            </padding>
+
+            <!-- Bandeau titre page (contexte) -->
+            <HBox alignment="CENTER_LEFT" spacing="14" styleClass="epd-page-kicker">
+                <FontIcon iconLiteral="fas-compass" iconSize="16" styleClass="epd-page-kicker-icon"/>
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label styleClass="epd-page-kicker-title" text="Espace supervision"/>
+                    <Label styleClass="epd-page-kicker-sub" text="Lecture du dossier client · synthèse · intervention encadrée"
+                           wrapText="true"/>
+                </VBox>
+            </HBox>
+
+            <GridPane styleClass="epd-mosaic" hgap="22" vgap="22" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="160" prefWidth="220" percentWidth="26"/>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="160" prefWidth="220" percentWidth="26"/>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="200" prefWidth="280" percentWidth="28"/>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="220" prefWidth="260" percentWidth="20"/>
+                </columnConstraints>
+
+                <!-- 0 · Carte client (hero) -->
+                <VBox styleClass="w-card planning-dash-card epd-client-card epd-hero-card" maxWidth="Infinity" spacing="18"
+                      GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="4">
+                    <HBox alignment="CENTER_LEFT" spacing="16">
+                        <StackPane styleClass="epd-hero-avatar">
+                            <FontIcon iconLiteral="fas-user-tie" iconSize="22" styleClass="epd-hero-avatar-icon"/>
+                        </StackPane>
+                        <VBox styleClass="w-card__titles" HBox.hgrow="ALWAYS" spacing="6">
+                            <Label styleClass="epd-client-card__title" text="Client supervisé"/>
+                            <Label styleClass="epd-client-card__subtitle"
+                                   text="Identité, statut de suivi et indicateurs programme — données en lecture seule"
+                                   wrapText="true"/>
+                        </VBox>
+                        <Label styleClass="epd-pill epd-pill--readonly" text="Supervision"/>
+                    </HBox>
+
+                    <GridPane hgap="20" vgap="12" styleClass="epd-client-grid">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="140" prefWidth="220" percentWidth="34"/>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="160" prefWidth="280" percentWidth="38"/>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="120" prefWidth="200" percentWidth="28"/>
+                        </columnConstraints>
+                        <VBox styleClass="epd-kv-block" spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label styleClass="epd-kv-block__k" text="Nom"/>
+                            <Label fx:id="lblClientName" styleClass="epd-kv-block__v" wrapText="true" text="—"/>
+                        </VBox>
+                        <VBox styleClass="epd-kv-block" spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label styleClass="epd-kv-block__k" text="E-mail"/>
+                            <Label fx:id="lblClientEmail" styleClass="epd-kv-block__v epd-kv-block__v--mono" wrapText="true" text="—"/>
+                        </VBox>
+                        <VBox styleClass="epd-kv-block" spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                            <Label styleClass="epd-kv-block__k" text="Statut (objectif semaine)"/>
+                            <Label fx:id="lblClientStatut" styleClass="epd-kv-block__v epd-kv-block__v--statut" wrapText="true" text="—"/>
+                        </VBox>
+                    </GridPane>
+
+                    <Region styleClass="epd-divider" prefHeight="1" maxWidth="Infinity"/>
+
+                    <HBox styleClass="epd-hero-metrics" alignment="CENTER_LEFT" spacing="14">
+                        <VBox spacing="6" styleClass="epd-hero-metric" HBox.hgrow="ALWAYS">
+                            <Label styleClass="epd-hero-metric__k" text="Calories / jour"/>
+                            <Label fx:id="lblDashCalories" styleClass="epd-hero-metric__v" wrapText="true" text="—"/>
+                        </VBox>
+                        <Region styleClass="epd-hero-metric-sep" prefWidth="1" maxHeight="48"/>
+                        <VBox spacing="6" styleClass="epd-hero-metric" HBox.hgrow="ALWAYS">
+                            <Label styleClass="epd-hero-metric__k" text="Objectif programme"/>
+                            <Label fx:id="lblDashObjectifProg" styleClass="epd-hero-metric__v" wrapText="true" text="—"/>
+                        </VBox>
+                        <Region styleClass="epd-hero-metric-sep" prefWidth="1" maxHeight="48"/>
+                        <VBox spacing="6" styleClass="epd-hero-metric" HBox.hgrow="ALWAYS">
+                            <Label styleClass="epd-hero-metric__k" text="Niveau d'activité"/>
+                            <Label fx:id="lblDashActivite" styleClass="epd-hero-metric__v" wrapText="true" text="—"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- 1a · Programme (colonne principale) -->
+                <VBox styleClass="w-card w-card--programme planning-dash-card epd-programme-card epd-programme-card--elevated"
+                      maxWidth="Infinity" spacing="0" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="3">
+                    <HBox styleClass="w-card__header epd-card-header-accent" alignment="CENTER_LEFT" spacing="14">
+                        <StackPane styleClass="w-card__icon-wrap epd-section-icon epd-icon-glow">
+                            <FontIcon iconLiteral="fas-clipboard-list" iconSize="18" styleClass="w-card__icon"/>
+                        </StackPane>
+                        <VBox styleClass="w-card__titles" HBox.hgrow="ALWAYS">
+                            <Label styleClass="w-card__title epd-section-title" text="Programme généré"/>
+                            <Label styleClass="w-card__subtitle" text="Entraînement &amp; nutrition — consultation encadrant"/>
+                        </VBox>
+                        <Label styleClass="epd-pill epd-pill--readonly" text="Lecture seule"/>
+                    </HBox>
+                    <VBox styleClass="w-card__body epd-programme-body" spacing="12" VBox.vgrow="ALWAYS">
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="w-scroll epd-scroll epd-scroll--programme"
+                                    maxHeight="560" minViewportHeight="240" VBox.vgrow="ALWAYS">
+                            <VBox fx:id="programmeStructuredHost" spacing="12"/>
+                        </ScrollPane>
+                    </VBox>
+                </VBox>
+
+                <!-- 1b · Rail droit : fiche + tâches -->
+                <VBox spacing="18" maxWidth="Infinity" GridPane.columnIndex="3" GridPane.rowIndex="1" styleClass="epd-rail">
+                    <VBox styleClass="w-card planning-dash-card epd-fiche-card epd-rail-card" maxWidth="Infinity" spacing="0" VBox.vgrow="NEVER">
+                        <HBox styleClass="w-card__header" alignment="CENTER_LEFT" spacing="12">
+                            <StackPane styleClass="w-card__icon-wrap epd-section-icon">
+                                <FontIcon iconLiteral="fas-heartbeat" iconSize="17" styleClass="w-card__icon"/>
+                            </StackPane>
+                            <VBox styleClass="w-card__titles" HBox.hgrow="ALWAYS">
+                                <Label styleClass="w-card__title epd-section-title" text="Fiche santé"/>
+                                <Label styleClass="w-card__subtitle" text="Profil biométrique"/>
+                            </VBox>
+                            <Label styleClass="epd-pill epd-pill--neutral" text="Réf."/>
+                        </HBox>
+                        <VBox styleClass="w-card__body epd-fiche-body-compact" spacing="10">
+                            <GridPane hgap="10" vgap="10" styleClass="epd-fiche-mini-grid">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="72" percentWidth="50"/>
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="72" percentWidth="50"/>
+                                </columnConstraints>
+                                <VBox styleClass="epd-mini-tile" spacing="2" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <Label styleClass="epd-mini-tile__k" text="Genre"/>
+                                    <Label fx:id="lblGenre" styleClass="epd-mini-tile__v" wrapText="true"/>
+                                </VBox>
+                                <VBox styleClass="epd-mini-tile" spacing="2" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                    <Label styleClass="epd-mini-tile__k" text="Âge"/>
+                                    <Label fx:id="lblAge" styleClass="epd-mini-tile__v" wrapText="true"/>
+                                </VBox>
+                                <VBox styleClass="epd-mini-tile" spacing="2" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <Label styleClass="epd-mini-tile__k" text="Taille"/>
+                                    <Label fx:id="lblTaille" styleClass="epd-mini-tile__v" wrapText="true"/>
+                                </VBox>
+                                <VBox styleClass="epd-mini-tile" spacing="2" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <Label styleClass="epd-mini-tile__k" text="Poids"/>
+                                    <Label fx:id="lblPoids" styleClass="epd-mini-tile__v" wrapText="true"/>
+                                </VBox>
+                                <VBox styleClass="epd-mini-tile epd-mini-tile--wide" spacing="2" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
+                                    <Label styleClass="epd-mini-tile__k" text="Objectif"/>
+                                    <Label fx:id="lblObjectif" styleClass="epd-mini-tile__v" wrapText="true"/>
+                                </VBox>
+                                <VBox styleClass="epd-mini-tile epd-mini-tile--wide" spacing="2" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
+                                    <Label styleClass="epd-mini-tile__k" text="Activité"/>
+                                    <Label fx:id="lblActivite" styleClass="epd-mini-tile__v" wrapText="true"/>
+                                </VBox>
+                            </GridPane>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="w-card planning-dash-card epd-tasks-card epd-rail-card" maxWidth="Infinity" VBox.vgrow="ALWAYS" spacing="0">
+                        <HBox styleClass="w-card__header" alignment="CENTER_LEFT" spacing="10">
+                            <StackPane styleClass="w-card__icon-wrap epd-section-icon">
+                                <FontIcon iconLiteral="fas-check-double" iconSize="16" styleClass="w-card__icon"/>
+                            </StackPane>
+                            <VBox styleClass="w-card__titles" HBox.hgrow="ALWAYS">
+                                <Label styleClass="w-card__title epd-section-title" text="Tâches"/>
+                                <Label styleClass="w-card__subtitle" text="Semaine ISO en cours"/>
+                            </VBox>
+                            <Label styleClass="epd-pill epd-pill--neutral" text="Suivi"/>
+                        </HBox>
+                        <VBox styleClass="w-card__body epd-tasks-body" spacing="10" VBox.vgrow="ALWAYS">
+                            <VBox fx:id="tasksContainer" spacing="10" VBox.vgrow="ALWAYS"/>
+                        </VBox>
+                    </VBox>
+                </VBox>
+
+                <!-- 2 · Progression (pleine largeur) -->
+                <VBox styleClass="w-card planning-dash-card epd-progress-card epd-progress-card--spotlight" maxWidth="Infinity" spacing="0"
+                      GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="4">
+                    <HBox styleClass="w-card__header epd-progress-header" alignment="CENTER_LEFT" spacing="14">
+                        <StackPane styleClass="w-card__icon-wrap epd-progress-card__icon">
+                            <FontIcon iconLiteral="fas-chart-line" iconSize="18" styleClass="w-card__icon"/>
+                        </StackPane>
+                        <VBox styleClass="w-card__titles" HBox.hgrow="ALWAYS">
+                            <Label styleClass="w-card__title epd-section-title" text="Progression hebdomadaire"/>
+                            <Label styleClass="w-card__subtitle" text="Complétion des tâches — indicateur principal pour la décision"/>
+                        </VBox>
+                        <Label styleClass="epd-pill epd-pill--accent" text="Priorité"/>
+                    </HBox>
+                    <VBox styleClass="w-card__body epd-progress-body" spacing="16">
+                        <HBox styleClass="epd-progress-legend" alignment="CENTER_LEFT" spacing="12">
+                            <Label styleClass="epd-legend-dot epd-legend-dot--good" text=" "/>
+                            <Label styleClass="epd-legend-txt" text="≥ 75 %"/>
+                            <Label styleClass="epd-legend-dot epd-legend-dot--warn" text=" "/>
+                            <Label styleClass="epd-legend-txt" text="40–74 %"/>
+                            <Label styleClass="epd-legend-dot epd-legend-dot--bad" text=" "/>
+                            <Label styleClass="epd-legend-txt" text="&lt; 40 %"/>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="24" styleClass="epd-progress-main">
+                            <VBox alignment="CENTER" styleClass="epd-progress-ring-wrap">
+                                <Label fx:id="lblDashProgressPct" styleClass="epd-progress-pct" text="—"/>
+                            </VBox>
+                            <VBox spacing="10" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                                <ProgressBar fx:id="progressDashSummary" maxWidth="Infinity" prefHeight="16" minHeight="16"
+                                             styleClass="epd-pbar epd-pbar--na" progress="0"/>
+                                <Label fx:id="lblDashProgressDetail" styleClass="epd-progress-detail" wrapText="true" text=""/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+
+                <!-- 3 · Bandeau insights : IA | Observation -->
+                <HBox spacing="22" maxWidth="Infinity" alignment="TOP_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="4"
+                       styleClass="epd-insight-deck">
+                    <VBox styleClass="w-card planning-dash-card epd-ia-card epd-insight-panel" maxWidth="Infinity" HBox.hgrow="ALWAYS" spacing="0" minWidth="0">
+                        <HBox styleClass="w-card__header epd-ia-header" alignment="CENTER_LEFT" spacing="14">
+                            <StackPane styleClass="w-card__icon-wrap epd-ia-card__icon">
+                                <FontIcon iconLiteral="fas-robot" iconSize="18" styleClass="w-card__icon"/>
+                            </StackPane>
+                            <VBox styleClass="w-card__titles" HBox.hgrow="ALWAYS">
+                                <Label styleClass="w-card__title epd-section-title" text="Synthèse IA"/>
+                                <Label styleClass="w-card__subtitle" text="Analyse structurée — génération locale"/>
+                            </VBox>
+                            <Label styleClass="epd-pill epd-pill--ia" text="Assistant"/>
+                        </HBox>
+                        <VBox styleClass="w-card__body epd-ia-body" spacing="12" VBox.vgrow="ALWAYS">
+                            <Label styleClass="epd-ia-disclaimer" wrapText="true"
+                                   text="Document d'aide à la décision : vérifier les données source avant toute action auprès du client."/>
+                            <TextArea fx:id="txtIa" editable="false" wrapText="true" styleClass="epd-ia-synthese" prefRowCount="10"
+                                      maxWidth="Infinity" VBox.vgrow="ALWAYS" minHeight="180"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="w-card planning-dash-card epd-obs-card epd-insight-panel epd-obs-card--featured" maxWidth="Infinity" HBox.hgrow="ALWAYS" spacing="0" minWidth="0">
+                        <HBox styleClass="w-card__header epd-obs-header" alignment="CENTER_LEFT" spacing="14">
+                            <StackPane styleClass="w-card__icon-wrap epd-obs-card__icon">
+                                <FontIcon iconLiteral="fas-pen-fancy" iconSize="17" styleClass="w-card__icon"/>
+                            </StackPane>
+                            <VBox styleClass="w-card__titles" HBox.hgrow="ALWAYS">
+                                <Label styleClass="w-card__title epd-section-title" text="Intervention encadrant"/>
+                                <Label styleClass="w-card__subtitle" text="Message persisté sur l'objectif hebdomadaire"/>
+                            </VBox>
+                            <Label styleClass="epd-pill epd-pill--obs" text="Édition"/>
+                        </HBox>
+                        <VBox styleClass="w-card__body epd-obs-body" spacing="12">
+                            <Label fx:id="lblObsHint" styleClass="epd-obs-hint" wrapText="true"/>
+                            <Label fx:id="lblObsValidation" managed="false" visible="false" styleClass="epd-obs-inline-error" wrapText="true"/>
+                            <TextArea fx:id="txtObservation" wrapText="true" styleClass="epd-obs-textarea" prefRowCount="8" maxWidth="Infinity" VBox.vgrow="ALWAYS" minHeight="160"/>
+                            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="epd-obs-actions">
+                                <CheckBox fx:id="chkEfforts" mnemonicParsing="false" text="Efforts validés" selected="true" styleClass="w-check epd-check"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="btnRefresh" mnemonicParsing="false" text="Actualiser" styleClass="w-btn-secondary epd-btn-secondary"/>
+                                <Button fx:id="btnSaveObs" mnemonicParsing="false" text="Enregistrer l'intervention" styleClass="w-btn-primary epd-btn-save"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </HBox>
+            </GridPane>
+        </VBox>
+    </ScrollPane>
+</VBox>

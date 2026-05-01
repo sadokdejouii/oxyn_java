@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.ClientHomeController"
+           styleClass="cl-root"
+           stylesheets="@../../css/client-salle.css">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
+        <VBox spacing="24" styleClass="page-root">
+            <padding>
+                <Insets bottom="24" left="8" right="8" top="8" />
+            </padding>
+
+            <VBox spacing="8">
+                <Label styleClass="page-hero-title" text="Bienvenue" />
+                <Label fx:id="welcomeSubtitle" styleClass="page-hero-sub"
+                       text="Espace client OXYN — événements, salles, planning et boutique."
+                       wrapText="true" />
+            </VBox>
+
+            <HBox spacing="14" styleClass="saas-stat-row">
+                <VBox spacing="6" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="VOTRE ESPACE" />
+                    <Label styleClass="saas-stat-value" text="Client" />
+                    <Label styleClass="saas-stat-hint" text="Réservations et activités" wrapText="true" />
+                </VBox>
+                <VBox spacing="6" styleClass="saas-stat-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="saas-stat-label" text="NAVIGATION" />
+                    <Label styleClass="saas-stat-value" text="Menu" />
+                    <Label styleClass="saas-stat-hint" text="Événements, salles, planning et boutique à gauche." wrapText="true" />
+                </VBox>
+            </HBox>
+
+            <VBox spacing="10" styleClass="saas-chart-card">
+                <Label styleClass="saas-card-title" text="Pour commencer" />
+                <Label styleClass="page-hero-sub"
+                       text="Consultez les événements, réservez une salle ou ouvrez votre planning depuis le menu à gauche."
+                       wrapText="true" />
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</StackPane>

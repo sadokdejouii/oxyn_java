@@ -1,0 +1,175 @@
+/*
+ * Page Commandes admin — ListView alignée sur le shell (#0D1B3E / #1A2F5E).
+ */
+
+.admin-commandes-root {
+    -fx-background-color: transparent;
+}
+
+.admin-orders-detail-card .list-view.admin-orders-list {
+    -fx-border-color: rgba(79, 195, 247, 0.18);
+}
+
+/* Fond bleu sur toute la chaîne ListView (évite le blanc Modena sur cellules vides / flow) */
+.list-view.admin-orders-list {
+    -fx-background-color: #0D1B3E;
+    -fx-control-inner-background: #0D1B3E;
+    -fx-border-color: rgba(79, 195, 247, 0.28);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-background-radius: 12px;
+    -fx-padding: 8 6 8 6;
+}
+
+.list-view.admin-orders-list .virtual-flow {
+    -fx-background-color: #0D1B3E;
+}
+
+.list-view.admin-orders-list .clip-container {
+    -fx-background-color: #0D1B3E;
+}
+
+.list-view.admin-orders-list:focused {
+    -fx-border-color: rgba(79, 195, 247, 0.42);
+}
+
+.list-view.admin-orders-list .list-cell {
+    -fx-background-color: #0D1B3E;
+    -fx-padding: 8 6 8 6;
+}
+
+.list-view.admin-orders-list .list-cell:empty {
+    -fx-background-color: #0D1B3E;
+}
+
+.list-view.admin-orders-list .list-cell:filled:selected,
+.list-view.admin-orders-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.12);
+}
+
+.list-view.admin-orders-list .list-cell:hover {
+    -fx-background-color: rgba(26, 47, 94, 0.35);
+}
+
+.list-view.admin-orders-list .virtual-flow .clipped-container .sheet,
+.list-view.admin-orders-list .virtual-flow .corner {
+    -fx-background-color: #0D1B3E;
+}
+
+.list-view.admin-orders-list .scroll-bar {
+    -fx-background-color: rgba(13, 27, 62, 0.4);
+}
+
+.list-view.admin-orders-list .scroll-bar .track {
+    -fx-background-color: rgba(13, 27, 62, 0.55);
+}
+
+.list-view.admin-orders-list .scroll-bar .thumb {
+    -fx-background-color: rgba(0, 191, 255, 0.38);
+    -fx-background-radius: 4px;
+}
+
+.list-view.admin-orders-list .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(0, 191, 255, 0.55);
+}
+
+/* Carte par commande dans la liste */
+.admin-order-list-card {
+    -fx-background-color: rgba(18, 34, 72, 0.72);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+/* Pastilles statut (couleurs explicites — ne pas les écraser avec .admin-order-list-card .label) */
+.admin-order-chip {
+    -fx-padding: 6 14 6 14;
+    -fx-background-radius: 8px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.admin-order-chip-annule {
+    -fx-background-color: rgba(198, 40, 40, 0.55);
+    -fx-text-fill: #ffebee;
+    -fx-border-color: rgba(239, 83, 80, 0.65);
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+
+.admin-order-chip-valide {
+    -fx-background-color: rgba(46, 125, 50, 0.55);
+    -fx-text-fill: #e8f5e9;
+    -fx-border-color: rgba(102, 187, 106, 0.65);
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+
+.admin-order-chip-neutre {
+    -fx-background-color: rgba(100, 120, 150, 0.4);
+    -fx-text-fill: rgba(236, 239, 241, 0.98);
+}
+
+.admin-order-address {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(200, 210, 225, 0.92);
+}
+
+.admin-order-list-card .saas-stat-hint {
+    -fx-text-fill: rgba(200, 210, 225, 0.92);
+}
+
+.admin-order-list-card .saas-stat-label {
+    -fx-text-fill: rgba(160, 180, 204, 0.9);
+}
+
+.admin-order-list-card .saas-stat-value {
+    -fx-text-fill: #00BFFF;
+}
+
+/* Pastille statut : priorité sur les règles génériques ci-dessus */
+.admin-order-list-card .admin-order-chip.admin-order-chip-valide {
+    -fx-background-color: rgba(46, 125, 50, 0.58);
+    -fx-text-fill: #e8f5e9;
+}
+
+.admin-order-list-card .admin-order-chip.admin-order-chip-annule {
+    -fx-background-color: rgba(198, 40, 40, 0.58);
+    -fx-text-fill: #ffebee;
+}
+
+/* Hub admin Planning / boutique — même fond liste que produits */
+.boutique-admin-root .list-view.admin-orders-list {
+    -fx-background-color: #121f36;
+    -fx-control-inner-background: #121f36;
+    -fx-border-color: rgba(56, 189, 248, 0.14);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.boutique-admin-root .list-view.admin-orders-list .virtual-flow,
+.boutique-admin-root .list-view.admin-orders-list .list-cell,
+.boutique-admin-root .list-view.admin-orders-list .list-cell:empty,
+.boutique-admin-root .list-view.admin-orders-list .virtual-flow .clipped-container .sheet,
+.boutique-admin-root .list-view.admin-orders-list .virtual-flow .corner {
+    -fx-background-color: #121f36;
+}
+
+.boutique-admin-root .list-view.admin-orders-list .list-cell:filled:selected,
+.boutique-admin-root .list-view.admin-orders-list .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.14);
+}
+
+.boutique-admin-root .list-view.admin-orders-list .list-cell:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.06);
+}
+
+.boutique-admin-root .list-view.admin-orders-list .scroll-bar .thumb {
+    -fx-background-color: rgba(56, 189, 248, 0.35);
+}
+
+.boutique-admin-root .list-view.admin-orders-list .list-cell,
+.boutique-admin-root .list-view.admin-orders-list .list-cell:empty {
+    -fx-padding: 6 4 6 4;
+}

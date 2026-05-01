@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.SalleManagementController"
+           maxWidth="Infinity" maxHeight="Infinity">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="18" styleClass="apd-page-inner salle-mgmt-inner" maxWidth="Infinity">
+            <VBox spacing="6">
+                <Label styleClass="apd-section-title" text="Gestion des salles" />
+                <Label styleClass="apd-section-sub" text="Ajoutez, modifiez ou désactivez les salles de sport." wrapText="true" />
+            </VBox>
+
+            <HBox spacing="12" styleClass="apd-filter-panel" alignment="CENTER_LEFT" maxWidth="Infinity">
+                <Button onAction="#handleAjouter" styleClass="apd-btn" text="+ Nouvelle salle" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleRefresh" styleClass="apd-btn-ghost" text="Actualiser" />
+            </HBox>
+
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <padding><Insets left="2"/></padding>
+                <Label fx:id="countLabel" styleClass="apd-match-hint" text="0 salle(s)" />
+            </HBox>
+
+            <FlowPane fx:id="sallesGrid" hgap="16" vgap="16" prefWrapLength="1100" styleClass="apd-user-cards-flow" maxWidth="Infinity">
+                <padding><Insets bottom="8" left="2" right="2" top="4"/></padding>
+            </FlowPane>
+        </VBox>
+    </ScrollPane>
+
+    <StackPane fx:id="dialogOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="680" styleClass="salle-dialog-scroll">
+            <VBox fx:id="dialogCard" maxWidth="520" spacing="14" styleClass="salle-dialog-card salle-dialog-card--apd" alignment="TOP_LEFT">
+                <padding><Insets bottom="28" left="28" right="28" top="24"/></padding>
+
+                <Label fx:id="dialogTitle" styleClass="salle-dialog-title" text="Nouvelle salle" />
+
+                <VBox spacing="8">
+                    <Label styleClass="salle-field-label" text="Photo" />
+                    <StackPane fx:id="previewPane" styleClass="salle-preview-pane" prefHeight="160" visible="false" managed="false">
+                        <ImageView fx:id="previewImage" fitWidth="464" fitHeight="160" preserveRatio="false" styleClass="salle-preview-img" />
+                        <Button fx:id="removeImageBtn" onAction="#handleRemoveImage" styleClass="salle-remove-img-btn" text="✕"
+                                StackPane.alignment="TOP_RIGHT" />
+                    </StackPane>
+                    <VBox fx:id="dropZone" styleClass="salle-drop-zone" prefHeight="100" alignment="CENTER" spacing="6"
+                          onMouseClicked="#handlePickImage">
+                        <Label styleClass="salle-drop-icon" text="📁" />
+                        <Label styleClass="salle-drop-text" text="Cliquez ou glissez une image ici" />
+                        <Label styleClass="salle-drop-hint" text="JPG, PNG, GIF — max 5 Mo" />
+                    </VBox>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label styleClass="salle-field-label" text="Nom *" />
+                    <TextField fx:id="fieldNom" promptText="Nom de la salle" styleClass="apd-field" maxWidth="Infinity" />
+                </VBox>
+                <VBox spacing="6">
+                    <Label styleClass="salle-field-label" text="Description" />
+                    <TextArea fx:id="fieldDescription" promptText="Description…" styleClass="apd-field" prefRowCount="3" maxWidth="Infinity" wrapText="true" />
+                </VBox>
+                <VBox spacing="6">
+                    <Label styleClass="salle-field-label" text="Adresse *" />
+                    <TextField fx:id="fieldAdresse" promptText="Ex : Sousse, Tunisie" styleClass="apd-field" maxWidth="Infinity" />
+                    <Label styleClass="salle-drop-hint" text="Format : Ville, Pays — ex : Sousse, Tunisie" wrapText="true" />
+                </VBox>
+                <HBox spacing="12">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label styleClass="salle-field-label" text="Téléphone *" />
+                        <TextField fx:id="fieldTelephone" promptText="+216XXXXXXXX ou 8 à 15 chiffres" styleClass="apd-field" maxWidth="Infinity" />
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label styleClass="salle-field-label" text="E-mail (optionnel)" />
+                        <TextField fx:id="fieldEmail" promptText="contact@salle.tn — laisser vide si absent" styleClass="apd-field" maxWidth="Infinity" />
+                    </VBox>
+                </HBox>
+
+                <Label fx:id="dialogError" styleClass="salle-error-label" text="" wrapText="true" />
+
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button onAction="#handleDialogCancel" styleClass="apd-btn-ghost" text="Annuler" />
+                    <Button fx:id="dialogSaveBtn" onAction="#handleDialogSave" styleClass="apd-btn" text="Enregistrer" />
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </StackPane>
+
+    <!-- Modal Équipements (par salle) -->
+    <StackPane fx:id="equipOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity"
+               onMouseClicked="#handleOverlayClick">
+        <VBox fx:id="equipCard" maxWidth="820" spacing="14" styleClass="salle-dialog-card salle-dialog-card--apd" alignment="TOP_LEFT">
+            <padding><Insets bottom="22" left="24" right="24" top="20"/></padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label fx:id="equipTitle" styleClass="salle-dialog-title" text="Équipements — Salle" HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleEquipCancel" styleClass="salle-remove-img-btn" text="✕" />
+            </HBox>
+
+            <Separator />
+
+            <TableView fx:id="equipementsTable" prefHeight="200" styleClass="equip-table">
+                <columns>
+                    <TableColumn fx:id="colNomEquipement" text="Nom" prefWidth="200" />
+                    <TableColumn fx:id="colQuantiteEquipement" text="Quantité" prefWidth="80" />
+                    <TableColumn fx:id="colActionsEquipement" text="Actions" prefWidth="160" />
+                </columns>
+            </TableView>
+
+            <Separator />
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="nomEquipementField" promptText="Ex: Tapis roulants" styleClass="apd-field" HBox.hgrow="ALWAYS" onAction="#handleAjouterEquipement" />
+                <TextField fx:id="quantiteEquipementField" promptText="Qté" styleClass="apd-field" prefWidth="70" onAction="#handleAjouterEquipement" />
+                <Button text="+ Ajouter" onAction="#handleAjouterEquipement" styleClass="apd-btn" />
+            </HBox>
+
+            <Label fx:id="equipError" styleClass="salle-error-label" text="" wrapText="true" />
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button onAction="#handleEquipCancel" styleClass="apd-btn-ghost" text="Annuler" />
+                <Button onAction="#handleEquipSave" styleClass="apd-btn" text="Enregistrer" />
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- Modal Abonnements (par salle) -->
+    <StackPane fx:id="subsOverlay" visible="false" managed="false" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity"
+               onMouseClicked="#handleOverlayClick">
+        <VBox fx:id="subsCard" maxWidth="920" spacing="14" styleClass="salle-dialog-card salle-dialog-card--apd" alignment="TOP_LEFT">
+            <padding><Insets bottom="22" left="24" right="24" top="20"/></padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label fx:id="subsTitle" styleClass="salle-dialog-title" text="Abonnements — Salle" HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleSubsCancel" styleClass="salle-remove-img-btn" text="✕" />
+            </HBox>
+
+            <Separator />
+
+            <TableView fx:id="abonnementsTable" prefHeight="200" styleClass="equip-table">
+                <columns>
+                    <TableColumn fx:id="colNomAbonnement" text="Nom de l’offre" prefWidth="200" />
+                    <TableColumn fx:id="colPrixAbonnement" text="Prix" prefWidth="80" />
+                    <TableColumn fx:id="colActionsAbonnement" text="Actions" prefWidth="160" />
+                </columns>
+            </TableView>
+
+            <Separator />
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="nomAbonnementField" promptText="Nom de l’offre…" styleClass="apd-field" HBox.hgrow="ALWAYS" onAction="#handleAjouterAbonnement" />
+                <TextField fx:id="prixAbonnementField" promptText="Prix" styleClass="apd-field" prefWidth="70" onAction="#handleAjouterAbonnement" />
+                <Button text="+ Ajouter" onAction="#handleAjouterAbonnement" styleClass="apd-btn" />
+            </HBox>
+
+            <Label fx:id="subsError" styleClass="salle-error-label" text="" wrapText="true" />
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button onAction="#handleSubsCancel" styleClass="apd-btn-ghost" text="Annuler" />
+                <Button onAction="#handleSubsSave" styleClass="apd-btn" text="Enregistrer" />
+            </HBox>
+        </VBox>
+    </StackPane>
+</StackPane>

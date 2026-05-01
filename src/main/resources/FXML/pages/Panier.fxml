@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="front-events-scroll client-shop-surface-root"
+            stylesheets="@../../css/front-events.css,@../../css/product-form.css,@../../css/client-shop-light.css"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controllers.PanierController">
+    <VBox alignment="TOP_CENTER" styleClass="front-page client-shop-page product-form-page" maxWidth="Infinity">
+        <VBox spacing="22" styleClass="product-form-shell" maxWidth="Infinity">
+            <padding>
+                <Insets bottom="28" left="8" right="8" top="12" />
+            </padding>
+
+            <StackPane styleClass="front-hero-banner client-shop-hero-accent">
+                <VBox alignment="CENTER" spacing="8">
+                    <Label styleClass="front-overline" text="CHECKOUT" />
+                    <Label styleClass="front-banner-title" text="Passer la commande" />
+                    <Label styleClass="front-banner-text"
+                           text="Vérifiez vos articles, renseignez l'adresse de livraison et le mode de paiement, puis validez."
+                           wrapText="true" />
+                    <Label styleClass="product-form-required-legend" text="* Champs obligatoires" />
+                </VBox>
+            </StackPane>
+
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="front-toolbar client-shop-toolbar-wide">
+                <Button onAction="#handleRetourBoutique" styleClass="client-shop-outline-btn" text="← Retour à la boutique" />
+                <Region HBox.hgrow="ALWAYS" />
+            </HBox>
+
+            <VBox spacing="14" styleClass="panier-recap-card client-shop-recap">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <VBox spacing="4">
+                        <Label styleClass="product-form-section-kicker" text="RÉCAPITULATIF" />
+                        <Label styleClass="product-form-section-title" text="Vos articles" />
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label fx:id="panierCountLabel" styleClass="panier-badge-count" text="0 article" />
+                </HBox>
+                <Separator styleClass="product-form-separator" />
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="380" styleClass="panier-lignes-scroll client-shop-inner-scroll" vbarPolicy="AS_NEEDED">
+                    <VBox fx:id="panierLignesContainer" spacing="12" styleClass="panier-lignes-list" />
+                </ScrollPane>
+                <HBox alignment="CENTER_RIGHT" spacing="14" styleClass="panier-total-bar">
+                    <Label styleClass="panier-total-libelle" text="Total TTC" />
+                    <Label fx:id="totalLabel" styleClass="panier-total-montant" text="0,00 TND" />
+                </HBox>
+            </VBox>
+
+            <VBox styleClass="product-form-section client-shop-checkout">
+                <VBox styleClass="product-form-section-head">
+                    <Label styleClass="product-form-section-kicker" text="LIVRAISON" />
+                    <Label styleClass="product-form-section-title" text="Adresse et paiement" />
+                    <Label styleClass="product-form-hint"
+                           text="Adresse au format : quartier, ville, pays (trois parties séparées par des virgules, max. 255 caractères)."
+                           wrapText="true" />
+                </VBox>
+                <Separator styleClass="product-form-separator client-shop-sep" />
+                <VBox styleClass="product-form-section-body client-shop-checkout-body">
+                    <VBox spacing="8">
+                        <Label styleClass="product-form-field-label" text="Adresse de livraison *" />
+                        <TextArea fx:id="adresseField" prefRowCount="5" promptText="Ex. cité Ibn Khaldoun, Tunis, Tunisie" styleClass="form-input client-shop-field" wrapText="true" />
+                    </VBox>
+                    <GridPane hgap="20" styleClass="product-form-grid" vgap="14">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="200" prefWidth="280" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="160" prefWidth="220" />
+                        </columnConstraints>
+                        <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label styleClass="product-form-field-label" text="Mode de paiement *" />
+                            <ComboBox fx:id="paiementCombo" maxWidth="Infinity" styleClass="form-input client-shop-field" />
+                        </VBox>
+                        <VBox alignment="BOTTOM_RIGHT" spacing="0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Button fx:id="validerBtn" onAction="#handleValiderCommande" styleClass="front-refresh-btn" text="Valider la commande" />
+                        </VBox>
+                    </GridPane>
+                </VBox>
+            </VBox>
+        </VBox>
+    </VBox>
+</ScrollPane>

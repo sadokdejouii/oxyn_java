@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll,um-page" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.UserManagementController">
+    <VBox spacing="22" styleClass="page-root,um-root">
+        <padding>
+            <Insets bottom="12" left="8" right="8" top="8" />
+        </padding>
+
+        <!-- Hero -->
+        <VBox spacing="10" styleClass="um-hero">
+            <HBox alignment="CENTER_LEFT" styleClass="um-hero-top">
+                <Label styleClass="um-kicker" text="ANNUAIRE" />
+            </HBox>
+            <Label styleClass="page-hero-title,um-title" text="Gestion des utilisateurs" />
+            <Label styleClass="page-hero-sub,um-hero-sub" text="Recherchez, créez et maintenez les comptes : rôles, statut d’activation et cohérence avec la table users." wrapText="true" />
+        </VBox>
+
+        <!-- KPI — ligne 1 -->
+        <HBox spacing="14" styleClass="um-stat-row">
+            <VBox maxWidth="Infinity" spacing="6" styleClass="saas-stat-card,um-stat-tile" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="TOTAL" />
+                <Label fx:id="statTotalValue" styleClass="saas-stat-value,um-stat-accent" text="0" />
+                <Label styleClass="saas-stat-hint" text="Comptes enregistrés" wrapText="true" />
+            </VBox>
+            <VBox maxWidth="Infinity" spacing="6" styleClass="saas-stat-card,um-stat-tile" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="ACTIFS" />
+                <Label fx:id="statActiveValue" styleClass="saas-stat-value,um-stat-success" text="0" />
+                <Label styleClass="saas-stat-hint" text="Connexion autorisée" wrapText="true" />
+            </VBox>
+            <VBox maxWidth="Infinity" spacing="6" styleClass="saas-stat-card,um-stat-tile" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="INACTIFS" />
+                <Label fx:id="statInactiveValue" styleClass="saas-stat-value,um-stat-warn" text="0" />
+                <Label styleClass="saas-stat-hint" text="Comptes suspendus" wrapText="true" />
+            </VBox>
+        </HBox>
+
+        <!-- KPI — ligne 2 (répartition par rôle) -->
+        <HBox spacing="14" styleClass="um-stat-row">
+            <VBox maxWidth="Infinity" spacing="6" styleClass="saas-stat-card,um-stat-tile" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="ADMINS" />
+                <Label fx:id="statAdminValue" styleClass="saas-stat-value,um-stat-muted" text="0" />
+                <Label styleClass="saas-stat-hint" text="Profils administrateur" wrapText="true" />
+            </VBox>
+            <VBox maxWidth="Infinity" spacing="6" styleClass="saas-stat-card,um-stat-tile" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="ENCADRANTS" />
+                <Label fx:id="statCoachValue" styleClass="saas-stat-value,um-stat-coach-stat" text="0" />
+                <Label styleClass="saas-stat-hint" text="Rôle encadrant" wrapText="true" />
+            </VBox>
+            <VBox maxWidth="Infinity" spacing="6" styleClass="saas-stat-card,um-stat-tile" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-stat-label" text="CLIENTS" />
+                <Label fx:id="statClientValue" styleClass="saas-stat-value,um-stat-client-stat" text="0" />
+                <Label styleClass="saas-stat-hint" text="Comptes client" wrapText="true" />
+            </VBox>
+        </HBox>
+
+        <!-- Search + actions -->
+        <VBox spacing="14" styleClass="um-panel">
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="um-panel-row">
+                <Label minWidth="72" styleClass="um-form-label" text="Recherche" />
+                <HBox alignment="CENTER_LEFT" maxWidth="Infinity" spacing="0" styleClass="um-search-wrap" HBox.hgrow="ALWAYS">
+                    <Label styleClass="um-search-icon" text="⌕" />
+                    <TextField fx:id="searchField" maxWidth="Infinity" promptText="E-mail, nom, prénom, rôle ou statut…" styleClass="um-search-field" HBox.hgrow="ALWAYS" />
+                    <Button focusTraversable="false" onAction="#handleClearSearch" styleClass="um-search-clear" text="Effacer" />
+                </HBox>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="um-toolbar-actions">
+                <Button onAction="#handleAdd" styleClass="primary-toolbar-btn,um-btn-compact" text="Nouvel utilisateur" />
+                <Button onAction="#handleEdit" styleClass="ghost-toolbar-btn,um-btn-compact" text="Modifier" />
+                <Button onAction="#handleDelete" styleClass="ghost-toolbar-btn,um-btn-compact" text="Supprimer" />
+                <Region styleClass="um-vdiv" />
+                <Button onAction="#handleToggleActive" styleClass="ghost-toolbar-btn,um-btn-compact" text="Activer / désactiver" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleGenerateDemo" styleClass="ghost-toolbar-btn,um-btn-compact" text="↺ Générer (demo)" />
+                <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn,um-btn-compact" text="Actualiser" />
+            </HBox>
+        </VBox>
+
+        <!-- Data & Analytics (demo) -->
+        <HBox spacing="14" alignment="TOP_LEFT">
+            <VBox spacing="10" styleClass="saas-chart-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-card-title" text="Activité — 12 semaines" />
+                <GridPane fx:id="heatmapGrid" hgap="4" vgap="4" />
+                <Label fx:id="heatmapHint" styleClass="um-table-hint" text="" />
+            </VBox>
+            <VBox spacing="10" styleClass="saas-chart-card" prefWidth="380">
+                <Label styleClass="saas-card-title" text="Répartition des rôles" />
+                <Canvas fx:id="rolesDonutCanvas" width="320" height="220" />
+                <Label fx:id="rolesHint" styleClass="um-table-hint" text="" />
+            </VBox>
+        </HBox>
+
+        <HBox spacing="14" alignment="TOP_LEFT">
+            <VBox spacing="12" styleClass="saas-chart-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="saas-card-title" text="Score de santé" />
+                <VBox spacing="10">
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label minWidth="120" text="Rétention" styleClass="um-form-label"/>
+                        <ProgressBar fx:id="pbRetention" prefWidth="420"/>
+                        <Label fx:id="lblRetention" styleClass="um-table-hint" text="—"/>
+                    </HBox>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label minWidth="120" text="Engagement" styleClass="um-form-label"/>
+                        <ProgressBar fx:id="pbEngagement" prefWidth="420"/>
+                        <Label fx:id="lblEngagement" styleClass="um-table-hint" text="—"/>
+                    </HBox>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label minWidth="120" text="NPS" styleClass="um-form-label"/>
+                        <ProgressBar fx:id="pbNps" prefWidth="420"/>
+                        <Label fx:id="lblNps" styleClass="um-table-hint" text="—"/>
+                    </HBox>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label minWidth="120" text="Risque churn" styleClass="um-form-label"/>
+                        <ProgressBar fx:id="pbChurn" prefWidth="420"/>
+                        <Label fx:id="lblChurn" styleClass="um-table-hint" text="—"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+            <VBox spacing="10" styleClass="saas-chart-card" prefWidth="380">
+                <Label styleClass="saas-card-title" text="Sparklines système" />
+                <Canvas fx:id="sparklinesCanvas" width="320" height="220" />
+                <Label fx:id="systemHint" styleClass="um-table-hint" text="" />
+            </VBox>
+        </HBox>
+
+        <!-- Liste type tableau + tri -->
+        <VBox spacing="10" styleClass="saas-chart-card,um-table-panel" VBox.vgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" styleClass="um-table-header">
+                <Label styleClass="saas-card-title" text="Liste des comptes" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="tableHintLabel" styleClass="um-table-hint" text="" />
+            </HBox>
+
+            <!-- En-têtes de colonnes (tri) — aligné sur les cellules -->
+            <HBox alignment="CENTER_LEFT" spacing="14" styleClass="um-grid-header">
+                <Region minWidth="40" prefWidth="40" maxWidth="40" />
+                <VBox maxWidth="Infinity" spacing="4" styleClass="um-grid-head-identity" HBox.hgrow="ALWAYS">
+                    <Button fx:id="sortEmailBtn" alignment="CENTER_LEFT" focusTraversable="false" maxWidth="Infinity" onAction="#handleSortEmail" styleClass="um-sort-btn" text="E-mail  ↑" />
+                    <Button fx:id="sortNameBtn" alignment="CENTER_LEFT" focusTraversable="false" maxWidth="Infinity" onAction="#handleSortName" styleClass="um-sort-btn um-sort-sub" text="Nom complet  ↕" />
+                </VBox>
+                <HBox alignment="CENTER" minWidth="100" prefWidth="100" styleClass="um-grid-head-role">
+                    <Button fx:id="sortRoleBtn" focusTraversable="false" onAction="#handleSortRole" styleClass="um-sort-btn" text="Rôle  ↕" />
+                </HBox>
+                <HBox alignment="CENTER" minWidth="88" prefWidth="88" styleClass="um-grid-head-status">
+                    <Button fx:id="sortStatusBtn" focusTraversable="false" onAction="#handleSortStatus" styleClass="um-sort-btn" text="Statut  ↕" />
+                </HBox>
+            </HBox>
+
+            <ListView fx:id="usersList" minHeight="380" prefHeight="520" styleClass="um-user-list" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </VBox>
+</ScrollPane>

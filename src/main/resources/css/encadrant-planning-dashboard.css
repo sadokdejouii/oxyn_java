@@ -1,0 +1,1346 @@
+/* Planning encadrant — thème supervision (sobre, structuré, peu saturé) */
+
+
+
+.epd-root {
+
+    -fx-background-color: transparent;
+
+    -fx-max-width: Infinity;
+
+}
+
+
+
+.epd-root--supervision {
+
+    -fx-background-color: #f5f7fb;
+
+}
+
+
+
+.epd-root--supervision .planning-dash-card {
+
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 16, 0.25, 0, 2);
+
+}
+
+
+
+.epd-root--supervision .planning-dash-card:hover {
+
+    -fx-border-color: rgba(51, 65, 85, 0.14);
+
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0.28, 0, 3);
+
+}
+
+
+
+.epd-root--supervision .w-card {
+
+    -fx-background-color: #ffffff;
+
+    -fx-border-color: rgba(30, 41, 59, 0.09);
+
+}
+
+
+
+/* Bandeau contexte (optionnel) */
+
+.epd-banner {
+
+    -fx-padding: 12px 16px;
+
+    -fx-background-color: rgba(51, 65, 85, 0.06);
+
+    -fx-background-radius: 10px;
+
+    -fx-border-color: rgba(51, 65, 85, 0.12);
+
+    -fx-border-radius: 10px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+.epd-banner-text {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #475569;
+
+}
+
+
+
+.epd-section-title {
+
+    -fx-text-fill: #0f172a;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+/* --- Pills / badges --- */
+
+.epd-pill {
+
+    -fx-font-size: 10px;
+
+    -fx-font-weight: bold;
+
+    -fx-padding: 5px 11px;
+
+    -fx-background-radius: 6px;
+
+    -fx-border-radius: 6px;
+
+    -fx-border-width: 1px;
+
+    -fx-text-fill: #334155;
+
+    -fx-background-color: #f1f5f9;
+
+    -fx-border-color: rgba(51, 65, 85, 0.15);
+
+}
+
+
+
+.epd-pill--readonly {
+
+    -fx-text-fill: #475569;
+
+    -fx-background-color: #f8fafc;
+
+}
+
+
+
+.epd-pill--neutral {
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-pill--accent {
+
+    -fx-text-fill: #0f172a;
+
+    -fx-background-color: #e2e8f0;
+
+    -fx-border-color: rgba(15, 23, 42, 0.12);
+
+}
+
+
+
+.epd-pill--ia {
+
+    -fx-text-fill: #334155;
+
+    -fx-background-color: #f1f5f9;
+
+    -fx-border-color: rgba(51, 65, 85, 0.14);
+
+}
+
+
+
+.epd-pill--obs {
+
+    -fx-text-fill: #1e293b;
+
+    -fx-background-color: #e2e8f0;
+
+    -fx-border-color: rgba(30, 41, 59, 0.12);
+
+}
+
+
+
+/* --- 1. Carte client --- */
+
+.epd-client-card {
+
+    -fx-border-color: rgba(15, 23, 42, 0.1);
+
+}
+
+
+
+.epd-client-card__icon {
+
+    -fx-background-color: rgba(51, 65, 85, 0.08);
+
+}
+
+
+
+.epd-client-card__title {
+
+    -fx-font-size: 16px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #0f172a;
+
+}
+
+
+
+.epd-client-card__subtitle {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-client-grid {
+
+    -fx-padding: 4 0 0 0;
+
+}
+
+
+
+.epd-kv-block__k {
+
+    -fx-font-size: 10px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #64748b;
+
+    -fx-letter-spacing: 0.03em;
+
+}
+
+
+
+.epd-kv-block__v {
+
+    -fx-font-size: 14px;
+
+    -fx-text-fill: #0f172a;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+.epd-kv-block__v--mono {
+
+    -fx-font-family: "Consolas", "Monaco", monospace;
+
+    -fx-font-weight: normal;
+
+    -fx-font-size: 13px;
+
+}
+
+
+
+.epd-kv-block__v--statut {
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #334155;
+
+}
+
+
+
+.epd-divider {
+
+    -fx-background-color: rgba(30, 41, 59, 0.08);
+
+    -fx-min-height: 1px;
+
+    -fx-max-height: 1px;
+
+}
+
+
+
+.epd-client-metrics {
+
+    -fx-padding: 4 0 0 0;
+
+}
+
+
+
+.epd-metric-chip__k {
+
+    -fx-font-size: 10px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-metric-chip__v {
+
+    -fx-font-size: 13px;
+
+    -fx-text-fill: #1e293b;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+/* --- 2. Fiche --- */
+
+.epd-fiche-card .w-card__subtitle {
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-section-icon {
+
+    -fx-background-color: rgba(51, 65, 85, 0.07);
+
+}
+
+
+
+.epd-kv-tile {
+
+    -fx-background-color: #f8fafc;
+
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+
+}
+
+
+
+/* --- Programme / scroll --- */
+
+.epd-scroll {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+.epd-programme-card .w-card__subtitle {
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-tasks-card .w-card__subtitle {
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+/* --- 4. Progression — codes couleur encadrant --- */
+
+.epd-progress-card {
+
+    -fx-border-color: rgba(15, 23, 42, 0.12);
+
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+
+}
+
+
+
+.epd-progress-card__icon {
+
+    -fx-background-color: rgba(30, 58, 138, 0.1);
+
+}
+
+
+
+.epd-progress-body {
+
+    -fx-padding-top: 4px;
+
+}
+
+
+
+.epd-progress-hint {
+
+    -fx-font-size: 11px;
+
+    -fx-text-fill: #64748b;
+
+    -fx-padding: 0 0 4 0;
+
+}
+
+
+
+.epd-progress-pct {
+
+    -fx-font-size: 36px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #334155;
+
+    -fx-min-width: 100px;
+
+}
+
+
+
+.epd-progress-pct--good {
+
+    -fx-text-fill: #15803d;
+
+}
+
+
+
+.epd-progress-pct--warn {
+
+    -fx-text-fill: #c2410c;
+
+}
+
+
+
+.epd-progress-pct--bad {
+
+    -fx-text-fill: #b91c1c;
+
+}
+
+
+
+.epd-progress-pct--na {
+
+    -fx-text-fill: #94a3b8;
+
+    -fx-font-size: 28px;
+
+}
+
+
+
+.epd-progress-detail {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #475569;
+
+}
+
+
+
+.epd-pbar {
+
+    -fx-pref-height: 14px;
+
+    -fx-min-height: 14px;
+
+    -fx-background-radius: 6px;
+
+    -fx-border-radius: 6px;
+
+}
+
+
+
+.epd-pbar .track {
+
+    -fx-background-color: #e2e8f0;
+
+    -fx-background-radius: 6px;
+
+}
+
+
+
+.epd-pbar .bar {
+
+    -fx-background-radius: 6px;
+
+    -fx-padding: 2px;
+
+}
+
+
+
+.epd-pbar--na .bar {
+
+    -fx-background-color: #94a3b8;
+
+    -fx-accent: #94a3b8;
+
+}
+
+
+
+.epd-pbar--good .bar {
+
+    -fx-background-color: linear-gradient(to right, #22c55e, #15803d);
+
+    -fx-accent: #15803d;
+
+}
+
+
+
+.epd-pbar--warn .bar {
+
+    -fx-background-color: linear-gradient(to right, #fb923c, #ea580c);
+
+    -fx-accent: #ea580c;
+
+}
+
+
+
+.epd-pbar--bad .bar {
+
+    -fx-background-color: linear-gradient(to right, #f87171, #b91c1c);
+
+    -fx-accent: #b91c1c;
+
+}
+
+
+
+/* --- 5. Synthèse IA --- */
+
+.epd-ia-card {
+
+    -fx-border-color: rgba(51, 65, 85, 0.1);
+
+}
+
+
+
+.epd-ia-card__icon {
+
+    -fx-background-color: rgba(51, 65, 85, 0.08);
+
+}
+
+
+
+.epd-ia-body {
+
+    -fx-padding-top: 2px;
+
+}
+
+
+
+.epd-ia-disclaimer {
+
+    -fx-font-size: 11px;
+
+    -fx-text-fill: #64748b;
+
+    -fx-padding: 0 0 2 0;
+
+}
+
+
+
+.epd-ia-synthese {
+
+    -fx-control-inner-background: #fafafa;
+
+    -fx-background-color: #fafafa;
+
+    -fx-background-radius: 10px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.1);
+
+    -fx-border-radius: 10px;
+
+    -fx-border-width: 1px;
+
+    -fx-text-fill: #1e293b;
+
+    -fx-font-size: 13px;
+
+    -fx-padding: 12px 14px;
+
+}
+
+
+
+.epd-ia-synthese .content {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+/* --- 6. Observation --- */
+
+.epd-obs-card {
+
+    -fx-border-color: rgba(30, 41, 59, 0.11);
+
+}
+
+
+
+.epd-obs-card__icon {
+
+    -fx-background-color: rgba(51, 65, 85, 0.07);
+
+}
+
+
+
+.epd-obs-body {
+
+    -fx-padding-top: 2px;
+
+}
+
+
+
+.epd-obs-hint {
+
+    -fx-font-size: 11px;
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-obs-textarea {
+
+    -fx-control-inner-background: #fafafa;
+
+    -fx-background-color: #fafafa;
+
+    -fx-background-radius: 10px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.12);
+
+    -fx-border-radius: 10px;
+
+    -fx-border-width: 1px;
+
+    -fx-text-fill: #0f172a;
+
+    -fx-font-size: 13px;
+
+    -fx-padding: 14px 16px;
+
+    -fx-prompt-text-fill: #94a3b8;
+
+}
+
+
+
+.epd-obs-textarea .content {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+.epd-obs-textarea:focused {
+
+    -fx-border-color: rgba(30, 58, 138, 0.35);
+
+    -fx-effect: dropshadow(gaussian, rgba(30, 58, 138, 0.08), 12, 0.25, 0, 0);
+
+}
+
+
+
+.epd-check {
+
+    -fx-text-fill: #334155;
+
+}
+
+
+
+.epd-btn-secondary {
+
+    -fx-background-color: #ffffff;
+
+    -fx-text-fill: #475569;
+
+}
+
+
+
+.epd-btn-save {
+
+    -fx-background-color: linear-gradient(to bottom, #334155 0%, #1e293b 100%);
+
+    -fx-text-fill: #f8fafc;
+
+    -fx-border-color: rgba(15, 23, 42, 0.35);
+
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.15), 10, 0.3, 0, 2);
+
+}
+
+
+
+.epd-btn-save:hover {
+
+    -fx-background-color: linear-gradient(to bottom, #475569 0%, #334155 100%);
+
+}
+
+
+
+/* --- Command center : scroll, kicker, mosaïque --- */
+
+.epd-page-scroll {
+
+    -fx-background-color: #f5f7fb;
+
+    -fx-background-insets: 0;
+
+    -fx-padding: 0;
+
+}
+
+
+
+.epd-page-scroll > .viewport {
+
+    -fx-background-color: #f5f7fb;
+
+}
+
+
+
+.epd-page-inner {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+.epd-page-kicker {
+
+    -fx-padding: 4px 4px 0 4px;
+
+}
+
+
+
+.epd-page-kicker-icon {
+
+    -fx-icon-color: #0ea5e9;
+
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.35), 8, 0.35, 0, 0);
+
+}
+
+
+
+.epd-page-kicker-title {
+
+    -fx-font-size: 20px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #0f172a;
+
+}
+
+
+
+.epd-page-kicker-sub {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-mosaic {
+
+    -fx-padding: 0;
+
+}
+
+
+
+/* Hero client */
+
+.epd-hero-card {
+
+    -fx-background-radius: 18px;
+
+    -fx-border-radius: 18px;
+
+    -fx-border-color: rgba(14, 165, 233, 0.12);
+
+    -fx-border-width: 1px;
+
+    -fx-background-color: linear-gradient(to bottom right, #ffffff 0%, #f8fafc 55%, #f0f9ff 100%);
+
+}
+
+
+
+.epd-hero-avatar {
+
+    -fx-min-width: 52px;
+
+    -fx-min-height: 52px;
+
+    -fx-max-width: 52px;
+
+    -fx-max-height: 52px;
+
+    -fx-background-radius: 14px;
+
+    -fx-background-color: linear-gradient(to bottom, #0ea5e9 0%, #0284c7 100%);
+
+    -fx-effect: dropshadow(gaussian, rgba(2, 132, 199, 0.35), 12, 0.35, 0, 2);
+
+}
+
+
+
+.epd-hero-avatar-icon {
+
+    -fx-icon-color: #f0f9ff;
+
+}
+
+
+
+.epd-hero-metrics {
+
+    -fx-padding: 14px 18px;
+
+    -fx-background-color: rgba(255, 255, 255, 0.65);
+
+    -fx-background-radius: 14px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.08);
+
+    -fx-border-radius: 14px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+.epd-hero-metric__k {
+
+    -fx-font-size: 11px;
+
+    -fx-text-fill: #64748b;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+.epd-hero-metric__v {
+
+    -fx-font-size: 14px;
+
+    -fx-text-fill: #0f172a;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+.epd-hero-metric-sep {
+
+    -fx-background-color: rgba(148, 163, 184, 0.35);
+
+}
+
+
+
+.epd-icon-glow {
+
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.22), 10, 0.3, 0, 1);
+
+}
+
+
+
+/* Rail droit + fiche compacte */
+
+.epd-rail {
+
+    -fx-padding: 0;
+
+}
+
+
+
+.epd-rail-card {
+
+    -fx-background-radius: 14px;
+
+}
+
+
+
+.epd-fiche-body-compact {
+
+    -fx-padding: 12px 14px 14px 14px;
+
+}
+
+
+
+.epd-fiche-mini-grid {
+
+    -fx-padding: 0;
+
+}
+
+
+
+.epd-mini-tile {
+
+    -fx-padding: 8px 10px;
+
+    -fx-background-color: #f8fafc;
+
+    -fx-background-radius: 10px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+
+    -fx-border-radius: 10px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+.epd-mini-tile--wide {
+
+    -fx-padding: 10px 12px;
+
+}
+
+
+
+.epd-mini-tile__k {
+
+    -fx-font-size: 10px;
+
+    -fx-text-fill: #64748b;
+
+    -fx-font-weight: bold;
+
+}
+
+
+
+.epd-mini-tile__v {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #0f172a;
+
+}
+
+
+
+/* Programme — carte mise en avant */
+
+.epd-programme-card--elevated {
+
+    -fx-background-radius: 16px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.08);
+
+}
+
+
+
+.epd-card-header-accent {
+
+    -fx-background-color: linear-gradient(to right, rgba(240, 249, 255, 0.95) 0%, #ffffff 55%);
+
+    -fx-border-color: rgba(14, 165, 233, 0.12);
+
+    -fx-border-width: 0 0 1px 0;
+
+}
+
+
+
+.epd-programme-body {
+
+    -fx-padding: 14px 16px 16px 16px;
+
+}
+
+
+
+.epd-scroll--programme {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+.epd-scroll--programme > .viewport {
+
+    -fx-background-color: transparent;
+
+}
+
+
+
+/* Progression — bandeau « spotlight » */
+
+.epd-progress-card--spotlight {
+
+    -fx-background-radius: 16px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.09);
+
+}
+
+
+
+.epd-progress-header {
+
+    -fx-background-color: linear-gradient(to right, #ffffff 0%, #f8fafc 100%);
+
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+
+    -fx-border-width: 0 0 1px 0;
+
+}
+
+
+
+.epd-progress-legend {
+
+    -fx-padding: 0 0 4px 0;
+
+}
+
+
+
+.epd-legend-dot {
+
+    -fx-min-width: 10px;
+
+    -fx-min-height: 10px;
+
+    -fx-max-width: 10px;
+
+    -fx-max-height: 10px;
+
+    -fx-background-radius: 5px;
+
+    -fx-padding: 0;
+
+    -fx-text-fill: transparent;
+
+}
+
+
+
+.epd-legend-dot--good {
+
+    -fx-background-color: #16a34a;
+
+}
+
+
+
+.epd-legend-dot--warn {
+
+    -fx-background-color: #ea580c;
+
+}
+
+
+
+.epd-legend-dot--bad {
+
+    -fx-background-color: #dc2626;
+
+}
+
+
+
+.epd-legend-txt {
+
+    -fx-font-size: 11px;
+
+    -fx-text-fill: #64748b;
+
+}
+
+
+
+.epd-progress-main {
+
+    -fx-padding: 4px 0 0 0;
+
+}
+
+
+
+.epd-progress-ring-wrap {
+
+    -fx-min-width: 88px;
+
+    -fx-pref-width: 88px;
+
+    -fx-max-width: 88px;
+
+    -fx-padding: 8px;
+
+    -fx-background-color: #ffffff;
+
+    -fx-background-radius: 999px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.08);
+
+    -fx-border-radius: 999px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+/* Insights : IA + intervention côte à côte */
+
+.epd-insight-deck {
+
+    -fx-padding: 4px 0 0 0;
+
+}
+
+
+
+.epd-insight-panel {
+
+    -fx-min-height: 320px;
+
+    -fx-background-radius: 16px;
+
+}
+
+
+
+.epd-ia-header {
+
+    -fx-background-color: linear-gradient(to right, rgba(241, 245, 249, 0.9) 0%, #ffffff 100%);
+
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+
+    -fx-border-width: 0 0 1px 0;
+
+}
+
+
+
+.epd-obs-header {
+
+    -fx-background-color: linear-gradient(to right, rgba(224, 242, 254, 0.55) 0%, #ffffff 100%);
+
+    -fx-border-color: rgba(14, 165, 233, 0.15);
+
+    -fx-border-width: 0 0 1px 0;
+
+}
+
+
+
+.epd-obs-card--featured {
+
+    -fx-border-color: rgba(14, 165, 233, 0.22);
+
+    -fx-border-width: 1px;
+
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.12), 20, 0.25, 0, 4);
+
+}
+
+
+
+.epd-obs-inline-error {
+
+    -fx-font-size: 12px;
+
+    -fx-text-fill: #b91c1c;
+
+    -fx-padding: 8px 10px;
+
+    -fx-background-color: rgba(254, 226, 226, 0.85);
+
+    -fx-background-radius: 8px;
+
+    -fx-border-color: rgba(220, 38, 38, 0.25);
+
+    -fx-border-radius: 8px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+.epd-obs-actions {
+
+    -fx-padding: 4px 0 0 0;
+
+}
+
+
+
+/* Tâches — lignes sobres */
+
+.epd-task-row {
+
+    -fx-padding: 10px 12px;
+
+    -fx-background-color: #f8fafc;
+
+    -fx-background-radius: 8px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.07);
+
+    -fx-border-radius: 8px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+.epd-task-row:hover {
+
+    -fx-background-color: #ffffff;
+
+    -fx-border-color: rgba(51, 65, 85, 0.14);
+
+}
+
+
+
+.epd-root--supervision .w-task-when {
+
+    -fx-text-fill: #475569;
+
+}
+
+
+
+/* --- Anciennes classes (compat) --- */
+
+.epd-dashboard-grid {
+
+    -fx-hgap: 20px;
+
+    -fx-vgap: 20px;
+
+    -fx-padding: 4px 0 0 0;
+
+}
+
+
+
+.epd-context-text {
+
+    -fx-font-size: 14px;
+
+    -fx-text-fill: #475569;
+
+}
+
+
+
+.epd-hero-strip {
+
+    -fx-padding: 16px 20px;
+
+    -fx-spacing: 6px;
+
+    -fx-background-color: #ffffff;
+
+    -fx-background-radius: 16px;
+
+    -fx-border-color: rgba(30, 41, 59, 0.06);
+
+    -fx-border-radius: 16px;
+
+    -fx-border-width: 1px;
+
+}
+
+
+
+/* Priorité sur le style bouton primaire widgets — bouton enregistrement sobre */
+
+.epd-root--supervision .w-btn-primary.epd-btn-save {
+
+    -fx-background-color: linear-gradient(to bottom, #334155 0%, #1e293b 100%);
+
+    -fx-text-fill: #f8fafc;
+
+    -fx-border-color: rgba(15, 23, 42, 0.35);
+
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.12), 8, 0.3, 0, 1);
+
+}
+
+
+
+.epd-root--supervision .w-btn-primary.epd-btn-save:hover {
+
+    -fx-background-color: linear-gradient(to bottom, #475569 0%, #334155 100%);
+
+}
+

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="front-events-scroll client-shop-surface-root"
+            stylesheets="@../../css/front-events.css,@../../css/client-shop-light.css"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controllers.ClientBoutiqueController">
+    <VBox spacing="22" styleClass="front-page client-shop-page" maxWidth="Infinity">
+        <StackPane styleClass="front-hero-banner client-shop-hero-accent">
+            <VBox alignment="CENTER" spacing="8">
+                <Label styleClass="front-overline" text="BOUTIQUE" />
+                <Label styleClass="front-banner-title" text="Notre boutique" />
+                <Label styleClass="front-banner-subtitle" text="Produits &amp; accessoires" />
+                <Label styleClass="front-banner-text"
+                       text="Découvrez notre sélection pour vos événements et votre quotidien bien-être — même esprit lumineux que la page Événements."
+                       wrapText="true" />
+            </VBox>
+        </StackPane>
+
+        <HBox alignment="CENTER" spacing="12" styleClass="front-toolbar client-shop-toolbar-wide">
+            <TextField fx:id="rechercheProduitsClient" onAction="#handleRechercheOuTriClient"
+                       promptText="Rechercher par nom, prix, stock…" styleClass="front-search" HBox.hgrow="ALWAYS" />
+            <ComboBox fx:id="triProduitsClient" onAction="#handleRechercheOuTriClient" promptText="Trier par" styleClass="front-sort" prefWidth="220" />
+            <Region prefWidth="8" />
+            <Button onAction="#handleRefresh" styleClass="client-shop-outline-btn" text="Actualiser" />
+            <Button onAction="#handleMesCommandes" styleClass="client-shop-outline-btn" text="Mes commandes" />
+            <Button onAction="#handlePanier" styleClass="front-refresh-btn" text="Mon panier" />
+        </HBox>
+
+        <VBox spacing="12" styleClass="client-shop-section-card" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+            <Label styleClass="front-result-label" text="Nos produits" />
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="products-scroll client-shop-inner-scroll" maxHeight="720" VBox.vgrow="ALWAYS">
+                <TilePane fx:id="produitsContainer" hgap="18" vgap="18" alignment="TOP_CENTER" prefColumns="3" styleClass="front-events-grid" />
+            </ScrollPane>
+        </VBox>
+    </VBox>
+</ScrollPane>

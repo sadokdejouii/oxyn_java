@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.controllers.AdminPlanningDashboardController"
+           styleClass="apd-root apd-root--premium" maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../../css/admin-planning-dashboard.css">
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="apd-page-scroll" maxWidth="Infinity" maxHeight="Infinity">
+        <VBox spacing="20" styleClass="apd-page-inner" maxWidth="Infinity">
+            <VBox styleClass="apd-hero" spacing="8">
+                <Label styleClass="apd-eyebrow" text="ADMINISTRATION · PLANNING" />
+                <Label styleClass="apd-title" text="Vue analytique globale" />
+                <Label styleClass="apd-sub" wrapText="true"
+                       text="Indicateurs agrégés et utilisateurs avec activité sur le module Planning." />
+                <Separator styleClass="apd-sep-hero" />
+            </VBox>
+
+            <GridPane styleClass="apd-kpi-grid" hgap="14" vgap="14" maxWidth="Infinity">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.33" />
+                    <ColumnConstraints hgrow="SOMETIMES" percentWidth="33.34" />
+                </columnConstraints>
+                <VBox styleClass="apd-kpi-card apd-kpi-card--users" spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="UTILISATEURS ACTIFS" />
+                    <Label fx:id="lblStatUsers" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Comptes avec fiche santé enregistrée" wrapText="true" />
+                </VBox>
+                <VBox styleClass="apd-kpi-card apd-kpi-card--prog" spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="PROGRAMMES GÉNÉRÉS" />
+                    <Label fx:id="lblStatProg" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Programmes personnalisés en base" wrapText="true" />
+                </VBox>
+                <VBox styleClass="apd-kpi-card apd-kpi-card--tasks" spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label styleClass="apd-kpi-label" text="TÂCHES TOTALES" />
+                    <Label fx:id="lblStatTasks" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Tâches quotidiennes enregistrées" wrapText="true" />
+                </VBox>
+                <VBox styleClass="apd-kpi-card apd-kpi-card--fiche" spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <Label styleClass="apd-kpi-label" text="FICHES SANTÉ" />
+                    <Label fx:id="lblStatFiches" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Profils biométriques actifs" wrapText="true" />
+                </VBox>
+                <VBox styleClass="apd-kpi-card apd-kpi-card--conv" spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <Label styleClass="apd-kpi-label" text="CONVERSATIONS" />
+                    <Label fx:id="lblStatConv" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Fils de discussion encadrant–client" wrapText="true" />
+                </VBox>
+                <VBox styleClass="apd-kpi-card apd-kpi-card--msg" spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <Label styleClass="apd-kpi-label" text="MESSAGES" />
+                    <Label fx:id="lblStatMsg" styleClass="apd-kpi-value" text="—" />
+                    <Label styleClass="apd-kpi-hint" text="Messages échangés sur le suivi" wrapText="true" />
+                </VBox>
+            </GridPane>
+
+            <VBox styleClass="apd-content-block" spacing="16" maxWidth="Infinity">
+                <HBox alignment="CENTER_LEFT" spacing="14">
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label styleClass="apd-section-title" text="Utilisateurs" />
+                        <Label styleClass="apd-section-sub" text="Cartes cliquables — détail en overlay" wrapText="true" />
+                    </VBox>
+                    <Label styleClass="apd-badge" text="Vue grille" />
+                    <Button fx:id="btnRefresh" mnemonicParsing="false" text="Actualiser" styleClass="apd-btn">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-sync-alt" iconSize="13" styleClass="apd-btn__icon" />
+                        </graphic>
+                    </Button>
+                </HBox>
+
+                <VBox styleClass="apd-filter-panel" spacing="12" maxWidth="Infinity">
+                    <TextField fx:id="searchField" styleClass="apd-field" promptText="Rechercher par nom, e-mail, rôle, objectif ou activité…" />
+                    <HBox alignment="CENTER_LEFT" spacing="14" styleClass="apd-filter-row">
+                        <Label styleClass="apd-filter-label" text="TRIER PAR" />
+                        <ComboBox fx:id="sortCombo" styleClass="apd-select" maxWidth="340" HBox.hgrow="ALWAYS" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblMatchHint" styleClass="apd-match-hint" text="" wrapText="true" />
+                    </HBox>
+                </VBox>
+
+                <FlowPane fx:id="userCardsHost" hgap="16" vgap="16" prefWrapLength="1320" styleClass="apd-user-cards-flow" maxWidth="Infinity" />
+            </VBox>
+        </VBox>
+    </ScrollPane>
+
+    <StackPane fx:id="detailOverlay" managed="false" visible="false" styleClass="apd-detail-overlay" maxWidth="Infinity" maxHeight="Infinity">
+        <Region fx:id="detailDim" styleClass="apd-detail-dim" maxWidth="Infinity" maxHeight="Infinity" />
+        <VBox styleClass="apd-detail-modal" maxWidth="780" minWidth="560" prefWidth="720" spacing="0" StackPane.alignment="CENTER">
+            <HBox alignment="CENTER_LEFT" spacing="20" styleClass="apd-detail-head">
+                <StackPane styleClass="apd-detail-avatar apd-detail-avatar--xl">
+                    <Circle radius="36" styleClass="apd-detail-avatar-ring" />
+                    <Label fx:id="detailAvatarLetter" styleClass="apd-detail-avatar-letter apd-detail-avatar-letter--xl" text="?" />
+                </StackPane>
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label fx:id="detailEyebrow" styleClass="apd-detail-eyebrow" text="Fiche utilisateur" />
+                    <Label fx:id="detailName" styleClass="apd-detail-name apd-detail-name--xl" wrapText="true" text="" />
+                    <Label fx:id="detailEmail" styleClass="apd-detail-email apd-detail-email--lg" wrapText="true" text="" />
+                    <Label fx:id="detailRoleChip" styleClass="apd-detail-role-chip" wrapText="true" text="" />
+                </VBox>
+                <Button fx:id="btnDetailClose" mnemonicParsing="false" text="" styleClass="apd-detail-close" focusTraversable="false">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-times" iconSize="18" styleClass="apd-detail-close-icon" />
+                    </graphic>
+                </Button>
+            </HBox>
+            <Separator styleClass="apd-detail-sep" />
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="520" styleClass="apd-detail-scroll">
+                <VBox spacing="24" styleClass="apd-detail-body">
+                    <VBox spacing="12" styleClass="apd-detail-panel">
+                        <Label styleClass="apd-detail-section-title" text="Profil santé" />
+                        <GridPane hgap="12" vgap="12" styleClass="apd-detail-metrics-grid" maxWidth="Infinity">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="120" percentWidth="33.33" />
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="120" percentWidth="33.33" />
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="120" percentWidth="33.34" />
+                            </columnConstraints>
+                            <VBox styleClass="apd-detail-metric" spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label styleClass="apd-detail-metric-k" text="Genre" />
+                                <Label fx:id="detailGenreVal" styleClass="apd-detail-metric-v" wrapText="true" text="—" />
+                            </VBox>
+                            <VBox styleClass="apd-detail-metric" spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label styleClass="apd-detail-metric-k" text="Âge" />
+                                <Label fx:id="detailAgeVal" styleClass="apd-detail-metric-v" wrapText="true" text="—" />
+                            </VBox>
+                            <VBox styleClass="apd-detail-metric" spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                <Label styleClass="apd-detail-metric-k" text="Poids" />
+                                <Label fx:id="detailPoidsVal" styleClass="apd-detail-metric-v" wrapText="true" text="—" />
+                            </VBox>
+                        </GridPane>
+                    </VBox>
+                    <VBox spacing="12" styleClass="apd-detail-panel">
+                        <Label styleClass="apd-detail-section-title" text="Activité sur le module" />
+                        <HBox spacing="12" alignment="CENTER_LEFT" maxWidth="Infinity">
+                            <VBox styleClass="apd-detail-stat-card" spacing="8" HBox.hgrow="ALWAYS">
+                                <Label styleClass="apd-detail-stat-k" text="Programme généré" />
+                                <Label fx:id="detailProgrammeVal" styleClass="apd-detail-stat-v" wrapText="true" text="—" />
+                                <Label fx:id="detailProgrammeHint" styleClass="apd-detail-stat-hint" wrapText="true" text="" />
+                            </VBox>
+                            <VBox styleClass="apd-detail-stat-card" spacing="8" HBox.hgrow="ALWAYS">
+                                <Label styleClass="apd-detail-stat-k" text="Tâches enregistrées" />
+                                <Label fx:id="detailTachesVal" styleClass="apd-detail-stat-v" wrapText="true" text="—" />
+                                <Label styleClass="apd-detail-stat-hint" text="Total historique sur toutes les semaines" wrapText="true" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                    <VBox spacing="12" styleClass="apd-detail-panel">
+                        <Label styleClass="apd-detail-section-title" text="Objectif &amp; niveau d’activité" />
+                        <VBox spacing="14" styleClass="apd-detail-narrative">
+                            <VBox spacing="4">
+                                <Label styleClass="apd-detail-narrative-k" text="Objectif déclaré" />
+                                <Label fx:id="detailObjectifVal" styleClass="apd-detail-narrative-v" wrapText="true" text="—" />
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label styleClass="apd-detail-narrative-k" text="Niveau d’activité" />
+                                <Label fx:id="detailActiviteVal" styleClass="apd-detail-narrative-v" wrapText="true" text="—" />
+                            </VBox>
+                        </VBox>
+                    </VBox>
+                    <VBox spacing="12" styleClass="apd-detail-panel apd-detail-panel--danger">
+                        <Label styleClass="apd-detail-section-title" text="Réinitialisation fiche client" />
+                        <Label wrapText="true" styleClass="apd-detail-stat-hint"
+                               text="Supprime définitivement la fiche santé, le programme généré, les tâches et les objectifs hebdomadaires. Le client devra remplir à nouveau sa fiche depuis son espace Planning." />
+                        <Button fx:id="btnDeleteFiche" mnemonicParsing="false" text="Supprimer la fiche santé"
+                                styleClass="apd-btn-danger" maxWidth="Infinity" />
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </StackPane>
+</StackPane>
