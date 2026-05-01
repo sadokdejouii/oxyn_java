@@ -31,6 +31,7 @@
             <TextField fx:id="rechercheProduitsClient" onAction="#handleRechercheOuTriClient"
                        promptText="Rechercher par nom, prix, stock…" styleClass="front-search" HBox.hgrow="ALWAYS" />
             <ComboBox fx:id="triProduitsClient" onAction="#handleRechercheOuTriClient" promptText="Trier par" styleClass="front-sort" prefWidth="220" />
+            <ComboBox fx:id="deviseProduitsClient" onAction="#handleRechercheOuTriClient" promptText="Devise" styleClass="front-sort" prefWidth="130" />
             <Region prefWidth="8" />
             <Button onAction="#handleRefresh" styleClass="client-shop-outline-btn" text="Actualiser" />
             <Button onAction="#handleMesCommandes" styleClass="client-shop-outline-btn" text="Mes commandes" />

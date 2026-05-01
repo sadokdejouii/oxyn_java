@@ -15,6 +15,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import org.example.entities.PanierSession;
 import org.example.entities.produits;
+import org.example.services.CurrencyExchangeService;
 import org.example.services.ProduitRecommendationService;
 import org.example.services.ProduitsService;
 import org.example.utils.CommandeClientResolver;
@@ -35,11 +36,14 @@ public class ClientBoutiqueController {
     @FXML
     private ComboBox<String> triProduitsClient;
     @FXML
+    private ComboBox<String> deviseProduitsClient;
+    @FXML
     private TilePane recommandationsContainer;
     @FXML
     private Label recoHintLabel;
 
     private final ProduitsService produitsService = new ProduitsService();
+    private final CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService();
     private final ProduitRecommendationService recommendationService = new ProduitRecommendationService();
     private final List<produits> tousLesProduits = new ArrayList<>();
     private MainLayoutController mainLayoutController;
@@ -63,6 +67,10 @@ public class ClientBoutiqueController {
                     "Stock (croissant)",
                     "Stock (décroissant)");
             triProduitsClient.getSelectionModel().selectFirst();
+        }
+        if (deviseProduitsClient != null) {
+            deviseProduitsClient.getItems().setAll("TND", "EUR", "USD");
+            deviseProduitsClient.getSelectionModel().select("TND");
         }
         if (rechercheProduitsClient != null) {
             rechercheProduitsClient.textProperty().addListener((o, a, b) -> appliquerFiltreEtTri());
@@ -213,7 +221,7 @@ public class ClientBoutiqueController {
         Label ratingLabel = new Label("★★★★★  (24 avis)");
         ratingLabel.getStyleClass().add("shop-client-rating");
 
-        Label priceLabel = new Label(String.format("%.2f TND", produit.getPrix_produit()));
+        Label priceLabel = new Label(formatPrice(produit.getPrix_produit()));
         priceLabel.getStyleClass().add("shop-client-price");
 
         Label stockLabel = new Label(enStock ? "En stock" : "Rupture de stock");
@@ -242,6 +250,17 @@ public class ClientBoutiqueController {
 
         card.getChildren().addAll(imgWrap, body, actionsBox);
         return card;
+    }
+
+    private String selectedCurrency() {
+        if (deviseProduitsClient == null || deviseProduitsClient.getValue() == null) {
+            return "TND";
+        }
+        return deviseProduitsClient.getValue();
+    }
+
+    private String formatPrice(double amountTnd) {
+        return currencyExchangeService.formatFromTnd(amountTnd, selectedCurrency());
     }
 
     @FXML

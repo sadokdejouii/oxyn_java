@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import org.example.entities.LigneCommandeAffichage;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
+import org.example.services.CurrencyExchangeService;
 import org.example.services.FacturePdfService;
 import org.example.services.SessionContext;
 import org.example.services.StripePaymentService;
@@ -62,12 +63,15 @@ public class MesCommandesController {
 
     @FXML
     private ComboBox<String> triMesCommandes;
+    @FXML
+    private ComboBox<String> deviseMesCommandesCombo;
 
     private MainLayoutController mainLayoutController;
 
     private final CommandesService commandesService = new CommandesService();
     private final StripePaymentService stripePaymentService = new StripePaymentService();
     private final FacturePdfService facturePdfService = new FacturePdfService();
+    private final CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService();
 
     private final List<commandes> toutesMesCommandes = new ArrayList<>();
 
@@ -91,6 +95,10 @@ public class MesCommandesController {
                     "Total (décroissant)",
                     "Statut (A → Z)");
             triMesCommandes.getSelectionModel().selectFirst();
+        }
+        if (deviseMesCommandesCombo != null) {
+            deviseMesCommandesCombo.getItems().setAll("TND", "EUR", "USD");
+            deviseMesCommandesCombo.getSelectionModel().select("TND");
         }
         if (rechercheMesCommandes != null) {
             rechercheMesCommandes.textProperty().addListener((o, a, b) -> reafficherListe());
@@ -343,7 +351,7 @@ public class MesCommandesController {
         meta.getStyleClass().add("client-order-meta");
         meta.setWrapText(true);
 
-        Label total = new Label(String.format("Total : %.2f TND", c.getTotal_commande()));
+        Label total = new Label("Total : " + formatFromTnd(c.getTotal_commande()));
         total.getStyleClass().add("client-order-total");
 
         Label addrTitle = new Label("Adresse de livraison");
@@ -365,8 +373,8 @@ public class MesCommandesController {
             lignesBox.getChildren().add(vide);
         } else {
             for (LigneCommandeAffichage l : lignes) {
-                Label line = new Label(String.format("· %s  × %d  →  %.2f TND",
-                        l.getNomProduit(), l.getQuantite(), l.getSousTotal()));
+                Label line = new Label(String.format("· %s  × %d  →  %s",
+                        l.getNomProduit(), l.getQuantite(), formatFromTnd(l.getSousTotal())));
                 line.getStyleClass().add("client-order-line");
                 line.setWrapText(true);
                 lignesBox.getChildren().add(line);
@@ -514,5 +522,16 @@ public class MesCommandesController {
         } catch (SQLException ex) {
             error("Erreur : " + ex.getMessage());
         }
+    }
+
+    private String selectedCurrency() {
+        if (deviseMesCommandesCombo == null || deviseMesCommandesCombo.getValue() == null) {
+            return "TND";
+        }
+        return deviseMesCommandesCombo.getValue();
+    }
+
+    private String formatFromTnd(double amountTnd) {
+        return currencyExchangeService.formatFromTnd(amountTnd, selectedCurrency());
     }
 }

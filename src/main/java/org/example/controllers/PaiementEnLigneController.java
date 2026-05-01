@@ -133,8 +133,13 @@ public class PaiementEnLigneController {
             return null;
         } catch (IllegalStateException e) {
             return e.getMessage();
-        } catch (Exception ignored) {
-            return "Erreur Twilio.";
+        } catch (Exception e) {
+            // On remonte le message réel (ex: 21608 unverified number, auth, solde, etc.)
+            String msg = e.getMessage();
+            if (msg == null || msg.isBlank()) {
+                return "Erreur Twilio.";
+            }
+            return msg;
         }
     }
 

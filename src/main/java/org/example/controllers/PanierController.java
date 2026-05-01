@@ -16,6 +16,7 @@ import org.example.entities.LignePanier;
 import org.example.entities.PanierSession;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
+import org.example.services.CurrencyExchangeService;
 import org.example.services.SessionContext;
 import org.example.services.StripePaymentService;
 import org.example.services.StripePaymentSession;
@@ -41,6 +42,8 @@ public class PanierController {
     @FXML
     private ComboBox<String> paiementCombo;
     @FXML
+    private ComboBox<String> devisePanierCombo;
+    @FXML
     private Label totalLabel;
     @FXML
     private Button validerBtn;
@@ -48,6 +51,7 @@ public class PanierController {
     private MainLayoutController mainLayoutController;
 
     private final PanierSession panier = PanierSession.getInstance();
+    private final CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService();
 
     public void setMainLayoutController(MainLayoutController mainLayoutController) {
         this.mainLayoutController = mainLayoutController;
@@ -57,7 +61,16 @@ public class PanierController {
     public void initialize() {
         paiementCombo.setItems(FXCollections.observableArrayList("En ligne", "En espèces"));
         paiementCombo.getSelectionModel().selectFirst();
+        if (devisePanierCombo != null) {
+            devisePanierCombo.setItems(FXCollections.observableArrayList("TND", "EUR", "USD"));
+            devisePanierCombo.getSelectionModel().select("TND");
+        }
         AdresseCommandeValidator.appliquerLimiteLongueur(adresseField);
+        rafraichirPanier();
+    }
+
+    @FXML
+    private void handleRefreshCurrency() {
         rafraichirPanier();
     }
 
@@ -71,6 +84,18 @@ public class PanierController {
     @FXML
     private void handleValiderCommande() {
         validerCommande();
+    }
+
+    @FXML
+    private void handleViderPanier() {
+        if (panier.estVide()) {
+            showAlert(Alert.AlertType.INFORMATION, "Panier", "Votre panier est déjà vide.");
+            return;
+        }
+        panier.viderPanier();
+        adresseField.clear();
+        rafraichirPanier();
+        showAlert(Alert.AlertType.INFORMATION, "Panier", "Le panier a été vidé.");
     }
 
     private void rafraichirPanier() {
@@ -96,7 +121,7 @@ public class PanierController {
             }
         }
 
-        totalLabel.setText(String.format("%.2f TND", panier.getTotal()));
+        totalLabel.setText(formatFromTnd(panier.getTotal()));
         validerBtn.setDisable(lignes.isEmpty());
     }
 
@@ -134,7 +159,7 @@ public class PanierController {
         Label qteBadge = new Label("Qté " + ligne.getQuantite());
         qteBadge.getStyleClass().add("shop-client-qte");
 
-        Label detail = new Label(String.format("×  %.2f TND  l’unité", ligne.getPrixUnitaire()));
+        Label detail = new Label("×  " + formatFromTnd(ligne.getPrixUnitaire()) + "  l’unité");
         detail.getStyleClass().add("shop-client-unit-price");
 
         meta.getChildren().addAll(qteBadge, detail);
@@ -142,7 +167,7 @@ public class PanierController {
 
         VBox prixCol = new VBox(2);
         prixCol.setAlignment(Pos.CENTER_RIGHT);
-        Label sous = new Label(String.format("%.2f TND", ligne.getSousTotal()));
+        Label sous = new Label(formatFromTnd(ligne.getSousTotal()));
         sous.getStyleClass().add("shop-client-sous-total");
         Label hint = new Label("Sous-total");
         hint.getStyleClass().add("shop-client-sous-hint");
@@ -238,5 +263,16 @@ public class PanierController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private String selectedCurrency() {
+        if (devisePanierCombo == null || devisePanierCombo.getValue() == null) {
+            return "TND";
+        }
+        return devisePanierCombo.getValue();
+    }
+
+    private String formatFromTnd(double amountTnd) {
+        return currencyExchangeService.formatFromTnd(amountTnd, selectedCurrency());
     }
 }

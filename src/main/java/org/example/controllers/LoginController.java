@@ -13,6 +13,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.entities.User;
+import org.example.entities.PanierSession;
 import org.example.services.AuthService;
 import org.example.services.AuthValidation;
 import org.example.services.SessionContext;
@@ -87,6 +88,8 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
+            // Précharge le panier persistant du client connecté.
+            PanierSession.getInstance().getLignes();
             openMain(event);
         } catch (SQLException e) {
             showError("Erreur base de données",

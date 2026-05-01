@@ -37,6 +37,7 @@
                 <TextField fx:id="rechercheMesCommandes" onAction="#handleRechercheOuTriMesCommandes"
                            promptText="Statut, adresse, paiement…" styleClass="front-search" HBox.hgrow="ALWAYS" />
                 <ComboBox fx:id="triMesCommandes" onAction="#handleRechercheOuTriMesCommandes" promptText="Trier" styleClass="front-sort" prefWidth="240" />
+                <ComboBox fx:id="deviseMesCommandesCombo" onAction="#handleRechercheOuTriMesCommandes" promptText="Devise" styleClass="front-sort" prefWidth="130" />
                 <Button onAction="#handleRefresh" styleClass="front-refresh-btn" text="Actualiser" />
             </HBox>
 
