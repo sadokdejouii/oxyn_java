@@ -79,7 +79,7 @@ public class ForumController implements Initializable {
     private List<Post> allPosts = new ArrayList<>();
     private boolean isGridView = true;
     private String selectedCategory = "Tous les posts";
-    private String selectedSort = "Popularité (likes)";
+    private String selectedSort = "Plus récent";
     private String attachedFilePath = null;
     private javafx.stage.Popup emojiPopup;
 
@@ -163,7 +163,7 @@ public class ForumController implements Initializable {
                 "Plus récent",
                 "Plus ancien"
         );
-        sortComboBox.setValue("Popularité (likes)");
+        sortComboBox.setValue("Plus récent");
 
         // Setup category combo
         categoryComboBox.getItems().addAll(
