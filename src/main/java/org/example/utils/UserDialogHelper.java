@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.example.controllers.dialog.ConfirmDialogController;
 import org.example.controllers.dialog.MessageDialogController;
+import org.example.controllers.dialog.TotpCodeDialogController;
 import org.example.controllers.dialog.UserFormDialogController;
 import org.example.entities.User;
 
@@ -23,6 +24,8 @@ public final class UserDialogHelper {
     private static final String MESSAGE_FXML = "/FXML/dialogs/MessageDialog.fxml";
     private static final String CONFIRM_FXML = "/FXML/dialogs/ConfirmDialog.fxml";
     private static final String USER_FORM_FXML = "/FXML/dialogs/UserFormDialog.fxml";
+    private static final String TOTP_CODE_FXML = "/FXML/dialogs/TotpCodeDialog.fxml";
+    private static final String FORGOT_PASSWORD_FXML = "/FXML/dialogs/ForgotPasswordDialog.fxml";
 
     private UserDialogHelper() {
     }
@@ -113,6 +116,63 @@ public final class UserDialogHelper {
             centerOnOwnerWhenShown(stage, owner);
             stage.showAndWait();
             return ctrl.getResult();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Optional<String> showTotpCodeDialog(Stage owner, String title, String subtitle,
+                                                      javafx.scene.image.Image qr, String secretHint) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(
+                    UserDialogHelper.class.getResource(TOTP_CODE_FXML)));
+            Parent root = loader.load();
+            TotpCodeDialogController ctrl = loader.getController();
+
+            Stage stage = new Stage();
+            stage.initOwner(owner);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+            ctrl.setup(stage, title, subtitle);
+            if (qr != null || (secretHint != null && !secretHint.isBlank())) {
+                ctrl.setQr(qr, secretHint);
+            }
+            stage.setResizable(false);
+            stage.sizeToScene();
+            centerOnOwnerWhenShown(stage, owner);
+            stage.showAndWait();
+            if (!ctrl.isConfirmed()) {
+                return Optional.empty();
+            }
+            String code = ctrl.getCode();
+            return Optional.ofNullable(code);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void showForgotPasswordDialog(Stage owner, String emailPrefill) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(
+                    UserDialogHelper.class.getResource(FORGOT_PASSWORD_FXML)));
+            Parent root = loader.load();
+            org.example.controllers.dialog.ForgotPasswordDialogController ctrl = loader.getController();
+
+            Stage stage = new Stage();
+            stage.initOwner(owner);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+            ctrl.setup(stage, emailPrefill);
+            stage.setResizable(false);
+            stage.sizeToScene();
+            centerOnOwnerWhenShown(stage, owner);
+            stage.showAndWait();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

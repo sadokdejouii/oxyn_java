@@ -190,7 +190,7 @@ class UserEntitiesTest {
         @Test
         @DisplayName("distinct de Client et Admin au même id si comparaison référentielle type")
         void concrete_type_distinct() {
-            Coach coach = new Coach(6, "c@c.c", "h", "N", "P", "1", true);
+            User coach = new Coach(6, "c@c.c", "h", "N", "P", "1", true);
             assertTrue(coach instanceof User);
             assertFalse(coach instanceof Admin);
             assertFalse(coach instanceof Client);
