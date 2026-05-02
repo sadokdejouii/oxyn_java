@@ -23,6 +23,7 @@ import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.stage.Stage;
 import org.example.services.SessionContext;
+import org.example.entities.PanierSession;
 import org.example.utils.PageLoader;
 import org.example.utils.PrimaryStageLayout;
 
@@ -556,6 +557,7 @@ public class MainLayoutController implements Initializable {
     private void handleLogout() {
         try {
             SessionContext.getInstance().logout();
+            PanierSession.getInstance().resetMemory();
             Stage stage = (Stage) contentArea.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Login.fxml"));
             Parent root = loader.load();

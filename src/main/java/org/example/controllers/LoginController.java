@@ -13,6 +13,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.entities.User;
+import org.example.entities.PanierSession;
 import org.example.notifications.FailedLoginAlertEmailer;
 import org.example.services.AuthService;
 import org.example.services.AuthValidation;
@@ -184,6 +185,8 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
+            // Précharge le panier persistant du client connecté.
+            PanierSession.getInstance().getLignes();
             try {
                 userService.touchLastSeen(user.getId());
             } catch (SQLException ignored) {
