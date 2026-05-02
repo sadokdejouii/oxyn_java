@@ -17,6 +17,7 @@ public class EvenementServices implements ICrud<Evenement> {
 
     public EvenementServices() {
         con = MyDataBase.getConnection();
+        eventNotificationService = new EventNotificationService();
     }
 
     @Override
@@ -92,6 +93,8 @@ public class EvenementServices implements ICrud<Evenement> {
     }
 
     public void modifier(Evenement e) throws SQLException {
+        boolean previousAutoCommit = con.getAutoCommit();
+        String previousStatus = null;
         String sql = "UPDATE evenements SET " +
                 "titre_evenement = ?, " +
                 "description_evenement = ?, " +
@@ -144,17 +147,21 @@ public class EvenementServices implements ICrud<Evenement> {
         ps.setInt(1, id);
         ResultSet rs = ps.executeQuery();
 
-        ps.setString(1, e.getTitre());
-        ps.setString(2, e.getDescription());
-        ps.setTimestamp(3, new Timestamp(e.getDateDebut().getTime()));
-        ps.setTimestamp(4, new Timestamp(e.getDateFin().getTime()));
-        ps.setString(5, e.getLieu());
-        ps.setString(6, e.getVille());
-        ps.setInt(7, e.getPlacesMax());
-        ps.setString(8, e.getStatut());
-        ps.setInt(9, e.getId());
+        if (rs.next()) {
+            Evenement ev = new Evenement();
+            ev.setId(rs.getInt("id_evenement"));
+            ev.setTitre(rs.getString("titre_evenement"));
+            ev.setDescription(rs.getString("description_evenement"));
+            ev.setDateDebut(SqlDateReaders.readTimestampOrNull(rs, "date_debut_evenement"));
+            ev.setDateFin(SqlDateReaders.readTimestampOrNull(rs, "date_fin_evenement"));
+            ev.setLieu(rs.getString("lieu_evenement"));
+            ev.setVille(rs.getString("ville_evenement"));
+            ev.setPlacesMax(rs.getInt("places_max_evenement"));
+            ev.setStatut(rs.getString("statut_evenement"));
+            ev.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_evenement"));
+            ev.setCreatedBy(rs.getInt("created_by_evenement"));
 
-            return e;
+            return ev;
         }
 
         return null;
@@ -183,31 +190,5 @@ public class EvenementServices implements ICrud<Evenement> {
                 .toLowerCase()
                 .trim();
         return normalized.contains("annul") || normalized.contains("cancel") || normalized.contains("close");
-    }
-
-    public Evenement afficherById(int id) throws SQLException {
-        String sql = "SELECT * FROM evenements WHERE id_evenement = ?";
-        PreparedStatement ps = con.prepareStatement(sql);
-        ps.setInt(1, id);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            Evenement e = new Evenement();
-            e.setId(rs.getInt("id_evenement"));
-            e.setTitre(rs.getString("titre_evenement"));
-            e.setDescription(rs.getString("description_evenement"));
-            e.setDateDebut(SqlDateReaders.readTimestampOrNull(rs, "date_debut_evenement"));
-            e.setDateFin(SqlDateReaders.readTimestampOrNull(rs, "date_fin_evenement"));
-            e.setLieu(rs.getString("lieu_evenement"));
-            e.setVille(rs.getString("ville_evenement"));
-            e.setPlacesMax(rs.getInt("places_max_evenement"));
-            e.setStatut(rs.getString("statut_evenement"));
-            e.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_evenement"));
-            e.setCreatedBy(rs.getInt("created_by_evenement"));
-
-            return e;
-        }
-
-        return null;
     }
 }
