@@ -1,13 +1,14 @@
 package org.example.controllers;
 
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
-import javafx.scene.chart.BarChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -16,6 +17,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Tooltip;
 import javafx.util.Duration;
 import org.example.entities.FicheSanteRow;
 import org.example.entities.ObjectifRow;
@@ -31,10 +33,10 @@ import org.example.model.planning.task.WeeklyTaskSummary;
 import org.example.planning.form.FicheSanteFormMode;
 import org.example.planning.form.FicheSanteFormView;
 import org.example.planning.widgets.ProgrammeJsonLayout;
-import org.example.services.CurrentSession;
 import org.example.services.PlanningAiAdviceMapper;
 import org.example.services.PlanningAiAdviceService;
 import org.example.services.PlanningClientService;
+import org.example.services.PlanningStatsService;
 
 import java.sql.SQLException;
 import java.text.NumberFormat;
@@ -81,7 +83,7 @@ public final class PlanningClientDashboardController {
     @FXML
     private VBox chartSection;
     @FXML
-    private BarChart<String, Number> weekProgressChart;
+    private LineChart<String, Number> weekProgressChart;
     @FXML
     private TextArea conseilsArea;
     @FXML
@@ -98,6 +100,14 @@ public final class PlanningClientDashboardController {
     private Label lblDashProgressPct;
     @FXML
     private Label lblDashProgressDetail;
+    @FXML
+    private HBox weekKpiRow;
+    @FXML
+    private Label lblWeekDeltaBadge;
+    @FXML
+    private Label lblWeekDoneBadge;
+    @FXML
+    private Label lblWeekTrendBadge;
     @FXML
     private VBox progressDashBlock;
     @FXML
@@ -124,6 +134,7 @@ public final class PlanningClientDashboardController {
     private PlanningClientDashboardData dashboardData;
     private int aiVariant;
     private final PlanningAiAdviceService planningAiAdviceService = new PlanningAiAdviceService();
+    private final PlanningStatsService planningStatsService = new PlanningStatsService();
     private boolean ficheOverlayHandlersWired;
 
     private static final String[] AI_MOTTOS = {
@@ -265,7 +276,7 @@ public final class PlanningClientDashboardController {
         ProgrammeGenere programme = PlanningAiAdviceMapper.fromProgramme(dashboardData.programme());
         WeeklyProgress progress = PlanningAiAdviceMapper.fromObjectif(dashboardData.objectifSemaine());
         String text = planningAiAdviceService.generateAdvice(fiche, programme, progress, aiVariant);
-        chatbotArea.setText(text);
+        chatbotArea.setText(formatStructuredAi(text));
     }
 
     private void copyAiAdviceToClipboard() {
@@ -379,27 +390,146 @@ public final class PlanningClientDashboardController {
         } else {
             detail = "Semaine courante · suivi des tâches";
         }
-        lblDashProgressDetail.setText(detail);
+        double deltaWeek = 0;
+        PlanningStatsService.WeekStats currentWeek = null;
+        PlanningStatsService.WeekStats previousWeek = null;
+        try {
+            currentWeek = planningStatsService.getCurrentWeekStats(userId);
+            previousWeek = planningStatsService.getPreviousWeekStats(userId);
+            deltaWeek = currentWeek.weekCompletionPct() - previousWeek.weekCompletionPct();
+        } catch (SQLException ignored) {
+            // garde le détail standard si stats indisponibles
+        }
+        refreshWeekKpiBadges(currentWeek, previousWeek, deltaWeek);
+        String deltaText = String.format(Locale.FRANCE, " — %+.0f%% vs semaine dernière", deltaWeek);
+        lblDashProgressDetail.setText(detail + deltaText);
         applyProgressHeroPctStyle(taux);
 
         double p = Math.min(1, Math.max(0, taux / 100.0));
         progressWeek.setProgress(p);
         applyProgressBarStyle(taux);
-        lblEncouragement.setText(encouragementForWeek(obj, taux));
+        // Le message motivationnel en bas de la carte progression est masqué
+        // pour garder une lecture plus professionnelle et compacte.
+        if (lblEncouragement != null) {
+            lblEncouragement.setText("");
+            lblEncouragement.setVisible(false);
+            lblEncouragement.setManaged(false);
+        }
 
         if (weekProgressChart != null) {
             weekProgressChart.getData().clear();
-            XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName("Semaine");
-            if (hasTasks) {
-                series.getData().add(new XYChart.Data<>("Réalisées", (double) fait));
-                series.getData().add(new XYChart.Data<>("Restant", (double) Math.max(0, total - fait)));
-            } else {
-                series.getData().add(new XYChart.Data<>("Réalisées", (double) fait));
-                series.getData().add(new XYChart.Data<>("Prévues", (double) Math.max(0, total)));
-            }
-            weekProgressChart.getData().add(series);
+            weekProgressChart.setLegendVisible(true);
+            weekProgressChart.setAnimated(true);
+            renderWeeklyComparisonChart(currentWeek, previousWeek);
         }
+    }
+
+    private void renderWeeklyComparisonChart(PlanningStatsService.WeekStats currentWeek,
+                                             PlanningStatsService.WeekStats previousWeek) {
+        if (weekProgressChart == null) {
+            return;
+        }
+        try {
+            PlanningStatsService.WeekStats current = currentWeek != null
+                    ? currentWeek
+                    : planningStatsService.getCurrentWeekStats(userId);
+            PlanningStatsService.WeekStats previous = previousWeek != null
+                    ? previousWeek
+                    : planningStatsService.getPreviousWeekStats(userId);
+
+            XYChart.Series<String, Number> currentSeries = new XYChart.Series<>();
+            currentSeries.setName("Semaine actuelle");
+            for (PlanningStatsService.DayPoint p : current.points()) {
+                currentSeries.getData().add(new XYChart.Data<>(p.dayLabel(), p.scorePct()));
+            }
+
+            XYChart.Series<String, Number> previousSeries = new XYChart.Series<>();
+            previousSeries.setName("Semaine précédente");
+            for (PlanningStatsService.DayPoint p : previous.points()) {
+                previousSeries.getData().add(new XYChart.Data<>(p.dayLabel(), p.scorePct()));
+            }
+
+            weekProgressChart.getData().clear();
+            weekProgressChart.getData().add(currentSeries);
+            weekProgressChart.getData().add(previousSeries);
+            Platform.runLater(() -> {
+                installSeriesTooltips(currentSeries);
+                installSeriesTooltips(previousSeries);
+            });
+        } catch (SQLException ex) {
+            // fallback silencieux: graphique vide plutôt qu'exception UI
+        }
+    }
+
+    private void refreshWeekKpiBadges(PlanningStatsService.WeekStats currentWeek,
+                                      PlanningStatsService.WeekStats previousWeek,
+                                      double deltaWeek) {
+        if (lblWeekDeltaBadge == null || lblWeekDoneBadge == null || lblWeekTrendBadge == null) {
+            return;
+        }
+        if (weekKpiRow != null) {
+            weekKpiRow.setManaged(true);
+            weekKpiRow.setVisible(true);
+        }
+        String sign = deltaWeek > 0 ? "+" : "";
+        lblWeekDeltaBadge.setText("Écart semaine: " + sign + String.format(Locale.FRANCE, "%.0f%%", deltaWeek));
+
+        int done = currentWeek != null ? currentWeek.doneTasks() : 0;
+        int total = currentWeek != null ? currentWeek.totalTasks() : 0;
+        lblWeekDoneBadge.setText("Tâches faites: " + done + "/" + total);
+
+        String trend;
+        if (deltaWeek >= 8) {
+            trend = "Tendance forte";
+        } else if (deltaWeek >= 2) {
+            trend = "Tendance positive";
+        } else if (deltaWeek <= -8) {
+            trend = "Tendance en baisse";
+        } else {
+            trend = "Tendance stable";
+        }
+        if (previousWeek != null && previousWeek.totalTasks() == 0 && currentWeek != null && currentWeek.totalTasks() > 0) {
+            trend = "Nouvelle dynamique";
+        }
+        lblWeekTrendBadge.setText(trend);
+
+        applyKpiTrendStyle(lblWeekDeltaBadge, deltaWeek > 0 ? "positive" : (deltaWeek < 0 ? "negative" : "neutral"));
+        applyKpiTrendStyle(lblWeekTrendBadge, deltaWeek > 1 ? "positive" : (deltaWeek < -1 ? "negative" : "neutral"));
+    }
+
+    private static void applyKpiTrendStyle(Label label, String mode) {
+        if (label == null) {
+            return;
+        }
+        label.getStyleClass().removeIf(c -> c.startsWith("pcd-week-kpi-chip--"));
+        label.getStyleClass().add("pcd-week-kpi-chip--" + mode);
+    }
+
+    private static void installSeriesTooltips(XYChart.Series<String, Number> series) {
+        if (series == null) {
+            return;
+        }
+        for (XYChart.Data<String, Number> d : series.getData()) {
+            if (d.getNode() == null) {
+                continue;
+            }
+            String value = String.format(Locale.FRANCE, "%.0f%%", d.getYValue().doubleValue());
+            Tooltip.install(d.getNode(), new Tooltip(series.getName() + " · " + d.getXValue() + " : " + value));
+        }
+    }
+
+    private static String formatStructuredAi(String raw) {
+        String text = raw != null ? raw.trim() : "";
+        if (text.isBlank()) {
+            return "Analyse :\n—\n\nRecommandation :\n—\n\nConseil :\n—";
+        }
+        String[] lines = text.split("\\R+");
+        String analyse = lines.length > 0 ? lines[0].trim() : "—";
+        String recommandation = lines.length > 1 ? lines[1].trim() : text;
+        String conseil = lines.length > 2 ? lines[2].trim() : "Restez régulier dans vos habitudes sur la semaine.";
+        return "Analyse :\n" + analyse
+                + "\n\nRecommandation :\n" + recommandation
+                + "\n\nConseil :\n" + conseil;
     }
 
     private void applyProgressBarStyle(double taux) {
@@ -431,28 +561,6 @@ public final class PlanningClientDashboardController {
         } else {
             lblDashProgressPct.getStyleClass().add("pcd-progress-hero-pct--bad");
         }
-    }
-
-    private String encouragementForWeek(Optional<ObjectifRow> obj, double taux) {
-        if (obj.isPresent()) {
-            ObjectifRow o = obj.get();
-            if (o.messageEncadrant() != null && !o.messageEncadrant().isBlank()) {
-                return o.messageEncadrant();
-            }
-            if (o.messageIa() != null && !o.messageIa().isBlank()) {
-                return o.messageIa();
-            }
-        }
-        if (taux >= 80) {
-            return "Excellent rythme : votre semaine est très bien maîtrisée. Continuez sur cette lancée.";
-        }
-        if (taux >= 45) {
-            return "Bon équilibre : quelques tâches supplémentaires suffisent pour une semaine très solide.";
-        }
-        if (taux >= 15) {
-            return "Vous avancez : privilégiez la régularité — un petit créneau chaque jour bat une grosse séance unique.";
-        }
-        return "Objectif doux : commencez par une seule tâche « FAIT » aujourd’hui pour relancer la dynamique.";
     }
 
     private void fillTasks(List<TacheQuotidienne> taches) {

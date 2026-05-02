@@ -28,6 +28,14 @@ public final class SessionContext {
     /** Client ciblé à l’ouverture de la messagerie (ex. depuis Planning encadrant), ou -1. */
     private int pendingDiscussionClientUserId = -1;
 
+    /**
+     * Identifiant de la conversation actuellement ouverte dans la page Discussion (ou -1
+     * si aucune conversation n'est affichée). Maintenu par le {@code DiscussionPageController}
+     * et lu par le {@code ToastNotificationService} pour ne PAS afficher de toast
+     * quand l'utilisateur est déjà en train de regarder cette conversation.
+     */
+    private volatile int activeDiscussionConversationId = -1;
+
     private SessionContext() {
     }
 
@@ -112,7 +120,20 @@ public final class SessionContext {
         this.pendingDiscussionClientUserId = -1;
     }
 
+    public void setActiveDiscussionConversationId(int conversationId) {
+        this.activeDiscussionConversationId = conversationId > 0 ? conversationId : -1;
+    }
+
+    public int getActiveDiscussionConversationId() {
+        return activeDiscussionConversationId;
+    }
+
     public void logout() {
+        try {
+            org.example.realtime.RealtimeService.getInstance().stop();
+        } catch (Exception rtErr) {
+            System.err.println("[Realtime] stop failed : " + rtErr.getMessage());
+        }
         this.currentUser = null;
         pushDisplayName("Guest");
         this.role = UserRole.CLIENT;
@@ -120,6 +141,7 @@ public final class SessionContext {
         this.legacyEmail = "";
         this.openDiscussionFromPlanningAction = null;
         this.pendingDiscussionClientUserId = -1;
+        this.activeDiscussionConversationId = -1;
     }
 
     public User getCurrentUser() {

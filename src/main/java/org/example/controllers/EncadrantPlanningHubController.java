@@ -72,6 +72,16 @@ public final class EncadrantPlanningHubController {
         loadGrid();
     }
 
+    /**
+     * Rafraîchissement public — déclenché par le bus temps réel
+     * ({@code RealtimePlanningSyncService}) quand un évènement planning d'un client
+     * arrive (intervention, objectif IA, tâche cochée). Recharge la grille sans
+     * réinitialiser la recherche/tri courants.
+     */
+    public void refresh() {
+        loadGrid();
+    }
+
     private void wireSearchAndSort() {
         sortCombo.setItems(FXCollections.observableArrayList(EncadrantHubSort.values()));
         sortCombo.getSelectionModel().selectFirst();
@@ -166,7 +176,9 @@ public final class EncadrantPlanningHubController {
                 || contains(r.email(), q)
                 || contains(r.objectif(), q)
                 || contains(r.niveauActivite(), q)
-                || contains(r.statusBadge(), q);
+                || contains(r.statusBadge(), q)
+                || contains(r.objectifLibreExcerpt(), q)
+                || contains(r.reponseIaLibreExcerpt(), q);
     }
 
     private static boolean contains(String field, String q) {
@@ -265,6 +277,24 @@ public final class EncadrantPlanningHubController {
         act.getStyleClass().add("eph-card-line");
         act.setWrapText(true);
 
+        VBox objLibreBox = new VBox(6);
+        if (row.objectifLibreExcerpt() != null && !row.objectifLibreExcerpt().isBlank()) {
+            Label h = new Label("Objectif libre (Planning)");
+            h.getStyleClass().add("eph-card-kicker");
+            Label t = new Label(dash(row.objectifLibreExcerpt()));
+            t.getStyleClass().add("eph-card-line");
+            t.setWrapText(true);
+            objLibreBox.getChildren().addAll(h, t);
+        }
+        if (row.reponseIaLibreExcerpt() != null && !row.reponseIaLibreExcerpt().isBlank()) {
+            Label h2 = new Label("Réponse IA (extrait)");
+            h2.getStyleClass().add("eph-card-kicker");
+            Label r = new Label(dash(row.reponseIaLibreExcerpt()));
+            r.getStyleClass().add("eph-card-line");
+            r.setWrapText(true);
+            objLibreBox.getChildren().addAll(h2, r);
+        }
+
         ProgressBar bar = new ProgressBar();
         bar.setMaxWidth(Double.MAX_VALUE);
         bar.getStyleClass().add("eph-card-progress");
@@ -311,7 +341,11 @@ public final class EncadrantPlanningHubController {
         chev.getStyleClass().add("eph-card-chevron");
         foot.getChildren().addAll(grow, chev);
 
-        card.getChildren().addAll(head, badge, obj, act, pct, bar, discussBtn, foot);
+        card.getChildren().addAll(head, badge, obj, act);
+        if (!objLibreBox.getChildren().isEmpty()) {
+            card.getChildren().add(objLibreBox);
+        }
+        card.getChildren().addAll(pct, bar, discussBtn, foot);
         return card;
     }
 

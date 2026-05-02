@@ -10,7 +10,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<StackPane fx:id="planningPageStack" styleClass="planning-page-stack" stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-module.css,@../../css/planning-client-zen.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.PlanningPageController">
+<StackPane fx:id="planningPageStack" styleClass="planning-page-stack" stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-module.css,@../../css/planning-client-zen.css,@../../css/planning-objectif.css,@../../css/planning-calendar.css,@../../css/planning-notifications.css,@../../css/realtime-status.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.PlanningPageController">
     <ScrollPane fx:id="planningPageScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll">
         <VBox fx:id="planningRoot" spacing="0" styleClass="planning-page-root">
             <VBox fx:id="planningMainShell" styleClass="planning-main-shell" spacing="20" maxWidth="Infinity">
@@ -21,13 +21,19 @@
                             <Label fx:id="roleBadge" styleClass="planning-role-badge" text="" />
                         </HBox>
                         <Label fx:id="heroSub" styleClass="planning-hero-sub" text="Chargement…" wrapText="true" />
-                        <Label styleClass="planning-hero-meta" text="Fiche santé · Programme · Tâches · IA · Discussion" wrapText="true" />
+                        <Label styleClass="planning-hero-meta" text="Fiche santé · Programme · Tâches · IA · Discussion · Objectif boutique" wrapText="true" />
                     </VBox>
+                    <StackPane fx:id="realtimeStatusSlot" />
+                    <StackPane fx:id="notificationBellSlot" />
                     <StackPane styleClass="planning-user-avatar-wrap">
                         <Circle radius="23" styleClass="planning-user-avatar-ring" />
                         <Circle radius="20" styleClass="planning-user-avatar-fill" />
                         <Label fx:id="avatarInitials" styleClass="planning-user-avatar-text" text="?" />
                     </StackPane>
+                </HBox>
+                <HBox fx:id="planningClientToolbar" alignment="CENTER_LEFT" spacing="12" styleClass="planning-client-toolbar" managed="false" visible="false">
+                    <Button fx:id="btnObjectifAssistant" mnemonicParsing="false" onAction="#handleOpenObjectifAssistant" text="Objectif / Assistant IA" styleClass="planning-obj-launch-btn" />
+                    <Button fx:id="btnTaskCalendar" mnemonicParsing="false" onAction="#handleOpenTaskCalendar" text="Calendrier des tâches" styleClass="planning-cal-launch-btn" />
                 </HBox>
                 <VBox fx:id="dynamicContainer" spacing="18" styleClass="planning-dynamic" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
             </VBox>

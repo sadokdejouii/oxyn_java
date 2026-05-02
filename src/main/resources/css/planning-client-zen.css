@@ -6,6 +6,12 @@
  *           + pcd-client-zen-* sur le dashboard.
  */
 
+/* Typographie cohérente (lisibilité maximale sur fond clair) */
+.planning-main-shell--client-zen,
+.pcd-client-zen-root {
+    -fx-font-family: "Segoe UI", "Segoe UI Variable", system-ui, sans-serif;
+}
+
 /* ── Fond page = même teinte que l’accueil client (.cl-root #f4f6f9) ── */
 .planning-page-stack.planning-page-stack--client-zen {
     -fx-background-color: #f4f6f9;
@@ -68,14 +74,14 @@
 }
 
 .planning-page-root--client-zen .planning-hero-sub {
-    -fx-font-size: 14px;
-    -fx-text-fill: #334155;
-    -fx-line-spacing: 2px;
+    -fx-font-size: 15px;
+    -fx-text-fill: #1e293b;
+    -fx-line-spacing: 3px;
 }
 
 .planning-page-root--client-zen .planning-hero-meta {
     -fx-font-size: 12px;
-    -fx-text-fill: #475569;
+    -fx-text-fill: #334155;
     -fx-font-weight: normal;
 }
 
@@ -131,23 +137,60 @@
 }
 
 .pcd-zen-hero-overline {
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-text-fill: #0369a1;
-    -fx-letter-spacing: 0.12em;
+    -fx-text-fill: #075985;
+    -fx-letter-spacing: 0.14em;
 }
 
 .pcd-zen-hero-title {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: #0a1628;
+    -fx-text-fill: #020617;
 }
 
 .pcd-zen-hero-lead {
     -fx-font-size: 14px;
-    -fx-text-fill: #1e293b;
-    -fx-line-spacing: 3px;
+    -fx-text-fill: #64748b;
+    -fx-line-spacing: 4px;
     -fx-max-width: 760px;
+}
+
+/* Contraste renforcé du bloc "Votre planning personnalisé" */
+.pcd-client-zen-root .pcd-zen-hero .label,
+.pcd-client-zen-flow .pcd-zen-hero .label {
+    -fx-text-fill: #0f172a;
+}
+
+.pcd-client-zen-root .pcd-zen-hero .pcd-zen-hero-overline,
+.pcd-client-zen-flow .pcd-zen-hero .pcd-zen-hero-overline {
+    -fx-text-fill: #0b4f75;
+}
+
+/* Sécurité : si une tuile KPI perd sa classe couleur, on garde un fond sombre lisible */
+.pcd-client-zen-flow .saas-stat-card:not(.saas-stat--blue):not(.saas-stat--green):not(.saas-stat--orange):not(.saas-stat--purple) {
+    -fx-background-color: #1e3a8a;
+}
+
+/* Force les fonds colorés KPI pour éviter tout rendu blanc/blanc */
+.pcd-client-zen-root .saas-stat--blue,
+.pcd-client-zen-flow .saas-stat--blue {
+    -fx-background-color: linear-gradient(to bottom, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.pcd-client-zen-root .saas-stat--green,
+.pcd-client-zen-flow .saas-stat--green {
+    -fx-background-color: linear-gradient(to bottom, #10b981 0%, #0f766e 100%);
+}
+
+.pcd-client-zen-root .saas-stat--orange,
+.pcd-client-zen-flow .saas-stat--orange {
+    -fx-background-color: linear-gradient(to bottom, #fb923c 0%, #ea580c 100%);
+}
+
+.pcd-client-zen-root .saas-stat--purple,
+.pcd-client-zen-flow .saas-stat--purple {
+    -fx-background-color: linear-gradient(to bottom, #8b5cf6 0%, #6d28d9 100%);
 }
 
 .pcd-client-zen-flow .pcd-main-grid {
@@ -155,38 +198,60 @@
     -fx-vgap: 20;
 }
 
-/* KPI : ombre légère sur couleurs saturées (texte déjà blanc sur les tuiles) */
+/* KPI : tuiles colorées — texte blanc pleinement lisible (pas de gris « lavé ») */
 .pcd-client-zen-flow .saas-stat-card {
     -fx-background-radius: 18px;
-    -fx-padding: 16px 18px;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0.2, 0, 4);
-    -fx-min-height: 104px;
+    -fx-padding: 18px 20px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.12), 20, 0.22, 0, 5);
+    -fx-min-height: 108px;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+}
+
+.pcd-client-zen-flow .saas-stat-k {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255, 255, 255, 0.98);
 }
 
 .pcd-client-zen-flow .saas-stat-v {
-    -fx-font-size: 22px;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
 }
 
-/* Sections : blanc pur, filet bleu clair (type front-events) */
+.pcd-client-zen-flow .saas-stat-v--multiline {
+    -fx-font-size: 15px;
+    -fx-line-spacing: 3px;
+}
+
+.pcd-client-zen-flow .saas-stat-sub {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255, 255, 255, 0.95);
+}
+
+/* Sections : blanc pur, contour net (cartes « premium ») */
 .pcd-client-zen-flow .saas-card {
     -fx-background-color: #ffffff;
     -fx-background-radius: 18px;
-    -fx-padding: 20px 22px;
-    -fx-border-color: rgba(102, 195, 255, 0.28);
+    -fx-padding: 20px;
+    -fx-border-color: rgba(30, 41, 59, 0.1);
     -fx-border-radius: 18px;
     -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, rgba(101, 181, 255, 0.08), 20, 0.2, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 24, 0.2, 0, 6);
 }
 
 .pcd-client-zen-flow .saas-card-title {
-    -fx-font-size: 16px;
+    -fx-font-size: 17px;
     -fx-font-weight: bold;
-    -fx-text-fill: #0a1628;
+    -fx-text-fill: #020617;
 }
 
 .pcd-client-zen-flow .saas-card-sub {
-    -fx-font-size: 13px;
-    -fx-text-fill: #475569;
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b;
 }
 
 .pcd-client-zen-flow .saas-card-title-icon {
@@ -214,8 +279,97 @@
 }
 
 .pcd-client-zen-flow .pcd-week-chart .axis {
-    -fx-tick-label-fill: #334155;
-    -fx-font-size: 11px;
+    -fx-tick-label-fill: #1e293b;
+    -fx-font-size: 12px;
+}
+
+.pcd-client-zen-flow .pcd-week-chart .chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 2 0 0 0;
+}
+
+.pcd-client-zen-flow .pcd-week-kpi-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 10;
+}
+
+.pcd-client-zen-flow .pcd-week-kpi-chip {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #334155;
+    -fx-background-color: #f8fafc;
+    -fx-padding: 7px 12px;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-color: rgba(148, 163, 184, 0.35);
+    -fx-border-width: 1px;
+}
+
+.pcd-client-zen-flow .pcd-week-kpi-chip--positive {
+    -fx-text-fill: #065f46;
+    -fx-background-color: rgba(16, 185, 129, 0.15);
+    -fx-border-color: rgba(16, 185, 129, 0.35);
+}
+
+.pcd-client-zen-flow .pcd-week-kpi-chip--negative {
+    -fx-text-fill: #991b1b;
+    -fx-background-color: rgba(239, 68, 68, 0.14);
+    -fx-border-color: rgba(239, 68, 68, 0.34);
+}
+
+.pcd-client-zen-flow .pcd-week-kpi-chip--neutral {
+    -fx-text-fill: #334155;
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: rgba(148, 163, 184, 0.34);
+}
+
+.pcd-client-zen-flow .pcd-week-chart .default-color0.chart-series-line {
+    -fx-stroke: #2563eb;
+    -fx-stroke-width: 2.4px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
+.pcd-client-zen-flow .pcd-week-chart .default-color1.chart-series-line {
+    -fx-stroke: #94a3b8;
+    -fx-stroke-width: 2.2px;
+    -fx-stroke-dash-array: 8 6;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
+.pcd-client-zen-flow .pcd-week-chart .default-color0.chart-line-symbol {
+    -fx-background-color: #2563eb, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px;
+}
+
+.pcd-client-zen-flow .pcd-week-chart .default-color1.chart-line-symbol {
+    -fx-background-color: #94a3b8, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px;
+}
+
+/* Ligne de pourcentage + barre sur une même rangée (dashboard) */
+.pcd-progress-hero-row {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 18;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-row .progress-bar.w-progress-track {
+    -fx-pref-height: 14px;
+    -fx-min-height: 14px;
+}
+
+.pcd-client-zen-flow .pcd-progress-hero-row .pcd-progress-hero-pct {
+    -fx-font-size: 30px;
+    -fx-min-width: 88px;
+}
+
+.pcd-client-zen-flow .progress-bar.w-progress-track > .track {
+    -fx-background-color: #cbd5e1;
 }
 
 .pcd-client-zen-flow .pcd-progress-hero-pct {
@@ -239,14 +393,16 @@
 }
 
 .pcd-client-zen-flow .pcd-progress-hero-detail {
-    -fx-font-size: 13px;
-    -fx-text-fill: #475569;
+    -fx-font-size: 14px;
+    -fx-text-fill: #334155;
+    -fx-font-weight: bold;
 }
 
 .pcd-client-zen-flow .pcd-progress-hero-quote {
-    -fx-font-size: 13px;
-    -fx-text-fill: #0f766e;
+    -fx-font-size: 14px;
+    -fx-text-fill: #0d9488;
     -fx-font-style: italic;
+    -fx-line-spacing: 2px;
 }
 
 /* Message « pas encore d’objectif » : lisible sans orange agressif */
@@ -293,14 +449,14 @@
 }
 
 .pcd-client-zen-flow .w-kv-tile__label {
-    -fx-text-fill: #475569;
+    -fx-text-fill: #334155;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
 }
 
 .pcd-client-zen-flow .w-kv-tile__value {
-    -fx-text-fill: #0a1628;
-    -fx-font-size: 14px;
+    -fx-text-fill: #020617;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
 }
 
@@ -311,11 +467,12 @@
     -fx-background-color: #ffffff;
     -fx-background-radius: 14px;
     -fx-border-radius: 14px;
-    -fx-border-color: rgba(125, 211, 252, 0.55);
+    -fx-border-color: rgba(56, 189, 248, 0.45);
     -fx-border-width: 1px;
     -fx-text-fill: #0f172a;
-    -fx-font-size: 13px;
-    -fx-padding: 12;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 2px;
+    -fx-padding: 14;
 }
 
 .pcd-client-zen-flow .w-ai-text .content,
@@ -324,13 +481,38 @@
 }
 
 .pcd-client-zen-flow .w-ai-disclaimer {
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #475569;
     -fx-font-size: 12px;
+    -fx-font-weight: bold;
 }
 
 .pcd-client-zen-flow .pcd-ai-motto-inline {
-    -fx-text-fill: #0369a1;
-    -fx-font-size: 13px;
+    -fx-text-fill: #0c4a6e;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* Pastille « Assistant » + boutons secondaires : contraste renforcé */
+.pcd-client-zen-flow .w-ai-pill {
+    -fx-font-size: 12px;
+    -fx-text-fill: #0c4a6e;
+    -fx-background-color: rgba(14, 165, 233, 0.16);
+    -fx-border-color: rgba(14, 165, 233, 0.4);
+}
+
+.pcd-client-zen-flow .w-btn-ghost {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1e40af;
+    -fx-font-weight: bold;
+    -fx-border-color: rgba(30, 64, 175, 0.28);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.pcd-client-zen-flow .w-btn-ghost:hover {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #1d4ed8;
+    -fx-border-color: rgba(29, 78, 216, 0.35);
 }
 
 /* Tâches */
@@ -339,12 +521,23 @@
     -fx-border-color: rgba(102, 195, 255, 0.22);
 }
 
-.pcd-client-zen-flow .pcd-task-when {
-    -fx-text-fill: #0369a1;
-}
-
 .pcd-client-zen-flow .pcd-task-desc {
     -fx-text-fill: #1e293b;
+}
+
+.pcd-client-zen-flow .w-task-desc {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 14px;
+}
+
+.pcd-client-zen-flow .w-task-hint {
+    -fx-text-fill: #475569;
+    -fx-font-size: 12px;
+}
+
+.pcd-client-zen-flow .w-task-when {
+    -fx-text-fill: #0369a1;
+    -fx-font-size: 13px;
 }
 
 /* Boutons */
@@ -357,24 +550,24 @@
     -fx-font-weight: bold;
 }
 
-.pcd-client-zen-flow .w-btn-ghost {
-    -fx-background-color: #ffffff;
-    -fx-text-fill: #0369a1;
-    -fx-border-color: rgba(56, 189, 248, 0.45);
-}
-
-.pcd-client-zen-flow .w-btn-ghost:hover {
-    -fx-background-color: #f0f9ff;
-}
-
 /* Bandeau kcal programme */
 .pcd-client-zen-flow .pcd-programme-kcal-hero {
     -fx-background-color: linear-gradient(to right, #f0f9ff 0%, #ecfeff 100%);
     -fx-border-color: rgba(56, 189, 248, 0.25);
 }
 
+.pcd-client-zen-flow .pcd-programme-kcal-hero__eyebrow {
+    -fx-text-fill: #334155;
+    -fx-font-size: 12px;
+}
+
 .pcd-client-zen-flow .pcd-programme-kcal-hero__value {
     -fx-text-fill: #0369a1;
+}
+
+.pcd-client-zen-flow .pcd-programme-kcal-hero__hint {
+    -fx-text-fill: #334155;
+    -fx-font-size: 13px;
 }
 
 /* Modal fiche */

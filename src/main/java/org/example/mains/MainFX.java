@@ -24,6 +24,14 @@ public class MainFX extends Application {
         primaryStage.show();
     }
 
+    @Override
+    public void stop() {
+        try {
+            org.example.realtime.RealtimeService.getInstance().stop();
+        } catch (Exception ignored) {
+        }
+    }
+
     public static void main(String[] args) {
         launch(args);
     }

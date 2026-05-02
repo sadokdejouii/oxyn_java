@@ -185,6 +185,11 @@ public class LoginController implements Initializable {
                 return;
             }
             SessionContext.getInstance().login(user);
+            try {
+                org.example.realtime.RealtimeService.getInstance().startForUser(user.getId());
+            } catch (Exception rtErr) {
+                System.err.println("[Realtime] start failed : " + rtErr.getMessage());
+            }
             // Précharge le panier persistant du client connecté.
             PanierSession.getInstance().getLignes();
             try {

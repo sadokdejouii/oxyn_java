@@ -1,0 +1,159 @@
+/* Vue Objectif / Assistant IA — module Planning client */
+
+.planning-client-toolbar {
+    -fx-padding: 2 0 12 0;
+}
+
+.planning-obj-launch-btn {
+    -fx-padding: 11px 20px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-background-color: linear-gradient(to bottom, #0ea5e9 0%, #0369a1 100%);
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(2, 132, 199, 0.35);
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(14, 116, 144, 0.20), 14, 0.28, 0, 3);
+    -fx-min-height: 40px;
+}
+
+.planning-obj-launch-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #38bdf8 0%, #075985 100%);
+    -fx-effect: dropshadow(gaussian, rgba(14, 116, 144, 0.26), 16, 0.30, 0, 4);
+}
+
+.planning-obj-launch-btn:pressed {
+    -fx-background-color: linear-gradient(to bottom, #0284c7 0%, #0c4a6e 100%);
+}
+
+.planning-objectif-root {
+    -fx-max-width: Infinity;
+    -fx-spacing: 20px;
+}
+
+.planning-obj-back {
+    -fx-background-color: transparent;
+    -fx-text-fill: #0369a1;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 4 0 8 0;
+}
+
+.planning-obj-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.planning-obj-lead {
+    -fx-font-size: 14px;
+    -fx-text-fill: #334155;
+    -fx-max-width: 920px;
+}
+
+.planning-obj-n8n-badge {
+    -fx-max-width: 900px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1d4ed8;
+    -fx-background-color: rgba(37, 99, 235, 0.1);
+    -fx-border-color: rgba(37, 99, 235, 0.28);
+    -fx-border-radius: 999px;
+    -fx-background-radius: 999px;
+    -fx-padding: 7px 12px;
+}
+
+.planning-obj-input {
+    -fx-control-inner-background: #ffffff;
+    -fx-font-size: 14px;
+}
+
+.planning-obj-card {
+    -fx-max-width: 900px;
+    -fx-padding: 20px;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+}
+
+.planning-obj-analyze {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.planning-obj-analysis-content {
+    -fx-font-size: 14px;
+    -fx-line-spacing: 3px;
+    -fx-text-fill: #0f172a;
+    -fx-padding: 16px 18px;
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(148, 163, 184, 0.35);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+.planning-obj-encadrant {
+    -fx-font-size: 13px;
+    -fx-text-fill: #0f766e;
+    -fx-padding: 10px 12px;
+    -fx-background-color: #ecfdf5;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(16, 185, 129, 0.35);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+.planning-obj-product-grid {
+    -fx-padding: 4 0 0 0;
+}
+
+.planning-obj-product-card {
+    -fx-padding: 12px;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(30, 41, 59, 0.1);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 16, 0.2, 0, 4);
+}
+
+.planning-obj-product-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.planning-obj-product-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+}
+
+.planning-obj-product-price {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0369a1;
+}
+
+.planning-obj-product-img {
+    -fx-background-radius: 10px;
+}
+
+.planning-obj-inline-error {
+    -fx-text-fill: #b91c1c;
+    -fx-font-size: 12px;
+    -fx-background-color: rgba(254, 226, 226, 0.8);
+    -fx-background-radius: 10px;
+    -fx-padding: 8px 10px;
+}
+
+.planning-obj-toast {
+    -fx-max-width: 900px;
+    -fx-text-fill: #065f46;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(209, 250, 229, 0.9);
+    -fx-border-color: rgba(16, 185, 129, 0.45);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 14px;
+}

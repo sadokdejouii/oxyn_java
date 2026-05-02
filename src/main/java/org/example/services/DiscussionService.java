@@ -319,6 +319,42 @@ public final class DiscussionService {
         return TYPE_MESSAGE.equals(type) || TYPE_CONSEIL.equals(type);
     }
 
+    /**
+     * Renvoie l'identifiant utilisateur de "l'autre participant" dans la
+     * conversation : si {@code currentUserId} est le client, renvoie l'encadrant ;
+     * si c'est l'encadrant, renvoie le client. Renvoie -1 si introuvable
+     * (pas d'encadrant assigné, conversation invalide, etc.).
+     */
+    public int findOtherParticipantUserId(int conversationId, int currentUserId) throws SQLException {
+        if (conversationId <= 0 || currentUserId <= 0) {
+            return -1;
+        }
+        Connection c = conn();
+        if (c == null) {
+            return -1;
+        }
+        String sql = "SELECT client_id, encadrant_id FROM conversations WHERE id = ?";
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, conversationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int clientId = rs.getInt("client_id");
+                    int encadrantId = rs.getInt("encadrant_id");
+                    if (rs.wasNull()) {
+                        encadrantId = -1;
+                    }
+                    if (currentUserId == clientId) {
+                        return encadrantId > 0 ? encadrantId : -1;
+                    }
+                    if (currentUserId == encadrantId) {
+                        return clientId > 0 ? clientId : -1;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
     private static boolean isEditableUserMessageType(String type) {
         return messageTypeAllowsUserEdit(type);
     }
