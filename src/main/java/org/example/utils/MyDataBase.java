@@ -10,7 +10,7 @@ import java.sql.SQLException;
 public final class MyDataBase {
 
     private static final String HOST = "localhost";
-    private static final String PORT = "3306";
+    private static final String PORT = "3307";
     private static final String DB_NAME = "oxyn";
 
     private static final String USERNAME = "root";
