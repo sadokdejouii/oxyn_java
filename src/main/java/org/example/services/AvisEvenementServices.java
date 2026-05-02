@@ -1,6 +1,7 @@
 package org.example.services;
 
 import org.example.entities.AvisEvenement;
+import org.example.entities.InscriptionEvenement;
 import org.example.utils.MyDataBase;
 import org.example.utils.SqlDateReaders;
 
@@ -11,19 +12,24 @@ import java.util.List;
 public class AvisEvenementServices implements ICrud<AvisEvenement> {
 
     Connection con;
+    private final InscriptionEvenementServices inscriptionEvenementServices;
 
     public AvisEvenementServices() {
         con = MyDataBase.getInstance().getConnection();
+        inscriptionEvenementServices = new InscriptionEvenementServices();
     }
 
     @Override
     public void ajouter(AvisEvenement a) throws SQLException {
+        validateUserRegisteredForEvent(a);
+        sanitizeAvisComment(a);
+
         String sql = "INSERT INTO avis_evenement (" +
                 "note_avis_evenement, " +
                 "commentaire_avis_evenement, " +
                 "created_at_avis_evenement, " +
-                "id_evenement_avis_evenement, " +
-                "id_user_avis_evenement) " +
+                "id_evenement_avis_evenement_id, " +
+                "id_user_avis_evenement_id) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         PreparedStatement ps = con.prepareStatement(sql);
@@ -61,8 +67,8 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
             a.setNote(rs.getInt("note_avis_evenement"));
             a.setCommentaire(rs.getString("commentaire_avis_evenement"));
             a.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_avis_evenement"));
-            a.setIdEvenement(rs.getInt("id_evenement_avis_evenement"));
-            a.setIdUser(rs.getInt("id_user_avis_evenement"));
+            a.setIdEvenement(rs.getInt("id_evenement_avis_evenement_id"));
+            a.setIdUser(rs.getInt("id_user_avis_evenement_id"));
 
             avisList.add(a);
         }
@@ -76,12 +82,15 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
     }
 
     public void modifier(AvisEvenement a) throws SQLException {
+        validateUserRegisteredForEvent(a);
+        sanitizeAvisComment(a);
+
         String sql = "UPDATE avis_evenement SET " +
                 "note_avis_evenement = ?, " +
                 "commentaire_avis_evenement = ?, " +
                 "created_at_avis_evenement = ?, " +
-                "id_evenement_avis_evenement = ?, " +
-                "id_user_avis_evenement = ? " +
+                "id_evenement_avis_evenement_id = ?, " +
+                "id_user_avis_evenement_id = ? " +
                 "WHERE id_note_avis_evenement = ?";
 
         PreparedStatement ps = con.prepareStatement(sql);
@@ -94,5 +103,36 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
         ps.executeUpdate();
 
         System.out.println("Avis modifié avec succès !");
+    }
+
+    private void sanitizeAvisComment(AvisEvenement avis) {
+        if (avis == null) {
+            throw new IllegalArgumentException("L'avis ne peut pas etre null.");
+        }
+
+        String normalizedComment = AvisAiModerationService.normalizeAcceptedComment(avis.getCommentaire());
+        AvisAiModerationService.validateCommentOrThrow(normalizedComment);
+        avis.setCommentaire(normalizedComment);
+    }
+
+    private void validateUserRegisteredForEvent(AvisEvenement avis) throws SQLException {
+        if (avis == null) {
+            throw new IllegalArgumentException("L'avis ne peut pas etre null.");
+        }
+
+        boolean hasRegistration = inscriptionEvenementServices.afficher().stream()
+                .anyMatch(inscription -> isMatchingRegistration(inscription, avis));
+
+        if (hasRegistration) {
+            return;
+        }
+
+        throw new SQLException("Vous devez être inscrit à cet événement avant de publier un avis.");
+    }
+
+    private boolean isMatchingRegistration(InscriptionEvenement inscription, AvisEvenement avis) {
+        return inscription != null
+                && inscription.getIdEvenement() == avis.getIdEvenement()
+                && inscription.getIdUser() == avis.getIdUser();
     }
 }

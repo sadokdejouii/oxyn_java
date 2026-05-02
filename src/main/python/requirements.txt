@@ -1,0 +1,5 @@
+transformers
+torch
+safetensors
+scikit-learn
+joblib

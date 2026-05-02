@@ -34,5 +34,13 @@ build/
 ### VS Code ###
 .vscode/
 
+### Local secrets ###
+client_secret_*.json
+google-oauth-client*.json
+google-calendar-tokens/
+secrets/
+.env.local
+.env
+
 ### Mac OS ###
 .DS_Store
