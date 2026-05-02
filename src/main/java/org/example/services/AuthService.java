@@ -6,6 +6,12 @@ import org.example.entities.Client;
 import org.example.entities.User;
 import org.example.utils.MyDataBase;
 import org.example.utils.PasswordUtils;
+import org.example.windowshello.WindowsHelloBridge;
+import org.example.windowshello.WindowsHelloLinkDAO;
+import org.example.windowshello.WindowsHelloResult;
+import org.example.facerec.FaceEmbeddingCodec;
+import org.example.facerec.FaceEmbeddingDAO;
+import org.example.facerec.FaceSimilarity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,9 +25,71 @@ import java.util.Optional;
 public final class AuthService {
 
     private final UserDAO userDAO = new UserDAO();
+    private final WindowsHelloLinkDAO windowsHelloLinkDAO = new WindowsHelloLinkDAO();
+    private final FaceEmbeddingDAO faceEmbeddingDAO = new FaceEmbeddingDAO();
 
     public User login(String email, String password) throws SQLException {
         return userDAO.login(email, password);
+    }
+
+    /**
+     * Connexion via Windows Hello (empreinte/PIN Windows) : pas de mot de passe applicatif.
+     * Pré-requis : l'utilisateur a activé Windows Hello depuis son profil, ce qui enregistre son SID Windows.
+     *
+     * @return utilisateur connecté si Hello est vérifié + SID correspond ; sinon {@code null}
+     */
+    public User loginWithWindowsHello(String email) throws SQLException {
+        WindowsHelloResult r = WindowsHelloBridge.verify("Connexion à OXYN");
+        if (r == null || !r.ok() || r.sid() == null || r.sid().isBlank()) {
+            return null;
+        }
+        return windowsHelloLinkDAO
+                .findUserEligibleForHelloLogin(email, r.sid())
+                .orElse(null);
+    }
+
+    /**
+     * Connexion par reconnaissance faciale (comparaison locale).
+     *
+     * @param email email saisi
+     * @param probeEmbedding embedding 128D (float[128]) capturé localement
+     */
+    public User loginWithFaceEmbedding(String email, float[] probeEmbedding) throws SQLException {
+        if (email == null || email.isBlank() || probeEmbedding == null || probeEmbedding.length != FaceEmbeddingCodec.DIM) {
+            return null;
+        }
+        User u = userDAO.findByEmail(email.trim());
+        if (u == null || !u.isActive()) {
+            return null;
+        }
+        var rec = faceEmbeddingDAO.getByUserId(u.getId()).orElse(null);
+        if (rec == null || !rec.enabled() || rec.embedding() == null) {
+            return null;
+        }
+        float[] ref = FaceEmbeddingCodec.fromBytes(rec.embedding());
+
+        // Seuil simple cosine distance ; typiquement ~0.30–0.45 selon modèle / qualité
+        double d = FaceSimilarity.cosineDistance(ref, probeEmbedding);
+        return d <= 0.12 ? u : null;
+    }
+
+    /**
+     * Retourne la distance (si un visage est enregistré) pour diagnostic UX.
+     */
+    public Double faceDistanceForEmail(String email, float[] probeEmbedding) throws SQLException {
+        if (email == null || email.isBlank() || probeEmbedding == null || probeEmbedding.length != FaceEmbeddingCodec.DIM) {
+            return null;
+        }
+        User u = userDAO.findByEmail(email.trim());
+        if (u == null || !u.isActive()) {
+            return null;
+        }
+        var rec = faceEmbeddingDAO.getByUserId(u.getId()).orElse(null);
+        if (rec == null || !rec.enabled() || rec.embedding() == null) {
+            return null;
+        }
+        float[] ref = FaceEmbeddingCodec.fromBytes(rec.embedding());
+        return FaceSimilarity.cosineDistance(ref, probeEmbedding);
     }
 
     /**

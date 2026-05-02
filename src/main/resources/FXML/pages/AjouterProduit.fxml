@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AjouterProduitController">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll" stylesheets="@../../css/product-form.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AjouterProduitController">
     <VBox alignment="TOP_CENTER" styleClass="page-root product-form-page product-form-outer">
         <VBox spacing="20" styleClass="product-form-shell">
 
@@ -41,7 +41,12 @@
                     </VBox>
                     <VBox spacing="6">
                         <Label styleClass="product-form-field-label" text="Description *" />
-                        <TextArea fx:id="descriptionArea" prefHeight="110" promptText="Décrivez le produit, le contenu, les usages…" styleClass="form-input" wrapText="true" />
+                        <TextArea fx:id="descriptionArea"
+                                  prefHeight="110"
+                                  promptText="Décrivez le produit, le contenu, les usages…"
+                                  wrapText="true"
+                                  style="-fx-text-fill: red;
+                                  -fx-control-inner-background: white;" />
                     </VBox>
                 </VBox>
             </VBox>

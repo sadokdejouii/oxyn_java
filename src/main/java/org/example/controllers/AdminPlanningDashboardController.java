@@ -22,7 +22,9 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.example.model.planning.admin.AdminPlanningModuleStats;
 import org.example.model.planning.admin.AdminPlanningUserRow;
+import org.example.model.planning.objectif.ObjectifClientAdminRow;
 import org.example.services.AdminPlanningDashboardService;
+import org.example.services.ObjectifClientService;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.sql.SQLException;
@@ -92,8 +94,11 @@ public final class AdminPlanningDashboardController {
     private ComboBox<AdminPlanningSort> sortCombo;
     @FXML
     private Label lblMatchHint;
+    @FXML
+    private VBox objectifsAdminHost;
 
     private final AdminPlanningDashboardService service = new AdminPlanningDashboardService();
+    private final ObjectifClientService objectifClientService = new ObjectifClientService();
     private final List<AdminPlanningUserRow> loadedRows = new ArrayList<>();
     private boolean overlayWired;
     /** Ligne affichée dans l’overlay détail (pour suppression fiche). */
@@ -235,6 +240,7 @@ public final class AdminPlanningDashboardController {
             loadedRows.addAll(service.listUsersWithPlanningActivity());
             lblStatUsers.setText(String.valueOf(loadedRows.size()));
             applySearchSortAndRender();
+            loadObjectifsAdmin();
         } catch (SQLException ex) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setTitle("Planning admin");
@@ -242,6 +248,64 @@ public final class AdminPlanningDashboardController {
             a.setContentText(ex.getMessage() != null ? ex.getMessage() : ex.toString());
             a.showAndWait();
         }
+    }
+
+    private void loadObjectifsAdmin() {
+        if (objectifsAdminHost == null) {
+            return;
+        }
+        objectifsAdminHost.getChildren().clear();
+        try {
+            List<ObjectifClientAdminRow> rows = objectifClientService.listRecentForAdmin(80);
+            if (rows.isEmpty()) {
+                Label e = new Label("Aucun objectif libre enregistré (les clients n’ont pas encore utilisé « Objectif / Assistant IA »).");
+                e.setWrapText(true);
+                e.getStyleClass().add("apd-section-sub");
+                objectifsAdminHost.getChildren().add(e);
+                return;
+            }
+            for (ObjectifClientAdminRow r : rows) {
+                objectifsAdminHost.getChildren().add(buildObjectifAdminCard(r));
+            }
+        } catch (SQLException ex) {
+            Label err = new Label("Chargement impossible — vérifiez la table objectifs_hebdomadaires.\n"
+                    + (ex.getMessage() != null ? ex.getMessage() : ex));
+            err.setWrapText(true);
+            err.getStyleClass().add("apd-empty-filter");
+            objectifsAdminHost.getChildren().add(err);
+        }
+    }
+
+    private VBox buildObjectifAdminCard(ObjectifClientAdminRow r) {
+        VBox card = new VBox(8);
+        card.getStyleClass().add("apd-objectif-admin-card");
+        Label head = new Label(r.userDisplayName() + " · " + r.userEmail());
+        head.getStyleClass().add("apd-objectif-admin-head");
+        head.setWrapText(true);
+        Label date = new Label(r.dateEnregistrement() != null ? r.dateEnregistrement().toString() : "—");
+        date.getStyleClass().add("apd-objectif-admin-meta");
+        Label tx = new Label("Saisie : " + truncate(r.texteObjectif(), 220));
+        tx.setWrapText(true);
+        tx.getStyleClass().add("apd-objectif-admin-body");
+        Label pr = new Label("Produits recommandés : " + (r.produitsLibelles() != null ? r.produitsLibelles() : "—"));
+        pr.setWrapText(true);
+        pr.getStyleClass().add("apd-objectif-admin-products");
+        Label inter = new Label("Intervention encadrant : " + (r.interventionEncadrant() != null && !r.interventionEncadrant().isBlank()
+                ? truncate(r.interventionEncadrant(), 160) : "—"));
+        inter.setWrapText(true);
+        inter.getStyleClass().add("apd-objectif-admin-inter");
+        card.getChildren().addAll(head, date, tx, pr, inter);
+        return card;
+    }
+
+    private static String truncate(String s, int max) {
+        if (s == null) {
+            return "—";
+        }
+        if (s.length() <= max) {
+            return s;
+        }
+        return s.substring(0, max - 1) + "…";
     }
 
     private void applySearchSortAndRender() {

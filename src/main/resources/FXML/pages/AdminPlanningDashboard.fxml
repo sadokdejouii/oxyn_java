@@ -94,6 +94,17 @@
                 </VBox>
 
                 <FlowPane fx:id="userCardsHost" hgap="16" vgap="16" prefWrapLength="1320" styleClass="apd-user-cards-flow" maxWidth="Infinity" />
+
+                <VBox styleClass="apd-content-block" spacing="12" maxWidth="Infinity">
+                    <VBox spacing="4">
+                        <Label styleClass="apd-section-title" text="Objectifs libres &amp; IA boutique" />
+                        <Label styleClass="apd-section-sub" text="Dernières saisies — analyse locale — produits recommandés — intervention encadrant"
+                               wrapText="true" />
+                    </VBox>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxHeight="440" styleClass="apd-table-shell">
+                        <VBox fx:id="objectifsAdminHost" spacing="12" />
+                    </ScrollPane>
+                </VBox>
             </VBox>
         </VBox>
     </ScrollPane>

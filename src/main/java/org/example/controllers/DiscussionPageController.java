@@ -1,5 +1,13 @@
 package org.example.controllers;
 
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.PauseTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.Timeline;
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,68 +23,71 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Window;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.example.discussion.ui.ChatBubble;
 import org.example.discussion.ui.ChatHeader;
+import org.example.discussion.ui.ConversationDetailsPanel;
 import org.example.discussion.ui.DiscussionInboxSortMode;
 import org.example.discussion.ui.InlineMessageEditor;
+import org.example.discussion.ui.MessageContent;
 import org.example.discussion.ui.MessageInput;
 import org.example.discussion.ui.UserListItemCell;
+import org.example.discussion.ui.VoiceRecorder;
+import org.example.discussion.ui.VoiceStore;
 import org.example.entities.ConversationInboxItem;
 import org.example.entities.MessageRow;
+import org.example.entities.User;
+import org.example.realtime.PresenceService;
+import org.example.realtime.RealtimeChatService;
+import org.example.realtime.TypingService;
 import org.example.services.DiscussionService;
+import org.example.services.NotificationService;
 import org.example.services.SessionContext;
+import org.example.services.TranslationService;
+import org.example.services.UserService;
 
-import javafx.scene.control.DialogPane;
+import com.google.gson.JsonObject;
+
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.BiConsumer;
 
 public class DiscussionPageController implements Initializable {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("dd/MM HH:mm");
 
-    @FXML
-    private Label subtitleLabel;
-
-    @FXML
-    private VBox conversationSidebar;
-
-    @FXML
-    private VBox inboxToolbarMount;
-
-    @FXML
-    private ListView<ConversationInboxItem> conversationList;
-
-    @FXML
-    private VBox chatHeaderMount;
-
-    @FXML
-    private ScrollPane messagesScroll;
-
-    @FXML
-    private VBox messagesBox;
-
-    @FXML
-    private VBox messageInputMount;
-
-    @FXML
-    private Label statusLabel;
+    @FXML private Label subtitleLabel;
+    @FXML private VBox chatColumn;
+    @FXML private VBox conversationSidebar;
+    @FXML private VBox inboxToolbarMount;
+    @FXML private ListView<ConversationInboxItem> conversationList;
+    @FXML private VBox chatHeaderMount;
+    @FXML private ScrollPane messagesScroll;
+    @FXML private VBox messagesBox;
+    @FXML private VBox messageInputMount;
+    @FXML private Label statusLabel;
+    @FXML private ConversationDetailsPanel detailsPanel;
 
     private TextField messageField;
     private Button sendButton;
+    private MessageInput messageInput;
 
     private ChatHeader chatHeader;
 
@@ -89,19 +100,47 @@ public class DiscussionPageController implements Initializable {
     private CheckBox inboxUnreadOnlyCheck;
 
     private final DiscussionService discussionService = new DiscussionService();
+    private final NotificationService notificationService = new NotificationService();
+    private final UserService userService = new UserService();
+    private final RealtimeChatService realtimeChatService = RealtimeChatService.getInstance();
+    private final PresenceService presenceService = PresenceService.getInstance();
+    private final TypingService typingService = TypingService.getInstance();
+    private final TranslationService translationService = TranslationService.getInstance();
+
     private int activeConversationId = -1;
-    /** Édition inline : id du message en cours, ou -1. */
+    private int activePeerUserId = -1;
+    private String activePeerDisplayName = "";
+    private String activePeerEmail = "";
+    private String chatSubscriptionId = null;
+    private String activePeerPresenceTopic = null;
+    private BiConsumer<Integer, PresenceService.Presence> presenceListener;
+    private BiConsumer<TypingService.TypingEvent, Boolean> typingListener;
     private int editingMessageId = -1;
+
+    private VoiceRecorder voiceRecorder;
+
+    private List<MessageRow> lastLoadedMessages = Collections.emptyList();
+
+    /** Animation du scroll messages : annule la précédente pour éviter les à-coups. */
+    private Timeline messagesScrollTimeline;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         mountChatChrome();
 
         SessionContext ctx = SessionContext.getInstance();
+        // L'ecran discussion adapte ses capacites par role:
+        // - admin: lecture seule
+        // - encadrant: inbox multi-clients
+        // - client: conversation unique avec encadrant
         if (ctx.isAdmin()) {
             subtitleLabel.setText("Suivi des conversations — lecture seule.");
             messageField.setDisable(true);
             sendButton.setDisable(true);
+            if (messageInput != null) {
+                messageInput.micButton().setDisable(true);
+                messageInput.emojiButton().setDisable(true);
+            }
             updateThreadHeader("Équipe", "", "Sélectionnez une discussion à gauche.");
             wireInboxDataModel();
             mountInboxToolbar();
@@ -139,17 +178,94 @@ public class DiscussionPageController implements Initializable {
     }
 
     private void mountChatChrome() {
+        if (chatColumn != null) {
+            HBox.setHgrow(chatColumn, Priority.ALWAYS);
+        }
+        if (conversationList != null) {
+            VBox.setVgrow(conversationList, Priority.ALWAYS);
+        }
+        if (messagesScroll != null) {
+            VBox.setVgrow(messagesScroll, Priority.ALWAYS);
+        }
         chatHeader = new ChatHeader();
         chatHeaderMount.getChildren().setAll(chatHeader);
 
-        MessageInput mi = new MessageInput();
-        messageInputMount.getChildren().setAll(mi);
-        messageField = mi.textField();
-        sendButton = mi.sendButton();
+        messageInput = new MessageInput();
+        messageInputMount.getChildren().setAll(messageInput);
+        messageField = messageInput.textField();
+        sendButton = messageInput.sendButton();
         sendButton.setOnAction(e -> handleSend());
-        mi.refreshButton().setOnAction(e -> handleRefresh());
+        messageField.setOnAction(e -> handleSend());
+        messageInput.refreshButton().setOnAction(e -> handleRefresh());
+
+        messageInput.setOnMicStart(this::startVoiceRecording);
+        messageInput.setOnMicCancel(this::cancelVoiceRecording);
+        messageInput.setOnMicConfirm(this::confirmVoiceRecording);
 
         messagesBox.prefWidthProperty().bind(messagesScroll.widthProperty());
+
+        messageField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (activeConversationId > 0 && newVal != null && !newVal.isEmpty()) {
+                typingService.notifyLocalTyping(activeConversationId);
+            }
+        });
+
+        installRealtimeListeners();
+        installSceneCleanupHook();
+    }
+
+    private void installRealtimeListeners() {
+        // Presence: met a jour le header/side panel en quasi temps reel.
+        presenceListener = (userId, presence) -> {
+            if (userId != null && userId == activePeerUserId) {
+                applyPresenceToHeader();
+                refreshDetailsPanel();
+            }
+        };
+        presenceService.addListener(presenceListener);
+
+        // Typing: affiche "en train d'ecrire" pour l'interlocuteur actif.
+        typingListener = (event, active) -> {
+            if (event != null && event.conversationId() == activeConversationId
+                    && event.userId() != SessionContext.getInstance().getUserId()) {
+                if (chatHeader != null) {
+                    chatHeader.setTypingActive(active, buildTypingLabel());
+                }
+            }
+        };
+        typingService.addListener(typingListener);
+    }
+
+    private void installSceneCleanupHook() {
+        chatHeader.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) {
+                disposeRealtime();
+            }
+        });
+    }
+
+    private void disposeRealtime() {
+        if (chatSubscriptionId != null) {
+            realtimeChatService.unsubscribeFromConversation(activeConversationId, chatSubscriptionId,
+                    activePeerPresenceTopic);
+            chatSubscriptionId = null;
+        }
+        if (presenceListener != null) {
+            presenceService.removeListener(presenceListener);
+            presenceListener = null;
+        }
+        if (typingListener != null) {
+            typingService.removeListener(typingListener);
+            typingListener = null;
+        }
+        if (activeConversationId > 0) {
+            typingService.notifyLocalStopped(activeConversationId);
+        }
+        activePeerPresenceTopic = null;
+        if (voiceRecorder != null && voiceRecorder.isRecording()) {
+            voiceRecorder.cancel();
+        }
+        SessionContext.getInstance().setActiveDiscussionConversationId(-1);
     }
 
     private void wireInboxDataModel() {
@@ -283,10 +399,15 @@ public class DiscussionPageController implements Initializable {
                 statusLabel.setText("Impossible de créer ou charger la conversation (base indisponible ?).");
                 return;
             }
+            int previous = activeConversationId;
             activeConversationId = cid;
+            activePeerDisplayName = "";
+            activePeerEmail = "";
             updateThreadHeaderForClient(ctx);
             statusLabel.setText("");
             reloadMessages();
+            markActiveConversationAsRead(ctx);
+            rebindRealtimeForActiveConversation(previous);
         } catch (Exception e) {
             statusLabel.setText("Impossible d’ouvrir la conversation. Réessayez plus tard.");
         }
@@ -319,11 +440,6 @@ public class DiscussionPageController implements Initializable {
         restoreInboxSelection(previousConversationId);
     }
 
-    /**
-     * Sélectionne la conversation correspondant au client demandé (navigation depuis Planning encadrant).
-     *
-     * @return true si une conversation a été sélectionnée
-     */
     private boolean trySelectPendingClientConversation() {
         SessionContext ctx = SessionContext.getInstance();
         int clientId = ctx.getPendingDiscussionClientUserId();
@@ -391,16 +507,200 @@ public class DiscussionPageController implements Initializable {
             if (assignEncadrantOnSelect && !ctx.isAdmin()) {
                 discussionService.assignEncadrantToConversation(item.conversationId(), ctx.getUserId());
             }
+            int previous = activeConversationId;
             activeConversationId = item.conversationId();
             editingMessageId = -1;
+            activePeerDisplayName = item.clientName() != null ? item.clientName().trim() : "";
+            activePeerEmail = item.clientEmail() != null ? item.clientEmail().trim() : "";
             String sub = item.clientEmail() != null && !item.clientEmail().isBlank() ? item.clientEmail() : "";
             if (chatHeader != null) {
                 chatHeader.update(item.clientName(), sub, item.presenceLabel(), initials(item.clientName()));
             }
             statusLabel.setText("");
             reloadMessages();
+            markActiveConversationAsRead(ctx);
+            rebindRealtimeForActiveConversation(previous);
         } catch (Exception e) {
             statusLabel.setText("Action impossible pour le moment.");
+        }
+    }
+
+    private void markActiveConversationAsRead(SessionContext ctx) {
+        if (activeConversationId <= 0 || ctx == null || !ctx.hasDbUser()) {
+            return;
+        }
+        // API interne notifications: synchronise badge/liste lors de l'ouverture du thread.
+        notificationService.markConversationAsRead(ctx.getUserId(), activeConversationId);
+    }
+
+    private void rebindRealtimeForActiveConversation(int oldConversationId) {
+        SessionContext.getInstance().setActiveDiscussionConversationId(activeConversationId);
+        if (oldConversationId > 0 && chatSubscriptionId != null) {
+            realtimeChatService.unsubscribeFromConversation(oldConversationId, chatSubscriptionId,
+                    activePeerPresenceTopic);
+            chatSubscriptionId = null;
+        }
+        activePeerPresenceTopic = null;
+        if (activeConversationId <= 0) {
+            activePeerUserId = -1;
+            activePeerDisplayName = "";
+            activePeerEmail = "";
+            if (chatHeader != null) {
+                chatHeader.clearPresence();
+                chatHeader.setTypingActive(false, null);
+            }
+            if (detailsPanel != null) detailsPanel.showEmpty();
+            return;
+        }
+        SessionContext ctx = SessionContext.getInstance();
+        if (ctx.hasDbUser()) {
+            try {
+                activePeerUserId = discussionService.findOtherParticipantUserId(activeConversationId, ctx.getUserId());
+            } catch (Exception e) {
+                activePeerUserId = -1;
+            }
+            if (activePeerUserId > 0 && (activePeerDisplayName == null || activePeerDisplayName.isBlank())) {
+                try {
+                    User peer = userService.getUserById(activePeerUserId);
+                    if (peer != null) {
+                        String full = peer.getFullName();
+                        activePeerDisplayName = full != null ? full.trim() : "";
+                        if (peer.getEmail() != null) {
+                            activePeerEmail = peer.getEmail();
+                        }
+                        if (chatHeader != null && !ctx.isAdmin()
+                                && (peer.getNom() != null || peer.getPrenom() != null)
+                                && !activePeerDisplayName.isEmpty()) {
+                            chatHeader.update("Votre conversation",
+                                    "Avec " + activePeerDisplayName,
+                                    "", initials(activePeerDisplayName));
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+            applyPresenceToHeader();
+        } else {
+            activePeerUserId = -1;
+            activePeerDisplayName = "";
+            activePeerEmail = "";
+            if (chatHeader != null) {
+                chatHeader.clearPresence();
+            }
+        }
+        activePeerPresenceTopic = activePeerUserId > 0 ? "/presence/user/" + activePeerUserId : null;
+        final int boundConversationId = activeConversationId;
+        final String boundChatTopic = "/chat/conversation/" + boundConversationId;
+        chatSubscriptionId = realtimeChatService.subscribeToConversation(
+                boundConversationId,
+                ev -> {
+                    // Évite le faux positif du préfixe Mercure (/chat/conversation/3 matche aussi …/30).
+                    if (!boundChatTopic.equals(ev.topic())) {
+                        return;
+                    }
+                    onIncomingChatEvent(ev);
+                },
+                activePeerPresenceTopic);
+        if (chatHeader != null) {
+            chatHeader.setTypingActive(false, null);
+        }
+        refreshDetailsPanel();
+    }
+
+    private String buildTypingLabel() {
+        String first = firstName(activePeerDisplayName);
+        if (first.isEmpty()) {
+            return "En train d'écrire…";
+        }
+        return first + " est en train d'écrire…";
+    }
+
+    private static String firstName(String displayName) {
+        if (displayName == null) {
+            return "";
+        }
+        String trimmed = displayName.trim();
+        if (trimmed.isEmpty()) {
+            return "";
+        }
+        int sep = trimmed.indexOf(' ');
+        return sep > 0 ? trimmed.substring(0, sep) : trimmed;
+    }
+
+    private void applyPresenceToHeader() {
+        if (chatHeader == null) {
+            return;
+        }
+        if (activePeerUserId <= 0) {
+            chatHeader.clearPresence();
+            return;
+        }
+        boolean online = presenceService.currentPresence(activePeerUserId) == PresenceService.Presence.ONLINE;
+        String label = presenceService.formatPresenceLabel(activePeerUserId);
+        chatHeader.updatePresence(online, label);
+    }
+
+    private void refreshDetailsPanel() {
+        if (detailsPanel == null) return;
+        if (activeConversationId <= 0) {
+            detailsPanel.showEmpty();
+            return;
+        }
+        boolean online = activePeerUserId > 0
+                && presenceService.currentPresence(activePeerUserId) == PresenceService.Presence.ONLINE;
+        String label = activePeerUserId > 0
+                ? presenceService.formatPresenceLabel(activePeerUserId)
+                : "";
+        String name = activePeerDisplayName != null && !activePeerDisplayName.isBlank()
+                ? activePeerDisplayName
+                : "Conversation";
+        detailsPanel.update(name, activePeerEmail, initials(name), online, label, lastLoadedMessages);
+    }
+
+    private void onIncomingChatEvent(org.example.realtime.RealtimeEvent event) {
+        if (event == null || activeConversationId <= 0) {
+            return;
+        }
+        Optional<JsonObject> root = event.asObject();
+        if (root.isEmpty()) {
+            return;
+        }
+        JsonObject o = root.get();
+        // Uniquement les publications « nouveau message » (évite tout bruit republié sur un topic voisin).
+        if (gsonPositiveInt(o, "messageId").isEmpty()) {
+            return;
+        }
+        int convId = gsonPositiveInt(o, "conversationId").orElse(activeConversationId);
+        if (convId != activeConversationId) {
+            return;
+        }
+        Optional<Integer> senderOpt = gsonPositiveInt(o, "senderId");
+        int senderId = senderOpt.orElse(-1);
+        if (senderId >= 0 && senderId == SessionContext.getInstance().getUserId()) {
+            return;
+        }
+        reloadMessages();
+        markActiveConversationAsRead(SessionContext.getInstance());
+        if (chatHeader != null) {
+            chatHeader.setTypingActive(false, null);
+        }
+    }
+
+    /** Entier strictement positif (expéditeur / identifiants métier), tolère les nombres sérialisés en chaîne. */
+    private static Optional<Integer> gsonPositiveInt(JsonObject o, String key) {
+        if (o == null || !o.has(key) || o.get(key).isJsonNull()) {
+            return Optional.empty();
+        }
+        try {
+            int v = o.get(key).getAsInt();
+            return v > 0 ? Optional.of(v) : Optional.empty();
+        } catch (RuntimeException ignored) {
+            try {
+                int v = Integer.parseInt(o.get(key).getAsString().trim());
+                return v > 0 ? Optional.of(v) : Optional.empty();
+            } catch (RuntimeException ignored2) {
+                return Optional.empty();
+            }
         }
     }
 
@@ -419,19 +719,111 @@ public class DiscussionPageController implements Initializable {
             return;
         }
         try {
-            discussionService.sendMessage(
+            int messageId = discussionService.sendMessage(
                     activeConversationId,
                     ctx.getUserId(),
                     text,
                     ctx.isEncadrant()
             );
             messageField.clear();
+            typingService.notifyLocalStopped(activeConversationId);
             reloadMessages();
             if (ctx.isEncadrant() || ctx.isAdmin()) {
                 loadConversationList();
             }
+            publishMessageRealtime(messageId, text, ctx);
         } catch (Exception e) {
             alert("L’envoi du message a échoué. Vérifiez votre connexion puis réessayez.");
+        }
+    }
+
+    // ----------------------------------------------------- Voice messages
+    private void startVoiceRecording() {
+        SessionContext ctx = SessionContext.getInstance();
+        if (activeConversationId <= 0 || !ctx.hasDbUser() || ctx.isAdmin()) {
+            return;
+        }
+        if (voiceRecorder == null) {
+            voiceRecorder = new VoiceRecorder();
+        }
+        voiceRecorder.setOnError(t -> {
+            messageInput.exitRecordingMode();
+            alert("Impossible d'accéder au micro : " + (t.getMessage() == null ? "ligne audio indisponible" : t.getMessage()));
+        });
+        voiceRecorder.setOnLevel(level -> messageInput.updateRecordingFeedback(level,
+                voiceRecorder.durationProperty().get()));
+        voiceRecorder.setOnTick(secs -> messageInput.updateRecordingFeedback(
+                voiceRecorder.levelProperty().get(), secs));
+        try {
+            voiceRecorder.start();
+            messageInput.enterRecordingMode();
+        } catch (IllegalStateException e) {
+            // déjà en cours, ignore
+        }
+    }
+
+    private void cancelVoiceRecording() {
+        if (voiceRecorder != null && voiceRecorder.isRecording()) {
+            voiceRecorder.cancel();
+        }
+        messageInput.exitRecordingMode();
+    }
+
+    private void confirmVoiceRecording() {
+        if (voiceRecorder == null || !voiceRecorder.isRecording()) {
+            messageInput.exitRecordingMode();
+            return;
+        }
+        VoiceRecorder.RecordedVoice rec = voiceRecorder.stop();
+        messageInput.exitRecordingMode();
+        if (rec == null) {
+            alert("Aucun son capté — réessayez en parlant un peu plus longtemps.");
+            return;
+        }
+        SessionContext ctx = SessionContext.getInstance();
+        String content = MessageContent.encodeVoice(rec.voiceId(), rec.durationSec());
+        try {
+            int messageId = discussionService.sendMessage(
+                    activeConversationId,
+                    ctx.getUserId(),
+                    content,
+                    ctx.isEncadrant());
+            typingService.notifyLocalStopped(activeConversationId);
+            reloadMessages();
+            if (ctx.isEncadrant() || ctx.isAdmin()) {
+                loadConversationList();
+            }
+            publishMessageRealtime(messageId, content, ctx);
+        } catch (Exception e) {
+            VoiceStore.delete(rec.voiceId());
+            alert("L'envoi du message vocal a échoué. Réessayez plus tard.");
+        }
+    }
+
+    private void publishMessageRealtime(int messageId, String text, SessionContext ctx) {
+        if (messageId <= 0) {
+            return;
+        }
+        int peerId = activePeerUserId;
+        if (peerId <= 0) {
+            try {
+                peerId = discussionService.findOtherParticipantUserId(activeConversationId, ctx.getUserId());
+                if (peerId > 0) {
+                    activePeerUserId = peerId;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        String type = ctx.isEncadrant() ? DiscussionService.TYPE_CONSEIL : DiscussionService.TYPE_MESSAGE;
+        try {
+            realtimeChatService.publishNewMessage(activeConversationId, messageId, ctx.getUserId(),
+                    text, peerId, type);
+            if (peerId > 0) {
+                org.example.realtime.RealtimeNotificationService.getInstance()
+                        .publishNewMessage(peerId, activeConversationId, ctx.getUserId(), text);
+            }
+        } catch (Exception ex) {
+            System.err.println("[Realtime] publish message failed : " + ex.getMessage());
         }
     }
 
@@ -442,33 +834,122 @@ public class DiscussionPageController implements Initializable {
         messagesBox.getChildren().clear();
         try {
             List<MessageRow> rows = discussionService.loadMessages(activeConversationId, 0);
+            lastLoadedMessages = rows;
             SessionContext ctx = SessionContext.getInstance();
             Window owner = messagesScroll.getScene() != null ? messagesScroll.getScene().getWindow() : null;
+            int animIndex = 0;
             for (MessageRow m : rows) {
                 boolean mine = ctx.hasDbUser() && m.senderId() == ctx.getUserId();
                 String timeStr = m.createdAt() != null ? TIME.format(m.createdAt()) : "";
                 String peerIni = initials(m.senderName());
-                boolean showMenu = mine
+                boolean canEditDelete = mine
                         && !ctx.isAdmin()
                         && ctx.hasDbUser()
                         && DiscussionService.messageTypeAllowsUserEdit(m.type());
-                if (showMenu && m.id() == editingMessageId) {
-                    messagesBox.getChildren().add(InlineMessageEditor.createMineRow(
+                if (canEditDelete && m.id() == editingMessageId
+                        && !MessageContent.parse(m.contenu()).isVoice()) {
+                    Node editorRow = InlineMessageEditor.createMineRow(
                             m,
                             messagesBox.widthProperty(),
                             text -> commitInlineEdit(m, text),
-                            this::cancelInlineEdit));
+                            this::cancelInlineEdit);
+                    messagesBox.getChildren().add(editorRow);
+                    animateChatRowIn(editorRow, true, animIndex++);
                     continue;
                 }
-                Runnable onEdit = showMenu ? () -> startInlineEdit(m) : null;
-                Runnable onDelete = showMenu ? () -> offerDeleteMessage(owner, m) : null;
-                messagesBox.getChildren().add(
-                        ChatBubble.createRow(m, mine, timeStr, peerIni, messagesBox.widthProperty(), showMenu, onEdit, onDelete));
+                ChatBubble.Row row = new ChatBubble.Row(m, mine, timeStr, peerIni,
+                        messagesBox.widthProperty(), canEditDelete);
+                if (canEditDelete) {
+                    row.onEdit(() -> startInlineEdit(m));
+                    row.onDelete(() -> offerDeleteMessage(owner, m));
+                }
+                row.onTranslate(toggle -> handleTranslate(m, toggle));
+                Node bubbleRow = ChatBubble.createRow(row);
+                messagesBox.getChildren().add(bubbleRow);
+                animateChatRowIn(bubbleRow, mine, animIndex++);
             }
-            Platform.runLater(() -> messagesScroll.setVvalue(1.0));
+            scheduleSmoothScrollToBottom();
+            refreshDetailsPanel();
         } catch (Exception ignored) {
             appendSystem("Impossible de charger les messages pour le moment. Réessayez dans un instant.");
         }
+    }
+
+    /**
+     * Micro-interaction : apparition message (fade + slide horizontal selon l’auteur).
+     * Délai en cascade pour un effet « timeline » discret.
+     */
+    private void animateChatRowIn(Node node, boolean mine, int staggerIndex) {
+        double fromX = mine ? 26 : -26;
+        node.setOpacity(0);
+        node.setTranslateX(fromX);
+        FadeTransition fade = new FadeTransition(Duration.millis(300), node);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.setInterpolator(Interpolator.EASE_OUT);
+        TranslateTransition slide = new TranslateTransition(Duration.millis(340), node);
+        slide.setFromX(fromX);
+        slide.setToX(0);
+        slide.setInterpolator(Interpolator.EASE_OUT);
+        ParallelTransition intro = new ParallelTransition(fade, slide);
+        intro.setDelay(Duration.millis(Math.min(staggerIndex, 14) * 32L));
+        intro.setOnFinished(e -> {
+            node.setOpacity(1);
+            node.setTranslateX(0);
+        });
+        intro.play();
+    }
+
+    /** Scroll vertical animé vers le bas (remplace un saut brutal de {@code setVvalue(1)}). */
+    private void scheduleSmoothScrollToBottom() {
+        Platform.runLater(() -> {
+            PauseTransition layoutWait = new PauseTransition(Duration.millis(48));
+            layoutWait.setOnFinished(ev -> smoothScrollMessagesToEnd());
+            layoutWait.play();
+        });
+    }
+
+    private void smoothScrollMessagesToEnd() {
+        if (messagesScroll == null) {
+            return;
+        }
+        messagesScroll.applyCss();
+        messagesScroll.layout();
+        double start = messagesScroll.getVvalue();
+        double target = 1.0;
+        if (messagesScrollTimeline != null) {
+            messagesScrollTimeline.stop();
+            messagesScrollTimeline = null;
+        }
+        if (target - start < 0.03) {
+            messagesScroll.setVvalue(target);
+            return;
+        }
+        messagesScrollTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(messagesScroll.vvalueProperty(), start)),
+                new KeyFrame(Duration.millis(450),
+                        new KeyValue(messagesScroll.vvalueProperty(), target, Interpolator.EASE_BOTH))
+        );
+        messagesScrollTimeline.setOnFinished(e -> messagesScrollTimeline = null);
+        messagesScrollTimeline.play();
+    }
+
+    private void handleTranslate(MessageRow m, ChatBubble.TranslationToggle toggle) {
+        if (toggle.isVisible()) {
+            toggle.hide();
+            return;
+        }
+        MessageContent.Parsed parsed = MessageContent.parse(m.contenu());
+        if (parsed.isVoice()) {
+            return;
+        }
+        toggle.showLoading();
+        // API externe (MyMemory) + fallback local geres dans TranslationService.
+        translationService.translateToArabic(parsed.text())
+                .thenAccept(arabic -> Platform.runLater(() ->
+                        toggle.showResult(arabic == null || arabic.isBlank()
+                                ? "(الترجمة غير متوفرة)"
+                                : arabic)));
     }
 
     private void startInlineEdit(MessageRow m) {
@@ -517,6 +998,11 @@ public class DiscussionPageController implements Initializable {
             return;
         }
         try {
+            // Pour les messages vocaux, supprime aussi le fichier local.
+            MessageContent.Parsed parsed = MessageContent.parse(m.contenu());
+            if (parsed.isVoice()) {
+                VoiceStore.delete(parsed.voiceId());
+            }
             discussionService.deleteOwnMessageInConversation(
                     activeConversationId,
                     m.id(),
@@ -555,6 +1041,22 @@ public class DiscussionPageController implements Initializable {
         l.getStyleClass().add("msg-system-line");
         wrap.getChildren().add(l);
         messagesBox.getChildren().add(wrap);
+        animateSystemBannerIn(wrap);
+        scheduleSmoothScrollToBottom();
+    }
+
+    private void animateSystemBannerIn(Node node) {
+        node.setOpacity(0);
+        node.setTranslateY(10);
+        FadeTransition fade = new FadeTransition(Duration.millis(280), node);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.setInterpolator(Interpolator.EASE_OUT);
+        TranslateTransition slide = new TranslateTransition(Duration.millis(320), node);
+        slide.setFromY(10);
+        slide.setToY(0);
+        slide.setInterpolator(Interpolator.EASE_OUT);
+        new ParallelTransition(fade, slide).play();
     }
 
     private static void alert(String msg) {

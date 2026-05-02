@@ -73,7 +73,8 @@ public final class UserListItemCell extends ListCell<ConversationInboxItem> {
         boolean awaiting = item.awaitingStaffReply();
         awaitPill.setVisible(awaiting);
         awaitPill.setManaged(awaiting);
-        preview.setText(item.lastMessagePreview() != null ? item.lastMessagePreview() : "");
+        String rawPreview = item.lastMessagePreview() != null ? item.lastMessagePreview() : "";
+        preview.setText(MessageContent.preview(rawPreview));
         time.setText(item.lastMessageAt() != null ? TIME.format(item.lastMessageAt()) : "");
         presence.setText(item.presenceLabel());
         presence.getStyleClass().setAll(

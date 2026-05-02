@@ -3,8 +3,7 @@ package org.example.entities;
 public class Post {
     private int id_post;
     private String content_post;
-    private String media_url_post;  // Kept for backward compatibility
-    private byte[] media_blob_post; // BLOB for storing image/video data
+    private String media_url_post;  // Will store Cloudinary secure URL
     private String media_type_post;
     private String visibility_post;
     private String created_at_post;
@@ -42,13 +41,7 @@ public class Post {
         this.media_url_post = media_url_post;
     }
 
-    public byte[] getMedia_blob_post() {
-        return media_blob_post;
-    }
 
-    public void setMedia_blob_post(byte[] media_blob_post) {
-        this.media_blob_post = media_blob_post;
-    }
 
     public String getMedia_type_post() {
         return media_type_post;

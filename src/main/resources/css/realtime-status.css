@@ -1,0 +1,56 @@
+/* =====================================================================
+   Petit badge "Mode dégradé / Connexion temps réel..." dans le header
+   Planning. Style discret pour ne pas distraire l'utilisateur.
+   ===================================================================== */
+
+.realtime-status-badge {
+    -fx-background-color: rgba(255, 184, 0, 0.16);
+    -fx-background-radius: 999;
+    -fx-padding: 4 10 4 10;
+    -fx-border-color: rgba(255, 184, 0, 0.45);
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+}
+
+.realtime-status-badge__icon {
+    -fx-icon-size: 12;
+    -fx-icon-color: #B7791F;
+}
+
+.realtime-status-badge__label {
+    -fx-text-fill: #8A5A00;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.realtime-status-badge--connecting {
+    -fx-background-color: rgba(33, 118, 255, 0.10);
+    -fx-border-color: rgba(33, 118, 255, 0.35);
+}
+
+.realtime-status-badge--connecting .realtime-status-badge__icon {
+    -fx-icon-color: #1F6FEB;
+}
+
+.realtime-status-badge--connecting .realtime-status-badge__label {
+    -fx-text-fill: #1F4DB8;
+}
+
+/* Variante sombre — header Admin */
+.planning-main-shell--admin-dark .realtime-status-badge {
+    -fx-background-color: rgba(255, 184, 0, 0.18);
+    -fx-border-color: rgba(255, 184, 0, 0.55);
+}
+
+.planning-main-shell--admin-dark .realtime-status-badge__label {
+    -fx-text-fill: #FFD27A;
+}
+
+.planning-main-shell--admin-dark .realtime-status-badge--connecting {
+    -fx-background-color: rgba(120, 165, 255, 0.14);
+    -fx-border-color: rgba(120, 165, 255, 0.45);
+}
+
+.planning-main-shell--admin-dark .realtime-status-badge--connecting .realtime-status-badge__label {
+    -fx-text-fill: #BBD4FF;
+}

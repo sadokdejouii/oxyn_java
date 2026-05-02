@@ -224,8 +224,33 @@
                     </VBox>
                 </VBox>
 
-                <!-- 3 · Bandeau insights : IA | Observation -->
-                <HBox spacing="22" maxWidth="Infinity" alignment="TOP_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="4"
+                <!-- 3 · Objectif libre boutique (client) -->
+                <VBox styleClass="w-card planning-dash-card epd-objectif-libre-card" maxWidth="Infinity" spacing="0"
+                      GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="4">
+                    <HBox styleClass="w-card__header epd-ia-header" alignment="CENTER_LEFT" spacing="14">
+                        <StackPane styleClass="w-card__icon-wrap epd-progress-card__icon">
+                            <FontIcon iconLiteral="fas-bullseye" iconSize="18" styleClass="w-card__icon"/>
+                        </StackPane>
+                        <VBox styleClass="w-card__titles" HBox.hgrow="ALWAYS">
+                            <Label styleClass="w-card__title epd-section-title" text="Objectif libre &amp; assistant IA (boutique)"/>
+                            <Label styleClass="w-card__subtitle" text="Dernière saisie client — analyse locale — votre message"/>
+                        </VBox>
+                        <Label styleClass="epd-pill epd-pill--readonly" text="Lecture"/>
+                    </HBox>
+                    <VBox styleClass="w-card__body epd-ia-body" spacing="12">
+                        <Label fx:id="lblObjLibreClient" styleClass="epd-mini-tile__v" wrapText="true" text="—"/>
+                        <TextArea fx:id="txtReponseIaObjLibre" editable="false" wrapText="true" styleClass="epd-ia-synthese"
+                                  prefRowCount="6" maxWidth="Infinity" minHeight="120"/>
+                        <Label styleClass="epd-kv-block__k" text="Intervention encadrant (visible côté client)"/>
+                        <TextArea fx:id="txtInterventionObjLibre" wrapText="true" styleClass="epd-obs-textarea" prefRowCount="4" maxWidth="Infinity"/>
+                        <HBox spacing="12" alignment="CENTER_RIGHT">
+                            <Button fx:id="btnSendObjLibre" mnemonicParsing="false" text="Envoyer" styleClass="w-btn-primary epd-btn-save"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+
+                <!-- 4 · Bandeau insights : IA | Observation -->
+                <HBox spacing="22" maxWidth="Infinity" alignment="TOP_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="4"
                        styleClass="epd-insight-deck">
                     <VBox styleClass="w-card planning-dash-card epd-ia-card epd-insight-panel" maxWidth="Infinity" HBox.hgrow="ALWAYS" spacing="0" minWidth="0">
                         <HBox styleClass="w-card__header epd-ia-header" alignment="CENTER_LEFT" spacing="14">

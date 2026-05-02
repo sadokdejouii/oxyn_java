@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.example.discussion.ui.ChatLayout?>
+<?import org.example.discussion.ui.ConversationDetailsPanel?>
 
 <BorderPane styleClass="msg-page-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.controllers.DiscussionPageController" maxWidth="Infinity" maxHeight="Infinity"
@@ -23,30 +22,33 @@
         </VBox>
     </top>
     <center>
+        <!-- Enfants directs de ChatLayout (HBox) : ne pas envelopper dans <children>. -->
         <ChatLayout maxWidth="Infinity" maxHeight="Infinity" styleClass="msg-chat-card">
-            <children>
-                <!-- Colonne liste (Messenger) -->
-                <VBox fx:id="conversationSidebar" spacing="0" styleClass="msg-user-list" minWidth="280" prefWidth="300" maxWidth="320">
-                    <VBox spacing="4" styleClass="msg-user-list-header">
-                        <padding>
-                            <Insets bottom="12" left="16" right="16" top="16" />
-                        </padding>
-                        <Label styleClass="msg-user-list-title" text="Discussions" />
-                        <Label styleClass="msg-user-list-sub" text="Vos contacts" wrapText="true" />
-                    </VBox>
-                    <VBox fx:id="inboxToolbarMount" styleClass="msg-inbox-toolbar-host" maxWidth="Infinity" />
-                    <ListView fx:id="conversationList" VBox.vgrow="ALWAYS" styleClass="msg-user-listview" />
+            <!-- Colonne 1 : LISTE CONVERSATIONS -->
+            <VBox fx:id="conversationSidebar" spacing="0" styleClass="msg-user-list" minWidth="280" prefWidth="300" maxWidth="320">
+                <VBox spacing="4" styleClass="msg-user-list-header">
+                    <padding>
+                        <Insets bottom="12" left="16" right="16" top="16" />
+                    </padding>
+                    <Label styleClass="msg-user-list-title" text="Discussions" />
+                    <Label styleClass="msg-user-list-sub" text="Vos contacts" wrapText="true" />
                 </VBox>
-                <!-- Colonne chat -->
-                <VBox spacing="0" styleClass="msg-chat-column" maxWidth="Infinity" maxHeight="Infinity" HBox.hgrow="ALWAYS">
-                    <VBox fx:id="chatHeaderMount" styleClass="msg-chat-header-wrap" maxWidth="Infinity" />
-                    <ScrollPane fx:id="messagesScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                                styleClass="msg-messages-scroll" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                <VBox fx:id="inboxToolbarMount" styleClass="msg-inbox-toolbar-host" maxWidth="Infinity" />
+                <ListView fx:id="conversationList" styleClass="msg-user-listview" />
+            </VBox>
+            <!-- Colonne 2 : CHAT (croissance horizontale : HBox.setHgrow dans DiscussionPageController) -->
+            <VBox fx:id="chatColumn" spacing="0" styleClass="msg-chat-column" maxWidth="Infinity" maxHeight="Infinity">
+                <VBox fx:id="chatHeaderMount" styleClass="msg-chat-header-wrap" maxWidth="Infinity" />
+                <ScrollPane fx:id="messagesScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                            styleClass="msg-messages-scroll" maxWidth="Infinity">
+                    <content>
                         <VBox fx:id="messagesBox" styleClass="msg-messages-stack" maxWidth="Infinity" />
-                    </ScrollPane>
-                    <VBox fx:id="messageInputMount" styleClass="msg-input-dock-outer" maxWidth="Infinity" />
-                </VBox>
-            </children>
+                    </content>
+                </ScrollPane>
+                <VBox fx:id="messageInputMount" styleClass="msg-input-dock-outer" maxWidth="Infinity" />
+            </VBox>
+            <!-- Colonne 3 : DETAILS (pas de HBox.hgrow : largeur implicite du panneau) -->
+            <ConversationDetailsPanel fx:id="detailsPanel" />
         </ChatLayout>
     </center>
     <bottom>
