@@ -561,7 +561,9 @@ public class MainLayoutController implements Initializable {
             Stage stage = (Stage) contentArea.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Login.fxml"));
             Parent root = loader.load();
-            stage.setScene(new Scene(root, 1080, 720));
+            Scene scene = new Scene(root, 1080, 720);
+            org.example.utils.AppStyles.apply(scene);
+            stage.setScene(scene);
             stage.setTitle("OXYN — Connexion");
             PrimaryStageLayout.applyFullScreen(stage);
             stage.show();

@@ -37,6 +37,14 @@ public class UserService {
         return userDAO.findByEmail(email);
     }
 
+    public boolean updatePasswordHashByEmail(String email, String passwordHash) throws SQLException {
+        return userDAO.updatePasswordHashByEmail(email, passwordHash);
+    }
+
+    public void touchLastSeen(int userId) throws SQLException {
+        userDAO.touchLastSeen(userId);
+    }
+
     /**
      * Met à jour uniquement nom, prénom et téléphone pour l'utilisateur connecté (contrôle d'identité côté appelant).
      */
