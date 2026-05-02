@@ -2,12 +2,16 @@ package org.example.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.entities.Admin;
@@ -21,10 +25,26 @@ import org.example.services.UserService;
 import org.example.utils.FormFieldFeedback;
 import org.example.utils.PasswordUtils;
 import org.example.utils.UserDialogHelper;
+import org.example.windowshello.WindowsHelloBridge;
+import org.example.windowshello.WindowsHelloLinkDAO;
+import org.example.windowshello.WindowsHelloResult;
+import org.example.facerec.FaceCaptureService;
+import org.example.facerec.FaceEmbeddingCodec;
+import org.example.facerec.FaceEmbeddingDAO;
+import org.example.facerec.FaceEmbeddingModel;
+import org.example.totp.Base32;
+import org.example.totp.QrCode;
+import org.example.totp.Totp;
+import org.example.totp.TotpDAO;
+import org.example.avatar.AvatarDAO;
+import org.example.avatar.AvatarGenerator;
+import org.example.avatar.AvatarAiService;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ResourceBundle;
+import java.io.ByteArrayInputStream;
 
 /**
  * Profil connecté : e-mail, nom, prénom, téléphone et changement de mot de passe (admin, client, encadrant).
@@ -88,7 +108,49 @@ public class ProfilePageController implements Initializable {
     private Button saveButton;
 
     @FXML
+    private Label windowsHelloStatusLabel;
+
+    @FXML
+    private Button enableWindowsHelloButton;
+
+    @FXML
+    private Button disableWindowsHelloButton;
+
+    @FXML
+    private Label faceStatusLabel;
+
+    @FXML
+    private Button enrollFaceButton;
+
+    @FXML
+    private Button disableFaceButton;
+
+    @FXML
+    private Label totpStatusLabel;
+
+    @FXML
+    private Button enableTotpButton;
+
+    @FXML
+    private Button disableTotpButton;
+
+    @FXML
     private Label avatarLabel;
+
+    @FXML
+    private ImageView avatarImageView;
+
+    @FXML
+    private Label avatarStatusLabel;
+
+    @FXML
+    private Button generateAvatarButton;
+
+    @FXML
+    private Button generateAvatarAiButton;
+
+    @FXML
+    private Button removeAvatarButton;
 
     @FXML
     private Label formHintLabel;
@@ -100,6 +162,11 @@ public class ProfilePageController implements Initializable {
     private VBox profileRoot;
 
     private final UserService userService = new UserService();
+    private final WindowsHelloLinkDAO windowsHelloLinkDAO = new WindowsHelloLinkDAO();
+    private final FaceEmbeddingDAO faceEmbeddingDAO = new FaceEmbeddingDAO();
+    private final TotpDAO totpDAO = new TotpDAO();
+    private final AvatarDAO avatarDAO = new AvatarDAO();
+    private final AvatarAiService avatarAiService = new AvatarAiService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -177,6 +244,428 @@ public class ProfilePageController implements Initializable {
         clearPasswordFields();
         clearFieldErrors();
         applyProfileTheme(u);
+        refreshWindowsHelloBlock(u);
+        refreshFaceBlock(u);
+        refreshTotpBlock(u);
+        refreshAvatarImage(u);
+    }
+
+    private void refreshAvatarImage(User u) {
+        if (avatarImageView == null || avatarLabel == null || avatarStatusLabel == null
+                || generateAvatarButton == null || removeAvatarButton == null) {
+            return;
+        }
+        if (u == null || u.getId() <= 0) {
+            avatarImageView.setVisible(false);
+            avatarImageView.setManaged(false);
+            avatarLabel.setVisible(true);
+            avatarLabel.setManaged(true);
+            avatarStatusLabel.setText("Avatar : indisponible (pas de session).");
+            generateAvatarButton.setDisable(true);
+            removeAvatarButton.setDisable(true);
+            return;
+        }
+        try {
+            var recOpt = avatarDAO.getByUserId(u.getId());
+            if (recOpt.isEmpty() || recOpt.get().avatarPng() == null || recOpt.get().avatarPng().length == 0) {
+                avatarImageView.setVisible(false);
+                avatarImageView.setManaged(false);
+                avatarLabel.setVisible(true);
+                avatarLabel.setManaged(true);
+                avatarStatusLabel.setText("Avatar : non généré.");
+                generateAvatarButton.setDisable(false);
+                removeAvatarButton.setDisable(true);
+                return;
+            }
+            Image img = new Image(new ByteArrayInputStream(recOpt.get().avatarPng()));
+            avatarImageView.setImage(img);
+            avatarImageView.setVisible(true);
+            avatarImageView.setManaged(true);
+            avatarLabel.setVisible(false);
+            avatarLabel.setManaged(false);
+            avatarStatusLabel.setText("Avatar : généré.");
+            generateAvatarButton.setDisable(false);
+            removeAvatarButton.setDisable(false);
+        } catch (SQLException e) {
+            avatarStatusLabel.setText("Avatar : erreur DB.");
+            generateAvatarButton.setDisable(false);
+            removeAvatarButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleGenerateAvatar() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) return;
+        try {
+            // Réutilise la capture visage (webcam) existante: détecte visage puis crop.
+            var face96 = FaceCaptureService.captureSingleFace96x96Bgr(0, Duration.ofSeconds(12));
+            byte[] png = AvatarGenerator.generateAvatarPng(face96);
+            avatarDAO.upsert(cur.getId(), png);
+            UserDialogHelper.showMessage(owner(), "Avatar", "Avatar généré et enregistré.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Avatar",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } catch (Exception e) {
+            UserDialogHelper.showMessage(owner(), "Avatar",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshAvatarImage(cur);
+        }
+    }
+
+    @FXML
+    private void handleGenerateAvatarAi() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) return;
+
+        // Désactiver les boutons pendant le traitement (appel réseau ~10-30s)
+        if (generateAvatarAiButton != null) generateAvatarAiButton.setDisable(true);
+        if (generateAvatarButton   != null) generateAvatarButton.setDisable(true);
+        if (avatarStatusLabel      != null) avatarStatusLabel.setText("Avatar IA : génération en cours…");
+
+        Task<byte[]> task = new Task<>() {
+            @Override
+            protected byte[] call() throws Exception {
+                // Capture le visage depuis la webcam (réutilise l'infrastructure existante)
+                var face96 = org.example.facerec.FaceCaptureService
+                        .captureSingleFace96x96Bgr(0, java.time.Duration.ofSeconds(12));
+
+                // Encode le Mat OpenCV en JPEG pour l'envoyer à l'API
+                org.bytedeco.javacpp.BytePointer buf = new org.bytedeco.javacpp.BytePointer();
+                org.bytedeco.opencv.global.opencv_imgcodecs.imencode(".jpg", face96, buf);
+                byte[] jpegBytes = new byte[(int) buf.limit()];
+                buf.get(jpegBytes);
+                buf.close();
+
+                return avatarAiService.generateAnimeAvatar(jpegBytes);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            byte[] result = task.getValue();
+            Platform.runLater(() -> {
+                if (result != null && result.length > 0) {
+                    try {
+                        avatarDAO.upsert(cur.getId(), result);
+                        UserDialogHelper.showMessage(owner(), "Avatar IA", "Avatar anime généré et enregistré ✨", false);
+                    } catch (java.sql.SQLException ex) {
+                        UserDialogHelper.showMessage(owner(), "Avatar IA", "Erreur DB: " + ex.getMessage(), true);
+                    }
+                } else {
+                    UserDialogHelper.showMessage(owner(), "Avatar IA",
+                            "La génération IA a échoué (API HuggingFace indisponible ou quota dépassé).", true);
+                }
+                refreshAvatarImage(cur);
+                if (generateAvatarAiButton != null) generateAvatarAiButton.setDisable(false);
+                if (generateAvatarButton   != null) generateAvatarButton.setDisable(false);
+            });
+        });
+
+        task.setOnFailed(e -> {
+            Throwable ex = task.getException();
+            Platform.runLater(() -> {
+                UserDialogHelper.showMessage(owner(), "Avatar IA",
+                        ex != null ? ex.getMessage() : "Erreur inconnue", true);
+                refreshAvatarImage(cur);
+                if (generateAvatarAiButton != null) generateAvatarAiButton.setDisable(false);
+                if (generateAvatarButton   != null) generateAvatarButton.setDisable(false);
+            });
+        });
+
+        new Thread(task, "avatar-ai-thread").start();
+    }
+
+    @FXML
+    private void handleRemoveAvatar() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) return;
+        try {
+            avatarDAO.delete(cur.getId());
+            UserDialogHelper.showMessage(owner(), "Avatar", "Avatar supprimé.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Avatar",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshAvatarImage(cur);
+        }
+    }
+
+    private void refreshTotpBlock(User u) {
+        if (totpStatusLabel == null || enableTotpButton == null || disableTotpButton == null) {
+            return;
+        }
+        if (u == null || u.getId() <= 0) {
+            totpStatusLabel.setText("2FA : indisponible (pas de session).");
+            enableTotpButton.setDisable(true);
+            disableTotpButton.setDisable(true);
+            return;
+        }
+        try {
+            var recOpt = totpDAO.getByUserId(u.getId());
+            if (recOpt.isEmpty()) {
+                totpStatusLabel.setText("2FA : non activée.");
+                enableTotpButton.setDisable(false);
+                disableTotpButton.setDisable(true);
+                return;
+            }
+            var rec = recOpt.get();
+            if (rec.enabled()) {
+                totpStatusLabel.setText("2FA : activée (TOTP).");
+                enableTotpButton.setDisable(true);
+                disableTotpButton.setDisable(false);
+            } else {
+                totpStatusLabel.setText("2FA : désactivée (réactivable).");
+                enableTotpButton.setDisable(false);
+                disableTotpButton.setDisable(true);
+            }
+        } catch (SQLException e) {
+            totpStatusLabel.setText("2FA : erreur DB.");
+            enableTotpButton.setDisable(false);
+            disableTotpButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleEnableTotp() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        String secret = Base32.randomSecret(20);
+        String issuer = "OXYN";
+        String account = cur.getEmail() != null ? cur.getEmail().trim() : ("user#" + cur.getId());
+        String uri = Totp.buildOtpAuthUri(issuer, account, secret);
+
+        javafx.scene.image.Image qr = null;
+        try {
+            qr = QrCode.toFxImage(uri, 240);
+        } catch (Exception ignored) {
+        }
+        String hint = "Clé (si QR indisponible) : " + secret;
+
+        var codeOpt = UserDialogHelper.showTotpCodeDialog(owner(),
+                "Activer 2FA (TOTP)",
+                "Scannez le QR code avec Google Authenticator, puis saisissez le code à 6 chiffres.",
+                qr, hint);
+        if (codeOpt.isEmpty()) {
+            refreshTotpBlock(cur);
+            return;
+        }
+        String code = codeOpt.get();
+        boolean ok = Totp.verifyCode(secret, code, System.currentTimeMillis());
+        if (!ok) {
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)", "Code invalide. Réessayez.", true);
+            refreshTotpBlock(cur);
+            return;
+        }
+        try {
+            totpDAO.upsert(cur.getId(), secret, true);
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)", "2FA activée. Un code sera demandé à la connexion.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshTotpBlock(cur);
+        }
+    }
+
+    @FXML
+    private void handleDisableTotp() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        boolean confirm = UserDialogHelper.showConfirm(owner(), "2FA (TOTP)",
+                "Désactiver la 2FA ? Vous pourrez vous connecter sans code temporaire.", "Désactiver", true);
+        if (!confirm) {
+            refreshTotpBlock(cur);
+            return;
+        }
+        try {
+            totpDAO.disable(cur.getId());
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)", "2FA désactivée.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "2FA (TOTP)",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshTotpBlock(cur);
+        }
+    }
+
+    private void refreshFaceBlock(User u) {
+        if (faceStatusLabel == null || enrollFaceButton == null || disableFaceButton == null) {
+            return;
+        }
+        if (u == null || u.getId() <= 0) {
+            faceStatusLabel.setText("Reconnaissance faciale : indisponible (pas de session).");
+            enrollFaceButton.setDisable(true);
+            disableFaceButton.setDisable(true);
+            return;
+        }
+        try {
+            var recOpt = faceEmbeddingDAO.getByUserId(u.getId());
+            if (recOpt.isEmpty()) {
+                faceStatusLabel.setText("Reconnaissance faciale : non enregistrée.");
+                enrollFaceButton.setDisable(false);
+                disableFaceButton.setDisable(true);
+                return;
+            }
+            var rec = recOpt.get();
+            if (rec.enabled()) {
+                faceStatusLabel.setText("Reconnaissance faciale : activée.");
+                enrollFaceButton.setDisable(false);
+                disableFaceButton.setDisable(false);
+            } else {
+                faceStatusLabel.setText("Reconnaissance faciale : désactivée (réactivable).");
+                enrollFaceButton.setDisable(false);
+                disableFaceButton.setDisable(true);
+            }
+        } catch (SQLException e) {
+            faceStatusLabel.setText("Reconnaissance faciale : erreur DB.");
+            enrollFaceButton.setDisable(false);
+            disableFaceButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleEnrollFace() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        try {
+            var face96 = FaceCaptureService.captureSingleFace96x96Bgr(0, Duration.ofSeconds(12));
+            float[] emb = FaceEmbeddingModel.embedFaceBgr96(face96);
+            byte[] bytes = FaceEmbeddingCodec.toBytes(emb);
+            faceEmbeddingDAO.upsert(cur.getId(), bytes, true);
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale",
+                    "Visage enregistré. Vous pourrez vous connecter via la webcam.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            if (msg == null || msg.isBlank() || msg.trim().matches("^\\d+$")) {
+                msg = e.toString();
+            }
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale", msg, true);
+        } finally {
+            refreshFaceBlock(cur);
+        }
+    }
+
+    @FXML
+    private void handleDisableFace() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        try {
+            faceEmbeddingDAO.disable(cur.getId());
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale",
+                    "Reconnaissance faciale désactivée pour ce compte.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Reconnaissance faciale",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshFaceBlock(cur);
+        }
+    }
+
+    private void refreshWindowsHelloBlock(User u) {
+        if (windowsHelloStatusLabel == null || enableWindowsHelloButton == null || disableWindowsHelloButton == null) {
+            return;
+        }
+        if (u == null || u.getId() <= 0) {
+            windowsHelloStatusLabel.setText("Windows Hello : indisponible (pas de session).");
+            enableWindowsHelloButton.setDisable(true);
+            disableWindowsHelloButton.setDisable(true);
+            return;
+        }
+        try {
+            var linkOpt = windowsHelloLinkDAO.getByUserId(u.getId());
+            if (linkOpt.isEmpty()) {
+                windowsHelloStatusLabel.setText("Windows Hello : non activé sur ce PC.");
+                enableWindowsHelloButton.setDisable(false);
+                disableWindowsHelloButton.setDisable(true);
+                return;
+            }
+            var link = linkOpt.get();
+            if (link.enabled()) {
+                windowsHelloStatusLabel.setText("Windows Hello : activé (SID " + link.windowsSid() + ").");
+                enableWindowsHelloButton.setDisable(true);
+                disableWindowsHelloButton.setDisable(false);
+            } else {
+                windowsHelloStatusLabel.setText("Windows Hello : désactivé (réactivable).");
+                enableWindowsHelloButton.setDisable(false);
+                disableWindowsHelloButton.setDisable(true);
+            }
+        } catch (SQLException e) {
+            windowsHelloStatusLabel.setText("Windows Hello : erreur DB.");
+            enableWindowsHelloButton.setDisable(false);
+            disableWindowsHelloButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleEnableWindowsHello() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        WindowsHelloResult r = WindowsHelloBridge.verify("Activer Windows Hello pour OXYN");
+        if (r == null || !r.ok()) {
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    (r != null && r.error() != null && !r.error().isBlank())
+                            ? r.error()
+                            : "Vérification Windows Hello non validée.", true);
+            refreshWindowsHelloBlock(cur);
+            return;
+        }
+        if (r.sid() == null || r.sid().isBlank()) {
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    "Impossible de lire le SID Windows. Activation annulée.", true);
+            refreshWindowsHelloBlock(cur);
+            return;
+        }
+        try {
+            windowsHelloLinkDAO.upsert(cur.getId(), r.sid(), true);
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    "Windows Hello activé sur ce PC. Vous pourrez vous connecter sans mot de passe.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshWindowsHelloBlock(cur);
+        }
+    }
+
+    @FXML
+    private void handleDisableWindowsHello() {
+        SessionContext ctx = SessionContext.getInstance();
+        User cur = ctx.getCurrentUser();
+        if (cur == null) {
+            return;
+        }
+        try {
+            windowsHelloLinkDAO.disable(cur.getId());
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    "Windows Hello désactivé pour ce compte.", false);
+        } catch (SQLException e) {
+            UserDialogHelper.showMessage(owner(), "Windows Hello",
+                    e.getMessage() != null ? e.getMessage() : e.toString(), true);
+        } finally {
+            refreshWindowsHelloBlock(cur);
+        }
     }
 
     private void clearPasswordFields() {
