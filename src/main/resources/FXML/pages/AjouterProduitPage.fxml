@@ -53,9 +53,6 @@
                         <VBox spacing="6">
                             <Label styleClass="product-form-field-label" text="Description *" />
                             <TextArea fx:id="descriptionField" prefHeight="110" promptText="Décrivez le produit, le contenu, les usages…" styleClass="apd-field" wrapText="true" />
-                            <HBox alignment="CENTER_RIGHT">
-                                <Button onAction="#handleGenerateDescriptionAi" styleClass="apd-btn-ghost" text="Generate with AI" />
-                            </HBox>
                         </VBox>
                     </VBox>
                 </VBox>

@@ -14,14 +14,23 @@ public class ClientSalleService {
     private final Connection con;
 
     public ClientSalleService() {
-        con = MyDataBase.getInstance().getConnection();
+        con = MyDataBase.getConnection();
     }
 
     /** All active gymnasia */
     public List<Salle> getSallesActives() throws SQLException {
         List<Salle> list = new ArrayList<>();
-        ResultSet rs = con.createStatement().executeQuery(
-            "SELECT * FROM gymnasia WHERE is_active = 1 ORDER BY name");
+        String sql = 
+            "SELECT g.*, " +
+            "COALESCE(AVG(r.rating), 0) as avg_rating, " +
+            "COUNT(r.id) as total_ratings " +
+            "FROM gymnasia g " +
+            "LEFT JOIN gym_ratings r ON g.id = r.gymnasium_id " +
+            "WHERE g.is_active = 1 " +
+            "GROUP BY g.id " +
+            "ORDER BY g.name";
+        
+        ResultSet rs = con.createStatement().executeQuery(sql);
         while (rs.next()) {
             Salle s = new Salle();
             s.setId(rs.getInt("id"));
@@ -31,8 +40,9 @@ public class ClientSalleService {
             s.setPhone(rs.getString("phone"));
             s.setEmail(rs.getString("email"));
             s.setImageUrl(rs.getString("image_url"));
-            s.setRating(rs.getDouble("rating"));
-            s.setRatingCount(rs.getInt("rating_count"));
+            s.setYoutubeUrl(rs.getString("youtube_url"));
+            s.setRating(rs.getDouble("avg_rating"));        // depuis gym_ratings
+            s.setRatingCount(rs.getInt("total_ratings"));   // depuis gym_ratings
             s.setActive(true);
             list.add(s);
         }
@@ -84,5 +94,39 @@ public class ClientSalleService {
             list.add(s);
         }
         return list;
+    }
+
+    /** Get a specific gymnasium by ID with all details */
+    public Salle getById(int id) throws SQLException {
+        String sql = 
+            "SELECT g.*, " +
+            "COALESCE(AVG(r.rating), 0) as avg_rating, " +
+            "COUNT(r.id) as total_ratings " +
+            "FROM gymnasia g " +
+            "LEFT JOIN gym_ratings r ON g.id = r.gymnasium_id " +
+            "WHERE g.id = ? AND g.is_active = 1 " +
+            "GROUP BY g.id";
+        
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            Salle s = new Salle();
+            s.setId(rs.getInt("id"));
+            s.setName(rs.getString("name"));
+            s.setDescription(rs.getString("description"));
+            s.setAddress(rs.getString("address"));
+            s.setPhone(rs.getString("phone"));
+            s.setEmail(rs.getString("email"));
+            s.setImageUrl(rs.getString("image_url"));
+            s.setYoutubeUrl(rs.getString("youtube_url"));
+            s.setGoogleMapsUrl(rs.getString("google_maps_url"));
+            s.setRating(rs.getDouble("avg_rating"));
+            s.setRatingCount(rs.getInt("total_ratings"));
+            s.setActive(rs.getInt("is_active") == 1);
+            return s;
+        }
+        return null;
     }
 }

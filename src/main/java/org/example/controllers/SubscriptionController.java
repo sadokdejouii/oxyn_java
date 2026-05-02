@@ -51,7 +51,7 @@ public class SubscriptionController implements Initializable {
             @Override public Salle fromString(String s) { return null; }
         };
         fieldSalle.getItems().clear(); fieldSalle.getItems().add(none);
-        try { fieldSalle.getItems().addAll(salleService.afficher()); } catch (SQLException ignored) {}
+        try { fieldSalle.getItems().addAll(salleService.afficher()); } catch (Exception ignored) {}
         fieldSalle.getSelectionModel().selectFirst(); fieldSalle.setConverter(conv);
     }
 
@@ -66,7 +66,7 @@ public class SubscriptionController implements Initializable {
     }
 
     private void load() {
-        try { allItems = service.afficher(); } catch (SQLException e) { e.printStackTrace(); }
+        allItems = service.getAll();
         statTotal.setText(String.valueOf(allItems.size()));
         statActives.setText(String.valueOf(allItems.stream().filter(SubscriptionOffer::isActive).count()));
         statPrix.setText(String.format("%.2f", allItems.stream().mapToDouble(SubscriptionOffer::getPrice).average().orElse(0)));
@@ -150,25 +150,30 @@ public class SubscriptionController implements Initializable {
         double price = priceBd.doubleValue();
         try {
             if (editing == null) {
-                service.ajouter(new SubscriptionOffer(gymId, name, dur, price, fieldDesc.getText().trim()));
+                service.add(new SubscriptionOffer(gymId, name, dur, price, fieldDesc.getText().trim()));
             } else {
                 editing.setName(name);
                 editing.setDurationMonths(dur);
                 editing.setPrice(price);
                 editing.setDescription(fieldDesc.getText().trim());
                 editing.setGymnasiumId(gymId);
-                service.modifier(editing);
+                service.update(editing);
             }
             showDialog(false); load();
-        } catch (SQLException e) { dialogError.setText("Erreur : " + e.getMessage()); }
+        } catch (Exception e) { dialogError.setText("Erreur : " + e.getMessage()); }
     }
 
     @FXML private void handleCancel() { showDialog(false); }
-    private void toggle(SubscriptionOffer o) { try { service.toggleActive(o.getId(), !o.isActive()); load(); } catch (SQLException e) { e.printStackTrace(); } }
-    private void showOrders(SubscriptionOffer o) { try { ordersTable.setItems(FXCollections.observableArrayList(service.getOrders(o.getId()))); ordersOverlay.setVisible(true); ordersOverlay.setManaged(true); } catch (SQLException e) { e.printStackTrace(); } }
+    private void toggle(SubscriptionOffer o) { service.toggleActive(o.getId(), !o.isActive()); load(); }
+    private void showOrders(SubscriptionOffer o) { 
+    List<String[]> orders = service.getOrdersByOffer(o.getId());
+    ordersTable.setItems(FXCollections.observableArrayList(orders)); 
+    ordersOverlay.setVisible(true); 
+    ordersOverlay.setManaged(true); 
+    }
     @FXML private void handleCloseOrders() { ordersOverlay.setVisible(false); ordersOverlay.setManaged(false); }
     private void openConfirm(SubscriptionOffer o) { toDelete = o; confirmMsg.setText("\"" + o.getName() + "\" sera supprimee."); confirmOverlay.setVisible(true); confirmOverlay.setManaged(true); }
-    @FXML private void handleConfirmDelete() { if (toDelete == null) return; try { service.supprimer(toDelete.getId()); load(); } catch (SQLException e) { e.printStackTrace(); } finally { confirmOverlay.setVisible(false); confirmOverlay.setManaged(false); toDelete = null; } }
+    @FXML private void handleConfirmDelete() { if (toDelete == null) return; service.delete(toDelete.getId()); load(); confirmOverlay.setVisible(false); confirmOverlay.setManaged(false); toDelete = null; }
     @FXML private void handleConfirmCancel() { confirmOverlay.setVisible(false); confirmOverlay.setManaged(false); toDelete = null; }
     private void showDialog(boolean show) { dialogOverlay.setVisible(show); dialogOverlay.setManaged(show); }
     private void clearDialog() { fieldName.clear(); fieldDuration.clear(); fieldPrice.clear(); fieldDesc.clear(); fieldSalle.getSelectionModel().selectFirst(); dialogError.setText(""); }

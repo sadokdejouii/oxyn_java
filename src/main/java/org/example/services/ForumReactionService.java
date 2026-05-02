@@ -11,7 +11,7 @@ public class ForumReactionService implements ICrud<ForumReaction> {
     Connection con;
 
     public ForumReactionService() {
-        con = MyDataBase.getInstance().getConnection();
+        con = MyDataBase.getConnection();
     }
 
     @Override

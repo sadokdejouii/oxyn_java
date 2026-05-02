@@ -1,0 +1,24 @@
+/* Bouton d'abonnement Flouci */
+.client-salle-subscribe-btn {
+    -fx-background-color: linear-gradient(to bottom, #28a745 0%, #20c997 100%);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 24;
+    -fx-border-radius: 8px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.3), 8, 0, 0, 2);
+    -fx-background-radius: 8px;
+    -fx-min-width: 120;
+}
+
+.client-salle-subscribe-btn:hover {
+    -fx-background-color: linear-gradient(to bottom, #218838 0%, #1e7e34 100%);
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.4), 12, 0, 0, 3);
+    -fx-translate-y: -2;
+}
+
+.client-salle-subscribe-btn:pressed {
+    -fx-background-color: linear-gradient(to bottom, #1e7e34 0%, #155724 100%);
+    -fx-translate-y: 0;
+}

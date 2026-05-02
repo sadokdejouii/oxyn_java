@@ -108,7 +108,7 @@ public final class AdminPlanningDashboardService {
     }
 
     private static Connection conn() throws SQLException {
-        Connection c = MyDataBase.getInstance().getConnection();
+        Connection c = MyDataBase.getConnection();
         if (c == null || c.isClosed()) {
             return null;
         }

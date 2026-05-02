@@ -51,6 +51,7 @@ public class SalleManagementController implements Initializable {
     @FXML private TextField fieldAdresse;
     @FXML private TextField fieldTelephone;
     @FXML private TextField fieldEmail;
+    @FXML private TextField fieldYoutubeUrl;
 
     // Photo
     @FXML private StackPane previewPane;
@@ -60,7 +61,6 @@ public class SalleManagementController implements Initializable {
 
     private final SalleService service = new SalleService();
     private final EquipmentService equipmentService = new EquipmentService();
-    private final SubscriptionOfferService subscriptionOfferService = new SubscriptionOfferService();
     private Salle salleEnEdition = null;
     private String selectedImagePath = null; // chemin local du fichier choisi
 
@@ -88,6 +88,7 @@ public class SalleManagementController implements Initializable {
     @FXML private Label subsError;
 
     private Salle currentSalleModal = null;
+    private SubscriptionOfferService subscriptionOfferService = new SubscriptionOfferService();
     private final Set<Integer> equipToDelete = new HashSet<>();
     private final Map<Integer, Equipment> equipToUpdate = new LinkedHashMap<>();
     private final List<Equipment> equipToAdd = new ArrayList<>();
@@ -95,6 +96,20 @@ public class SalleManagementController implements Initializable {
     private final Set<Integer> subsToDelete = new HashSet<>();
     private final Map<Integer, SubscriptionOffer> subsToUpdate = new LinkedHashMap<>();
     private final List<SubscriptionOffer> subsToAdd = new ArrayList<>();
+
+    // Méthode utilitaire pour getText() safe
+    private String safeGetText(TextField field) {
+        return field != null && field.getText() != null ? field.getText().trim() : "";
+    }
+
+    private String safeGetText(TextArea field) {
+        if (field == null) {
+            System.err.println("WARNING: TextArea field is null!");
+            return "";
+        }
+        String text = field.getText();
+        return text != null ? text.trim() : "";
+    }
 
     // Dossier de stockage des images
     private static final String UPLOAD_DIR = System.getProperty("user.home") + "/oxyn_uploads/salles/";
@@ -260,7 +275,7 @@ public class SalleManagementController implements Initializable {
     private void loadSalles() {
         sallesGrid.getChildren().clear();
         try {
-            List<Salle> salles = service.afficher();
+            List<Salle> salles = service.getAll();
             countLabel.setText(salles.size() + " salle(s)");
             for (Salle s : salles) sallesGrid.getChildren().add(buildCard(s));
         } catch (SQLException e) {
@@ -364,8 +379,8 @@ public class SalleManagementController implements Initializable {
 
         int equipCount = 0;
         int subsCount = 0;
-        try { equipCount = equipmentService.countParSalle(s.getId()); } catch (SQLException ignored) {}
-        try { subsCount = subscriptionOfferService.countParSalle(s.getId()); } catch (SQLException ignored) {}
+        try { equipCount = equipmentService.countParSalle(s.getId()); } catch (Exception ignored) {}
+        try { subsCount = subscriptionOfferService.countParSalle(s.getId()); } catch (Exception ignored) {}
 
         Button btnEquip = buildActionButtonWithBadge("🏋  Équipements", equipCount);
         btnEquip.setOnAction(e -> openEquipModal(s));
@@ -433,10 +448,11 @@ public class SalleManagementController implements Initializable {
         salleEnEdition = s;
         dialogTitle.setText("Modifier la salle");
         fieldNom.setText(s.getName());
-        fieldDescription.setText(s.getDescription());
+        if (fieldDescription != null) fieldDescription.setText(s.getDescription());
         fieldAdresse.setText(s.getAddress() != null ? s.getAddress() : "");
         fieldTelephone.setText(s.getPhone());
         fieldEmail.setText(s.getEmail());
+        fieldYoutubeUrl.setText(s.getYoutubeUrl() != null ? s.getYoutubeUrl() : "");
         dialogError.setText("");
 
         // Charger la photo existante
@@ -455,7 +471,7 @@ public class SalleManagementController implements Initializable {
 
     @FXML
     private void handleDialogSave() {
-        String adresse = fieldAdresse.getText() == null ? "" : fieldAdresse.getText().trim();
+        String adresse = safeGetText(fieldAdresse);
         if (adresse.isEmpty()) {
             dialogError.setText("L'adresse est obligatoire.");
             return;
@@ -465,17 +481,17 @@ public class SalleManagementController implements Initializable {
             dialogError.setText("Format invalide. Utilisez : Ville, Pays — ex : Sousse, Tunisie");
             return;
         }
-        String errNom = AdminFormValidation.validateAdminDisplayName(fieldNom.getText(), "Le nom de la salle", 2, 150);
+        String errNom = AdminFormValidation.validateAdminDisplayName(safeGetText(fieldNom), "Le nom de la salle", 2, 150);
         if (errNom != null) { dialogError.setText(errNom); return; }
-        String errDesc = AdminFormValidation.validateOptionalDescription(fieldDescription.getText(), 4000, "La description");
+        String errDesc = AdminFormValidation.validateOptionalDescription(safeGetText(fieldDescription), 4000, "La description");
         if (errDesc != null) { dialogError.setText(errDesc); return; }
-        String errTel = org.example.services.AuthValidation.validateTelephone(fieldTelephone.getText(), false);
+        String errTel = org.example.services.AuthValidation.validateTelephone(safeGetText(fieldTelephone), false);
         if (errTel != null) { dialogError.setText(errTel); return; }
-        String errEmail = AdminFormValidation.validateEmailIfPresent(fieldEmail.getText());
+        String errEmail = AdminFormValidation.validateEmailIfPresent(safeGetText(fieldEmail));
         if (errEmail != null) { dialogError.setText(errEmail); return; }
         dialogError.setText("");
 
-        String nom = fieldNom.getText().trim();
+        String nom = safeGetText(fieldNom);
         try {
             String finalImagePath = null;
             if (selectedImagePath != null) {
@@ -487,19 +503,21 @@ public class SalleManagementController implements Initializable {
             }
             if (salleEnEdition == null) {
                 Salle s = new Salle(nom,
-                    fieldDescription.getText().trim(),
+                    safeGetText(fieldDescription),
                     adresse,
-                    fieldTelephone.getText().trim(),
-                    fieldEmail.getText().trim());
+                    safeGetText(fieldTelephone),
+                    safeGetText(fieldEmail));
                 s.setImageUrl(finalImagePath);
+                s.setYoutubeUrl(safeGetText(fieldYoutubeUrl));
                 service.ajouter(s);
             } else {
                 salleEnEdition.setName(nom);
-                salleEnEdition.setDescription(fieldDescription.getText().trim());
+                salleEnEdition.setDescription(safeGetText(fieldDescription));
                 salleEnEdition.setAddress(adresse);
-                salleEnEdition.setPhone(fieldTelephone.getText().trim());
-                salleEnEdition.setEmail(fieldEmail.getText().trim());
+                salleEnEdition.setPhone(safeGetText(fieldTelephone));
+                salleEnEdition.setEmail(safeGetText(fieldEmail));
                 salleEnEdition.setImageUrl(finalImagePath);
+                salleEnEdition.setYoutubeUrl(safeGetText(fieldYoutubeUrl));
                 service.modifier(salleEnEdition);
             }
             showDialog(false);
@@ -543,10 +561,11 @@ public class SalleManagementController implements Initializable {
 
     private void clearDialog() {
         fieldNom.clear();
-        fieldDescription.clear();
+        if (fieldDescription != null) fieldDescription.clear();
         fieldAdresse.clear();
         fieldTelephone.clear();
         fieldEmail.clear();
+        fieldYoutubeUrl.clear();
         dialogError.setText("");
         selectedImagePath = null;
         previewImage.setImage(null);
@@ -555,6 +574,7 @@ public class SalleManagementController implements Initializable {
 
     // ── MODALS ÉQUIPEMENTS / ABONNEMENTS ────────────────────────────────────
 
+// ...
     @FXML
     private void handleOverlayClick(MouseEvent e) {
         Object src = e.getSource();
@@ -579,7 +599,7 @@ public class SalleManagementController implements Initializable {
             for (Equipment eq : list) {
                 if (equipementsTable != null) equipementsTable.getItems().add(new Equipement(eq.getName(), eq.getQuantity()));
             }
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             equipError.setText("Impossible de charger les équipements.");
         }
 
@@ -628,10 +648,10 @@ public class SalleManagementController implements Initializable {
         try {
             for (Integer id : equipToDelete) equipmentService.supprimer(id);
             for (Equipment e : equipToUpdate.values()) equipmentService.modifier(e);
-            for (Equipment e : equipToAdd) equipmentService.ajouter(e);
+            for (Equipment e : equipToAdd) equipmentService.add(e);  // ← add() au lieu de ajouter()
             closeEquipModal();
             loadSalles();
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             equipError.setText("Erreur d’enregistrement : " + ex.getMessage());
         }
     }
@@ -660,11 +680,11 @@ public class SalleManagementController implements Initializable {
         subsToAdd.clear();
 
         try {
-            List<SubscriptionOffer> list = subscriptionOfferService.afficherParSalle(s.getId());
+            List<SubscriptionOffer> list = subscriptionOfferService.getByGym(s.getId());
             for (SubscriptionOffer o : list) {
                 if (abonnementsTable != null) abonnementsTable.getItems().add(new Abonnement(o.getName(), o.getPrice()));
             }
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             subsError.setText("Impossible de charger les abonnements.");
         }
 
@@ -711,12 +731,12 @@ public class SalleManagementController implements Initializable {
     private void handleSubsSave() {
         if (currentSalleModal == null) { closeSubsModal(); return; }
         try {
-            for (Integer id : subsToDelete) subscriptionOfferService.supprimer(id);
-            for (SubscriptionOffer o : subsToUpdate.values()) subscriptionOfferService.modifier(o);
-            for (SubscriptionOffer o : subsToAdd) subscriptionOfferService.ajouter(o);
+            for (Integer id : subsToDelete) subscriptionOfferService.delete(id);
+            for (SubscriptionOffer o : subsToUpdate.values()) subscriptionOfferService.update(o);
+            for (SubscriptionOffer o : subsToAdd) subscriptionOfferService.add(o);
             closeSubsModal();
             loadSalles();
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             subsError.setText("Erreur d’enregistrement : " + ex.getMessage());
         }
     }

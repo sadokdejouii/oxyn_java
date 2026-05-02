@@ -37,8 +37,6 @@
 
             <HBox alignment="CENTER_LEFT" spacing="12" styleClass="front-toolbar client-shop-toolbar-wide">
                 <Button onAction="#handleRetourBoutique" styleClass="client-shop-outline-btn" text="← Retour à la boutique" />
-                <ComboBox fx:id="devisePanierCombo" onAction="#handleRefreshCurrency" prefWidth="130" styleClass="front-sort" />
-                <Button onAction="#handleViderPanier" styleClass="client-shop-outline-btn" text="Vider le panier" />
                 <Region HBox.hgrow="ALWAYS" />
             </HBox>
 

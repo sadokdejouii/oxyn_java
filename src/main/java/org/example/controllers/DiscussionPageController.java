@@ -440,6 +440,11 @@ public class DiscussionPageController implements Initializable {
         restoreInboxSelection(previousConversationId);
     }
 
+    /**
+     * Sélectionne la conversation correspondant au client demandé (navigation depuis Planning encadrant).
+     *
+     * @return true si une conversation a été sélectionnée
+     */
     private boolean trySelectPendingClientConversation() {
         SessionContext ctx = SessionContext.getInstance();
         int clientId = ctx.getPendingDiscussionClientUserId();

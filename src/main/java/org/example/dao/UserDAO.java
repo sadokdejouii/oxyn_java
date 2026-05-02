@@ -33,7 +33,7 @@ public class UserDAO {
     private final Connection con;
 
     public UserDAO() {
-        this.con = MyDataBase.getInstance().getConnection();
+        this.con = MyDataBase.getConnection();
     }
 
     /**

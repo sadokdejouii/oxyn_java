@@ -8,23 +8,18 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/21"
-           xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="org.example.controllers.AjouterEvenementsController"
-           stylesheets="@../css/dashboard-saas.css,@../css/event-management.css"
-           fx:id="rootStackPane">
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controllers.AjouterEvenementsController"
+      styleClass="form-dialog"
+    alignment="TOP_CENTER"
+      stylesheets="@../css/dashboard-saas.css">
 
-    <!-- Form Content -->
-    <VBox styleClass="form-dialog"
-          alignment="TOP_CENTER">
-
-        <ScrollPane fitToWidth="true"
-                    hbarPolicy="NEVER"
-                    styleClass="page-scroll">
+    <ScrollPane fitToWidth="true"
+                hbarPolicy="NEVER"
+                styleClass="page-scroll">
 
         <VBox styleClass="form-shell" spacing="0">
             <padding>
@@ -101,19 +96,10 @@
 
                     <VBox styleClass="form-group">
                         <Label styleClass="form-label" text="Lieu *" />
-                        <HBox spacing="8">
-                            <TextField fx:id="lieu_evenement"
-                                       maxWidth="Infinity"
-                                       promptText="Entrez le lieu"
-                                       styleClass="form-input"
-                                       HBox.hgrow="ALWAYS" />
-                            <Button fx:id="openMapButton"
-                                    mnemonicParsing="false"
-                                    onAction="#openLocationPicker"
-                                    styleClass="form-btn-secondary"
-                                    text="📍 Localiser"
-                                    minWidth="100" />
-                        </HBox>
+                        <TextField fx:id="lieu_evenement"
+                                   maxWidth="Infinity"
+                                   promptText="Entrez le lieu"
+                                   styleClass="form-input" />
                     </VBox>
 
                     <VBox styleClass="form-group">
@@ -146,6 +132,4 @@
             </VBox>
         </VBox>
     </ScrollPane>
-    </VBox>
-
-</StackPane>
+</VBox>

@@ -17,7 +17,7 @@ public final class JdbcPlanningSupport {
      * @throws SQLException si pas de connexion ou connexion fermée
      */
     public static Connection requireConnection() throws SQLException {
-        Connection c = MyDataBase.getInstance().getConnection();
+        Connection c = MyDataBase.getConnection();
         if (c == null || c.isClosed()) {
             throw new SQLException("Pas de connexion MySQL");
         }
@@ -25,7 +25,7 @@ public final class JdbcPlanningSupport {
     }
 
     public static Connection connectionOrNull() throws SQLException {
-        Connection c = MyDataBase.getInstance().getConnection();
+        Connection c = MyDataBase.getConnection();
         if (c == null || c.isClosed()) {
             return null;
         }

@@ -12,14 +12,12 @@
     <center>
         <VBox spacing="16" styleClass="forum-main-content" VBox.vgrow="ALWAYS">
             <padding>
-                <Insets top="40" bottom="30" left="48" right="48" />
+                <Insets bottom="12" left="20" right="20" top="8" />
             </padding>
 
-            <!-- CREATE POST SECTION — compact -->
-            <VBox styleClass="create-post-section" spacing="8">
-                <VBox.margin>
-                    <Insets top="15" bottom="15" left="10" right="10" />
-                </VBox.margin>
+            <!-- CREATE POST SECTION -->
+            <VBox styleClass="create-post-section" spacing="10">
+
 
                 <!-- Inline header + controls row -->
                 <HBox spacing="10" alignment="CENTER_LEFT">
@@ -40,26 +38,39 @@
                 <Label fx:id="attachmentLabel" text="" styleClass="attachment-status-label" />
             </VBox>
 
-            <!-- Filter & Controls — compact bar -->
-            <HBox styleClass="filter-bar" spacing="10" alignment="CENTER_LEFT">
-                <TextField fx:id="searchField" promptText="🔍 Rechercher..." prefHeight="32" prefWidth="180" styleClass="search-field" />
+            <!-- Filter & Controls Section -->
+            <HBox alignment="CENTER">
 
-                <Separator orientation="VERTICAL" prefHeight="24" />
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <!-- Search -->
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="searchField" promptText="Rechercher..." prefHeight="36" prefWidth="200" styleClass="search-field" />
+                        <Button text="🔍" styleClass="search-button" prefWidth="36" prefHeight="36" />
+                    </HBox>
 
-                <Label text="Catégorie:" styleClass="filter-label" />
-                <ComboBox fx:id="categoriesFilterCombo" prefWidth="140" prefHeight="32" styleClass="sort-combo" />
+                    <Separator orientation="VERTICAL" prefHeight="32" />
 
-                <Separator orientation="VERTICAL" prefHeight="24" />
+                    <!-- Categories -->
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Catégorie:" styleClass="filter-label" />
+                        <ComboBox fx:id="categoriesFilterCombo" prefWidth="160" styleClass="sort-combo" />
+                    </HBox>
 
-                <Label text="Trier:" styleClass="filter-label" />
-                <ComboBox fx:id="sortComboBox" prefWidth="140" prefHeight="32" styleClass="sort-combo" />
+                    <Separator orientation="VERTICAL" prefHeight="32" />
 
-                <Region HBox.hgrow="ALWAYS" />
+                    <!-- Sort -->
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Trier par:" styleClass="filter-label" />
+                        <ComboBox fx:id="sortComboBox" prefWidth="160" styleClass="sort-combo" />
+                    </HBox>
 
-                <!-- Grid/List Toggle -->
-                <HBox spacing="3" styleClass="view-toggle-box">
-                    <Button fx:id="gridViewBtn" text="⊞" styleClass="view-button,grid-view-btn" prefWidth="32" prefHeight="32" />
-                    <Button fx:id="listViewBtn" text="☰" styleClass="view-button,list-view-btn" prefWidth="32" prefHeight="32" />
+                    <Separator orientation="VERTICAL" prefHeight="32" />
+
+                    <!-- Grid/List Toggle -->
+                    <HBox spacing="4" styleClass="view-toggle-box">
+                        <Button fx:id="gridViewBtn" text="⊞" styleClass="view-button,grid-view-btn" prefWidth="40" prefHeight="40" />
+                        <Button fx:id="listViewBtn" text="☰" styleClass="view-button,list-view-btn" prefWidth="40" prefHeight="40" />
+                    </HBox>
                 </HBox>
             </HBox>
 

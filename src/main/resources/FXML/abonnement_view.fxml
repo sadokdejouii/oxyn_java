@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="org.example.controllers.AbonnementController" 
+      spacing="20" padding="20" style="-fx-background-color: #f8f9fa;">
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="📋 Gestion des Abonnements" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblSalleInfo" text="Salle: " style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+    </HBox>
+
+    <!-- Formulaire d'ajout -->
+    <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);">
+        <Label text="➕ Ajouter une offre" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+        
+        <GridPane hgap="15" vgap="10">
+            <Label text="Nom de l'offre:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-text-fill: #2c3e50;"/>
+            <TextField fx:id="fieldName" GridPane.columnIndex="1" GridPane.rowIndex="0" 
+                       promptText="Ex: Mensuel Premium" style="-fx-pref-width: 250px;"/>
+            
+            <Label text="Prix (€):" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-text-fill: #2c3e50;"/>
+            <TextField fx:id="fieldPrice" GridPane.columnIndex="1" GridPane.rowIndex="1" 
+                       promptText="Ex: 29.99" style="-fx-pref-width: 250px;"/>
+        </GridPane>
+        
+        <HBox spacing="10">
+            <Button fx:id="btnAjouter" text="+ Ajouter" onAction="#handleAjouter" 
+                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 5;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </VBox>
+
+    <!-- TableView des offres -->
+    <VBox VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);">
+        <Label text="📊 Liste des offres" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+        
+        <TableView fx:id="tableViewOffres" VBox.vgrow="ALWAYS" style="-fx-border-color: #ecf0f1; -fx-border-radius: 5;">
+            <columns>
+                <TableColumn fx:id="colNom" text="Nom de l'offre" prefWidth="300"/>
+                <TableColumn fx:id="colPrix" text="Prix (€)" prefWidth="100"/>
+                <TableColumn fx:id="colActions" text="Actions" prefWidth="150"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+    </VBox>
+
+    <!-- Boutons de contrôle -->
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button fx:id="btnAnnuler" text="Annuler" onAction="#handleAnnuler" 
+                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+        <Button fx:id="btnEnregistrer" text="Enregistrer" onAction="#handleEnregistrer" 
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+    </HBox>
+
+    <!-- Styles CSS -->
+    <stylesheets>
+        <String fx:value="/styles/abonnement.css"/>
+    </stylesheets>
+
+</VBox>

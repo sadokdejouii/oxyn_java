@@ -341,11 +341,7 @@ public final class EncadrantPlanningHubController {
         chev.getStyleClass().add("eph-card-chevron");
         foot.getChildren().addAll(grow, chev);
 
-        card.getChildren().addAll(head, badge, obj, act);
-        if (!objLibreBox.getChildren().isEmpty()) {
-            card.getChildren().add(objLibreBox);
-        }
-        card.getChildren().addAll(pct, bar, discussBtn, foot);
+        card.getChildren().addAll(head, badge, obj, act, pct, bar, discussBtn, foot);
         return card;
     }
 

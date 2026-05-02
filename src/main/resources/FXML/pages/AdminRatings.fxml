@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" styleClass="admin-container" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.AdminRatingsController">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Header -->
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Label text="Gestion des avis" styleClass="admin-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="refreshBtn" text="Actualiser" styleClass="admin-btn-primary"/>
+    </HBox>
+    
+    <!-- Filtres -->
+    <VBox spacing="10" styleClass="admin-section">
+        <Label text="Filtres" styleClass="admin-section-title"/>
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Label text="Salle:"/>
+            <ComboBox fx:id="salleFilterCombo" prefWidth="150"/>
+            
+            <Label text="Note:"/>
+            <ComboBox fx:id="ratingFilterCombo" prefWidth="150"/>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="deleteBtn" text="Supprimer la sélection" styleClass="admin-btn-danger" disable="true"/>
+        </HBox>
+    </VBox>
+    
+    <!-- Statistiques -->
+    <VBox spacing="5" styleClass="admin-section">
+        <Label text="Statistiques" styleClass="admin-section-title"/>
+        <Label fx:id="statsLabel" styleClass="admin-stats-text" wrapText="true"/>
+    </VBox>
+    
+    <!-- Tableau des avis -->
+    <VBox spacing="10" styleClass="admin-section" VBox.vgrow="ALWAYS">
+        <Label text="Liste des avis" styleClass="admin-section-title"/>
+        
+        <TableView fx:id="ratingsTable" VBox.vgrow="ALWAYS" styleClass="admin-table">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
+                <TableColumn fx:id="ratingColumn" text="Note" prefWidth="80"/>
+                <TableColumn fx:id="commentColumn" text="Commentaire" prefWidth="200"/>
+                <TableColumn fx:id="userColumn" text="ID User" prefWidth="80"/>
+                <TableColumn fx:id="salleColumn" text="ID Salle" prefWidth="80"/>
+                <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
+                <TableColumn fx:id="actionsColumn" text="Actions" prefWidth="150"/>
+            </columns>
+        </TableView>
+    </VBox>
+    
+</VBox>

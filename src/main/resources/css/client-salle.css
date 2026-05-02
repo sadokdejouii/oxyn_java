@@ -379,3 +379,36 @@
     -fx-text-fill: #0f172a;
     -fx-font-weight: bold;
 }
+
+/* Bouton Planning */
+.client-salle-planning-btn {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #2563eb);
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 20px;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.2), 4, 0, 0, 2);
+    -fx-transition: all 0.2s ease;
+}
+
+.client-salle-planning-btn:hover {
+    -fx-background-color: linear-gradient(to right, #2563eb, #1d4ed8);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 6, 0, 0, 3);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.client-salle-planning-btn:pressed {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #1e40af);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.client-salle-planning-btn:focused {
+    -fx-border-color: #60a5fa;
+    -fx-border-width: 2px;
+}

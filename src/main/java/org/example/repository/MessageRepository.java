@@ -310,7 +310,7 @@ public final class MessageRepository {
 
     private static Connection conn() throws SQLException {
 
-        Connection c = MyDataBase.getInstance().getConnection();
+        Connection c = MyDataBase.getConnection();
 
         if (c == null || c.isClosed()) {
 

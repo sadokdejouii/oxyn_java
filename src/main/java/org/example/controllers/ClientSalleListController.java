@@ -133,7 +133,14 @@ public class ClientSalleListController implements Initializable {
         Button btnVoir = new Button("Voir la fiche");
         btnVoir.getStyleClass().addAll("front-card-button", "client-salle-primary-btn");
         btnVoir.setMaxWidth(Double.MAX_VALUE);
-        btnVoir.setOnAction(e -> openDetail(s));
+        btnVoir.setOnAction(e -> {
+            btnVoir.setDisable(true);  // ← empêche les clics multiples
+            try {
+                openDetail(s);
+            } finally {
+                btnVoir.setDisable(false);  // ← réactiver après
+            }
+        });
 
         content.getChildren().addAll(topRow, rating, infos, sep, btnVoir);
         card.getChildren().addAll(photoPane, content);
@@ -156,13 +163,40 @@ public class ClientSalleListController implements Initializable {
 
     private void openDetail(Salle salle) {
         try {
+            // Recharger la salle complète depuis BD pour inclure youtube_url
+            Salle salleComplete = service.getById(salle.getId());
+            if (salleComplete == null) {
+                System.err.println("Erreur : salle non trouvée en BD pour ID=" + salle.getId());
+                return;
+            }
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/pages/ClientSalleDetail.fxml"));
             javafx.scene.Node detail = loader.load();
             ClientSalleDetailController ctrl = loader.getController();
-            ctrl.setSalle(salle);
+            ctrl.setSalle(salleComplete);
+
+            // Récupérer le MainLayoutController et le passer au contrôleur de détail
+            javafx.scene.Node root = sallesGrid.getScene().getRoot();
+            System.out.println("🔍 DEBUG: Root class = " + root.getClass().getSimpleName());
+            System.out.println("🔍 DEBUG: Root userData = " + root.getUserData());
+            
+            MainLayoutController mainLayoutCtrl = (MainLayoutController) root.getUserData();
+            if (mainLayoutCtrl != null) {
+                System.out.println("✅ DEBUG: MainLayoutController trouvé, passage au contrôleur détail");
+                ctrl.setMainLayoutController(mainLayoutCtrl);
+            } else {
+                System.out.println("❌ DEBUG: MainLayoutController null - recherche alternative");
+                // Alternative: chercher dans la hiérarchie
+                mainLayoutCtrl = findMainLayoutController(root);
+                if (mainLayoutCtrl != null) {
+                    System.out.println("✅ DEBUG: MainLayoutController trouvé par recherche hiérarchique");
+                    ctrl.setMainLayoutController(mainLayoutCtrl);
+                } else {
+                    System.out.println("❌ DEBUG: MainLayoutController introuvable - utilisation fallback");
+                }
+            }
 
             // Find contentArea StackPane in the scene
-            javafx.scene.Node root = sallesGrid.getScene().getRoot();
             javafx.scene.layout.StackPane contentArea =
                 (javafx.scene.layout.StackPane) root.lookup("#contentArea");
             if (contentArea != null) {
@@ -171,5 +205,28 @@ public class ClientSalleListController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Recherche le MainLayoutController dans la hiérarchie des nœuds
+     */
+    private MainLayoutController findMainLayoutController(javafx.scene.Node node) {
+        if (node == null) return null;
+        
+        // Vérifier si le nœud lui-même est le contrôleur
+        if (node.getUserData() instanceof MainLayoutController) {
+            return (MainLayoutController) node.getUserData();
+        }
+        
+        // Si c'est un parent, chercher dans ses enfants
+        if (node instanceof javafx.scene.Parent) {
+            javafx.scene.Parent parent = (javafx.scene.Parent) node;
+            for (javafx.scene.Node child : parent.getChildrenUnmodifiable()) {
+                MainLayoutController ctrl = findMainLayoutController(child);
+                if (ctrl != null) return ctrl;
+            }
+        }
+        
+        return null;
     }
 }

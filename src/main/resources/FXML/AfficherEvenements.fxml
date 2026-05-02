@@ -28,7 +28,7 @@
                 <TableColumn fx:id="villeColumn" prefWidth="80.0" text="Ville" />
                 <TableColumn fx:id="placesColumn" prefWidth="70.0" text="Places" />
                 <TableColumn fx:id="statutColumn" prefWidth="80.0" text="Statut" />
-                <TableColumn fx:id="actionsColumn" prefWidth="260.0" text="Actions" sortable="false" />
+                <TableColumn fx:id="actionsColumn" prefWidth="180.0" text="Actions" sortable="false" />
             </columns>
         </TableView>
     </VBox>

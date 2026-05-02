@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controllers.SallePlanningPageController"
+      fx:id="rootContainer"
+      prefWidth="1100"
+      prefHeight="750"
+      style="-fx-background-color: #f8fafc;">
+</VBox>

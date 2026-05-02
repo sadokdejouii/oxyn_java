@@ -33,7 +33,7 @@
         </StackPane>
         <Label styleClass="login-eyebrow" text="OXYN" />
         <Label styleClass="login-title" text="Connexion" />
-        <Label styleClass="login-sub" text="Connectez-vous avec votre e-mail et votre mot de passe, ou via Windows Hello." wrapText="true" />
+        <Label styleClass="login-sub" text="Connectez-vous avec votre e-mail et votre mot de passe." wrapText="true" />
 
         <Region prefHeight="8" />
 
@@ -51,14 +51,6 @@
         </VBox>
 
         <Button defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="login-primary" text="Se connecter" />
-
-        <Button maxWidth="Infinity" onAction="#handleWindowsHelloLogin" styleClass="login-secondary" text="Se connecter avec Windows Hello" />
-
-        <Button maxWidth="Infinity" onAction="#handleFaceLogin" styleClass="login-secondary" text="Se connecter par reconnaissance faciale" />
-
-        <HBox alignment="CENTER_RIGHT" spacing="6">
-            <Hyperlink styleClass="login-link" text="Mot de passe oublié ?" onAction="#handleForgotPassword" />
-        </HBox>
 
         <HBox alignment="CENTER" spacing="6">
             <Label styleClass="login-hint" text="Pas encore de compte ?" />

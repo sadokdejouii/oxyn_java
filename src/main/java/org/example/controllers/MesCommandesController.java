@@ -22,8 +22,6 @@ import org.example.services.CommandesService;
 import org.example.services.CurrencyExchangeService;
 import org.example.services.FacturePdfService;
 import org.example.services.SessionContext;
-import org.example.services.StripePaymentService;
-import org.example.services.StripePaymentSession;
 import org.example.services.UserRole;
 import org.example.utils.AdresseCommandeValidator;
 import org.example.utils.CommandeClientResolver;
@@ -351,7 +349,7 @@ public class MesCommandesController {
         meta.getStyleClass().add("client-order-meta");
         meta.setWrapText(true);
 
-        Label total = new Label("Total : " + formatFromTnd(c.getTotal_commande()));
+        Label total = new Label(String.format("Total : %.2f TND", c.getTotal_commande()));
         total.getStyleClass().add("client-order-total");
 
         Label addrTitle = new Label("Adresse de livraison");
@@ -373,8 +371,8 @@ public class MesCommandesController {
             lignesBox.getChildren().add(vide);
         } else {
             for (LigneCommandeAffichage l : lignes) {
-                Label line = new Label(String.format("· %s  × %d  →  %s",
-                        l.getNomProduit(), l.getQuantite(), formatFromTnd(l.getSousTotal())));
+                Label line = new Label(String.format("· %s  × %d  →  %.2f TND",
+                        l.getNomProduit(), l.getQuantite(), l.getSousTotal()));
                 line.getStyleClass().add("client-order-line");
                 line.setWrapText(true);
                 lignesBox.getChildren().add(line);

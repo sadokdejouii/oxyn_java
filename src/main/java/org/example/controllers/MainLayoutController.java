@@ -24,16 +24,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.stage.Stage;
-import org.example.entities.EventNotification;
-import org.example.services.EventNotificationService;
 import org.example.services.SessionContext;
-import org.example.entities.PanierSession;
 import org.example.utils.PageLoader;
 import org.example.utils.PrimaryStageLayout;
 
@@ -78,12 +74,8 @@ public class MainLayoutController implements Initializable {
     private static final String PAGE_ENC_HOME = "/FXML/pages/EncadrantHome.fxml";
     private static final String PAGE_ENC_GROUPE = "/FXML/pages/EncadrantGroupe.fxml";
     private static final String PAGE_ENC_PLANNING = "/FXML/pages/EncadrantPlanning.fxml";
-    private static final SimpleDateFormat NOTIFICATION_DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy • HH:mm", Locale.FRANCE);
-    private static final int NOTIFICATION_LIMIT = 25;
-
-    @FXML
-    private StackPane shellStack;
-
+    private static final Set<String> CHAT_PAGES = Set.of(); // Plus de chatbot sur aucune page
+    
     @FXML
     private BorderPane shellRoot;
 
@@ -118,38 +110,26 @@ public class MainLayoutController implements Initializable {
     private VBox sidebarActionsBox;
 
     @FXML
+    private VBox chatBotContainer;
+
+    @FXML
+    private Button chatBubbleBtn;
+
+    @FXML
     private Label footerText;
 
     @FXML
     private StackPane contentArea;
-
+    
+    @FXML
+    private TextField topbarSearchField;
+    
     @FXML
     private Label topbarPageTitle;
 
     @FXML
-    private TextField topbarSearchField;
-
-    @FXML
-    private Button notificationBtn;
-
-    @FXML
-    private Label notificationBadge;
-
-    @FXML
-    private StackPane notificationOverlay;
-
-    @FXML
-    private Region notificationOverlayBackdrop;
-
-    @FXML
-    private Label notificationModalSubtitle;
-
-    @FXML
-    private VBox notificationListBox;
-
-    @FXML
     private Label topbarUserName;
-
+    
     @FXML
     private Label topbarUserRole;
 
@@ -233,6 +213,9 @@ public class MainLayoutController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Stocker le contrôleur comme userData pour y accéder depuis d'autres contrôleurs
+        shellRoot.setUserData(this);
+        
         Runnable installIcons = () -> installIkonliFontIcons(shellRoot);
         installIcons.run();
         // After skins attach button graphics / scroll content, placeholders may only appear on this pass.
@@ -302,9 +285,9 @@ public class MainLayoutController implements Initializable {
         clientNavGroup.setManaged(client);
 
         String modeLabel = admin ? "ADMINISTRATOR" : encadrant ? "ENCADRANT" : "MEMBRE";
-        shellModeLabel.setText(modeLabel);
+        if (shellModeLabel != null) shellModeLabel.setText(modeLabel);
         topbarUserRole.setText(ctx.getRole().displayLabel());
-        footerText.setText(admin ? "Back office session"
+        if (footerText != null) footerText.setText(admin ? "Back office session"
             : encadrant ? "Encadrant — planning"
             : "Session active · accès sécurisé");
         if (topbarSearchField != null) {
@@ -317,12 +300,6 @@ public class MainLayoutController implements Initializable {
             shellRoot.getStyleClass().remove(STYLE_SHELL_CLIENT);
             if (client) {
                 shellRoot.getStyleClass().add(STYLE_SHELL_CLIENT);
-            }
-        }
-        if (shellStack != null) {
-            shellStack.getStyleClass().remove(STYLE_SHELL_CLIENT);
-            if (client) {
-                shellStack.getStyleClass().add(STYLE_SHELL_CLIENT);
             }
         }
     }
@@ -347,7 +324,6 @@ public class MainLayoutController implements Initializable {
 
     private void navigatePlaceholder(String moduleTitle, Button navButton) {
         try {
-            PlaceholderContext.setModuleLabel(moduleTitle);
             PageLoader.show(contentArea, PAGE_PLACEHOLDER, this);
             topbarPageTitle.setText(moduleTitle);
             setActiveNav(navButton);
@@ -376,7 +352,7 @@ public class MainLayoutController implements Initializable {
             PageLoader.show(contentArea, classpath, this);
             topbarPageTitle.setText(title);
             setActiveNav(navButton);
-            refreshNotificationBadge();
+            updateChatVisibility(resolvePageKey(classpath));
         } catch (Exception e) {
             e.printStackTrace();
             if (footerText != null) {
@@ -408,6 +384,31 @@ public class MainLayoutController implements Initializable {
         activeNavButton = button;
         if (button != null && !button.getStyleClass().contains("active")) {
             button.getStyleClass().add("active");
+        }
+    }
+
+    private String resolvePageKey(String classpath) {
+        if (classpath == null) {
+            return "";
+        }
+        if (classpath.contains("ClientSalle") || classpath.contains("Salle")) {
+            return "salle";
+        }
+        if (classpath.contains("Session") || classpath.contains("Planning")) {
+            return "session";
+        }
+        return "accueil";
+    }
+
+    private void updateChatVisibility(String pageKey) {
+        boolean show = CHAT_PAGES.contains(pageKey);
+        if (chatBotContainer != null) {
+            chatBotContainer.setVisible(show);
+            chatBotContainer.setManaged(show);
+        }
+        if (chatBubbleBtn != null) {
+            chatBubbleBtn.setVisible(show);
+            chatBubbleBtn.setManaged(show);
         }
     }
 
@@ -535,6 +536,11 @@ public class MainLayoutController implements Initializable {
     }
 
     @FXML
+    private void handleDashboard() {
+        navigate(PAGE_ADMIN_DASH, "Dashboard", adminDashboardBtn);
+    }
+
+    @FXML
     private void handleAdminSalle() {
         navigate(PAGE_STOCK, "Salle", adminSalleBtn);
     }
@@ -550,7 +556,7 @@ public class MainLayoutController implements Initializable {
     }
 
     /**
-     * Ouvert depuis la page Boutique : garde l’entrée « Boutique » active dans la barre latérale.
+     * Ouvert depuis la page Boutique : garde l'entrée « Boutique » active dans la barre latérale.
      */
     public void navigateToAdminCommandes() {
         navigate(PAGE_ADMIN_COMMANDES, "Commandes", adminBoutiqueBtn);
@@ -577,7 +583,7 @@ public class MainLayoutController implements Initializable {
     }
 
     @FXML
-    private void handleSalle() {
+    public void handleSalle() {
         navigate(PAGE_CLIENT_SALLE, "Salles", salleBtn);
     }
 
@@ -642,7 +648,12 @@ public class MainLayoutController implements Initializable {
     }
 
     @FXML
-    private void handleLogout() {
+    public StackPane getContentArea() {
+        return contentArea;
+    }
+
+    @FXML
+    public void handleLogout() {
         try {
             hideNotificationOverlay();
             stopNotificationRefresh();
@@ -651,9 +662,7 @@ public class MainLayoutController implements Initializable {
             Stage stage = (Stage) contentArea.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Login.fxml"));
             Parent root = loader.load();
-            Scene scene = new Scene(root, 1080, 720);
-            org.example.utils.AppStyles.apply(scene);
-            stage.setScene(scene);
+            stage.setScene(new Scene(root, 1080, 720));
             stage.setTitle("OXYN — Connexion");
             PrimaryStageLayout.applyFullScreen(stage);
             stage.show();
@@ -673,6 +682,22 @@ public class MainLayoutController implements Initializable {
         }
         return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
     }
+    
+    /**
+     * Charge le chatbot manuellement via FXMLLoader
+     */
+    private void loadChatBot() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/FXML/ChatBot.fxml"));
+            StackPane chatBotPane = loader.load();
+            // Ajouter au StackPane racine (parent du shellRoot)
+            StackPane rootPane = (StackPane) shellRoot.getParent();
+            rootPane.getChildren().add(chatBotPane);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private static void info(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
@@ -680,151 +705,6 @@ public class MainLayoutController implements Initializable {
         a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
-    }
-
-    private void configureNotifications(SessionContext ctx) {
-        refreshNotificationBadge();
-        stopNotificationRefresh();
-        if (eventNotificationService == null || !ctx.isClientUser() || !ctx.hasDbUser()) {
-            setNotificationBadgeCount(0);
-            hideNotificationOverlay();
-            return;
-        }
-
-        notificationRefreshTimeline = new Timeline(new KeyFrame(Duration.seconds(20), event -> refreshNotificationBadge()));
-        notificationRefreshTimeline.setCycleCount(Animation.INDEFINITE);
-        notificationRefreshTimeline.play();
-    }
-
-    private void stopNotificationRefresh() {
-        if (notificationRefreshTimeline != null) {
-            notificationRefreshTimeline.stop();
-            notificationRefreshTimeline = null;
-        }
-    }
-
-    private void refreshNotificationBadge() {
-        SessionContext ctx = SessionContext.getInstance();
-        if (eventNotificationService == null || !ctx.hasDbUser()) {
-            setNotificationBadgeCount(0);
-            return;
-        }
-
-        try {
-            setNotificationBadgeCount(eventNotificationService.countUnreadByUser(ctx.getUserId()));
-        } catch (Exception ignored) {
-            setNotificationBadgeCount(0);
-        }
-    }
-
-    private void setNotificationBadgeCount(int unreadCount) {
-        if (notificationBadge == null) {
-            return;
-        }
-        boolean visible = unreadCount > 0;
-        notificationBadge.setText(unreadCount > 99 ? "99+" : Integer.toString(Math.max(0, unreadCount)));
-        notificationBadge.setVisible(visible);
-        notificationBadge.setManaged(visible);
-    }
-
-    private void renderNotificationOverlay(List<EventNotification> notifications) {
-        if (notificationModalSubtitle != null) {
-            notificationModalSubtitle.setText(notifications.isEmpty()
-                    ? "Aucune alerte pour le moment."
-                    : "Les dernières annulations apparaissent ici.");
-        }
-        if (notificationListBox == null) {
-            return;
-        }
-
-        notificationListBox.getChildren().clear();
-        if (notifications.isEmpty()) {
-            Label empty = new Label("Aucune notification disponible.");
-            empty.getStyleClass().add("notification-modal-empty");
-            notificationListBox.getChildren().add(empty);
-            return;
-        }
-
-        for (EventNotification notification : notifications) {
-            notificationListBox.getChildren().add(buildNotificationCard(notification));
-        }
-    }
-
-    private VBox buildNotificationCard(EventNotification notification) {
-        Label title = new Label(notification.getTitle());
-        title.getStyleClass().add("notification-item-title");
-
-        Label timestamp = new Label(formatNotificationDate(notification));
-        timestamp.getStyleClass().add("notification-item-meta");
-
-        Button deleteButton = new Button("Supprimer");
-        deleteButton.getStyleClass().add("notification-item-delete-btn");
-        deleteButton.setOnAction(event -> deleteNotification(notification));
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox header = new HBox(12, title, spacer, timestamp, deleteButton);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        Label message = new Label(notification.getMessage());
-        message.setWrapText(true);
-        message.getStyleClass().add("notification-item-message");
-
-        VBox card = new VBox(8, header, message);
-        card.getStyleClass().add("notification-item");
-        if (!notification.isRead()) {
-            card.getStyleClass().add("notification-item--unread");
-        }
-        return card;
-    }
-
-    private void deleteNotification(EventNotification notification) {
-        SessionContext ctx = SessionContext.getInstance();
-        if (eventNotificationService == null || notification == null || !ctx.hasDbUser()) {
-            return;
-        }
-
-        try {
-            boolean deleted = eventNotificationService.deleteNotification(notification.getId(), ctx.getUserId());
-            if (!deleted) {
-                return;
-            }
-            List<EventNotification> refreshedNotifications = eventNotificationService.findByUser(ctx.getUserId(), NOTIFICATION_LIMIT);
-            renderNotificationOverlay(refreshedNotifications);
-            refreshNotificationBadge();
-        } catch (Exception ex) {
-            info("Notifications", ex.getMessage() != null ? ex.getMessage() : "Impossible de supprimer cette notification.");
-        }
-    }
-
-    private void showNotificationOverlay() {
-        if (notificationOverlay == null) {
-            return;
-        }
-        notificationOverlay.setManaged(true);
-        notificationOverlay.setVisible(true);
-        notificationOverlay.toFront();
-        if (shellRoot != null) {
-            shellRoot.setEffect(notificationBlur);
-        }
-    }
-
-    private void hideNotificationOverlay() {
-        if (notificationOverlay == null) {
-            return;
-        }
-        notificationOverlay.setVisible(false);
-        notificationOverlay.setManaged(false);
-        if (shellRoot != null) {
-            shellRoot.setEffect(null);
-        }
-    }
-
-    private String formatNotificationDate(EventNotification notification) {
-        if (notification.getCreatedAt() == null) {
-            return "À l'instant";
-        }
-        return NOTIFICATION_DATE_FORMAT.format(notification.getCreatedAt());
     }
 
     /**

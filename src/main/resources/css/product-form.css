@@ -124,8 +124,8 @@
 
 /* ─── Champs clairs (contraste sur fond sombre) ─── */
 .form-input {
-    -fx-background-color: black;
-    -fx-control-inner-background: black;
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
     -fx-border-color: rgba(90, 110, 140, 0.4);
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;

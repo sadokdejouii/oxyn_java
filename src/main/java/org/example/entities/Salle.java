@@ -12,6 +12,7 @@ public class Salle {
     private String email;
     private String imageUrl;
     private String googleMapsUrl;
+    private String youtubeUrl;
     private double rating;
     private int ratingCount;
     private boolean active;
@@ -56,6 +57,9 @@ public class Salle {
 
     public String getGoogleMapsUrl() { return googleMapsUrl; }
     public void setGoogleMapsUrl(String googleMapsUrl) { this.googleMapsUrl = googleMapsUrl; }
+
+    public String getYoutubeUrl() { return youtubeUrl; }
+    public void setYoutubeUrl(String youtubeUrl) { this.youtubeUrl = youtubeUrl; }
 
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }

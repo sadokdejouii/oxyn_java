@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 /**
  * Connexion JDBC MySQL (base {@code oxyn}) — paramètres alignés sur {@code main} (fuseau, UTF-8).
+ * ✅ Pattern : Toujours retourner une nouvelle connexion fraîche
  */
 public final class MyDataBase {
 
@@ -20,53 +21,85 @@ public final class MyDataBase {
             + "?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8"
             + "&zeroDateTimeBehavior=CONVERT_TO_NULL";
 
-    private static MyDataBase instance;
-
-    private Connection connection;
-
-    private MyDataBase() {
-        connect();
-    }
-
-    private void connect() {
+    /**
+     * ✅ Toujours retourner une nouvelle connexion fraîche
+     * @return Connection JDBC MySQL (null si erreur)
+     */
+    public static Connection getConnection() {
         try {
-            connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            System.out.println("Connexion à la base « " + DB_NAME + " » établie.");
-        } catch (SQLException e) {
-            System.err.println("Échec de connexion à « " + DB_NAME + " » : " + e.getMessage());
-            connection = null;
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+            System.out.println("✅ Nouvelle connexion BD créée pour « " + DB_NAME + " »");
+            return conn;
+        } catch (ClassNotFoundException | SQLException e) {
+            System.err.println("❌ Connexion BD échouée : " + e.getMessage());
+            return null; // ← ne lance plus d'exception
         }
     }
 
+    /**
+     * ✅ Alternative qui lance une exception (pour les cas où on veut gérer l'erreur)
+     * @return Connection JDBC MySQL
+     * @throws SQLException si la connexion échoue
+     */
+    public static Connection getConnectionWithException() throws SQLException {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+            System.out.println("✅ Nouvelle connexion BD créée pour « " + DB_NAME + " »");
+            return conn;
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("Driver MySQL non trouvé", e);
+        } catch (SQLException e) {
+            System.err.println("❌ Connexion BD échouée : " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * ✅ Pattern try-with-resources recommandé
+     * @deprecated Utilisez try-with-resources avec getConnection() à la place
+     */
+    @Deprecated
     public static MyDataBase getInstance() {
-        if (instance == null) {
-            instance = new MyDataBase();
-        }
-        return instance;
+        System.err.println("⚠️ getInstance() est déprécié. Utilisez getConnection() avec try-with-resources.");
+        return new MyDataBase();
     }
 
-    public Connection getConnection() {
-        try {
-            if (connection == null || connection.isClosed() || !connection.isValid(1)) {
-                connect();
+    /**
+     * ✅ Fermer une connexion proprement
+     * @param conn La connexion à fermer
+     */
+    public static void closeConnection(Connection conn) {
+        if (conn != null) {
+            try {
+                if (!conn.isClosed()) {
+                    conn.close();
+                    System.out.println("🔒 Connexion BD fermée");
+                }
+            } catch (SQLException e) {
+                System.err.println("❌ Erreur fermeture connexion: " + e.getMessage());
             }
+        }
+    }
+
+    /**
+     * ✅ Vérifier si une connexion est valide
+     * @param conn La connexion à vérifier
+     * @return true si la connexion est valide
+     */
+    public static boolean isValid(Connection conn) {
+        if (conn == null) {
+            return false;
+        }
+        try {
+            return !conn.isClosed() && conn.isValid(1);
         } catch (SQLException e) {
-            connect();
+            return false;
         }
-        return connection;
     }
 
-    /** Reset after writes so next read gets fresh data */
-    public void resetConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException ignored) {
-        }
-        connect();
-    }
-
+    // Getters pour compatibilité
     public static String getURL() {
         return URL;
     }
@@ -77,5 +110,10 @@ public final class MyDataBase {
 
     public static String getPASSWORD() {
         return PASSWORD;
+    }
+
+    // Constructeur privé pour éviter l'instanciation
+    private MyDataBase() {
+        // Constructeur privé - utiliser les méthodes statiques
     }
 }

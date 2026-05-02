@@ -15,8 +15,7 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
     private final InscriptionEvenementServices inscriptionEvenementServices;
 
     public AvisEvenementServices() {
-        con = MyDataBase.getInstance().getConnection();
-        inscriptionEvenementServices = new InscriptionEvenementServices();
+        con = MyDataBase.getConnection();
     }
 
     @Override
@@ -28,8 +27,8 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
                 "note_avis_evenement, " +
                 "commentaire_avis_evenement, " +
                 "created_at_avis_evenement, " +
-                "id_evenement_avis_evenement_id, " +
-                "id_user_avis_evenement_id) " +
+                "id_evenement_avis_evenement, " +
+                "id_user_avis_evenement) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         PreparedStatement ps = con.prepareStatement(sql);
@@ -67,8 +66,8 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
             a.setNote(rs.getInt("note_avis_evenement"));
             a.setCommentaire(rs.getString("commentaire_avis_evenement"));
             a.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_avis_evenement"));
-            a.setIdEvenement(rs.getInt("id_evenement_avis_evenement_id"));
-            a.setIdUser(rs.getInt("id_user_avis_evenement_id"));
+            a.setIdEvenement(rs.getInt("id_evenement_avis_evenement"));
+            a.setIdUser(rs.getInt("id_user_avis_evenement"));
 
             avisList.add(a);
         }
@@ -82,15 +81,12 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
     }
 
     public void modifier(AvisEvenement a) throws SQLException {
-        validateUserRegisteredForEvent(a);
-        sanitizeAvisComment(a);
-
         String sql = "UPDATE avis_evenement SET " +
                 "note_avis_evenement = ?, " +
                 "commentaire_avis_evenement = ?, " +
                 "created_at_avis_evenement = ?, " +
-                "id_evenement_avis_evenement_id = ?, " +
-                "id_user_avis_evenement_id = ? " +
+                "id_evenement_avis_evenement = ?, " +
+                "id_user_avis_evenement = ? " +
                 "WHERE id_note_avis_evenement = ?";
 
         PreparedStatement ps = con.prepareStatement(sql);

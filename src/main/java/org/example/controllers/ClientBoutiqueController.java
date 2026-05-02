@@ -221,7 +221,7 @@ public class ClientBoutiqueController {
         Label ratingLabel = new Label("★★★★★  (24 avis)");
         ratingLabel.getStyleClass().add("shop-client-rating");
 
-        Label priceLabel = new Label(formatPrice(produit.getPrix_produit()));
+        Label priceLabel = new Label(String.format("%.2f TND", produit.getPrix_produit()));
         priceLabel.getStyleClass().add("shop-client-price");
 
         Label stockLabel = new Label(enStock ? "En stock" : "Rupture de stock");

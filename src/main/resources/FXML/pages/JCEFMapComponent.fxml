@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import org.example.components.JCEFMapComponent?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.example.controllers.JCEFMapController"
+           prefHeight="400.0" prefWidth="800.0">
+    
+    <JCEFMapComponent fx:id="mapComponent" />
+    
+</StackPane>

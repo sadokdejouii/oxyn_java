@@ -4,15 +4,17 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
 
 <ScrollPane fitToWidth="true" hbarPolicy="NEVER"
             styleClass="front-events-scroll client-salle-surface-root"
-            stylesheets="@../../css/front-events.css,@../../css/client-salle.css"
+            stylesheets="@../../css/front-events.css,@../../css/client-salle.css,@../../css/salle-planning.css"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.controllers.ClientSalleDetailController">
     <VBox alignment="TOP_CENTER" maxWidth="Infinity" spacing="22" styleClass="front-page client-salle-page">
@@ -45,6 +47,7 @@
                     <Label fx:id="salleEmail" styleClass="cl-detail-info" text="—" />
                     <Separator styleClass="client-salle-sep" />
                     <Label fx:id="salleRating" styleClass="cl-detail-rating" text="—" />
+                    <Button fx:id="btnVoirPlanning" onAction="#handleVoirPlanning" styleClass="client-salle-planning-btn" text="📅 Voir le planning" />
                 </VBox>
             </HBox>
         </VBox>
@@ -65,6 +68,43 @@
                     <Insets bottom="28" />
                 </padding>
             </FlowPane>
+        </VBox>
+
+        <VBox spacing="12" styleClass="client-salle-section">
+            <Label styleClass="cl-section-title" text="Localisation" />
+            <WebView fx:id="mapView"
+         prefWidth="1200"
+         prefHeight="300"
+         minWidth="800"
+         minHeight="300"/>
+        </VBox>
+
+        <VBox fx:id="videoSection" spacing="12" styleClass="client-salle-section">
+            <Label styleClass="cl-section-title" text="Vidéo YouTube" />
+            <WebView fx:id="videoPlayer"
+                     visible="false"
+                     managed="false"
+                     prefWidth="560"
+                     prefHeight="315"
+                     VBox.vgrow="NEVER" />
+            <Label fx:id="videoLinkLabel"
+                   text="▶ Voir la vidéo sur YouTube"
+                   visible="false"
+                   managed="false" />
+            <Label fx:id="noVideoLabel"
+                   styleClass="cl-empty-label"
+                   text="Aucune vidéo disponible."
+                   visible="true"
+                   managed="true" />
+        </VBox>
+
+        <VBox spacing="12" styleClass="client-salle-section">
+            <Label styleClass="cl-section-title" text="Votre avis" />
+            <HBox fx:id="starsContainer" alignment="CENTER_LEFT" spacing="6" />
+            <Label fx:id="ratingInfo" styleClass="cl-detail-info" text="Cliquez sur les étoiles pour noter" />
+            <TextArea fx:id="commentArea" prefRowCount="3" promptText="Laissez un commentaire (optionnel)" wrapText="true" />
+            <Button fx:id="submitRatingBtn" text="Soumettre ma note" />
+            <Label fx:id="ratingMessage" styleClass="cl-empty-label" visible="false" managed="false" />
         </VBox>
     </VBox>
 </ScrollPane>

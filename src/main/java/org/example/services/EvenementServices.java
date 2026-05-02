@@ -16,7 +16,7 @@ public class EvenementServices implements ICrud<Evenement> {
     private final EventNotificationService eventNotificationService;
 
     public EvenementServices() {
-        con = MyDataBase.getInstance().getConnection();
+        con = MyDataBase.getConnection();
         eventNotificationService = new EventNotificationService();
     }
 
@@ -148,20 +148,20 @@ public class EvenementServices implements ICrud<Evenement> {
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()) {
-            Evenement e = new Evenement();
-            e.setId(rs.getInt("id_evenement"));
-            e.setTitre(rs.getString("titre_evenement"));
-            e.setDescription(rs.getString("description_evenement"));
-            e.setDateDebut(SqlDateReaders.readTimestampOrNull(rs, "date_debut_evenement"));
-            e.setDateFin(SqlDateReaders.readTimestampOrNull(rs, "date_fin_evenement"));
-            e.setLieu(rs.getString("lieu_evenement"));
-            e.setVille(rs.getString("ville_evenement"));
-            e.setPlacesMax(rs.getInt("places_max_evenement"));
-            e.setStatut(rs.getString("statut_evenement"));
-            e.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_evenement"));
-            e.setCreatedBy(rs.getInt("created_by_evenement"));
+            Evenement ev = new Evenement();
+            ev.setId(rs.getInt("id_evenement"));
+            ev.setTitre(rs.getString("titre_evenement"));
+            ev.setDescription(rs.getString("description_evenement"));
+            ev.setDateDebut(SqlDateReaders.readTimestampOrNull(rs, "date_debut_evenement"));
+            ev.setDateFin(SqlDateReaders.readTimestampOrNull(rs, "date_fin_evenement"));
+            ev.setLieu(rs.getString("lieu_evenement"));
+            ev.setVille(rs.getString("ville_evenement"));
+            ev.setPlacesMax(rs.getInt("places_max_evenement"));
+            ev.setStatut(rs.getString("statut_evenement"));
+            ev.setCreatedAt(SqlDateReaders.readTimestampOrNull(rs, "created_at_evenement"));
+            ev.setCreatedBy(rs.getInt("created_by_evenement"));
 
-            return e;
+            return ev;
         }
 
         return null;

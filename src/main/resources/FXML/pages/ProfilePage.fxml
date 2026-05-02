@@ -6,19 +6,12 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fx:id="profileScroll" fitToWidth="true" hbarPolicy="NEVER"
-            styleClass="page-scroll pp-page"
-            style="-fx-background-color: #0B1220; -fx-background: #0B1220; -fx-border-color: transparent;"
-            stylesheets="@../../css/login.css,@../../css/dashboard-saas.css,@../../css/client-shell-premium.css,@../../css/profile-page.css"
-            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.example.controllers.ProfilePageController">
-    <VBox fx:id="profileRoot" spacing="24" alignment="TOP_CENTER" styleClass="page-root pp-root">
+<ScrollPane fx:id="profileScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="page-scroll,pp-page" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.ProfilePageController">
+    <VBox fx:id="profileRoot" spacing="24" styleClass="page-root,pp-root">
         <padding>
             <Insets bottom="12" left="8" right="8" top="8" />
         </padding>
@@ -26,19 +19,18 @@
         <!-- Hero -->
         <HBox styleClass="pp-hero">
             <StackPane styleClass="pp-avatar-wrap">
-                <ImageView fx:id="avatarImageView" fitWidth="64" fitHeight="64" preserveRatio="true" visible="false" managed="false" />
                 <Label fx:id="avatarLabel" styleClass="pp-avatar-text" text="?" />
             </StackPane>
             <VBox spacing="10" HBox.hgrow="ALWAYS">
                 <Label styleClass="pp-kicker" text="MON COMPTE" />
-                <Label styleClass="page-hero-title pp-title" text="Mon profil" />
-                <Label fx:id="subtitleLabel" styleClass="page-hero-sub pp-hero-sub" text="Chargement…" wrapText="true" />
+                <Label styleClass="page-hero-title,pp-title" text="Mon profil" />
+                <Label fx:id="subtitleLabel" styleClass="page-hero-sub,pp-hero-sub" text="Chargement…" wrapText="true" />
             </VBox>
         </HBox>
 
         <HBox styleClass="pp-columns">
             <!-- Account summary -->
-            <VBox maxWidth="Infinity" styleClass="saas-chart-card pp-card" HBox.hgrow="ALWAYS" minWidth="220">
+            <VBox maxWidth="Infinity" styleClass="saas-chart-card,pp-card" HBox.hgrow="ALWAYS" minWidth="220">
                 <Label styleClass="pp-card-head" text="STATUT DU COMPTE" />
                 <VBox styleClass="pp-kv-list">
                     <VBox spacing="8" styleClass="pp-kv-row">
@@ -47,7 +39,7 @@
                             <Label fx:id="statusValue" styleClass="pp-inline-badge" text="—" />
                         </HBox>
                     </VBox>
-                    <VBox spacing="8" styleClass="pp-kv-row pp-kv-row-last">
+                    <VBox spacing="8" styleClass="pp-kv-row,pp-kv-row-last">
                         <Label styleClass="pp-kv-key" text="Rôle" />
                         <HBox spacing="10">
                             <Label fx:id="roleValue" styleClass="pp-inline-badge" text="—" />
@@ -57,7 +49,7 @@
             </VBox>
 
             <!-- Editable profile + security -->
-            <VBox maxWidth="Infinity" styleClass="saas-chart-card pp-card" HBox.hgrow="ALWAYS" minWidth="320">
+            <VBox maxWidth="Infinity" styleClass="saas-chart-card,pp-card" HBox.hgrow="ALWAYS" minWidth="320">
                 <Label styleClass="pp-card-head" text="INFORMATIONS &amp; SÉCURITÉ" />
                 <Label styleClass="pp-card-sub" text="Modifiez votre e-mail, vos coordonnées et, si besoin, votre mot de passe. Laissez les champs de nouveau mot de passe vides pour le conserver." wrapText="true" />
                 <VBox spacing="18" styleClass="pp-form-block">
@@ -103,68 +95,13 @@
                             <Label fx:id="confirmPasswordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
                         </VBox>
                     </HBox>
-
-                    <Label styleClass="pp-section-title" text="WINDOWS HELLO" />
-                    <Label styleClass="pp-section-hint" text="Activez Windows Hello sur ce PC pour vous connecter ensuite sans mot de passe (empreinte/PIN Windows). Lié au compte Windows (SID)." wrapText="true" />
-                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="pp-action-row">
-                        <Label fx:id="windowsHelloStatusLabel" styleClass="pp-hint-muted" text="—" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <HBox spacing="10" styleClass="pp-actions">
-                            <Button fx:id="enableWindowsHelloButton" onAction="#handleEnableWindowsHello" styleClass="pp-btn pp-btn-primary" text="Activer"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill:#ffffff; -fx-background-color: linear-gradient(to bottom, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%); -fx-border-color: rgba(125,211,252,0.52); -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.26), 18, 0.35, 0, 3);" />
-                            <Button fx:id="disableWindowsHelloButton" onAction="#handleDisableWindowsHello" styleClass="pp-btn pp-btn-ghost" text="Désactiver"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill: rgba(248,250,252,0.96); -fx-background-color: rgba(148,163,184,0.14); -fx-border-color: rgba(226,232,240,0.18);" />
-                        </HBox>
-                    </HBox>
-
-                    <Label styleClass="pp-section-title" text="RECONNAISSANCE FACIALE" />
-                    <Label styleClass="pp-section-hint" text="Enregistrez votre visage via la webcam pour pouvoir vous connecter ensuite sans mot de passe. Les données restent locales (embedding 128 floats en base)." wrapText="true" />
-                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="pp-action-row">
-                        <Label fx:id="faceStatusLabel" styleClass="pp-hint-muted" text="—" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <HBox spacing="10" styleClass="pp-actions">
-                            <Button fx:id="enrollFaceButton" onAction="#handleEnrollFace" styleClass="pp-btn pp-btn-primary" text="Enregistrer"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill:#ffffff; -fx-background-color: linear-gradient(to bottom, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%); -fx-border-color: rgba(125,211,252,0.52); -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.26), 18, 0.35, 0, 3);" />
-                            <Button fx:id="disableFaceButton" onAction="#handleDisableFace" styleClass="pp-btn pp-btn-ghost" text="Désactiver"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill: rgba(248,250,252,0.96); -fx-background-color: rgba(148,163,184,0.14); -fx-border-color: rgba(226,232,240,0.18);" />
-                        </HBox>
-                    </HBox>
-
-                    <Label styleClass="pp-section-title" text="2FA (TOTP)" />
-                    <Label styleClass="pp-section-hint" text="Ajoutez un code temporaire (Google Authenticator) après la connexion. Compatible RFC 6238." wrapText="true" />
-                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="pp-action-row">
-                        <Label fx:id="totpStatusLabel" styleClass="pp-hint-muted" text="—" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <HBox spacing="10" styleClass="pp-actions">
-                            <Button fx:id="enableTotpButton" onAction="#handleEnableTotp" styleClass="pp-btn pp-btn-primary" text="Activer"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill:#ffffff; -fx-background-color: linear-gradient(to bottom, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%); -fx-border-color: rgba(125,211,252,0.52); -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.26), 18, 0.35, 0, 3);" />
-                            <Button fx:id="disableTotpButton" onAction="#handleDisableTotp" styleClass="pp-btn pp-btn-ghost" text="Désactiver"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill: rgba(248,250,252,0.96); -fx-background-color: rgba(148,163,184,0.14); -fx-border-color: rgba(226,232,240,0.18);" />
-                        </HBox>
-                    </HBox>
-
-                    <Label styleClass="pp-section-title" text="AVATAR" />
-                    <Label styleClass="pp-section-hint" text="Générez automatiquement un avatar à partir de votre photo (visage détecté puis stylisé localement)." wrapText="true" />
-                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="pp-action-row">
-                        <Label fx:id="avatarStatusLabel" styleClass="pp-hint-muted" text="—" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <HBox spacing="10" styleClass="pp-actions">
-                            <Button fx:id="generateAvatarButton" onAction="#handleGenerateAvatar" styleClass="pp-btn pp-btn-primary" text="Webcam"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill:#ffffff; -fx-background-color: linear-gradient(to bottom, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%); -fx-border-color: rgba(125,211,252,0.52); -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.26), 18, 0.35, 0, 3);" />
-                            <Button fx:id="generateAvatarAiButton" text="IA" onAction="#handleGenerateAvatarAi" styleClass="pp-btn pp-btn-glow"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill:#ffffff; -fx-background-color: linear-gradient(to bottom, #c4b5fd 0%, #8b5cf6 50%, #6d28d9 100%); -fx-border-color: rgba(196,181,253,0.55); -fx-effect: dropshadow(gaussian, rgba(139,92,246,0.35), 16, 0.3, 0, 2);" />
-                            <Button fx:id="removeAvatarButton" onAction="#handleRemoveAvatar" styleClass="pp-btn pp-btn-danger" text="Supprimer"
-                                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:38; -fx-padding:9 18; -fx-font-weight:700; -fx-text-fill:#ffffff; -fx-background-color: linear-gradient(to bottom, #fca5a5 0%, #ef4444 55%, #b91c1c 100%); -fx-border-color: rgba(254,202,202,0.55); -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.28), 16, 0.35, 0, 3);" />
-                        </HBox>
-                    </HBox>
                 </VBox>
             </VBox>
         </HBox>
 
         <HBox alignment="CENTER_RIGHT" styleClass="pp-footer">
             <Label styleClass="pp-hint-muted" text="E-mail, nom, prénom et téléphone obligatoires. Mot de passe : laisser vide pour ne pas changer." />
-            <Button id="profileSaveButton" fx:id="saveButton" onAction="#handleSave" styleClass="primary-toolbar-btn pp-save-btn pp-profile-save-btn" text="Enregistrer les modifications"
-                    style="-fx-background-insets:0; -fx-border-insets:0; -fx-background-radius:14; -fx-border-radius:14; -fx-min-height:40; -fx-padding:10 22; -fx-font-weight:700; -fx-text-fill:#ffffff; -fx-background-color: linear-gradient(to bottom, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%); -fx-border-color: rgba(125,211,252,0.52); -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.26), 18, 0.35, 0, 3);" />
+            <Button id="profileSaveButton" fx:id="saveButton" onAction="#handleSave" styleClass="primary-toolbar-btn pp-save-btn pp-profile-save-btn" text="Enregistrer les modifications" />
         </HBox>
     </VBox>
 </ScrollPane>

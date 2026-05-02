@@ -78,6 +78,11 @@
                         <TextField fx:id="fieldEmail" promptText="contact@salle.tn — laisser vide si absent" styleClass="apd-field" maxWidth="Infinity" />
                     </VBox>
                 </HBox>
+                <VBox spacing="6">
+                    <Label styleClass="salle-field-label" text="URL Vidéo YouTube (optionnel)" />
+                    <TextField fx:id="fieldYoutubeUrl" promptText="https://www.youtube.com/watch?v=..." styleClass="apd-field" maxWidth="Infinity" />
+                    <Label styleClass="salle-drop-hint" text="Formats supportés : youtube.com/watch?v=XXXX ou youtu.be/XXXX" wrapText="true" />
+                </VBox>
 
                 <Label fx:id="dialogError" styleClass="salle-error-label" text="" wrapText="true" />
 

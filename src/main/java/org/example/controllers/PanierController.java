@@ -18,8 +18,6 @@ import org.example.entities.commandes;
 import org.example.services.CommandesService;
 import org.example.services.CurrencyExchangeService;
 import org.example.services.SessionContext;
-import org.example.services.StripePaymentService;
-import org.example.services.StripePaymentSession;
 import org.example.services.UserRole;
 import org.example.utils.AdresseCommandeValidator;
 import org.example.utils.CommandeClientResolver;
@@ -159,7 +157,7 @@ public class PanierController {
         Label qteBadge = new Label("Qté " + ligne.getQuantite());
         qteBadge.getStyleClass().add("shop-client-qte");
 
-        Label detail = new Label("×  " + formatFromTnd(ligne.getPrixUnitaire()) + "  l’unité");
+        Label detail = new Label(String.format("×  %.2f TND  l’unité", ligne.getPrixUnitaire()));
         detail.getStyleClass().add("shop-client-unit-price");
 
         meta.getChildren().addAll(qteBadge, detail);
@@ -167,7 +165,7 @@ public class PanierController {
 
         VBox prixCol = new VBox(2);
         prixCol.setAlignment(Pos.CENTER_RIGHT);
-        Label sous = new Label(formatFromTnd(ligne.getSousTotal()));
+        Label sous = new Label(String.format("%.2f TND", ligne.getSousTotal()));
         sous.getStyleClass().add("shop-client-sous-total");
         Label hint = new Label("Sous-total");
         hint.getStyleClass().add("shop-client-sous-hint");

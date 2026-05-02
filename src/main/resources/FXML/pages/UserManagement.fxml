@@ -4,11 +4,8 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -84,57 +81,9 @@
                 <Region styleClass="um-vdiv" />
                 <Button onAction="#handleToggleActive" styleClass="ghost-toolbar-btn,um-btn-compact" text="Activer / désactiver" />
                 <Region HBox.hgrow="ALWAYS" />
-                <Button onAction="#handleGenerateDemo" styleClass="ghost-toolbar-btn,um-btn-compact" text="↺ Générer (demo)" />
                 <Button onAction="#handleRefresh" styleClass="ghost-toolbar-btn,um-btn-compact" text="Actualiser" />
             </HBox>
         </VBox>
-
-        <!-- Data & Analytics (demo) -->
-        <HBox spacing="14" alignment="TOP_LEFT">
-            <VBox spacing="10" styleClass="saas-chart-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="saas-card-title" text="Activité — 12 semaines" />
-                <GridPane fx:id="heatmapGrid" hgap="4" vgap="4" />
-                <Label fx:id="heatmapHint" styleClass="um-table-hint" text="" />
-            </VBox>
-            <VBox spacing="10" styleClass="saas-chart-card" prefWidth="380">
-                <Label styleClass="saas-card-title" text="Répartition des rôles" />
-                <Canvas fx:id="rolesDonutCanvas" width="320" height="220" />
-                <Label fx:id="rolesHint" styleClass="um-table-hint" text="" />
-            </VBox>
-        </HBox>
-
-        <HBox spacing="14" alignment="TOP_LEFT">
-            <VBox spacing="12" styleClass="saas-chart-card" HBox.hgrow="ALWAYS">
-                <Label styleClass="saas-card-title" text="Score de santé" />
-                <VBox spacing="10">
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label minWidth="120" text="Rétention" styleClass="um-form-label"/>
-                        <ProgressBar fx:id="pbRetention" prefWidth="420"/>
-                        <Label fx:id="lblRetention" styleClass="um-table-hint" text="—"/>
-                    </HBox>
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label minWidth="120" text="Engagement" styleClass="um-form-label"/>
-                        <ProgressBar fx:id="pbEngagement" prefWidth="420"/>
-                        <Label fx:id="lblEngagement" styleClass="um-table-hint" text="—"/>
-                    </HBox>
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label minWidth="120" text="NPS" styleClass="um-form-label"/>
-                        <ProgressBar fx:id="pbNps" prefWidth="420"/>
-                        <Label fx:id="lblNps" styleClass="um-table-hint" text="—"/>
-                    </HBox>
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label minWidth="120" text="Risque churn" styleClass="um-form-label"/>
-                        <ProgressBar fx:id="pbChurn" prefWidth="420"/>
-                        <Label fx:id="lblChurn" styleClass="um-table-hint" text="—"/>
-                    </HBox>
-                </VBox>
-            </VBox>
-            <VBox spacing="10" styleClass="saas-chart-card" prefWidth="380">
-                <Label styleClass="saas-card-title" text="Sparklines système" />
-                <Canvas fx:id="sparklinesCanvas" width="320" height="220" />
-                <Label fx:id="systemHint" styleClass="um-table-hint" text="" />
-            </VBox>
-        </HBox>
 
         <!-- Liste type tableau + tri -->
         <VBox spacing="10" styleClass="saas-chart-card,um-table-panel" VBox.vgrow="ALWAYS">
