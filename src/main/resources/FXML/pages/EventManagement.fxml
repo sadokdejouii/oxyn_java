@@ -107,5 +107,24 @@
                 <HBox fx:id="reviewsPaginationBox" spacing="10" style="-fx-alignment: CENTER; -fx-padding: 10;" />
             </VBox>
         </VBox>
-    </VBox>
-</ScrollPane>
+        </VBox>
+    </ScrollPane>
+
+    <!-- Weather overlay popup (in-page, not a separate window) -->
+    <StackPane fx:id="weatherOverlay" managed="false" visible="false" styleClass="event-popup-overlay">
+        <Region fx:id="weatherDim" styleClass="event-popup-dim" onMouseClicked="#closeWeatherPopup" />
+        <VBox fx:id="weatherModal" styleClass="event-popup-card" spacing="14" maxWidth="460">
+            <VBox spacing="5" styleClass="event-popup-header">
+                <Label text="Meteo de l'evenement" styleClass="event-popup-title" />
+                <Label fx:id="weatherEventTitleLabel" text="" styleClass="event-popup-subtitle" wrapText="true" />
+                <Label fx:id="weatherCityDateLabel" text="" styleClass="event-popup-subtitle" wrapText="true" />
+            </VBox>
+
+            <VBox fx:id="weatherContentHost" spacing="10" alignment="CENTER" styleClass="event-popup-content" VBox.vgrow="ALWAYS" />
+
+            <HBox alignment="CENTER_RIGHT">
+                <Button fx:id="weatherCloseBtn" text="Fermer" onAction="#closeWeatherPopup" styleClass="event-popup-close-btn" />
+            </HBox>
+        </VBox>
+    </StackPane>
+</StackPane>

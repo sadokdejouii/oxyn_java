@@ -22,6 +22,12 @@
             <TextArea fx:id="commentTextArea" prefHeight="150.0" promptText="Écrivez votre avis..." styleClass="front-modal-textarea" wrapText="true" />
         </VBox>
 
+        <VBox fx:id="moderationAlertBox" managed="false" spacing="5" styleClass="front-moderation-alert" visible="false">
+            <Label fx:id="moderationAlertTitleLabel" styleClass="front-moderation-alert-title" text="" />
+            <Label fx:id="moderationAlertBodyLabel" styleClass="front-moderation-alert-body" text="" wrapText="true" />
+            <Label fx:id="moderationAlertMetaLabel" styleClass="front-moderation-alert-meta" text="" wrapText="true" />
+        </VBox>
+
         <Label fx:id="feedbackLabel" styleClass="front-form-feedback" text="" />
 
         <HBox alignment="CENTER" spacing="10" styleClass="front-modal-actions">

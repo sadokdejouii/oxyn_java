@@ -35,6 +35,7 @@ public class MainFX extends Application {
 
         System.out.println("🎨 Création de la scene...");
         Scene scene = new Scene(root, 1080, 720);
+        AppStyles.apply(scene);
 
         System.out.println("🖼️ Configuration de la fenêtre...");
         primaryStage.setTitle("OXYN — Connexion");
@@ -50,6 +51,14 @@ public class MainFX extends Application {
     public void stop() {
         // Arrêter proprement les services d'abonnement
         SubscriptionIntegration.stopServices();
+    }
+
+    @Override
+    public void stop() {
+        try {
+            org.example.realtime.RealtimeService.getInstance().stop();
+        } catch (Exception ignored) {
+        }
     }
 
     public static void main(String[] args) {

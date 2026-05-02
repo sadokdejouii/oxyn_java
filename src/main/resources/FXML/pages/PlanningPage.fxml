@@ -21,13 +21,19 @@
                             <Label fx:id="roleBadge" styleClass="planning-role-badge" text="" />
                         </HBox>
                         <Label fx:id="heroSub" styleClass="planning-hero-sub" text="Chargement…" wrapText="true" />
-                        <Label styleClass="planning-hero-meta" text="Fiche santé · Programme · Tâches · IA · Discussion" wrapText="true" />
+                        <Label styleClass="planning-hero-meta" text="Fiche santé · Programme · Tâches · IA · Discussion · Objectif boutique" wrapText="true" />
                     </VBox>
+                    <StackPane fx:id="realtimeStatusSlot" />
+                    <StackPane fx:id="notificationBellSlot" />
                     <StackPane styleClass="planning-user-avatar-wrap">
                         <Circle radius="23" styleClass="planning-user-avatar-ring" />
                         <Circle radius="20" styleClass="planning-user-avatar-fill" />
                         <Label fx:id="avatarInitials" styleClass="planning-user-avatar-text" text="?" />
                     </StackPane>
+                </HBox>
+                <HBox fx:id="planningClientToolbar" alignment="CENTER_LEFT" spacing="12" styleClass="planning-client-toolbar" managed="false" visible="false">
+                    <Button fx:id="btnObjectifAssistant" mnemonicParsing="false" onAction="#handleOpenObjectifAssistant" text="Objectif / Assistant IA" styleClass="planning-obj-launch-btn" />
+                    <Button fx:id="btnTaskCalendar" mnemonicParsing="false" onAction="#handleOpenTaskCalendar" text="Calendrier des tâches" styleClass="planning-cal-launch-btn" />
                 </HBox>
                 <VBox fx:id="dynamicContainer" spacing="18" styleClass="planning-dynamic" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
             </VBox>

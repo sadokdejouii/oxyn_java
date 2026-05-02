@@ -1,10 +1,14 @@
 package org.example.controllers;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -14,6 +18,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -27,13 +34,16 @@ import org.example.utils.PageLoader;
 import org.example.utils.PrimaryStageLayout;
 
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
+import javafx.util.Duration;
 
 public class MainLayoutController implements Initializable {
 
@@ -197,6 +207,9 @@ public class MainLayoutController implements Initializable {
     private Button activeNavButton;
 
     private boolean sidebarCompact;
+    private Timeline notificationRefreshTimeline;
+    private EventNotificationService eventNotificationService;
+    private final GaussianBlur notificationBlur = new GaussianBlur(18);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -214,6 +227,11 @@ public class MainLayoutController implements Initializable {
         userAvatarLabel.textProperty().bind(Bindings.createStringBinding(
                 () -> initials(ctx.getDisplayName()),
                 ctx.displayNameProperty()));
+        try {
+            eventNotificationService = new EventNotificationService();
+        } catch (RuntimeException ex) {
+            eventNotificationService = null;
+        }
 
         mainNavButtons.clear();
         mainNavButtons.add(adminDashboardBtn);
@@ -240,6 +258,8 @@ public class MainLayoutController implements Initializable {
         mainNavButtons.add(encForumBtn);
 
         applyRoleShell(ctx);
+        hideNotificationOverlay();
+        configureNotifications(ctx);
         wireSearch();
         registerDiscussionFromPlanningHook(ctx);
 
@@ -328,6 +348,7 @@ public class MainLayoutController implements Initializable {
 
     public void navigate(String classpath, String title, Button navButton) {
         try {
+            hideNotificationOverlay();
             PageLoader.show(contentArea, classpath, this);
             topbarPageTitle.setText(title);
             setActiveNav(navButton);
@@ -468,7 +489,40 @@ public class MainLayoutController implements Initializable {
    
     @FXML
     private void handleNotifications() {
-        info("Notifications", "You have no unread notifications (demo).");
+        SessionContext ctx = SessionContext.getInstance();
+        if (!ctx.hasDbUser()) {
+            renderNotificationOverlay(List.of());
+            showNotificationOverlay();
+            return;
+        }
+
+        try {
+            List<EventNotification> notifications = eventNotificationService == null
+                    ? List.of()
+                    : eventNotificationService.findByUser(ctx.getUserId(), NOTIFICATION_LIMIT);
+            if (notifications.stream().anyMatch(notification -> !notification.isRead())) {
+                eventNotificationService.markAllAsRead(ctx.getUserId());
+                refreshNotificationBadge();
+                notifications = eventNotificationService.findByUser(ctx.getUserId(), NOTIFICATION_LIMIT);
+            }
+            renderNotificationOverlay(notifications);
+            showNotificationOverlay();
+        } catch (Exception ex) {
+            info("Notifications", ex.getMessage() != null ? ex.getMessage() : "Impossible de charger les notifications.");
+        }
+    }
+
+    @FXML
+    private void closeNotificationOverlay() {
+        hideNotificationOverlay();
+    }
+
+    @FXML
+    private void handleNotificationOverlayClick(MouseEvent event) {
+        Object target = event.getTarget();
+        if (target == notificationOverlay || target == notificationOverlayBackdrop) {
+            hideNotificationOverlay();
+        }
     }
 
     @FXML
@@ -601,7 +655,10 @@ public class MainLayoutController implements Initializable {
     @FXML
     public void handleLogout() {
         try {
+            hideNotificationOverlay();
+            stopNotificationRefresh();
             SessionContext.getInstance().logout();
+            PanierSession.getInstance().resetMemory();
             Stage stage = (Stage) contentArea.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/Login.fxml"));
             Parent root = loader.load();

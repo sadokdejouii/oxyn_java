@@ -555,7 +555,7 @@
 }
 
 .fs-form-bmi-strip {
-    -fx-background-color: linear-gradient(90deg, rgba(58, 122, 254, 0.08) 0%, rgba(0, 201, 167, 0.06) 100%);
+    -fx-background-color: linear-gradient(from 0% 50% to 100% 50%, rgba(58, 122, 254, 0.08) 0%, rgba(0, 201, 167, 0.06) 100%);
     -fx-background-radius: 14px;
     -fx-border-color: rgba(58, 122, 254, 0.14);
     -fx-border-radius: 14px;

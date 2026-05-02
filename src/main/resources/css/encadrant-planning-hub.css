@@ -211,3 +211,10 @@
 .eph-detail-mount .epd-root--supervision {
     -fx-background-color: #f5f7fb;
 }
+
+.eph-card-kicker {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0369a1;
+    -fx-letter-spacing: 0.06em;
+}

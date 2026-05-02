@@ -50,6 +50,9 @@ public class RegisterController {
     private Label passwordErrorLabel;
 
     @FXML
+    private Label passwordStrengthLabel;
+
+    @FXML
     private PasswordField confirmPasswordField;
 
     @FXML
@@ -66,7 +69,22 @@ public class RegisterController {
         prenomField.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(prenomField, prenomErrorLabel, LOGIN_THEME));
         emailField.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME));
         telephoneField.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(telephoneField, telephoneErrorLabel, LOGIN_THEME));
-        passwordField.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME));
+        passwordField.textProperty().addListener((o, oldVal, newVal) -> {
+            FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME);
+
+            // Indicateur de force
+            if (passwordStrengthLabel != null) {
+                if (newVal == null || newVal.isEmpty()) {
+                    passwordStrengthLabel.setText("");
+                } else {
+                    PasswordStrengthEvaluator.Strength s = PasswordStrengthEvaluator.evaluate(newVal);
+                    passwordStrengthLabel.setText("Force : " + PasswordStrengthEvaluator.label(s));
+                    passwordStrengthLabel.setStyle(
+                            "-fx-font-size: 11px; -fx-padding: 2 0 0 2; -fx-text-fill: "
+                                    + PasswordStrengthEvaluator.color(s) + ";");
+                }
+            }
+        });
         confirmPasswordField.textProperty().addListener((o, a, b) -> FormFieldFeedback.clearInputError(confirmPasswordField, confirmPasswordErrorLabel, LOGIN_THEME));
     }
 

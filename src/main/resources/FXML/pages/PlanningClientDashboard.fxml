@@ -6,8 +6,8 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -81,24 +81,31 @@
                 <VBox spacing="14" styleClass="saas-card pcd-zen-progress-panel" maxWidth="Infinity"
                        GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="4">
                     <Label styleClass="saas-card-title" text="Progression &amp; semaine" />
-                    <Label styleClass="saas-card-sub" text="Graphique des tâches et suivi d’objectif" wrapText="true" />
+                    <Label styleClass="saas-card-sub" text="Progression &amp; comparaison hebdomadaire" wrapText="true" />
+                    <HBox fx:id="weekKpiRow" alignment="CENTER_LEFT" spacing="10" styleClass="pcd-week-kpi-row" maxWidth="Infinity">
+                        <Label fx:id="lblWeekDeltaBadge" styleClass="pcd-week-kpi-chip" text="Écart semaine: 0%" />
+                        <Label fx:id="lblWeekDoneBadge" styleClass="pcd-week-kpi-chip" text="Tâches faites: 0/0" />
+                        <Label fx:id="lblWeekTrendBadge" styleClass="pcd-week-kpi-chip" text="Tendance stable" />
+                    </HBox>
                     <VBox fx:id="chartSection" spacing="10" maxWidth="Infinity">
-                        <BarChart fx:id="weekProgressChart" legendVisible="false" animated="true" minHeight="180" prefHeight="200" categoryGap="24" barGap="6" maxWidth="Infinity" styleClass="pcd-week-chart">
+                        <LineChart fx:id="weekProgressChart" legendVisible="true" animated="true" minHeight="190" prefHeight="210" createSymbols="true" maxWidth="Infinity" styleClass="pcd-week-chart">
                             <xAxis>
                                 <CategoryAxis side="BOTTOM" />
                             </xAxis>
                             <yAxis>
                                 <NumberAxis side="LEFT" minorTickCount="0" />
                             </yAxis>
-                        </BarChart>
+                        </LineChart>
                     </VBox>
                     <Label fx:id="lblNoObjectif" managed="false" visible="false" styleClass="w-empty-hint" wrapText="true" maxWidth="Infinity" />
-                    <VBox fx:id="progressDashBlock" spacing="10">
-                        <Label fx:id="lblDashProgressPct" styleClass="pcd-progress-hero-pct" text="—" />
-                        <ProgressBar fx:id="progressWeek" maxWidth="Infinity" prefHeight="12" minHeight="12"
-                                     styleClass="w-progress-track w-progress-track--compact" progress="0" />
+                    <VBox fx:id="progressDashBlock" spacing="12">
+                        <HBox alignment="CENTER_LEFT" spacing="18" styleClass="pcd-progress-hero-row" maxWidth="Infinity">
+                            <Label fx:id="lblDashProgressPct" styleClass="pcd-progress-hero-pct" text="—" />
+                            <ProgressBar fx:id="progressWeek" maxWidth="Infinity" prefHeight="14" minHeight="14"
+                                         HBox.hgrow="ALWAYS" styleClass="w-progress-track w-progress-track--compact" progress="0" />
+                        </HBox>
                         <Label fx:id="lblDashProgressDetail" styleClass="pcd-progress-hero-detail" wrapText="true" text="" />
-                        <Label fx:id="lblEncouragement" styleClass="pcd-progress-hero-quote" wrapText="true" text="" />
+                        <Label fx:id="lblEncouragement" managed="false" visible="false" styleClass="pcd-progress-hero-quote" wrapText="true" text="" />
                     </VBox>
                 </VBox>
 

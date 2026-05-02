@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      spacing="15"
+      style="-fx-padding: 20; -fx-background-color: #f5f5f5;">
+
+    <Label styleClass="form-title" text="Map Size &amp; Layout Variants" 
+           style="-fx-font-size: 18; -fx-font-weight: bold;" />
+
+    <GridPane hgap="15" vgap="15" style="-fx-padding: 10;">
+
+        <!-- Small Map -->
+        <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" spacing="8">
+            <Label text="Small (300x250)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+            <WebView fx:id="mapSmall" prefWidth="300" prefHeight="250" />
+        </VBox>
+
+        <!-- Medium Map -->
+        <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" spacing="8">
+            <Label text="Medium (500x350)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+            <WebView fx:id="mapMedium" prefWidth="500" prefHeight="350" />
+        </VBox>
+
+        <!-- Large Map -->
+        <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" spacing="8">
+            <Label text="Large (700x400)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+            <WebView fx:id="mapLarge" prefWidth="700" prefHeight="400" />
+        </VBox>
+
+        <!-- Compact Square -->
+        <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" spacing="8">
+            <Label text="Square (350x350)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+            <WebView fx:id="mapSquare" prefWidth="350" prefHeight="350" />
+        </VBox>
+
+        <!-- Wide Landscape -->
+        <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" spacing="8">
+            <Label text="Wide (650x300)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+            <WebView fx:id="mapWide" prefWidth="650" prefHeight="300" />
+        </VBox>
+
+        <!-- Tall Portrait -->
+        <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" spacing="8">
+            <Label text="Tall (350x500)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+            <WebView fx:id="mapTall" prefWidth="350" prefHeight="500" />
+        </VBox>
+
+    </GridPane>
+
+</VBox>

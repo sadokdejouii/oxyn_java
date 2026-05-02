@@ -71,11 +71,6 @@ public class ForumPostService implements ICrud<Post> {
                     rs.getInt("id_author_post")
             );
             post.setId_post(rs.getInt("id_post"));
-            // Fetch BLOB data from media_url_post column (now stores BLOB)
-            Blob mediaBlob = rs.getBlob("media_url_post");
-            if (mediaBlob != null) {
-                post.setMedia_blob_post(mediaBlob.getBytes(1, (int) mediaBlob.length()));
-            }
             posts.add(post);
         }
 
@@ -104,11 +99,6 @@ public class ForumPostService implements ICrud<Post> {
                     rs.getInt("id_author_post")
             );
             post.setId_post(rs.getInt("id_post"));
-            // Fetch BLOB data from media_url_post column (now stores BLOB)
-            Blob mediaBlob = rs.getBlob("media_url_post");
-            if (mediaBlob != null) {
-                post.setMedia_blob_post(mediaBlob.getBytes(1, (int) mediaBlob.length()));
-            }
         }
 
         rs.close();

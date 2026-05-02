@@ -10,7 +10,11 @@ public record EncadrantClientCardRow(
         String objectif,
         String niveauActivite,
         int tasksTotalWeek,
-        int tasksDoneWeek
+        int tasksDoneWeek,
+        /** Dernier objectif libre saisi (Planning — assistant boutique), extrait court. */
+        String objectifLibreExcerpt,
+        /** Réponse IA associée (extrait). */
+        String reponseIaLibreExcerpt
 ) {
     public double progressPct() {
         if (tasksTotalWeek <= 0) {

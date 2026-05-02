@@ -12,7 +12,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -115,6 +117,72 @@ public class UserDAO {
                 throw new SQLException("Aucun utilisateur avec id_user = " + user.getId());
             }
         }
+    }
+
+    /**
+     * Réinitialisation mot de passe : met à jour uniquement {@code password_user} par e-mail.
+     *
+     * @return true si un compte a été mis à jour, sinon false
+     */
+    public boolean updatePasswordHashByEmail(String email, String passwordHash) throws SQLException {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+        if (passwordHash == null || passwordHash.isBlank()) {
+            throw new SQLException("Hash mot de passe obligatoire");
+        }
+        String sql = """
+                UPDATE users
+                SET password_user = ?
+                WHERE LOWER(TRIM(email_user)) = LOWER(TRIM(?))
+                """;
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, passwordHash);
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public void touchLastSeen(int userId) throws SQLException {
+        String sql = "UPDATE users SET last_seen_at_user = CURRENT_TIMESTAMP WHERE id_user = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Utilisateurs inactifs (basé sur last_seen_at_user, sinon fallback created_at_user).
+     */
+    public List<User> findInactiveUsersBefore(Instant cutoff, int limit) throws SQLException {
+        if (cutoff == null) {
+            return List.of();
+        }
+        int lim = (limit <= 0) ? 200 : Math.min(limit, 2000);
+        String sql = """
+                SELECT %s
+                FROM users
+                WHERE (
+                    (last_seen_at_user IS NOT NULL AND last_seen_at_user < ?)
+                    OR
+                    (last_seen_at_user IS NULL AND created_at_user IS NOT NULL AND created_at_user < ?)
+                )
+                ORDER BY COALESCE(last_seen_at_user, created_at_user) ASC
+                LIMIT ?
+                """.formatted(COL_SELECT);
+        List<User> out = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            Timestamp t = Timestamp.from(cutoff);
+            ps.setTimestamp(1, t);
+            ps.setTimestamp(2, t);
+            ps.setInt(3, lim);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(mapRow(rs));
+                }
+            }
+        }
+        return out;
     }
 
     /**

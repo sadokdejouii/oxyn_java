@@ -25,6 +25,7 @@ import org.example.utils.UserDialogHelper;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.io.ByteArrayInputStream;
 
 /**
  * Profil connecté : e-mail, nom, prénom, téléphone et changement de mot de passe (admin, client, encadrant).

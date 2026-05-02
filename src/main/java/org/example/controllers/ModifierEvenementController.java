@@ -3,16 +3,25 @@ package org.example.controllers;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.example.entities.Evenement;
 import org.example.services.EvenementServices;
+import org.example.services.LocationService;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -23,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class ModifierEvenementController implements Initializable {
 
@@ -56,13 +66,16 @@ public class ModifierEvenementController implements Initializable {
     @FXML
     private Label formFeedbackLabel;
 
+    @FXML
+    private StackPane rootStackPane;
+
     private final EvenementServices es = new EvenementServices();
     private Evenement currentEvenement;
     private int eventId = -1;
     private boolean embeddedMode = false;
-    private Runnable onDone;
+    private Consumer<Evenement> onDone;
 
-    public void setEmbeddedMode(Runnable onDone) {
+    public void setEmbeddedMode(Consumer<Evenement> onDone) {
         this.embeddedMode = true;
         this.onDone = onDone;
     }
@@ -76,9 +89,10 @@ public class ModifierEvenementController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         statut_evenement.setItems(FXCollections.observableArrayList(
                 "Sélectionner",
-                "À venir",
+            "A venir",
                 "En cours",
-                "Terminée"
+            "Terminee",
+            "Annulee"
         ));
         statut_evenement.setValue("Sélectionner");
         clearFeedback();
@@ -94,7 +108,7 @@ public class ModifierEvenementController implements Initializable {
                 lieu_evenement.setText(currentEvenement.getLieu());
                 ville_evenement.setText(currentEvenement.getVille());
                 places_max_evenement.setText(String.valueOf(currentEvenement.getPlacesMax()));
-                statut_evenement.setValue(currentEvenement.getStatut());
+                statut_evenement.setValue(normalizeStatus(currentEvenement.getStatut()));
 
                 // Set dates - convert java.util.Date to LocalDate
                 if (currentEvenement.getDateDebut() != null) {
@@ -210,7 +224,7 @@ public class ModifierEvenementController implements Initializable {
 
             es.modifier(evenementModifie);
             showSuccess("Événement modifié avec succès !");
-            closeOrReturn();
+            closeOrReturn(evenementModifie);
 
         } catch (SQLException ex) {
             showError("Erreur lors de la modification de l'événement : " + ex.getMessage(), "Erreur base de données");
@@ -219,10 +233,100 @@ public class ModifierEvenementController implements Initializable {
         }
     }
 
-    private void closeOrReturn() {
+    @FXML
+    void openLocationPicker(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/LocationPicker.fxml"));
+            if (loader.getLocation() == null) {
+                showError("Fichier LocationPicker.fxml introuvable", "Erreur");
+                return;
+            }
+            VBox locationPickerContent = loader.load();
+
+            // Create dimming overlay
+            Region dimOverlay = new Region();
+            dimOverlay.setStyle("""
+                -fx-background-color: rgba(0, 0, 0, 0.4);
+                """);
+            
+            // Click on overlay to close
+            dimOverlay.setOnMouseClicked(e -> closeLocationModal(rootStackPane, dimOverlay));
+
+            // Create popup container
+            VBox popupContainer = new VBox();
+            popupContainer.setStyle("""
+                -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(34, 65, 138, 0.24) 0%, rgba(13, 27, 62, 0.96) 100%);
+                -fx-background-radius: 18;
+                -fx-border-color: rgba(79, 195, 247, 0.28);
+                -fx-border-width: 1;
+                -fx-border-radius: 18;
+                -fx-padding: 12;
+                """);
+            popupContainer.setEffect(new javafx.scene.effect.DropShadow(
+                    javafx.scene.effect.BlurType.GAUSSIAN,
+                    javafx.scene.paint.Color.web("#000000", 0.45),
+                    24, 0.2, 0, 6
+            ));
+            
+            // Set max size for modal
+            popupContainer.setMaxWidth(1000);
+            popupContainer.setMaxHeight(720);
+            popupContainer.setPrefWidth(1000);
+            popupContainer.setPrefHeight(720);
+
+            // Add content
+            VBox.setVgrow(locationPickerContent, javafx.scene.layout.Priority.ALWAYS);
+            popupContainer.getChildren().add(locationPickerContent);
+
+            // Center the popup
+            StackPane.setAlignment(popupContainer, javafx.geometry.Pos.CENTER);
+            StackPane.setMargin(popupContainer, new Insets(20));
+
+            // Add overlay and popup to root
+            rootStackPane.getChildren().addAll(dimOverlay, popupContainer);
+
+            LocationPickerController controller = loader.getController();
+            if (controller == null) {
+                showError("Erreur lors du chargement du contrôleur LocationPicker", "Erreur");
+                return;
+            }
+            
+            controller.setOnLocationSelected(() -> {
+                LocationService.LocationResult result = controller.getSelectedLocation();
+                if (result != null) {
+                    if (result.getPlace() != null && !result.getPlace().isEmpty()) {
+                        lieu_evenement.setText(result.getPlace());
+                    }
+                    if (result.getCity() != null && !result.getCity().isEmpty()) {
+                        ville_evenement.setText(result.getCity());
+                    }
+                    showSuccess("Lieu sélectionné: " + result.getPlace() + ", " + result.getCity());
+                    closeLocationModal(rootStackPane, dimOverlay);
+                }
+            });
+            
+            controller.setOnCancel(() -> {
+                closeLocationModal(rootStackPane, dimOverlay);
+            });
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur lors de l'ouverture de la carte: " + e.getMessage(), "Erreur");
+        }
+    }
+    
+    private void closeLocationModal(StackPane root, Region dimOverlay) {
+        // Remove the last two children (dimOverlay and popupContainer)
+        if (root.getChildren().size() >= 2) {
+            root.getChildren().remove(root.getChildren().size() - 1);
+            root.getChildren().remove(root.getChildren().size() - 1);
+        }
+    }
+
+    private void closeOrReturn(Evenement savedEvent) {
         if (embeddedMode) {
             if (onDone != null) {
-                onDone.run();
+                onDone.accept(savedEvent);
             }
             return;
         }
@@ -259,5 +363,23 @@ public class ModifierEvenementController implements Initializable {
         formFeedbackLabel.getStyleClass().removeAll("form-feedback-error", "form-feedback-success");
         formFeedbackLabel.setVisible(false);
         formFeedbackLabel.setManaged(false);
+    }
+
+    private String normalizeStatus(String status) {
+        String normalized = status == null ? "" : java.text.Normalizer.normalize(status, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .toLowerCase()
+                .trim();
+
+        if (normalized.contains("annul")) {
+            return "Annulee";
+        }
+        if (normalized.contains("termin")) {
+            return "Terminee";
+        }
+        if (normalized.contains("en cours")) {
+            return "En cours";
+        }
+        return "A venir";
     }
 }

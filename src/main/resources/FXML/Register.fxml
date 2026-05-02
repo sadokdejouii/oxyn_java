@@ -66,6 +66,7 @@
             <VBox spacing="4">
                 <Label styleClass="field-label" text="Mot de passe *" />
                 <PasswordField fx:id="passwordField" promptText="8+ car. : maj, min, chiffre, spécial" styleClass="login-field" />
+                <Label fx:id="passwordStrengthLabel" text="" style="-fx-font-size: 11px; -fx-padding: 2 0 0 2;" />
                 <Label fx:id="passwordErrorLabel" styleClass="field-error-msg" managed="false" visible="false" />
             </VBox>
 

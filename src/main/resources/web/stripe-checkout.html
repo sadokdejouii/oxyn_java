@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paiement Stripe</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body {
+      margin: 0;
+      background: #f6f8fb;
+      font-family: Arial, sans-serif;
+      color: #10233f;
+    }
+    .container {
+      max-width: 760px;
+      margin: 24px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(16, 35, 63, 0.08);
+      padding: 20px;
+    }
+    h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+    }
+    #payment-element {
+      margin-bottom: 16px;
+    }
+    #submit-button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 18px;
+      background: #2f80ed;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #submit-button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+    #error-message {
+      margin-top: 12px;
+      color: #b12e2e;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Paiement sécurisé</h2>
+  <form id="payment-form">
+    <div id="payment-element"></div>
+    <button id="submit-button" type="submit">Payer maintenant</button>
+    <div id="error-message"></div>
+  </form>
+</div>
+<script>
+  const form = document.getElementById('payment-form');
+  const errorMessage = document.getElementById('error-message');
+  const submitButton = document.getElementById('submit-button');
+  let stripe = null;
+  let elements = null;
+
+  window.startCheckout = async function (clientSecret, publishableKey) {
+    try {
+      stripe = Stripe(publishableKey);
+      elements = stripe.elements({clientSecret: clientSecret});
+      const paymentElement = elements.create('payment');
+      paymentElement.mount('#payment-element');
+    } catch (e) {
+      alert('PAYMENT_ERROR:' + (e && e.message ? e.message : 'Erreur d\'initialisation Stripe'));
+    }
+  };
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    if (!stripe || !elements) {
+      alert('PAYMENT_ERROR:Session Stripe non initialisee');
+      return;
+    }
+    submitButton.disabled = true;
+    errorMessage.textContent = '';
+    const result = await stripe.confirmPayment({
+      elements: elements,
+      redirect: 'if_required'
+    });
+    submitButton.disabled = false;
+    if (result.error) {
+      const message = result.error.message || 'Paiement refuse';
+      errorMessage.textContent = message;
+      alert('PAYMENT_ERROR:' + message);
+      return;
+    }
+    alert('PAYMENT_SUCCESS');
+  });
+</script>
+</body>
+</html>

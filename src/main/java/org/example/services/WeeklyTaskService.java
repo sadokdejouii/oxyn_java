@@ -96,6 +96,11 @@ public final class WeeklyTaskService {
         tacheRepo.updateEtat(tacheId, userId, next);
         ensureObjectifRowExists(userId);
         syncObjectifMetricsFromTasks(userId);
+        try {
+            org.example.realtime.RealtimePlanningSyncService.getInstance()
+                    .notifyTaskToggled(userId, tacheId, next == TacheEtat.FAIT);
+        } catch (Exception ignored) {
+        }
     }
 
     private void generateAndInsertWeek(int userId, LocalDate monday, FicheSanteRow fiche, ProgrammeGenereRow programmeOrNull) throws SQLException {

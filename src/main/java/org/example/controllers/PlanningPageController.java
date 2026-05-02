@@ -5,15 +5,22 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import org.example.planning.PlanningUi;
 import org.example.planning.PlanningViewModel;
+import org.example.planning.ui.NotificationBell;
+import org.example.realtime.RealtimePlanningSyncService;
+import org.example.realtime.ui.RealtimeStatusBadge;
 import org.example.services.CurrentSession;
+import org.example.services.NotificationService;
+import org.example.services.SessionContext;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -49,6 +56,27 @@ public class PlanningPageController implements Initializable {
     @FXML
     private Label avatarInitials;
 
+    @FXML
+    private HBox planningClientToolbar;
+    @FXML
+    private Button btnObjectifAssistant;
+    @FXML
+    private Button btnTaskCalendar;
+
+    @FXML
+    private StackPane notificationBellSlot;
+
+    @FXML
+    private StackPane realtimeStatusSlot;
+
+    private NotificationBell notificationBell;
+    private RealtimeStatusBadge realtimeStatusBadge;
+    private final NotificationService notificationService = new NotificationService();
+    private String planningSyncSubscriptionId;
+    private long lastPlanningRefreshMs = 0L;
+    private PlanningClientController activeClientController;
+    private EncadrantPlanningHubController activeEncadrantHub;
+
     private final PlanningViewModel viewModel = new PlanningViewModel();
 
     public void setMainLayoutController(MainLayoutController mainLayoutController) {
@@ -72,13 +100,61 @@ public class PlanningPageController implements Initializable {
         encadrantHubController = null;
         dynamicContainer.getChildren().clear();
 
+        mountNotificationBell(ctx);
+        mountRealtimeStatusBadge();
+        installPlanningRealtimeListener();
+
         if (ctx.isEncadrant()) {
+            setPlanningClientToolbarVisible(false);
             buildEncadrantView();
         } else if (ctx.isAdmin()) {
+            setPlanningClientToolbarVisible(false);
             buildAdminView();
         } else {
             buildClientView();
+            setPlanningClientToolbarVisible(ctx.isClientUser() && ctx.hasDbUser());
         }
+    }
+
+    private void setPlanningClientToolbarVisible(boolean on) {
+        if (planningClientToolbar != null) {
+            planningClientToolbar.setVisible(on);
+            planningClientToolbar.setManaged(on);
+        }
+    }
+
+    @FXML
+    private void handleOpenObjectifAssistant() {
+        var ctx = CurrentSession.context();
+        if (!ctx.isClientUser() || !ctx.hasDbUser()) {
+            return;
+        }
+        dynamicContainer.getChildren().clear();
+        PlanningObjectifController oc = new PlanningObjectifController(ctx.getUserId(), this::restoreClientPlanningDashboard);
+        VBox root = oc.buildRoot();
+        dynamicContainer.getChildren().add(root);
+        VBox.setVgrow(root, Priority.ALWAYS);
+        setPlanningClientToolbarVisible(false);
+    }
+
+    @FXML
+    private void handleOpenTaskCalendar() {
+        var ctx = CurrentSession.context();
+        if (!ctx.isClientUser() || !ctx.hasDbUser()) {
+            return;
+        }
+        dynamicContainer.getChildren().clear();
+        PlanningCalendarController calendar = new PlanningCalendarController(ctx.getUserId(), this::restoreClientPlanningDashboard);
+        VBox root = calendar.buildRoot();
+        dynamicContainer.getChildren().add(root);
+        VBox.setVgrow(root, Priority.ALWAYS);
+        setPlanningClientToolbarVisible(false);
+    }
+
+    private void restoreClientPlanningDashboard() {
+        buildClientView();
+        var ctx = CurrentSession.context();
+        setPlanningClientToolbarVisible(ctx.isClientUser() && ctx.hasDbUser());
     }
 
     private void applyRoleBadgeStyle(String variant) {
@@ -93,6 +169,86 @@ public class PlanningPageController implements Initializable {
         CurrentSession.context().openDiscussionFromPlanning();
     }
 
+    private void mountNotificationBell(SessionContext ctx) {
+        if (notificationBellSlot == null) {
+            return;
+        }
+        if (notificationBell != null) {
+            notificationBell.dispose();
+        }
+        notificationBellSlot.getChildren().clear();
+        if (!ctx.hasDbUser() || ctx.isAdmin()) {
+            notificationBellSlot.setVisible(false);
+            notificationBellSlot.setManaged(false);
+            notificationBell = null;
+            return;
+        }
+        notificationBellSlot.setVisible(true);
+        notificationBellSlot.setManaged(true);
+        notificationBell = new NotificationBell(
+                ctx.getUserId(),
+                notificationService,
+                this::openConversationFromNotification);
+        notificationBellSlot.getChildren().add(notificationBell);
+    }
+
+    private void installPlanningRealtimeListener() {
+        if (planningSyncSubscriptionId != null) {
+            RealtimePlanningSyncService.getInstance().unsubscribe(planningSyncSubscriptionId);
+            planningSyncSubscriptionId = null;
+        }
+        planningSyncSubscriptionId = RealtimePlanningSyncService.getInstance()
+                .subscribeForCurrentUser(this::onPlanningSyncEvent);
+        if (planningPageStack != null) {
+            planningPageStack.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene == null && planningSyncSubscriptionId != null) {
+                    RealtimePlanningSyncService.getInstance().unsubscribe(planningSyncSubscriptionId);
+                    planningSyncSubscriptionId = null;
+                }
+            });
+        }
+    }
+
+    private void onPlanningSyncEvent(org.example.realtime.RealtimeEvent event) {
+        long now = System.currentTimeMillis();
+        if (now - lastPlanningRefreshMs < 500L) {
+            return;
+        }
+        lastPlanningRefreshMs = now;
+        var ctx = CurrentSession.context();
+        if (ctx.isClientUser() && activeClientController != null) {
+            try {
+                activeClientController.refresh();
+            } catch (Exception ignored) {
+            }
+        } else if (ctx.isEncadrant() && activeEncadrantHub != null) {
+            try {
+                activeEncadrantHub.refresh();
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private void mountRealtimeStatusBadge() {
+        if (realtimeStatusSlot == null) {
+            return;
+        }
+        if (realtimeStatusBadge != null) {
+            realtimeStatusBadge.dispose();
+        }
+        realtimeStatusSlot.getChildren().clear();
+        realtimeStatusBadge = new RealtimeStatusBadge();
+        realtimeStatusSlot.getChildren().add(realtimeStatusBadge);
+    }
+
+    private void openConversationFromNotification(NotificationService.UnreadNotification notification) {
+        SessionContext ctx = CurrentSession.context();
+        if (ctx.isEncadrant() && notification.otherUserId() > 0) {
+            ctx.setPendingDiscussionClientUserId(notification.otherUserId());
+        }
+        ctx.openDiscussionFromPlanning();
+    }
+
     private void buildClientView() {
         applyAdminPlanningDarkTheme(false);
         applyClientPlanningZen(true);
@@ -101,9 +257,11 @@ public class PlanningPageController implements Initializable {
             VBox req = new VBox(PlanningUi.hintLabel(
                     "Connexion requise : connectez-vous avec un compte reconnu par l’application (e-mail enregistré)."));
             dynamicContainer.getChildren().add(PlanningUi.card("Compte requis", null, null, wrapGrow(req)));
+            activeClientController = null;
             return;
         }
-        new PlanningClientController(dynamicContainer, ctx.getUserId()).refresh();
+        activeClientController = new PlanningClientController(dynamicContainer, ctx.getUserId());
+        activeClientController.refresh();
     }
 
     private void buildEncadrantView() {

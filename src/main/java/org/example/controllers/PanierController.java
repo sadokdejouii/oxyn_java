@@ -16,6 +16,7 @@ import org.example.entities.LignePanier;
 import org.example.entities.PanierSession;
 import org.example.entities.commandes;
 import org.example.services.CommandesService;
+import org.example.services.CurrencyExchangeService;
 import org.example.services.SessionContext;
 import org.example.services.UserRole;
 import org.example.utils.AdresseCommandeValidator;
@@ -39,6 +40,8 @@ public class PanierController {
     @FXML
     private ComboBox<String> paiementCombo;
     @FXML
+    private ComboBox<String> devisePanierCombo;
+    @FXML
     private Label totalLabel;
     @FXML
     private Button validerBtn;
@@ -46,6 +49,7 @@ public class PanierController {
     private MainLayoutController mainLayoutController;
 
     private final PanierSession panier = PanierSession.getInstance();
+    private final CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService();
 
     public void setMainLayoutController(MainLayoutController mainLayoutController) {
         this.mainLayoutController = mainLayoutController;
@@ -55,7 +59,16 @@ public class PanierController {
     public void initialize() {
         paiementCombo.setItems(FXCollections.observableArrayList("En ligne", "En espèces"));
         paiementCombo.getSelectionModel().selectFirst();
+        if (devisePanierCombo != null) {
+            devisePanierCombo.setItems(FXCollections.observableArrayList("TND", "EUR", "USD"));
+            devisePanierCombo.getSelectionModel().select("TND");
+        }
         AdresseCommandeValidator.appliquerLimiteLongueur(adresseField);
+        rafraichirPanier();
+    }
+
+    @FXML
+    private void handleRefreshCurrency() {
         rafraichirPanier();
     }
 
@@ -69,6 +82,18 @@ public class PanierController {
     @FXML
     private void handleValiderCommande() {
         validerCommande();
+    }
+
+    @FXML
+    private void handleViderPanier() {
+        if (panier.estVide()) {
+            showAlert(Alert.AlertType.INFORMATION, "Panier", "Votre panier est déjà vide.");
+            return;
+        }
+        panier.viderPanier();
+        adresseField.clear();
+        rafraichirPanier();
+        showAlert(Alert.AlertType.INFORMATION, "Panier", "Le panier a été vidé.");
     }
 
     private void rafraichirPanier() {
@@ -94,7 +119,7 @@ public class PanierController {
             }
         }
 
-        totalLabel.setText(String.format("%.2f TND", panier.getTotal()));
+        totalLabel.setText(formatFromTnd(panier.getTotal()));
         validerBtn.setDisable(lignes.isEmpty());
     }
 
@@ -181,7 +206,7 @@ public class PanierController {
         commandes commande = new commandes(
                 LocalDateTime.now().format(DATE_HEURE),
                 panier.getTotal(),
-                "validée",
+                modePaiement.equalsIgnoreCase("En ligne") ? "en attente" : "validée",
                 modePaiement,
                 idClient,
                 adresse
@@ -189,13 +214,44 @@ public class PanierController {
         CommandesService commandesService = new CommandesService();
         boolean success = commandesService.ajouterCommande(commande, panier.getLignes());
         if (success) {
-            showAlert(Alert.AlertType.INFORMATION, "Commande enregistrée", "Votre commande a été validée. Merci pour votre achat !");
-            panier.viderPanier();
-            rafraichirPanier();
-            adresseField.clear();
+            if (modePaiement.equalsIgnoreCase("En ligne")) {
+                ouvrirPaiementStripe(commande, idClient);
+            } else {
+                showAlert(Alert.AlertType.INFORMATION, "Commande enregistrée", "Votre commande a été validée. Merci pour votre achat !");
+                panier.viderPanier();
+                rafraichirPanier();
+                adresseField.clear();
+            }
         } else {
             showAlert(Alert.AlertType.ERROR, "Commande impossible",
                     "L’enregistrement a échoué : stock insuffisant pour un ou plusieurs produits, ou erreur de base de données. Vérifiez les quantités disponibles.");
+        }
+    }
+
+    private void ouvrirPaiementStripe(commandes commande, int idClient) {
+        StripePaymentService stripePaymentService = new StripePaymentService();
+        try {
+            StripePaymentService.PaymentIntentData paymentIntentData =
+                    stripePaymentService.createPaymentIntentForCommande(commande.getId_commande(), commande.getTotal_commande());
+            StripePaymentSession.getInstance().start(
+                    commande.getId_commande(),
+                    idClient,
+                    commande.getTotal_commande(),
+                    paymentIntentData.clientSecret(),
+                    paymentIntentData.publishableKey()
+            );
+            panier.viderPanier();
+            rafraichirPanier();
+            adresseField.clear();
+            if (mainLayoutController != null) {
+                mainLayoutController.navigate("/FXML/pages/PaiementEnLigne.fxml", "Paiement en ligne", null);
+            }
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.WARNING,
+                    "Commande en attente",
+                    "La commande a été enregistrée en attente de paiement, mais l'initialisation Stripe a échoué : "
+                            + ex.getMessage()
+                            + ". Vous pourrez relancer le paiement plus tard.");
         }
     }
 
@@ -205,5 +261,16 @@ public class PanierController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private String selectedCurrency() {
+        if (devisePanierCombo == null || devisePanierCombo.getValue() == null) {
+            return "TND";
+        }
+        return devisePanierCombo.getValue();
+    }
+
+    private String formatFromTnd(double amountTnd) {
+        return currencyExchangeService.formatFromTnd(amountTnd, selectedCurrency());
     }
 }

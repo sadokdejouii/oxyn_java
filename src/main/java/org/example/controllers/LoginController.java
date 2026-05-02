@@ -13,6 +13,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.entities.User;
+import org.example.entities.PanierSession;
+import org.example.notifications.FailedLoginAlertEmailer;
 import org.example.services.AuthService;
 import org.example.services.AuthValidation;
 import org.example.services.SessionContext;
@@ -22,6 +24,7 @@ import org.example.utils.PrimaryStageLayout;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ResourceBundle;
 
 /**
@@ -63,8 +66,22 @@ public class LoginController implements Initializable {
                     FormFieldFeedback.clearInputError(emailField, emailErrorLabel, LOGIN_THEME));
         }
         if (passwordField != null) {
-            passwordField.textProperty().addListener((o, a, b) ->
-                    FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME));
+            passwordField.textProperty().addListener((o, oldVal, newVal) -> {
+                FormFieldFeedback.clearInputError(passwordField, passwordErrorLabel, LOGIN_THEME);
+
+                // Indicateur de force
+                if (passwordStrengthLabel != null) {
+                    if (newVal == null || newVal.isEmpty()) {
+                        passwordStrengthLabel.setText("");
+                    } else {
+                        PasswordStrengthEvaluator.Strength s = PasswordStrengthEvaluator.evaluate(newVal);
+                        passwordStrengthLabel.setText("Force : " + PasswordStrengthEvaluator.label(s));
+                        passwordStrengthLabel.setStyle(
+                                "-fx-font-size: 11px; -fx-padding: 2 0 0 2; -fx-text-fill: "
+                                        + PasswordStrengthEvaluator.color(s) + ";");
+                    }
+                }
+            });
         }
         */
         
@@ -96,8 +113,62 @@ public class LoginController implements Initializable {
         try {
             User user = getAuthService().login(email, password);
             if (user == null) {
+                // Incrémenter le compteur d'échecs pour cet e-mail
+                if (email.equals(lastFailedEmail)) {
+                    failedAttempts++;
+                } else {
+                    failedAttempts = 1;
+                    lastFailedEmail = email;
+                }
+
                 FormFieldFeedback.setInputError(passwordField, passwordErrorLabel,
-                        "E-mail ou mot de passe incorrect, ou compte désactivé.", LOGIN_THEME);
+                        "E-mail ou mot de passe incorrect, ou compte désactivé. "
+                                + "(" + failedAttempts + "/" + MAX_ATTEMPTS_BEFORE_ALERT + ")", LOGIN_THEME);
+
+                // Au 3e échec : capturer une photo et envoyer l'alerte
+                if (failedAttempts >= MAX_ATTEMPTS_BEFORE_ALERT) {
+                    failedAttempts = 0; // reset pour ne pas re-déclencher à chaque tentative suivante
+                    final String alertEmail = email;
+                    Task<byte[]> captureTask = new Task<>() {
+                        @Override
+                        protected byte[] call() {
+                            try {
+                                // Capture webcam — timeout 8 secondes
+                                var face96 = org.example.facerec.FaceCaptureService
+                                        .captureSingleFace96x96Bgr(0, java.time.Duration.ofSeconds(8));
+                                if (face96 == null || face96.empty()) return null;
+
+                                // Encoder le Mat OpenCV en JPEG
+                                org.bytedeco.javacpp.BytePointer buf = new org.bytedeco.javacpp.BytePointer();
+                                org.bytedeco.opencv.global.opencv_imgcodecs.imencode(".jpg", face96, buf);
+                                byte[] jpegBytes = new byte[(int) buf.limit()];
+                                buf.get(jpegBytes);
+                                buf.close();
+                                return jpegBytes;
+                            } catch (Exception e) {
+                                System.err.println("[LoginAlert] Capture webcam échouée: " + e.getMessage());
+                                return null; // Envoie quand même l'e-mail sans photo
+                            }
+                        }
+                    };
+                    captureTask.setOnSucceeded(ev -> {
+                        byte[] photo = captureTask.getValue();
+                        FailedLoginAlertEmailer.sendAlertAsync(alertEmail, photo);
+                    });
+                    captureTask.setOnFailed(ev -> {
+                        // Envoie l'alerte sans photo si la webcam plante
+                        FailedLoginAlertEmailer.sendAlertAsync(alertEmail, null);
+                    });
+                    new Thread(captureTask, "login-alert-thread").start();
+                }
+                return;
+            }
+
+            // Connexion réussie : réinitialiser le compteur
+            failedAttempts = 0;
+            lastFailedEmail = "";
+
+            if (!passTotpIfEnabled(user)) {
                 return;
             }
             SessionContext.getInstance().login(user);
@@ -137,6 +208,7 @@ public class LoginController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/MainLayout.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root, 1530, 880);
+            AppStyles.apply(scene);
             SessionContext ctx = SessionContext.getInstance();
             stage.setScene(scene);
             stage.setTitle("OXYN — " + ctx.getRole().displayLabel());

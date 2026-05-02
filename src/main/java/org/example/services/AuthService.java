@@ -6,6 +6,12 @@ import org.example.entities.Client;
 import org.example.entities.User;
 import org.example.utils.MyDataBase;
 import org.example.utils.PasswordUtils;
+import org.example.windowshello.WindowsHelloBridge;
+import org.example.windowshello.WindowsHelloLinkDAO;
+import org.example.windowshello.WindowsHelloResult;
+import org.example.facerec.FaceEmbeddingCodec;
+import org.example.facerec.FaceEmbeddingDAO;
+import org.example.facerec.FaceSimilarity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

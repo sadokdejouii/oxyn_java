@@ -54,7 +54,11 @@ public final class EncadrantClientPlanningService {
                        (SELECT COUNT(*) FROM taches_quotidiennes t
                         WHERE t.user_id = u.id_user AND t.`date` BETWEEN ? AND ?) AS ntot,
                        (SELECT COUNT(*) FROM taches_quotidiennes t
-                        WHERE t.user_id = u.id_user AND t.`date` BETWEEN ? AND ? AND t.etat = 'FAIT') AS ndone
+                        WHERE t.user_id = u.id_user AND t.`date` BETWEEN ? AND ? AND t.etat = 'FAIT') AS ndone,
+                       (SELECT LEFT(o.objectifs, 140) FROM objectifs_hebdomadaires o
+                        WHERE o.user_id = u.id_user ORDER BY COALESCE(o.updated_at, o.created_at) DESC, o.id DESC LIMIT 1) AS obj_libre,
+                       (SELECT LEFT(o.message_ia, 180) FROM objectifs_hebdomadaires o
+                        WHERE o.user_id = u.id_user ORDER BY COALESCE(o.updated_at, o.created_at) DESC, o.id DESC LIMIT 1) AS rep_libre
                 FROM users u
                 INNER JOIN fiche_sante f ON f.user_id = u.id_user
                 WHERE u.is_active_user = 1
@@ -77,6 +81,8 @@ public final class EncadrantClientPlanningService {
                     }
                     int ntot = rs.getInt("ntot");
                     int ndone = rs.getInt("ndone");
+                    String objLib = rs.getString("obj_libre");
+                    String repLib = rs.getString("rep_libre");
                     out.add(new EncadrantClientCardRow(
                             rs.getInt("id_user"),
                             name,
@@ -84,7 +90,9 @@ public final class EncadrantClientPlanningService {
                             rs.getString("objectif"),
                             rs.getString("niveau_activite"),
                             ntot,
-                            ndone));
+                            ndone,
+                            objLib,
+                            repLib));
                 }
             }
         }
@@ -123,6 +131,12 @@ public final class EncadrantClientPlanningService {
                     + "les observations seront persistées lorsque l’objectif hebdomadaire existera (ex. après suivi client).");
         }
         planning.saveEncadrantIntervention(o.get().id(), messageEncadrant, effortsValides, null, null);
+        try {
+            int encadrantId = org.example.services.SessionContext.getInstance().getUserId();
+            org.example.realtime.RealtimePlanningSyncService.getInstance()
+                    .notifyInterventionAdded(clientUserId, encadrantId, messageEncadrant);
+        } catch (Exception ignored) {
+        }
     }
 
     private String buildAiSynthese(

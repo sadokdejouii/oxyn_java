@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controllers.LocationPickerController"
+      styleClass="location-picker-dialog"
+      stylesheets="@../css/dashboard-saas.css,@../css/event-management.css"
+      spacing="12"
+      prefWidth="900"
+      prefHeight="650">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Title -->
+    <Label styleClass="form-title" text="Sélectionner un Lieu sur la Carte" />
+
+    <!-- Search Section -->
+    <VBox styleClass="form-group" spacing="8">
+        <Label styleClass="form-label" text="Rechercher un lieu ou cliquer sur la carte" />
+        <HBox spacing="8">
+            <TextField fx:id="searchField"
+                       maxWidth="Infinity"
+                       promptText="Entrez un lieu (adresse, ville, point d'intérêt...)"
+                       styleClass="form-input"
+                       HBox.hgrow="ALWAYS" />
+            <Button fx:id="searchButton"
+                    mnemonicParsing="false"
+                    onAction="#performSearch"
+                    styleClass="form-btn-submit"
+                    text="Rechercher"
+                    minWidth="100" />
+        </HBox>
+    </VBox>
+
+    <!-- Status Label -->
+    <Label fx:id="statusLabel"
+           styleClass="form-feedback"
+           text="Cliquez sur la carte ou recherchez un lieu"
+           wrapText="true" />
+
+    <!-- Loading Indicator -->
+    <ProgressIndicator fx:id="loadingIndicator"
+                       maxHeight="30"
+                       maxWidth="30"
+                       prefHeight="30"
+                       prefWidth="30"
+                       visible="false" />
+
+    <!-- Main Content: Map and Results Side-by-Side -->
+    <HBox spacing="12" VBox.vgrow="ALWAYS" prefHeight="420">
+        
+        <!-- Left: Map (NO GROW - FIXED SIZE) -->
+        <VBox styleClass="form-group" spacing="8" prefWidth="540" prefHeight="400">
+            <Label styleClass="form-label" text="Carte Interactive" />
+            <WebView fx:id="mapView"
+                     prefWidth="520"
+                     prefHeight="370" />
+        </VBox>
+        
+        <!-- Right: Results (NO GROW - FIXED WIDTH) -->
+        <VBox styleClass="location-results-panel" spacing="8" prefWidth="300" prefHeight="400">
+            <Label styleClass="form-label" text="Résultats Recherche" />
+            <ListView fx:id="resultsListView"
+                      prefWidth="280"
+                      prefHeight="350"
+                      styleClass="location-results-list" />
+        </VBox>
+    </HBox>
+
+    <!-- Details Panel -->
+    <VBox fx:id="detailsPanel"
+          styleClass="form-group"
+          spacing="8"
+          visible="false">
+        <Label styleClass="form-label" text="Détails du lieu sélectionné" />
+        <Label fx:id="selectedLocationLabel"
+               styleClass="form-feedback"
+               text=""
+               wrapText="true" />
+    </VBox>
+
+    <!-- Button Group -->
+    <HBox spacing="12" prefHeight="45" alignment="CENTER">
+        <Button fx:id="selectButton"
+                mnemonicParsing="false"
+                onAction="#confirmSelection"
+                styleClass="form-btn-submit"
+                text="Confirmer la sélection"
+                minWidth="160"
+                minHeight="40" />
+        <Button mnemonicParsing="false"
+                onAction="#cancelSelection"
+                styleClass="form-btn-cancel"
+                text="Annuler"
+                minWidth="120"
+                minHeight="40" />
+    </HBox>
+
+</VBox>
