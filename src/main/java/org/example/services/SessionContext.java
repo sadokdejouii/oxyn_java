@@ -56,6 +56,10 @@ public final class SessionContext {
 
     private int pendingDiscussionClientUserId = -1;
 
+    /** Conversation ouverte dans la page Discussion (pour filtrer les toasts temps réel), ou -1. */
+
+    private int activeDiscussionConversationId = -1;
+
 
 
     private SessionContext() {
@@ -224,6 +228,18 @@ public final class SessionContext {
 
     }
 
+    public void setActiveDiscussionConversationId(int conversationId) {
+
+        this.activeDiscussionConversationId = conversationId > 0 ? conversationId : -1;
+
+    }
+
+    public int getActiveDiscussionConversationId() {
+
+        return activeDiscussionConversationId;
+
+    }
+
 
 
     public void logout() {
@@ -241,6 +257,8 @@ public final class SessionContext {
         this.openDiscussionFromPlanningAction = null;
 
         this.pendingDiscussionClientUserId = -1;
+
+        this.activeDiscussionConversationId = -1;
 
     }
 

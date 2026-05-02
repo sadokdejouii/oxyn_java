@@ -22,6 +22,8 @@ import org.example.services.CommandesService;
 import org.example.services.CurrencyExchangeService;
 import org.example.services.FacturePdfService;
 import org.example.services.SessionContext;
+import org.example.services.StripePaymentService;
+import org.example.services.StripePaymentSession;
 import org.example.services.UserRole;
 import org.example.utils.AdresseCommandeValidator;
 import org.example.utils.CommandeClientResolver;

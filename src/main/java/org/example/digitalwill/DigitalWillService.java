@@ -31,7 +31,14 @@ public final class DigitalWillService {
 
     private final DigitalWillConfig.Cfg cfg = DigitalWillConfig.load();
     private final DigitalWillDAO dao = new DigitalWillDAO();
-    private final UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO;
+
+    private UserDAO users() throws SQLException {
+        if (userDAO == null) {
+            userDAO = new UserDAO();
+        }
+        return userDAO;
+    }
 
     public void startMaintenanceOnceAsync() {
         if (maintenanceStarted) return;
@@ -52,7 +59,7 @@ public final class DigitalWillService {
      */
     public void runMaintenanceOnce() throws SQLException {
         Instant cutoff = Instant.now().minus(cfg.inactiveAfter());
-        List<User> inactive = userDAO.findInactiveUsersBefore(cutoff, 200);
+        List<User> inactive = users().findInactiveUsersBefore(cutoff, 200);
         for (User u : inactive) {
             applyWorkflow(u);
         }
@@ -71,7 +78,7 @@ public final class DigitalWillService {
         // Archivage simple: désactiver le compte + event
         if (u.isActive()) {
             u.setActive(false);
-            userDAO.updateUser(u);
+            users().updateUser(u);
         }
         dao.addEvent(u.getId(), "ARCHIVED", "Compte archivé (inactivité)");
     }
@@ -107,7 +114,7 @@ public final class DigitalWillService {
     private void deleteGdpr(User u) throws SQLException {
         // RGPD: suppression physique (dangereux) → on journalise avant suppression
         dao.addEvent(u.getId(), "DELETE_REQUESTED", "Suppression RGPD (inactivité)");
-        userDAO.deleteUser(u.getId());
+        users().deleteUser(u.getId());
     }
 
     private static void sendPlainEmail(String toEmail, String subject, String body) {

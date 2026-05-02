@@ -5,8 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.example.utils.PrimaryStageLayout;
 import org.example.integration.SubscriptionIntegration;
+import org.example.utils.AppStyles;
+import org.example.utils.PrimaryStageLayout;
 
 public class MainFX extends Application {
 
@@ -49,12 +50,7 @@ public class MainFX extends Application {
 
     @Override
     public void stop() {
-        // Arrêter proprement les services d'abonnement
         SubscriptionIntegration.stopServices();
-    }
-
-    @Override
-    public void stop() {
         try {
             org.example.realtime.RealtimeService.getInstance().stop();
         } catch (Exception ignored) {

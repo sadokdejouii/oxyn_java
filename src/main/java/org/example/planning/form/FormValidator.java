@@ -2,6 +2,8 @@ package org.example.planning.form;
 
 import javafx.scene.control.Spinner;
 
+import org.example.ui.forms.FicheSanteFormValidator;
+
 import java.util.Optional;
 
 /**

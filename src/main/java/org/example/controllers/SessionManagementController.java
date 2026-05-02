@@ -80,10 +80,21 @@ public class SessionManagementController implements Initializable {
 
     private void loadSallesCombo() {
         fieldSalle.getItems().clear();
-        Salle none = new Salle(); none.setId(0); none.setName("Aucune salle");
+        Salle none = new Salle();
+        none.setId(0);
+        none.setName("Aucune salle");
         fieldSalle.getItems().add(none);
-        try { fieldSalle.getItems().addAll(salleService.afficher()); }
-        catch (SQLException ignored) {}
+        try {
+            if (dialogError != null) {
+                dialogError.setText("");
+            }
+            fieldSalle.getItems().addAll(salleService.afficher());
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            if (dialogError != null) {
+                dialogError.setText("Salles : " + (ex.getMessage() != null ? ex.getMessage() : ex.toString()));
+            }
+        }
         fieldSalle.getSelectionModel().selectFirst();
         fieldSalle.setConverter(new javafx.util.StringConverter<Salle>() {
             @Override public String toString(Salle s)    { return s == null ? "" : s.getName(); }
@@ -95,10 +106,13 @@ public class SessionManagementController implements Initializable {
 
     private void loadSessions() {
         try {
-            if (SessionContext.getInstance().hasDbUser()) {
-                allSessions = sessionService.afficher();
-            } else {
+            SessionContext ctx = SessionContext.getInstance();
+            if (!ctx.hasDbUser()) {
                 allSessions = List.of();
+            } else if (ctx.isEncadrant()) {
+                allSessions = sessionService.afficherPourCoach(ctx.getUserId());
+            } else {
+                allSessions = sessionService.afficher();
             }
         } catch (SQLException e) {
             allSessions = List.of();

@@ -18,17 +18,22 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.stage.Stage;
+import org.example.entities.EventNotification;
+import org.example.entities.PanierSession;
+import org.example.services.EventNotificationService;
 import org.example.services.SessionContext;
 import org.example.utils.PageLoader;
 import org.example.utils.PrimaryStageLayout;
@@ -37,6 +42,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
@@ -210,6 +216,19 @@ public class MainLayoutController implements Initializable {
     private Timeline notificationRefreshTimeline;
     private EventNotificationService eventNotificationService;
     private final GaussianBlur notificationBlur = new GaussianBlur(18);
+
+    private static final int NOTIFICATION_LIMIT = 50;
+
+    private StackPane notificationOverlayRoot;
+
+    private Region notificationOverlayBackdrop;
+
+    private VBox notificationOverlay;
+
+    private VBox notificationItemsBox;
+
+    @FXML
+    private Button notificationBtn;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -705,6 +724,141 @@ public class MainLayoutController implements Initializable {
         a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    private void configureNotifications(SessionContext ctx) {
+        ensureNotificationOverlayBuilt();
+        stopNotificationRefresh();
+        if (ctx != null && ctx.hasDbUser() && eventNotificationService != null) {
+            notificationRefreshTimeline = new Timeline(
+                    new KeyFrame(Duration.minutes(1), e -> refreshNotificationBadge()));
+            notificationRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
+            notificationRefreshTimeline.play();
+        }
+        refreshNotificationBadge();
+    }
+
+    private void stopNotificationRefresh() {
+        if (notificationRefreshTimeline != null) {
+            notificationRefreshTimeline.stop();
+            notificationRefreshTimeline = null;
+        }
+    }
+
+    private void refreshNotificationBadge() {
+        if (notificationBtn == null || eventNotificationService == null) {
+            return;
+        }
+        SessionContext ctx = SessionContext.getInstance();
+        if (!ctx.hasDbUser()) {
+            notificationBtn.setTooltip(null);
+            return;
+        }
+        Platform.runLater(() -> {
+            try {
+                int n = eventNotificationService.countUnreadByUser(ctx.getUserId());
+                if (n > 0) {
+                    notificationBtn.setTooltip(new Tooltip(n + " notification(s)"));
+                } else {
+                    notificationBtn.setTooltip(null);
+                }
+            } catch (Exception ignored) {
+                notificationBtn.setTooltip(null);
+            }
+        });
+    }
+
+    private void ensureNotificationOverlayBuilt() {
+        if (notificationOverlayRoot != null) {
+            return;
+        }
+        Parent root = shellRoot != null ? shellRoot.getParent() : null;
+        if (!(root instanceof StackPane stack)) {
+            return;
+        }
+
+        notificationOverlayBackdrop = new Region();
+        notificationOverlayBackdrop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        notificationOverlayBackdrop.setStyle("-fx-background-color: rgba(0,0,0,0.45);");
+        notificationOverlayBackdrop.setOnMouseClicked(e -> hideNotificationOverlay());
+
+        notificationItemsBox = new VBox(8);
+
+        ScrollPane scroll = new ScrollPane(notificationItemsBox);
+        scroll.setFitToWidth(true);
+        scroll.setPrefViewportHeight(320);
+        scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
+        Label title = new Label("Notifications");
+        title.getStyleClass().add("topbar-page-title");
+
+        Button closeBtn = new Button("Fermer");
+        closeBtn.setOnAction(e -> hideNotificationOverlay());
+
+        Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+        HBox header = new HBox(12, title, headerSpacer, closeBtn);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        notificationOverlay = new VBox(12, header, scroll);
+        notificationOverlay.setPadding(new Insets(20));
+        notificationOverlay.setMaxWidth(480);
+        notificationOverlay.setStyle(
+                "-fx-background-color: #1e1e2e; -fx-background-radius: 12; -fx-border-color: #333; -fx-border-radius: 12;");
+        notificationOverlay.setOnMouseClicked(MouseEvent::consume);
+
+        notificationOverlayRoot = new StackPane(notificationOverlayBackdrop, notificationOverlay);
+        StackPane.setAlignment(notificationOverlay, Pos.CENTER_RIGHT);
+        StackPane.setMargin(notificationOverlay, new Insets(24, 48, 24, 24));
+        stack.getChildren().add(notificationOverlayRoot);
+        notificationOverlayRoot.setVisible(false);
+        notificationOverlayRoot.setManaged(false);
+        notificationOverlayRoot.toFront();
+    }
+
+    private void hideNotificationOverlay() {
+        if (notificationOverlayRoot != null) {
+            notificationOverlayRoot.setVisible(false);
+            notificationOverlayRoot.setManaged(false);
+        }
+    }
+
+    private void showNotificationOverlay() {
+        ensureNotificationOverlayBuilt();
+        if (notificationOverlayRoot != null) {
+            notificationOverlayRoot.setVisible(true);
+            notificationOverlayRoot.setManaged(true);
+            notificationOverlayRoot.toFront();
+        }
+    }
+
+    private void renderNotificationOverlay(List<EventNotification> notifications) {
+        ensureNotificationOverlayBuilt();
+        if (notificationItemsBox == null) {
+            return;
+        }
+        notificationItemsBox.getChildren().clear();
+        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.FRENCH);
+        if (notifications == null || notifications.isEmpty()) {
+            Label empty = new Label("Aucune notification.");
+            empty.setWrapText(true);
+            notificationItemsBox.getChildren().add(empty);
+            return;
+        }
+        for (EventNotification n : notifications) {
+            VBox row = new VBox(4);
+            Label t = new Label(n.getTitle() != null ? n.getTitle() : "");
+            t.getStyleClass().add("topbar-user-name");
+            Label m = new Label(n.getMessage() != null ? n.getMessage() : "");
+            m.setWrapText(true);
+            Date created = n.getCreatedAt();
+            Label d = new Label(created != null ? fmt.format(created) : "");
+            d.getStyleClass().add("topbar-user-role");
+            row.getChildren().addAll(t, m, d);
+            row.setPadding(new Insets(8));
+            row.setStyle("-fx-border-color: #3a3a4a; -fx-border-radius: 8; -fx-background-radius: 8;");
+            notificationItemsBox.getChildren().add(row);
+        }
     }
 
     /**

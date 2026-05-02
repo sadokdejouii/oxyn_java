@@ -14,8 +14,8 @@ public final class TotpDAO {
 
     private final Connection con;
 
-    public TotpDAO() {
-        this.con = MyDataBase.getInstance().getConnection();
+    public TotpDAO() throws SQLException {
+        this.con = MyDataBase.requireConnection();
     }
 
     public void ensureTable() throws SQLException {

@@ -26,7 +26,7 @@ public final class AuthService {
 
     private UserDAO userDAO;
 
-    private UserDAO getUserDAO() {
+    private UserDAO getUserDAO() throws SQLException {
         if (userDAO == null) {
             userDAO = new UserDAO();
         }
@@ -45,16 +45,13 @@ public final class AuthService {
             return Optional.empty();
         }
         String email = emailInput.trim();
-        Connection c = MyDataBase.getConnection();
-        if (c == null) {
-            return Optional.empty();
-        }
         String sql = """
                 SELECT id_user, email_user, password_user, roles_user, first_name_user, last_name_user
                 FROM users
                 WHERE email_user = ? AND is_active_user = 1
                 """;
-        try (PreparedStatement ps = c.prepareStatement(sql)) {
+        try (Connection c = MyDataBase.requireConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
@@ -85,11 +82,11 @@ public final class AuthService {
             throw new IllegalArgumentException(err);
         }
         String em = email.trim().toLowerCase();
-        if (userDAO.findByEmail(em) != null) {
+        if (getUserDAO().findByEmail(em) != null) {
             return false;
         }
         String hash = PasswordUtils.hash(plainPassword);
         Client client = new Client(0, em, hash, nom.trim(), prenom.trim(), telephone.trim(), true);
-        return userDAO.register(client);
+        return getUserDAO().register(client);
     }
 }

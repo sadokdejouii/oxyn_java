@@ -1,4 +1,4 @@
-package org.example.planning.form;
+package org.example.ui.forms;
 
 import org.example.model.planning.FicheSanteFormData;
 

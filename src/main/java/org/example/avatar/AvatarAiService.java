@@ -11,7 +11,21 @@ import java.util.Base64;
  */
 public class AvatarAiService {
 
-    
+    private static final String HF_TOKEN = resolveHfToken();
+
+    private static String resolveHfToken() {
+        String env = System.getenv("HF_TOKEN");
+        if (env != null && !env.isBlank()) {
+            return env.trim();
+        }
+        try {
+            String p = org.example.utils.ConfigManager.getInstance().getHfToken();
+            return p != null ? p.trim() : "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     private static final String SUBMIT_URL = "https://router.huggingface.co/wavespeed/api/v3/wavespeed-ai/qwen-image/edit-plus-lora";
     private static final String PROMPT     = "Convert this portrait into anime style";
     private static final String SDXL_URL   = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0";

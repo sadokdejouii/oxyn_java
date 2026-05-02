@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.concurrent.Task;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.entities.User;
@@ -18,13 +19,18 @@ import org.example.notifications.FailedLoginAlertEmailer;
 import org.example.services.AuthService;
 import org.example.services.AuthValidation;
 import org.example.services.SessionContext;
+import org.example.totp.Totp;
+import org.example.totp.TotpDAO;
+import org.example.utils.AppStyles;
 import org.example.utils.AuthNavigation;
 import org.example.utils.FormFieldFeedback;
 import org.example.utils.PrimaryStageLayout;
+import org.example.utils.UserDialogHelper;
 
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
@@ -47,6 +53,12 @@ public class LoginController implements Initializable {
     private Label passwordErrorLabel;
 
     private AuthService authService;
+
+    private int failedAttempts;
+
+    private String lastFailedEmail = "";
+
+    private static final int MAX_ATTEMPTS_BEFORE_ALERT = 3;
 
     private AuthService getAuthService() {
         if (authService == null) {
@@ -227,5 +239,34 @@ public class LoginController implements Initializable {
         a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    private boolean passTotpIfEnabled(User user) {
+        try {
+            TotpDAO dao = new TotpDAO();
+            Optional<TotpDAO.Record> rec = dao.getByUserId(user.getId());
+            if (rec.isEmpty() || !rec.get().enabled()) {
+                return true;
+            }
+            Stage owner = emailField != null && emailField.getScene() != null
+                    ? (Stage) emailField.getScene().getWindow()
+                    : null;
+            if (owner == null) {
+                return false;
+            }
+            Optional<String> code = UserDialogHelper.showTotpCodeDialog(
+                    owner,
+                    "Verification 2FA",
+                    "Entrez le code a six chiffres de votre application d'authentification.",
+                    null,
+                    "");
+            if (code.isEmpty()) {
+                return false;
+            }
+            return Totp.verifyCode(rec.get().secretBase32(), code.get(), System.currentTimeMillis());
+        } catch (Exception e) {
+            System.err.println("[Login] TOTP: " + e.getMessage());
+            return true;
+        }
     }
 }

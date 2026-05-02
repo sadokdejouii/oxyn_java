@@ -20,7 +20,7 @@ import org.example.model.planning.PlanningClientDashboardData;
 
 import org.example.planning.PlanningUi;
 
-import org.example.planning.form.FicheSanteFormMode;
+import org.example.ui.forms.FicheSanteFormMode;
 
 import org.example.planning.form.FicheSanteFormView;
 

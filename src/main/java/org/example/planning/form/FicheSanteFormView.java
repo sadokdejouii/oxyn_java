@@ -18,6 +18,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.example.model.planning.FicheSanteFormData;
+import org.example.ui.forms.FicheSanteFormMode;
+import org.example.ui.forms.FicheSanteFormValidator;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;

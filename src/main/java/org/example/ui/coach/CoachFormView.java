@@ -14,7 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.example.model.planning.FicheSanteFormData;
-import org.example.planning.form.FicheSanteFormMode;
+import org.example.ui.forms.FicheSanteFormMode;
 import java.util.function.Consumer;
 
 /**

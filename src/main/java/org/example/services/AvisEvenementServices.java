@@ -16,6 +16,7 @@ public class AvisEvenementServices implements ICrud<AvisEvenement> {
 
     public AvisEvenementServices() {
         con = MyDataBase.getConnection();
+        this.inscriptionEvenementServices = new InscriptionEvenementServices();
     }
 
     @Override

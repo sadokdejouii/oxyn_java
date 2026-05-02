@@ -58,6 +58,19 @@ public class ClientSalleListController implements Initializable {
             statSessions.setText(String.valueOf(totalSessions));
         } catch (SQLException e) {
             e.printStackTrace();
+            allSalles = List.of();
+            if (statSalles != null) {
+                statSalles.setText("0");
+            }
+            if (statOffres != null) {
+                statOffres.setText("0");
+            }
+            if (statSessions != null) {
+                statSessions.setText("0");
+            }
+            if (countLabel != null) {
+                countLabel.setText("Erreur : " + (e.getMessage() != null ? e.getMessage() : "base de données"));
+            }
         }
         applyFilter();
     }

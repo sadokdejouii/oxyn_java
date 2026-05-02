@@ -10,8 +10,8 @@ import java.sql.SQLException;
  */
 public final class MyDataBase {
 
-    private static final String HOST = "localhost";
-    private static final String PORT = "3307";
+    private static final String HOST = resolveHost();
+    private static final String PORT = resolvePort();
     private static final String DB_NAME = "oxyn";
 
     private static final String USERNAME = "root";
@@ -20,6 +20,31 @@ public final class MyDataBase {
     private static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME
             + "?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8"
             + "&zeroDateTimeBehavior=CONVERT_TO_NULL";
+
+    private static String resolveHost() {
+        String env = System.getenv("OXYN_MYSQL_HOST");
+        if (env != null && !env.isBlank()) {
+            return env.trim();
+        }
+        String prop = System.getProperty("oxyn.mysql.host");
+        if (prop != null && !prop.isBlank()) {
+            return prop.trim();
+        }
+        return "localhost";
+    }
+
+    /** Port MySQL : env {@code OXYN_MYSQL_PORT}, propriété {@code oxyn.mysql.port}, sinon {@code 3306} (défaut MySQL). */
+    private static String resolvePort() {
+        String env = System.getenv("OXYN_MYSQL_PORT");
+        if (env != null && !env.isBlank()) {
+            return env.trim();
+        }
+        String prop = System.getProperty("oxyn.mysql.port");
+        if (prop != null && !prop.isBlank()) {
+            return prop.trim();
+        }
+        return "3306";
+    }
 
     /**
      * ✅ Toujours retourner une nouvelle connexion fraîche
@@ -46,7 +71,7 @@ public final class MyDataBase {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            System.out.println("✅ Nouvelle connexion BD créée pour « " + DB_NAME + " »");
+            System.out.println("✅ Nouvelle connexion BD créée pour « " + DB_NAME + " » sur " + HOST + ":" + PORT);
             return conn;
         } catch (ClassNotFoundException e) {
             throw new SQLException("Driver MySQL non trouvé", e);
@@ -54,6 +79,15 @@ public final class MyDataBase {
             System.err.println("❌ Connexion BD échouée : " + e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * Connexion obligatoire pour les DAO : ne renvoie jamais {@code null}.
+     *
+     * @throws SQLException si le driver ou la connexion échoue (MySQL arrêté, mauvais port/hôte, base absente, etc.)
+     */
+    public static Connection requireConnection() throws SQLException {
+        return getConnectionWithException();
     }
 
     /**

@@ -30,7 +30,7 @@ import org.example.model.planning.ai.WeeklyProgress;
 import org.example.model.planning.task.TacheEtat;
 import org.example.model.planning.task.TacheQuotidienne;
 import org.example.model.planning.task.WeeklyTaskSummary;
-import org.example.planning.form.FicheSanteFormMode;
+import org.example.ui.forms.FicheSanteFormMode;
 import org.example.planning.form.FicheSanteFormView;
 import org.example.planning.widgets.ProgrammeJsonLayout;
 import org.example.services.PlanningAiAdviceMapper;

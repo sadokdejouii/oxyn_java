@@ -324,7 +324,7 @@ public class EventManagementController implements Initializable {
             // Set event data in the controller
             ModifierEvenementController controller = loader.getController();
             controller.setEventData(eventId);
-            controller.setEmbeddedMode(() -> {
+            controller.setEmbeddedMode(ev -> {
                 loadData();
                 showView(View.EVENTS);
             });

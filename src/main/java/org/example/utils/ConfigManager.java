@@ -52,6 +52,16 @@ public class ConfigManager {
         properties.setProperty("FLOUCI_PROD_PRIVATE_KEY", "PROD_SECRET");
         properties.setProperty("FLOUCI_TIMEOUT", "30");
         properties.setProperty("FLOUCI_MAX_RETRIES", "3");
+        properties.setProperty("GROQ_API_KEY", "");
+        properties.setProperty("HF_TOKEN", "");
+    }
+
+    public String getGroqApiKey() {
+        return properties.getProperty("GROQ_API_KEY", "");
+    }
+
+    public String getHfToken() {
+        return properties.getProperty("HF_TOKEN", "");
     }
 
     public String getFlouciEnvironment() {

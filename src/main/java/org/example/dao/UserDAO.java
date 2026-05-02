@@ -32,8 +32,8 @@ public class UserDAO {
 
     private final Connection con;
 
-    public UserDAO() {
-        this.con = MyDataBase.getConnection();
+    public UserDAO() throws SQLException {
+        this.con = MyDataBase.requireConnection();
     }
 
     /**

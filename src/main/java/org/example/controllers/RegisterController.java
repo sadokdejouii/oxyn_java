@@ -10,6 +10,7 @@ import org.example.services.AuthValidation;
 import org.example.services.UserService;
 import org.example.utils.AuthNavigation;
 import org.example.utils.FormFieldFeedback;
+import org.example.utils.PasswordStrengthEvaluator;
 import org.example.utils.UserDialogHelper;
 
 import java.sql.SQLException;
