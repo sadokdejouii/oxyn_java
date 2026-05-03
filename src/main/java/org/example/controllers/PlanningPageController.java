@@ -272,6 +272,7 @@ public class PlanningPageController implements Initializable {
             Parent root = loader.load();
             EncadrantPlanningHubController c = loader.getController();
             encadrantHubController = c;
+            activeEncadrantHub = c;
             if (mainLayoutController != null) {
                 c.setMainLayoutController(mainLayoutController);
             }
@@ -280,6 +281,7 @@ public class PlanningPageController implements Initializable {
             VBox.setVgrow(root, Priority.ALWAYS);
         } catch (Exception e) {
             encadrantHubController = null;
+            activeEncadrantHub = null;
             Throwable t = e.getCause() != null ? e.getCause() : e;
             String msg = t.getMessage() != null ? t.getMessage() : t.toString();
             VBox err = new VBox(PlanningUi.hintLabel("Impossible de charger la vue encadrant : " + msg));

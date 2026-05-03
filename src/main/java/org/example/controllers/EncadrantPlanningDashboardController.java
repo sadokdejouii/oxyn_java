@@ -97,6 +97,9 @@ public final class EncadrantPlanningDashboardController {
         lblClientStatut.setText("—");
         btnRefresh.setOnAction(e -> loadAll());
         btnSaveObs.setOnAction(e -> saveObservation());
+        if (btnSendObjLibre != null) {
+            btnSendObjLibre.setOnAction(e -> saveObjectifLibreIntervention());
+        }
         txtObservation.textProperty().addListener((o, a, b) -> clearObsValidation());
         loadAll();
     }

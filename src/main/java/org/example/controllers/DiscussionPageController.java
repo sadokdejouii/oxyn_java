@@ -875,8 +875,12 @@ public class DiscussionPageController implements Initializable {
             }
             scheduleSmoothScrollToBottom();
             refreshDetailsPanel();
-        } catch (Exception ignored) {
-            appendSystem("Impossible de charger les messages pour le moment. Réessayez dans un instant.");
+        } catch (Exception ex) {
+            Throwable t = ex instanceof SQLException && ex.getCause() != null ? ex.getCause() : ex;
+            String detail = t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName();
+            System.err.println("[Discussion] load messages failed: " + detail);
+            ex.printStackTrace();
+            appendSystem("Impossible de charger les messages : " + detail);
         }
     }
 
@@ -885,19 +889,22 @@ public class DiscussionPageController implements Initializable {
      * Délai en cascade pour un effet « timeline » discret.
      */
     private void animateChatRowIn(Node node, boolean mine, int staggerIndex) {
-        double fromX = mine ? 26 : -26;
-        node.setOpacity(0);
+        // Toujours laisser le nœud visible : une animation partant de opacity=0 peut rester
+        // invisible si le pulse layout n'a pas encore couru (ScrollPane / largeur 0).
+        node.setOpacity(1);
+        node.setTranslateX(0);
+        double fromX = mine ? 14 : -14;
         node.setTranslateX(fromX);
-        FadeTransition fade = new FadeTransition(Duration.millis(300), node);
-        fade.setFromValue(0);
+        FadeTransition fade = new FadeTransition(Duration.millis(220), node);
+        fade.setFromValue(0.88);
         fade.setToValue(1);
         fade.setInterpolator(Interpolator.EASE_OUT);
-        TranslateTransition slide = new TranslateTransition(Duration.millis(340), node);
+        TranslateTransition slide = new TranslateTransition(Duration.millis(240), node);
         slide.setFromX(fromX);
         slide.setToX(0);
         slide.setInterpolator(Interpolator.EASE_OUT);
         ParallelTransition intro = new ParallelTransition(fade, slide);
-        intro.setDelay(Duration.millis(Math.min(staggerIndex, 14) * 32L));
+        intro.setDelay(Duration.millis(Math.min(staggerIndex, 14) * 24L));
         intro.setOnFinished(e -> {
             node.setOpacity(1);
             node.setTranslateX(0);

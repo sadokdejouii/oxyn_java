@@ -20,8 +20,6 @@ import org.example.model.planning.PlanningClientDashboardData;
 
 import org.example.planning.PlanningUi;
 
-import org.example.ui.forms.FicheSanteFormMode;
-
 import org.example.planning.form.FicheSanteFormView;
 
 import org.example.services.PlanningClientService;
@@ -102,7 +100,7 @@ public final class PlanningClientController {
 
 
 
-        FicheSanteFormView form = new FicheSanteFormView(FicheSanteFormMode.CREATION, FicheSanteFormData.empty());
+        FicheSanteFormView form = FicheSanteFormView.forCreation(FicheSanteFormData.empty());
 
         form.setOnSubmit(data -> {
 

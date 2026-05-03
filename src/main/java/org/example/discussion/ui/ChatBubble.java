@@ -85,8 +85,8 @@ public final class ChatBubble {
     public static Node createRow(Row r) {
         MessageContent.Parsed parsed = MessageContent.parse(r.message.contenu());
         Node body = parsed.isVoice()
-                ? VoicePlayer.create(parsed.voiceId(), parsed.voiceDurationSec(), r.mine)
-                : buildTextBubble(parsed.text(), r);
+                ? wrapVoiceChrome(parsed.voiceId(), parsed.voiceDurationSec(), r)
+                : buildTextChromeVBox(parsed.text(), r);
 
         VBox translationBox = new VBox(0);
         translationBox.setManaged(false);
@@ -113,16 +113,39 @@ public final class ChatBubble {
         return assemble(r, parsed, body, actionTrigger, translationBox, toggle);
     }
 
-    private static Node buildTextBubble(String text, Row r) {
-        Label label = new Label(text == null ? "" : text);
-        label.setWrapText(true);
-        label.setMaxWidth(Double.MAX_VALUE);
-        label.maxWidthProperty().bind(Bindings.createDoubleBinding(
+    /** Bulle texte type Messenger : {@code VBox.message-sent|message-received} + corps + heure. */
+    private static VBox buildTextChromeVBox(String text, Row r) {
+        Label content = new Label(text == null ? "" : text);
+        content.setWrapText(true);
+        content.maxWidthProperty().bind(Bindings.createDoubleBinding(
                 () -> Math.max(160d, r.threadWidth.get() * 0.62),
                 r.threadWidth));
-        label.getStyleClass().add(r.mine ? "msg-bubble msg-bubble--me" : "msg-bubble msg-bubble--them");
-        label.setPadding(new Insets(11, 16, 11, 16));
-        return label;
+        content.getStyleClass().add("discussion-msg-body");
+
+        Label time = new Label(r.timeStr == null ? "" : r.timeStr);
+        time.getStyleClass().add("message-time");
+
+        VBox box = new VBox(4);
+        box.getStyleClass().add(r.mine ? "message-sent" : "message-received");
+        box.getChildren().addAll(content, time);
+        box.setMaxWidth(Region.USE_PREF_SIZE);
+        return box;
+    }
+
+    private static Node wrapVoiceChrome(String voiceId, double durationSec, Row r) {
+        Region player = VoicePlayer.create(voiceId, durationSec, r.mine);
+        player.maxWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> Math.max(200d, r.threadWidth.get() * 0.62),
+                r.threadWidth));
+
+        Label time = new Label(r.timeStr == null ? "" : r.timeStr);
+        time.getStyleClass().add("message-time");
+
+        VBox box = new VBox(6);
+        box.getStyleClass().add(r.mine ? "message-sent" : "message-received");
+        box.getChildren().addAll(player, time);
+        box.setMaxWidth(Region.USE_PREF_SIZE);
+        return box;
     }
 
     private static Node assemble(Row r,
@@ -149,13 +172,10 @@ public final class ChatBubble {
             attachContextMenu(bubbleNode, r, toggle, true);
         }
 
-        Label time = new Label(r.timeStr == null ? "" : r.timeStr);
-        time.getStyleClass().add(r.mine ? "msg-bubble-time--me" : "msg-bubble-time--them");
-
         VBox bubbleStack = new VBox(4);
         bubbleStack.setAlignment(r.mine ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
         bubbleStack.setMaxWidth(Region.USE_PREF_SIZE);
-        bubbleStack.getChildren().addAll(bubbleNode, time, translationBox);
+        bubbleStack.getChildren().addAll(bubbleNode, translationBox);
 
         if (r.mine) {
             Region grow = new Region();

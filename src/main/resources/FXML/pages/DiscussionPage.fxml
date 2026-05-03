@@ -11,7 +11,7 @@
 
 <BorderPane styleClass="msg-page-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.controllers.DiscussionPageController" maxWidth="Infinity" maxHeight="Infinity"
-            stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-discussion-page.css">
+            stylesheets="@../../css/planning-saas-theme.css,@../../css/planning-discussion-page.css,@../../css/discussion.css">
     <padding>
         <Insets top="20" right="24" bottom="24" left="24" />
     </padding>
@@ -42,7 +42,7 @@
                 <ScrollPane fx:id="messagesScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
                             styleClass="msg-messages-scroll" maxWidth="Infinity">
                     <content>
-                        <VBox fx:id="messagesBox" styleClass="msg-messages-stack" maxWidth="Infinity" />
+                        <VBox fx:id="messagesBox" styleClass="msg-messages-stack message-container" maxWidth="Infinity" />
                     </content>
                 </ScrollPane>
                 <VBox fx:id="messageInputMount" styleClass="msg-input-dock-outer" maxWidth="Infinity" />

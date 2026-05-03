@@ -82,7 +82,7 @@ public final class MessageInput extends VBox {
         textBar.getStyleClass().add("msg-input-bar");
 
         textField.setPromptText("Écrire un message…");
-        textField.getStyleClass().add("msg-input-field");
+        textField.getStyleClass().addAll("msg-input-field", "chat-input");
         HBox.setHgrow(textField, Priority.ALWAYS);
 
         emojiButton.setFocusTraversable(false);
@@ -99,7 +99,7 @@ public final class MessageInput extends VBox {
             if (onMicStart != null) onMicStart.run();
         });
 
-        sendButton.getStyleClass().add("msg-input-send");
+        sendButton.getStyleClass().addAll("msg-input-send", "send-button");
         sendButton.setDefaultButton(true);
         sendButton.setGraphic(icon("fas-paper-plane", 14));
         sendButton.setText("");

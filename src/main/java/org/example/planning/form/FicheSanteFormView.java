@@ -29,9 +29,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Formulaire fiche santé — présentation type produit SaaS : hero, jalons visuels, 
- * cartes thématiques, IMC live. Adapté pour toute application nécessitant 
- * les informations de santé d'un utilisateur (fitness, bien-être, suivi médical, etc.).
+ * Formulaire fiche santé — présentation type produit SaaS : hero, jalons visuels, cartes thématiques, IMC live.
  */
 public final class FicheSanteFormView {
 
@@ -135,6 +133,14 @@ public final class FicheSanteFormView {
         refreshMetricsValidation();
     }
 
+    public static FicheSanteFormView forCreation(FicheSanteFormData initial) {
+        return new FicheSanteFormView(FicheSanteFormMode.CREATION, initial);
+    }
+
+    public static FicheSanteFormView forEdition(FicheSanteFormData initial, Runnable onCancel) {
+        return new FicheSanteFormView(FicheSanteFormMode.EDITION, initial, onCancel);
+    }
+
     private VBox buildHero(FicheSanteFormMode mode) {
         VBox hero = new VBox(10);
         hero.getStyleClass().add("fs-form-hero");
@@ -160,7 +166,7 @@ public final class FicheSanteFormView {
         headline.getStyleClass().add("fs-form-hero-title");
         headline.setWrapText(true);
         Label sub = new Label(mode == FicheSanteFormMode.CREATION
-                ? "Quelques informations suffisent : nous calculons votre IMC, adaptons vos objectifs et générons un programme sur mesure à l'enregistrement."
+                ? "Quelques informations suffisent : nous calculons votre IMC, adaptons vos objectifs et générons un programme sur mesure à l’enregistrement."
                 : "Les changements régénèrent votre programme personnalisé à partir de ces données.");
         sub.setWrapText(true);
         sub.getStyleClass().add("fs-form-hero-sub");
@@ -265,7 +271,7 @@ public final class FicheSanteFormView {
         card.getStyleClass().addAll("fs-form-card");
         card.setPadding(new Insets(18, 20, 20, 20));
 
-        card.getChildren().add(cardHeader("fas-id-card", "Identité", "Genre et tranche d'âge"));
+        card.getChildren().add(cardHeader("fas-id-card", "Identité", "Genre et tranche d’âge"));
 
         Label gLab = fieldCaption("Genre");
         genreMale.setToggleGroup(genreGroup);
@@ -363,7 +369,7 @@ public final class FicheSanteFormView {
         card.getStyleClass().addAll("fs-form-card", "fs-form-card--wide");
         card.setPadding(new Insets(18, 20, 20, 20));
 
-        card.getChildren().add(cardHeader("fas-bullseye", "Objectifs & rythme", "Nous adaptons volume d'entraînement et déficit calorique"));
+        card.getChildren().add(cardHeader("fas-bullseye", "Objectifs & rythme", "Nous adaptons volume d’entraînement et déficit calorique"));
 
         GridPane grid = new GridPane();
         grid.setHgap(20);
@@ -379,7 +385,7 @@ public final class FicheSanteFormView {
         VBox oBox = new VBox(6);
         oBox.getChildren().addAll(fieldCaption("Objectif principal"), wrapFull(objectifCombo));
         VBox nBox = new VBox(6);
-        nBox.getChildren().addAll(fieldCaption("Niveau d'activité"), wrapFull(niveauCombo));
+        nBox.getChildren().addAll(fieldCaption("Niveau d’activité"), wrapFull(niveauCombo));
         grid.add(oBox, 0, 0);
         grid.add(nBox, 1, 0);
 
@@ -568,13 +574,17 @@ public final class FicheSanteFormView {
             if (line == null) {
                 continue;
             }
-            String x = line.toLowerCase(Locale.FRENCH);
-            if (x.contains("âge") || x.contains("taille") || x.contains("poids")) {
+            if (isPhysiqueBackendLine(line)) {
                 continue;
             }
             out.add(line);
         }
         return out;
+    }
+
+    private static boolean isPhysiqueBackendLine(String s) {
+        String x = s.toLowerCase(Locale.FRENCH);
+        return x.contains("âge") || x.contains("taille") || x.contains("poids");
     }
 
     private void showErrors(List<String> errors) {
@@ -595,6 +605,7 @@ public final class FicheSanteFormView {
     private void clearErrors() {
         errorBox.getChildren().clear();
         errorBox.setVisible(false);
+        errorBox.setManaged(false);
         errorTitle.setVisible(false);
         errorTitle.setManaged(false);
     }
@@ -701,6 +712,26 @@ public final class FicheSanteFormView {
         };
     }
 
+    public static String normalizeNiveauFromDb(String db) {
+        if (db == null || db.isBlank()) {
+            return "peu_actif";
+        }
+        String k = db.trim().toLowerCase();
+        return switch (k) {
+            case "sedentaire", "sédentaire" -> "sedentaire";
+            case "peu_actif" -> "peu_actif";
+            case "modere", "modéré", "moderement_actif", "modérément_actif" -> "moderement_actif";
+            case "actif" -> "moderement_actif";
+            case "tres_actif", "très_actif" -> "tres_actif";
+            default -> {
+                if (List.of("sedentaire", "peu_actif", "moderement_actif", "tres_actif").contains(k)) {
+                    yield k;
+                }
+                yield "peu_actif";
+            }
+        };
+    }
+
     public void applyInitial(FicheSanteFormData data) {
         if (data.genre() != null) {
             if ("F".equalsIgnoreCase(data.genre().trim())) {
@@ -736,25 +767,5 @@ public final class FicheSanteFormView {
 
     private static int clamp(int v, int min, int max) {
         return Math.max(min, Math.min(max, v));
-    }
-
-    public static String normalizeNiveauFromDb(String db) {
-        if (db == null || db.isBlank()) {
-            return "peu_actif";
-        }
-        String k = db.trim().toLowerCase();
-        return switch (k) {
-            case "sedentaire", "sédentaire" -> "sedentaire";
-            case "peu_actif" -> "peu_actif";
-            case "modere", "modéré", "moderement_actif", "modérément_actif" -> "moderement_actif";
-            case "actif" -> "moderement_actif";
-            case "tres_actif", "très_actif" -> "tres_actif";
-            default -> {
-                if (List.of("sedentaire", "peu_actif", "moderement_actif", "tres_actif").contains(k)) {
-                    yield k;
-                }
-                yield "peu_actif";
-            }
-        };
     }
 }

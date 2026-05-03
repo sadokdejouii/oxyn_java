@@ -41,8 +41,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Dropdown notifications attaché à la cloche (overlay), style app moderne.
- * UI/UX uniquement : aucune modification backend ou DB.
+ * Bell notification dropdown (overlay). Modern in-app UI only.
+ * Does not change backend or database behaviour.
  */
 public final class NotificationBell extends StackPane {
 
@@ -127,7 +127,7 @@ public final class NotificationBell extends StackPane {
 
         Label headerTitle = new Label("Notifications");
         headerTitle.getStyleClass().add("planning-notif-dropdown-title");
-        countSubtitle = new Label("Tout est à jour");
+        countSubtitle = new Label("Tout est \u00e0 jour");
         countSubtitle.getStyleClass().add("planning-notif-dropdown-sub");
 
         VBox headerText = new VBox(2, headerTitle, countSubtitle);
@@ -167,9 +167,9 @@ public final class NotificationBell extends StackPane {
         emptyIconWrap.setMinSize(72, 72);
         emptyIconWrap.setMaxSize(72, 72);
 
-        Label emptyTitle = new Label("Tout est à jour");
+        Label emptyTitle = new Label("Tout est \u00e0 jour");
         emptyTitle.getStyleClass().add("planning-notif-empty-title");
-        Label emptySub = new Label("Aucune nouvelle notification.\nNous vous préviendrons dès qu'un message arrive.");
+        Label emptySub = new Label("Aucune nouvelle notification.\nNous vous pr\u00e9viendrons d\u00e8s qu'un message arrive.");
         emptySub.getStyleClass().add("planning-notif-empty-sub");
         emptySub.setWrapText(true);
         emptySub.setMaxWidth(260);
@@ -309,7 +309,7 @@ public final class NotificationBell extends StackPane {
         }
         lastData = data;
         updateBadge(total);
-        countSubtitle.setText(total == 0 ? "Tout est à jour" : total + " non lu" + (total > 1 ? "s" : ""));
+        countSubtitle.setText(total == 0 ? "Tout est \u00e0 jour" : total + " non lu" + (total > 1 ? "s" : ""));
 
         if (popup.isShowing()) {
             rebuildList();
@@ -551,10 +551,10 @@ public final class NotificationBell extends StackPane {
     private String buildPreview(UnreadNotification n) {
         String raw = n.lastMessagePreview();
         String clean = (raw == null || raw.isBlank())
-                ? "Vous a envoyé un nouveau message"
+                ? "Vous a envoy\u00e9 un nouveau message"
                 : MessageContent.preview(raw);
         if (n.unreadCount() > 1) {
-            clean = clean + "  ·  " + n.unreadCount() + " messages";
+            clean = clean + "  \u00b7  " + n.unreadCount() + " messages";
         }
         return clean;
     }
@@ -590,7 +590,7 @@ public final class NotificationBell extends StackPane {
         }
         LocalDateTime now = LocalDateTime.now();
         long sec = ChronoUnit.SECONDS.between(dt, now);
-        if (sec < 30) return "à l'instant";
+        if (sec < 30) return "\u00e0 l'instant";
         long min = sec / 60;
         if (min < 60) return min + " min";
         long hour = min / 60;

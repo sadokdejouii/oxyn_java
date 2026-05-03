@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -207,9 +206,9 @@ public final class DiscussionService {
                 SELECT m.id, m.sender_id, m.contenu, m.type, m.created_at,
                        u.first_name_user, u.last_name_user
                 FROM messages m
-                JOIN users u ON u.id_user = m.sender_id
+                LEFT JOIN users u ON u.id_user = m.sender_id
                 WHERE m.conversation_id = ? AND m.id > ?
-                  AND m.type NOT IN ('IA_SUGGESTION')
+                  AND (m.type IS NULL OR m.type <> 'IA_SUGGESTION')
                 ORDER BY m.id ASC
                 LIMIT 300
                 """;
@@ -222,6 +221,9 @@ public final class DiscussionService {
                     String fn = rs.getString("first_name_user");
                     String ln = rs.getString("last_name_user");
                     String name = ((fn == null ? "" : fn) + " " + (ln == null ? "" : ln)).trim();
+                    if (name.isBlank()) {
+                        name = "Utilisateur";
+                    }
                     Timestamp ts = rs.getTimestamp("created_at");
                     list.add(new MessageRow(
                             rs.getInt("id"),
